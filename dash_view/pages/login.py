@@ -46,7 +46,7 @@ def render_content():
                                             fac.AntdInput(
                                                 prefix=fac.AntdIcon(icon='antd-lock'),
                                                 mode='password',
-                                                md5Value=True,
+                                                passwordUseMd5=True,
                                                 placeholder='请输入密码',
                                                 className={
                                                     'margin-top': '20px',
@@ -56,13 +56,13 @@ def render_content():
                                                 [
                                                     fac.AntdInput(
                                                         prefix=fac.AntdIcon(icon='antd-right'),
-                                                        laceholder='请输入验证码',
+                                                        placeholder='请输入验证码',
                                                         allowClear=True,
                                                         className={
                                                             'margin-right': '20px',
                                                         },
                                                     ),
-                                                    fuc.FefferyCaptcha(width=200, charNum=6),
+                                                    fuc.FefferyCaptcha(width=200, charNum=4),
                                                 ],
                                                 className={
                                                     'margin-top': '20px',
