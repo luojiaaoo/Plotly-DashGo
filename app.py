@@ -15,4 +15,4 @@ def router_login():
 app.layout = router_login
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=80, debug=False)
+    app.run(host='127.0.0.1', port=80, debug=True)

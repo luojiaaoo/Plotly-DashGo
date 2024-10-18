@@ -1,0 +1,16 @@
+._dash-loading {
+    color: transparent;
+    position: fixed;
+    width: calc(8 * 40px);
+    height: calc(6 * 40px);
+    top: 50vh;
+    left: 50vw;
+    transform: translate(-50%, -50%);
+    background-image: url("/assets/ini_load_animation.gif");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+._dash-loading::after {
+    content: '';
+}
