@@ -11,6 +11,7 @@ def render_content():
                     fuc.FefferyDiv(
                         children=ShowConf.SYSTEM_NAME,
                         className={
+                            'font-weight': 'bold',
                             'letter-spacing': '2px',
                             'font-family': "'Microsoft YaHei', sans-serif",
                             'font-size': '30px',
@@ -18,7 +19,8 @@ def render_content():
                             'display': 'flex',
                             'justify-content': 'center',
                             'align-items': 'center',
-                            'color': 'rgb(245,245,245)'
+                            'color': 'rgb(245,245,245)',
+                            'padding': '20px 0 0 0',
                         },
                     ),
                     fac.AntdTabs(
@@ -28,9 +30,6 @@ def render_content():
                                 'label': fac.AntdText(
                                     '账号密码登录',
                                     className={
-                                        'letter-spacing': '2px',
-                                        'font-family': "'Microsoft YaHei', sans-serif",
-                                        'font-size': '24px',
                                         'color': 'rgb(22,119,255)',
                                     },
                                 ),
@@ -42,36 +41,28 @@ def render_content():
                                                 placeholder='请输入用户名',
                                                 className={
                                                     'margin-top': '20px',
-                                                    'letter-spacing': '2px',
-                                                    'font-family': "'Microsoft YaHei', sans-serif",
-                                                    'font-size': '24px',
                                                 },
                                             ),
                                             fac.AntdInput(
                                                 prefix=fac.AntdIcon(icon='antd-lock'),
                                                 mode='password',
+                                                md5Value=True,
                                                 placeholder='请输入密码',
                                                 className={
                                                     'margin-top': '20px',
-                                                    'letter-spacing': '2px',
-                                                    'font-family': "'Microsoft YaHei', sans-serif",
-                                                    'font-size': '24px',
                                                 },
                                             ),
                                             fac.AntdFlex(
                                                 [
                                                     fac.AntdInput(
                                                         prefix=fac.AntdIcon(icon='antd-right'),
+                                                        laceholder='请输入验证码',
                                                         allowClear=True,
                                                         className={
-                                                            'letter-spacing': '2px',
-                                                            'font-family': "'Microsoft YaHei', sans-serif",
-                                                            'font-size': '24px',
-                                                            'width': '100%',
                                                             'margin-right': '20px',
                                                         },
                                                     ),
-                                                    fuc.FefferyCaptcha(width=150),
+                                                    fuc.FefferyCaptcha(width=200, charNum=6),
                                                 ],
                                                 className={
                                                     'margin-top': '20px',
@@ -95,16 +86,16 @@ def render_content():
                 className={
                     'width': 'max(25%,600px)',
                     'height': 'max(35%,700px)',
-                    'margin-right': '10%',
+                    'margin-right': '15%',
                     'backdrop-filter': 'blur(10px)',
                     'background-color': 'rgba(0, 0, 0, 0.15)',
-                    'border-radius': '5px',
+                    'border-radius': '15px',
                     'display': 'flex',
                     'flex-direction': 'column',
                     'justify-content': 'center',
                     'align-items': 'center',
-                    'box-shadow': '0 10px 20px rgba(0, 0, 0, 0.3)',
-                    'border': '1px solid rgba(255, 255, 255, 0.3)',
+                    'box-shadow': '0 10px 20px rgba(0, 0, 0, 0.4)',
+                    'border': '1px solid rgba(255, 255, 255, 0.4)',
                     'animation': 'float 2s ease-in-out infinite',
                 },
             ),
@@ -120,5 +111,11 @@ def render_content():
             'height': '100vh',
             'justify-content': 'flex-end',
             'align-items': 'center',
+            '.ant-input-affix-wrapper, .ant-tabs-tab .ant-typography': {
+                'letter-spacing': '2px',
+                'font-family': "'Microsoft YaHei', sans-serif",
+                'font-size': '24px',
+                'width': '100%',
+            },
         },
     )
