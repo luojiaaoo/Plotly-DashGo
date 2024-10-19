@@ -20,4 +20,4 @@ class ShowConf:
 class JwtConf:
     JWT_SECRET_KEY = conf.get('jwt', 'JWT_SECRET_KEY')
     JWT_ALGORITHM = conf.get('jwt', 'JWT_ALGORITHM')
-    JWT_EXPIRE_MINUTES = conf.get('jwt', 'JWT_EXPIRE_MINUTES')
+    JWT_EXPIRE_MINUTES = conf.getint('jwt', 'JWT_EXPIRE_MINUTES')

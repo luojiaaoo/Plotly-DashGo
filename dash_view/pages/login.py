@@ -1,6 +1,6 @@
 import feffery_utils_components as fuc
 import feffery_antd_components as fac
-from config.dash_melon_conf import ShowConf
+from config.dash_melon_conf import ShowConf, JwtConf
 
 
 def render_content():
@@ -62,10 +62,33 @@ def render_content():
                                                             'margin-right': '20px',
                                                         },
                                                     ),
-                                                    fuc.FefferyCaptcha(width=200, charNum=4),
+                                                    fuc.FefferyCaptcha(width=100, charNum=4),
                                                 ],
                                                 className={
                                                     'margin-top': '20px',
+                                                },
+                                            ),
+                                            fac.AntdCheckbox(
+                                                label=f'保持{f"{JwtConf.JWT_EXPIRE_MINUTES//60}小时" if JwtConf.JWT_EXPIRE_MINUTES//60<24 else f"{JwtConf.JWT_EXPIRE_MINUTES//60//24}天"}免登录',
+                                                checked=True,
+                                                className={
+                                                    'margin-top': '10px',
+                                                    'font-weight': 'bold',
+                                                    'letter-spacing': '2px',
+                                                    'font-family': "'Microsoft YaHei', sans-serif",
+                                                    'font-size': '12px',
+                                                    'color': 'rgb(245,245,245)',
+                                                },
+                                            ),
+                                            fac.AntdButton(
+                                                '登录',
+                                                id='login-submit',
+                                                type='primary',
+                                                block=True,
+                                                className={
+                                                    'margin-top': '30px',
+                                                    'height': '3em',
+                                                    'border-radius': '1.5em',
                                                 },
                                             ),
                                         ],
@@ -84,12 +107,12 @@ def render_content():
                     ),
                 ],
                 className={
-                    'width': 'max(25%,600px)',
-                    'height': 'max(35%,700px)',
+                    'width': 'max(25%,300px)',
+                    'height': 'max(40%,600px)',
                     'margin-right': '15%',
                     'backdrop-filter': 'blur(10px)',
                     'background-color': 'rgba(0, 0, 0, 0.15)',
-                    'border-radius': '15px',
+                    'border-radius': '10px',
                     'display': 'flex',
                     'flex-direction': 'column',
                     'justify-content': 'center',
@@ -111,11 +134,12 @@ def render_content():
             'height': '100vh',
             'justify-content': 'flex-end',
             'align-items': 'center',
-            '.ant-input-affix-wrapper, .ant-tabs-tab .ant-typography': {
+            '.ant-input-affix-wrapper, .ant-tabs-tab .ant-typography, .ant-btn': {
                 'letter-spacing': '2px',
                 'font-family': "'Microsoft YaHei', sans-serif",
-                'font-size': '24px',
+                'font-size': '18px',
                 'width': '100%',
+                'padding': '10px 10px',
             },
         },
     )
