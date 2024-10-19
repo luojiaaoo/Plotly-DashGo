@@ -1,12 +1,45 @@
 import feffery_utils_components as fuc
 import feffery_antd_components as fac
-from config.dash_melon_conf import ShowConf, JwtConf
+from config.dash_melon_conf import ShowConf, JwtConf, LoginConf
+from dash.dependencies import Input, Output, State
+from dash import dcc
+from server import app
+
+
+app.clientside_callback(
+    """
+    (nClicks,nSubmit,timeoutCount,data) => {
+        data=data || 0;
+        console.log('data2');
+        console.log(data);
+        if (data>="""
+    + str(LoginConf.VERIFY_CODE_SHOW_LOGIN_FAIL_COUNT)
+    + """) {
+            return [{'display':'flex'}, window.dash_clientside.no_update, 1];
+        }
+        return [{'display':'None'}, {'height': 'max(35%,500px)'}, 0];
+    }
+    """,
+    [
+        Output('login-verify-code', 'style'),
+        Output('login-container', 'style'),
+        Output('login-store-need-vc', 'data'),
+    ],
+    [
+        Input('login-submit', 'nClicks'),
+        Input('login-password', 'nSubmit'),
+        Input('timeout-trigger-verify-code', 'timeoutCount'),
+    ],
+    State('login-store-fc', 'data'),
+    prevent_initial_call=True,
+)
 
 
 def render_content():
     return fuc.FefferyDiv(
         children=[
             fuc.FefferyDiv(
+                id='login-container',
                 children=[
                     fuc.FefferyDiv(
                         children=ShowConf.SYSTEM_NAME,
@@ -44,6 +77,7 @@ def render_content():
                                                 },
                                             ),
                                             fac.AntdInput(
+                                                id='login-password',
                                                 prefix=fac.AntdIcon(icon='antd-lock'),
                                                 mode='password',
                                                 passwordUseMd5=True,
@@ -62,10 +96,16 @@ def render_content():
                                                             'margin-right': '20px',
                                                         },
                                                     ),
-                                                    fuc.FefferyCaptcha(width=100, charNum=4),
+                                                    fuc.FefferyCaptcha(
+                                                        width=100, charNum=LoginConf.VERIFY_CODE_CHAR_NUM
+                                                    ),
                                                 ],
+                                                id='login-verify-code',
                                                 className={
                                                     'margin-top': '20px',
+                                                },
+                                                style={
+                                                    'display': 'None',
                                                 },
                                             ),
                                             fac.AntdCheckbox(
@@ -91,6 +131,9 @@ def render_content():
                                                     'border-radius': '1.5em',
                                                 },
                                             ),
+                                            dcc.Store(id='login-store-need-vc', storage_type='local'),
+                                            dcc.Store(id='login-store-fc', storage_type='local'),
+                                            fuc.FefferyTimeout(id='timeout-trigger-verify-code', delay=0),
                                         ],
                                         direction='vertical',
                                         className={

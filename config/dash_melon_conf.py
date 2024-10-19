@@ -8,6 +8,13 @@ class PathProj:
 conf = ConfigParser()
 conf.read(PathProj.ROOT_PATH/'config'/'dash_melon.ini')
 
+class EncryptConf:
+    CUSTOM_KEY = conf.get('encrypt', 'CUSTOM_KEY')
+
+class LoginConf:
+    VERIFY_CODE_SHOW_LOGIN_FAIL_COUNT = conf.getint('login', 'VERIFY_CODE_SHOW_LOGIN_FAIL_COUNT')
+    VERIFY_CODE_CHAR_NUM = conf.getint('login', 'VERIFY_CODE_CHAR_NUM')
+
 class FlaskConf:
     COMPRESS_ALGORITHM = conf.get('flask', 'COMPRESS_ALGORITHM')
     COMPRESS_BR_LEVEL = conf.getint('flask', 'COMPRESS_BR_LEVEL')
