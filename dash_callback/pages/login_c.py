@@ -32,6 +32,27 @@ app.clientside_callback(
     prevent_initial_call=True,
 )
 
+app.clientside_callback(
+    """
+    (data) => {
+        // 将字符串转换为 Uint8Array
+        const encoder = new TextEncoder();
+        const dataUint8 = encoder.encode(data);
+
+        // 使用 Web Cryptography API 计算 SHA-256 哈希
+        return crypto.subtle.digest('SHA-256', dataUint8).then(hashBuffer => {
+            // 将 ArrayBuffer 转换为十六进制字符串
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        });
+    }
+    """,
+    Output('login-password-sha256', 'data'),
+    Input('login-password', 'value'),
+    prevent_initial_call=True,
+)
+
 
 @app.callback(
     [
@@ -46,7 +67,7 @@ app.clientside_callback(
     ],
     [
         State('login-username', 'value'),
-        State('login-password', 'value'),
+        State('login-password-sha256', 'data'),
         State('login-store-need-vc', 'data'),
         State('login-verify-code-input', 'value'),
         State('login-verify-code-pic', 'captcha'),
@@ -54,7 +75,7 @@ app.clientside_callback(
     ],
     prevent_initial_call=True,
 )
-def login(nClicks, nSubmit, username, password, need_vc, vc_input, pic_vc_value, fc):
+def login(nClicks, nSubmit, username, password_sha256, need_vc, vc_input, pic_vc_value, fc):
     # 登录回调函数
     # 该函数处理用户的登录请求，并根据登录结果更新页面内容和状态
     # 参数:
@@ -70,7 +91,8 @@ def login(nClicks, nSubmit, username, password, need_vc, vc_input, pic_vc_value,
     #   更新登录页面内容、登录状态和登录消息等
     if not nClicks and not nSubmit:
         raise PreventUpdate
-    if not username or not password:
+    # e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 为空字符串的sha256加密结果
+    if not username or password_sha256=='e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' or not password_sha256:
         return (
             dash.no_update,
             dash.no_update,
@@ -84,10 +106,12 @@ def login(nClicks, nSubmit, username, password, need_vc, vc_input, pic_vc_value,
             fuc.FefferyFancyMessage('验证码错误，请重新输入', type='error'),
             True,
         )
-    if username == 'luoja' and password == '123456':
+    from common.api.user import login
+
+    if login.user_login(username, password_sha256):
         return (
             dcc.Location(pathname='/dashborad', refresh=True, id='index-redirect'),
-            0, # 重置登录失败次数
+            0,  # 重置登录失败次数
             dash.no_update,
             dash.no_update,
         )

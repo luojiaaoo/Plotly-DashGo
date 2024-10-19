@@ -1,7 +1,7 @@
 import os
 
 import dash
-from config.dash_melon_conf import ShowConf,FlaskConf
+from config.dash_melon_conf import ShowConf, FlaskConf
 
 app = dash.Dash(
     __name__,

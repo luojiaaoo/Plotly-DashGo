@@ -39,23 +39,33 @@ def render_content():
                                 'children': [
                                     fac.AntdSpace(
                                         [
-                                            fac.AntdInput(
-                                                id='login-username',
-                                                prefix=fac.AntdIcon(icon='antd-user'),
-                                                placeholder='请输入用户名',
-                                                className={
-                                                    'margin-top': '20px',
-                                                },
-                                            ),
-                                            fac.AntdInput(
-                                                id='login-password',
-                                                prefix=fac.AntdIcon(icon='antd-lock'),
-                                                mode='password',
-                                                passwordUseMd5=True,
-                                                placeholder='请输入密码',
-                                                className={
-                                                    'margin-top': '20px',
-                                                },
+                                            fac.AntdForm(
+                                                [
+                                                    fac.AntdFormItem(
+                                                        fac.AntdInput(
+                                                            id='login-username',
+                                                            prefix=fac.AntdIcon(icon='antd-user'),
+                                                            placeholder='请输入用户名',
+                                                            className={
+                                                                'margin-top': '20px',
+                                                            },
+                                                        ),
+                                                        className={'margin-bottom': 0},
+                                                    ),
+                                                    fac.AntdFormItem(
+                                                        fac.AntdInput(
+                                                            id='login-password',
+                                                            prefix=fac.AntdIcon(icon='antd-lock'),
+                                                            mode='password',
+                                                            passwordUseMd5=True,
+                                                            placeholder='请输入密码',
+                                                            className={
+                                                                'margin-top': '25px',
+                                                            },
+                                                        ),
+                                                        className={'margin-bottom': 0},
+                                                    ),
+                                                ],
                                             ),
                                             fac.AntdFlex(
                                                 [
@@ -100,7 +110,7 @@ def render_content():
                                                 type='primary',
                                                 block=True,
                                                 className={
-                                                    'margin-top': '30px',
+                                                    'margin-top': '35px',
                                                     'height': '3em',
                                                     'border-radius': '1.5em',
                                                 },
@@ -110,6 +120,7 @@ def render_content():
                                             fuc.FefferyTimeout(id='timeout-trigger-verify-code', delay=0),
                                             dcc.Location(id='login-location-no-refresh', refresh=False),
                                             fac.Fragment(id='login-location-refresh-container'),
+                                            dcc.Store(id='login-password-sha256'),
                                             fac.Fragment(id='login-message-container'),
                                         ],
                                         direction='vertical',
