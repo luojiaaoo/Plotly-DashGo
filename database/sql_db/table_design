@@ -7,7 +7,7 @@ class __User:
     user_status: UserStatus
     user_sex: UserSex
     user_avatar: str
-    user_department_id: str
+    user_department_name: str
     user_type: UserType
     user_roles: List[str]
     user_email: str

@@ -86,7 +86,14 @@ def jwt_encode_save_access_to_session(
     session['Authorization'] = f'Bearer {access_token}'
 
 
-def jwt_decode_from_session(verify_exp: bool = True) -> Union[Dict, AccessFailType]:
+def reload_for_logout(comp_id_reload='global_reload'):
+    from dash import set_props
+
+    clear_access_token_from_session()
+    set_props(comp_id_reload, {'reload': True})
+
+
+def jwt_decode_from_session(verify_exp: bool = True, force_logout_if_exp=True) -> Union[Dict, AccessFailType]:
     """
     从会话中解码JWT（JSON Web Token）。
 
@@ -113,7 +120,21 @@ def jwt_decode_from_session(verify_exp: bool = True) -> Union[Dict, AccessFailTy
         try:
             access_data = jwt_decode(access_token, verify_exp=verify_exp)
         except ExpiredSignatureError:
+            if force_logout_if_exp:
+                reload_for_logout()
             return AccessFailType.EXPIRED
         except Exception:
             return AccessFailType.INVALID
         return access_data
+
+
+def clear_access_token_from_session() -> NoReturn:
+    """
+    从会话中清除访问令牌。
+
+    该函数从用户会话中删除访问令牌，以注销用户。
+
+    返回:
+    - NoReturn, 该函数不返回任何值。
+    """
+    session.pop('Authorization', None)

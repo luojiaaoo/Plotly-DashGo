@@ -15,8 +15,3 @@ class UserInfoFromSession(UserInfoFromSession_):
             user_name=kwargs.get('user_name'),
             user_department=kwargs.get('user_department'),
         )
-
-
-# 创建实例，传递多余参数 a=111
-a = UserInfoFromSession(user_id=1, user_name='admin', user_department='admin', a=111)
-print(a)

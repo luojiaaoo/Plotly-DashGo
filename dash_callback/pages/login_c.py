@@ -75,13 +75,13 @@ app.clientside_callback(
     ],
     prevent_initial_call=True,
 )
-def login(nClicks, nSubmit, username, password_sha256, need_vc, vc_input, pic_vc_value, fc):
+def login(nClicks, nSubmit, user_name, password_sha256, need_vc, vc_input, pic_vc_value, fc):
     # 登录回调函数
     # 该函数处理用户的登录请求，并根据登录结果更新页面内容和状态
     # 参数:
     #   nClicks: 登录按钮点击次数
     #   nSubmit: 密码输入框提交次数
-    #   username: 用户名
+    #   user_name: 用户名
     #   password: 密码
     #   need_vc: 是否需要验证码
     #   vc_input: 用户输入的验证码
@@ -92,7 +92,7 @@ def login(nClicks, nSubmit, username, password_sha256, need_vc, vc_input, pic_vc
     if not nClicks and not nSubmit:
         raise PreventUpdate
     # e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 为空字符串的sha256加密结果
-    if not username or password_sha256=='e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' or not password_sha256:
+    if not user_name or password_sha256=='e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' or not password_sha256:
         return (
             dash.no_update,
             dash.no_update,
@@ -108,7 +108,7 @@ def login(nClicks, nSubmit, username, password_sha256, need_vc, vc_input, pic_vc
         )
     from common.api.user import login
 
-    if login.user_login(username, password_sha256):
+    if login.user_login(user_name, password_sha256):
         return (
             dcc.Location(pathname='/dashborad', refresh=True, id='index-redirect'),
             0,  # 重置登录失败次数
