@@ -12,7 +12,7 @@ def render_content():
                 id='login-container',
                 children=[
                     fuc.FefferyDiv(
-                        children=ShowConf.SYSTEM_NAME,
+                        children=ShowConf.APP_NAME,
                         className={
                             'font-weight': 'bold',
                             'letter-spacing': '2px',

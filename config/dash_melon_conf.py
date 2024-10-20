@@ -22,7 +22,7 @@ class FlaskConf:
 
 class ShowConf:
     WEB_TITLE:str = conf.get('show', 'WEB_TITLE')
-    SYSTEM_NAME:str = conf.get('show', 'SYSTEM_NAME')
+    APP_NAME:str = conf.get('show', 'APP_NAME')
 
 class JwtConf:
     JWT_SECRET_KEY = conf.get('jwt', 'JWT_SECRET_KEY')
