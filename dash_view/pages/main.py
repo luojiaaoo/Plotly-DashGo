@@ -3,23 +3,13 @@ from dash_view.framework.aside import render_aside_content
 
 
 def render_content():
-    return (
-        fac.AntdCol(
-            [
-                fac.AntdRow(
-                    style={
-                        'height': '50px',
-                        'boxShadow': 'rgb(240 241 242) 0px 2px 14px',
-                        'background': 'white',
-                        'marginBottom': '10px',
-                        'position': 'sticky',
-                        'top': 0,
-                        'zIndex': 999,
-                    },
-                ),
-                fac.AntdRow(render_aside_content(), wrap=False),
-            ],
-            flex='auto',
-            style={'width': 0},
-        ),
+    return fac.AntdRow(
+        [
+            fac.AntdCol(
+                render_aside_content(),
+                flex='None',
+            ),
+            fac.AntdCol(flex=1),
+        ],
+        className={'width': '100vw', 'height': '100vh'},
     )
