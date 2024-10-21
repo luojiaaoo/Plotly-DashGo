@@ -1,14 +1,44 @@
 import feffery_antd_components as fac
 from dash_view.framework.aside import render_aside_content
+from dash.dependencies import Input, Output, State
 from dash_view.framework.head import render_head_content
+from server import app
+
+# 折叠侧边栏按钮回调
+app.clientside_callback(
+    """(nClicks, collapsed) => {
+        if (collapsed){
+            return [!collapsed, 'antd-menu-fold',{'display':'block'}];
+        }else{
+            return [!collapsed, 'antd-menu-unfold',{'display':'None'}];
+        }
+    }""",
+    [
+        Output('menu-collapse-sider', 'collapsed'),
+        Output('btn-menu-collapse-sider-menu-icon', 'icon'),
+        Output('logo-text', 'style'),
+    ],
+    Input('btn-menu-collapse-sider-menu', 'nClicks'),
+    State('menu-collapse-sider', 'collapsed'),
+    prevent_initial_call=True,
+)
 
 
 def render_content():
     return fac.AntdRow(
         [
             fac.AntdCol(
-                render_aside_content(),
+                fac.AntdSider(
+                    render_aside_content(),
+                    collapsible=False,
+                    collapsedWidth=60,
+                    trigger=None,
+                    id='menu-collapse-sider',
+                ),
                 flex='None',
+                className={
+                    'background': 'rgb( 43, 47, 58)',
+                },
             ),
             fac.AntdCol(
                 [

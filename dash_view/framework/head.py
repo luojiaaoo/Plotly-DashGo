@@ -7,8 +7,8 @@ def render_head_content():
         # 页首左侧折叠按钮区域
         fac.AntdCol(
             fac.AntdButton(
-                fac.AntdIcon(id='fold-side-menu-icon', icon='antd-menu-fold'),
-                id='fold-side-menu',
+                fac.AntdIcon(id='btn-menu-collapse-sider-menu-icon', icon='antd-menu-fold'),
+                id='btn-menu-collapse-sider-menu',
                 type='text',
                 shape='circle',
                 size='large',
@@ -19,7 +19,6 @@ def render_head_content():
                 'display': 'flex',
                 'alignItems': 'center',
             },
-            id='fold-side-menu-col',
             flex='1',
         ),
         # 页首面包屑区域

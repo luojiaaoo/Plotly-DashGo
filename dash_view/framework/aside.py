@@ -7,6 +7,7 @@ from server import app
 def render_aside_content():
     return fac.AntdCol(
         [
+            # logo 和 app名
             fac.AntdRow(
                 [
                     fac.AntdCol(
@@ -25,7 +26,6 @@ def render_aside_content():
                     fac.AntdCol(
                         fac.AntdText(
                             ShowConf.APP_NAME,
-                            id='logo-text',
                             className={
                                 'fontSize': '20px',
                                 'font-weight': 'bold',
@@ -38,9 +38,10 @@ def render_aside_content():
                             'alignItems': 'center',
                             'marginLeft': '20px',
                         },
+                        id='logo-text',
                     ),
                 ],
-                style={
+                className={
                     'height': '60px',
                     'background': 'rgb( 43, 47, 58)',
                     'position': 'sticky',
@@ -52,6 +53,7 @@ def render_aside_content():
                     'padding-bottom': '12px',
                 },
             ),
+            # 目录
             fac.AntdRow(
                 fac.AntdMenu(
                     menuItems=[
@@ -95,9 +97,8 @@ def render_aside_content():
                 )
             ),
         ],
+        # 修改目录的样式
         className={
-            'height': '100vh',
-            'background': 'rgb( 43, 47, 58)',
             '.ant-menu-submenu-title, .ant-menu': {'background-color': 'rgb( 43, 47, 58)'},
             '.ant-menu-submenu-title:hover': {'color': '#fff'},
             '.ant-menu-item-selected': {
