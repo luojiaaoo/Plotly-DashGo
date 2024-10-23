@@ -91,7 +91,7 @@ def login(nClicks, password_nSubmit, vc_input_nSubmit ,user_name, password_sha25
     #   fc: 登录失败计数
     # 返回值:
     #   更新登录页面内容、登录状态和登录消息等
-    if not nClicks and not password_nSubmit and not password_nSubmit:
+    if not nClicks and not password_nSubmit and not vc_input_nSubmit:
         raise PreventUpdate
     if vc_style['display'] == 'flex' and dash.ctx.triggered_prop_ids=={'login-password.nSubmit': 'login-password'}:
         raise PreventUpdate
