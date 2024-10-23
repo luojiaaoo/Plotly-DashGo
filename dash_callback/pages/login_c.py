@@ -118,7 +118,7 @@ def login(nClicks, nSubmit, user_name, password_sha256, need_vc, vc_input, pic_v
     else:
         return (
             dash.no_update,
-            fc + 1,
+            (fc or 0) + 1,
             fuc.FefferyFancyMessage('用户名或密码错误', type='error'),
             True,
         )

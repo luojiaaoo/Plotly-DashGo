@@ -1,6 +1,23 @@
 from database.sql_db.conn import pool
 from typing import Dict, List, Set, Union
 
+def exists_user_name(user_name: str) -> bool:
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            """SELECT user_name FROM sys_user where user_name = %s;""",
+            (user_name,),
+        )
+        result = cursor.fetchone()
+        return result is not None
+
+def user_password_verify(user_name: str, password_sha256: str) -> bool:
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            """SELECT user_name FROM sys_user where user_name = %s and user_password_sha256 = %s;""",
+            (user_name, password_sha256),
+        )
+        result = cursor.fetchone()
+        return result is not None
 
 def get_user_info(user_name: str) -> Dict:
     heads = (
