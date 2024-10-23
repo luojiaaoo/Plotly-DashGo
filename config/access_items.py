@@ -1,3 +1,6 @@
+from enum import Enum
+
+
 class AccessItems:
     access_items = {
         {
@@ -10,23 +13,24 @@ class AccessItems:
                     'name': 'statistics',
                     'module_name': 'statistics',
                     'show_name': '分析页',
-                    'accesses': [
-                        '登录排名',
-                        '应用使用统计',
-                    ],
                 },
                 {
                     'name': 'workbench',
                     'module_name': 'workbench',
                     'show_name': '工作台',
-                    'accesses': [
-                        '动态',
-                        '定时任务执行',
-                    ],
                 },
             ],
         },
     }
+
+    # 权限配置枚举，供view和callback注入拦截
+    class Dashboard_Statistics_Accesses(Enum):
+        STATISTISC_FUNC1 = 'STATISTISC_FUNC1'
+        STATISTISC_FUNC2 = 'STATISTISC_FUNC2'
+
+    class Dashboard_Workbench_Accesses(Enum):
+        WORKBENCH_FUNC1 = 'WORKBENCH_FUNC1'
+        WORKBENCH_FUNC2 = 'WORKBENCH_FUNC2'
 
     @classmethod
     def get_level1_items(cls):
