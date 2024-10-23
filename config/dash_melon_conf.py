@@ -28,3 +28,12 @@ class JwtConf:
     JWT_SECRET_KEY = conf.get('jwt', 'JWT_SECRET_KEY')
     JWT_ALGORITHM = conf.get('jwt', 'JWT_ALGORITHM')
     JWT_EXPIRE_MINUTES = conf.getint('jwt', 'JWT_EXPIRE_MINUTES')
+
+class SqlDbConf:
+    HOST = conf.get('sql_db', 'HOST')
+    PORT = conf.getint('sql_db', 'PORT')
+    USER = conf.get('sql_db', 'USER')
+    PASSWORD = conf.get('sql_db', 'PASSWORD')
+    DATABASE = conf.get('sql_db', 'DATABASE')
+    CHARSET = conf.get('sql_db', 'CHARSET')
+    POOL_SIZE = conf.getint('sql_db', 'POOL_SIZE')
