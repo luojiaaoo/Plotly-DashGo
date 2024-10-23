@@ -64,6 +64,7 @@ app.clientside_callback(
     [
         Input('login-submit', 'nClicks'),
         Input('login-password', 'nSubmit'),
+        Input('login-verify-code-input', 'nSubmit'),
     ],
     [
         State('login-username', 'value'),
@@ -72,10 +73,11 @@ app.clientside_callback(
         State('login-verify-code-input', 'value'),
         State('login-verify-code-pic', 'captcha'),
         State('login-store-fc', 'data'),
+        State('login-verify-code-container','style')
     ],
     prevent_initial_call=True,
 )
-def login(nClicks, nSubmit, user_name, password_sha256, need_vc, vc_input, pic_vc_value, fc):
+def login(nClicks, password_nSubmit, vc_input_nSubmit ,user_name, password_sha256, need_vc, vc_input, pic_vc_value, fc, vc_style):
     # 登录回调函数
     # 该函数处理用户的登录请求，并根据登录结果更新页面内容和状态
     # 参数:
@@ -89,7 +91,9 @@ def login(nClicks, nSubmit, user_name, password_sha256, need_vc, vc_input, pic_v
     #   fc: 登录失败计数
     # 返回值:
     #   更新登录页面内容、登录状态和登录消息等
-    if not nClicks and not nSubmit:
+    if not nClicks and not password_nSubmit and not password_nSubmit:
+        raise PreventUpdate
+    if vc_style['display'] == 'flex' and dash.ctx.triggered_prop_ids=={'login-password.nSubmit': 'login-password'}:
         raise PreventUpdate
     # e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 为空字符串的sha256加密结果
     if not user_name or password_sha256=='e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' or not password_sha256:
