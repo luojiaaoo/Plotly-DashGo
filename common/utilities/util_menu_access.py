@@ -4,7 +4,7 @@ from typing import Dict, List, Set, Union
 
 class MenuAccess:
     @classmethod
-    def get_dict_menu_item_and_app_meta(cls, user_name: str) -> Dict[str, str]:
+    def get_dict_menu_item_and_app_meta(cls, user_name: str) -> Dict[str, List[str]]:
         """获取用户可访问的菜单项权限字典
 
         根据用户名获取该用户可以访问的所有菜单项和应用权限，并将其整理为字典格式。
@@ -14,14 +14,17 @@ class MenuAccess:
         user_name (str): 用户名，用于查询用户权限。
 
         返回:
-        Dict[str, str]: 一个字典，其中键是菜单项的模块路径，值是对应的权限列表。
+        Dict[str, List[str]]: 一个字典，其中键是菜单项的模块路径，值是对应的权限列表。
         """
         # 比如 menu_item:  dashboard.workbench:log_info,冒号前为视图的包路径，后面为权限列表
         all_menu_item_and_app_meta: Set[str] = get_all_menu_item_and_app_meta(user_name=user_name)
         dict_menu_item_and_app_meta = dict()
         for _menu_item_and_app_meta in all_menu_item_and_app_meta:
             module_path, access = _menu_item_and_app_meta.split(':')
-            dict_menu_item_and_app_meta[module_path] = access
+            if dict_menu_item_and_app_meta.get(module_path) is None:
+                dict_menu_item_and_app_meta[module_path] = [access]
+            else:
+                dict_menu_item_and_app_meta[module_path].append(access)
         return dict_menu_item_and_app_meta
 
     @classmethod
