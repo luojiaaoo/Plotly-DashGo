@@ -93,7 +93,9 @@ def reload_for_logout(comp_id_reload='global_reload'):
     set_props(comp_id_reload, {'reload': True})
 
 
-def jwt_decode_from_session(verify_exp: bool = True, force_logout_if_exp=True) -> Union[Dict, AccessFailType]:
+def jwt_decode_from_session(
+    verify_exp: bool, force_logout_if_exp, ignore_exp, force_logout_if_invalid
+) -> Union[Dict, AccessFailType]:
     """
     从会话中解码JWT（JSON Web Token）。
 
@@ -122,8 +124,13 @@ def jwt_decode_from_session(verify_exp: bool = True, force_logout_if_exp=True) -
         except ExpiredSignatureError:
             if force_logout_if_exp:
                 reload_for_logout()
-            return AccessFailType.EXPIRED
+            if ignore_exp:
+                return jwt_decode(access_token, verify_exp=False)
+            else:
+                return AccessFailType.EXPIRED
         except Exception:
+            if force_logout_if_invalid:
+                reload_for_logout()
             return AccessFailType.INVALID
         return access_data
 

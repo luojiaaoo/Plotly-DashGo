@@ -74,3 +74,28 @@ class MenuAccess:
         self.dict_menu_item_and_app_meta = self.get_dict_menu_item_and_app_meta(user_name)
         self.menu_item = set(list(self.dict_menu_item_and_app_meta.keys()))
         self.menu = self.gen_menu(self.menu_item)
+
+
+def get_menu_access() -> MenuAccess:
+    """
+    在已登录状态下，获取菜单访问权限。
+
+    本函数通过JWT（JSON Web Token）解码来获取当前用户的访问权限信息，并返回一个包含用户名的MenuAccess对象。
+    如果解码无效，强制退出登录；如果过期则可选择性退出登录或者不管。
+
+    参数:
+    无
+
+    返回:
+    MenuAccess: 包含用户访问权限信息的MenuAccess对象。
+    """
+    from common.utilities import util_jwt
+    from config.dash_melon_conf import LoginConf
+
+    rt_access = util_jwt.jwt_decode_from_session(
+        verify_exp=True,
+        force_logout_if_exp=LoginConf.JWT_EXPIRED_FORCE_LOGOUT,
+        ignore_exp=not LoginConf.JWT_EXPIRED_FORCE_LOGOUT,
+        force_logout_if_invalid=True,
+    )
+    return MenuAccess(user_name=rt_access['user_name'])
