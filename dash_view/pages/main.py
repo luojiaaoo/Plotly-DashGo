@@ -3,6 +3,7 @@ from dash_view.framework.aside import render_aside_content
 from dash.dependencies import Input, Output, State
 from dash_view.framework.head import render_head_content
 from server import app
+from common.utilities.util_menu_access import MenuAccess
 
 # 折叠侧边栏按钮回调
 app.clientside_callback(
@@ -24,12 +25,12 @@ app.clientside_callback(
 )
 
 
-def render_content():
+def render_content(menu_access: MenuAccess):
     return fac.AntdRow(
         [
             fac.AntdCol(
                 fac.AntdSider(
-                    render_aside_content(),
+                    render_aside_content(menu_access),
                     collapsible=False,
                     collapsedWidth=60,
                     trigger=None,

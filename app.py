@@ -2,6 +2,7 @@ from flask import session
 from server import app
 from common.utilities import util_jwt
 from dash_view.pages import main, login
+from common.utilities.util_menu_access import MenuAccess
 
 
 def valid_token():
@@ -10,11 +11,11 @@ def valid_token():
     if isinstance(rt_access, util_jwt.AccessFailType):
         return login.render_content()
     else:
-        return main.render_content()
+        return main.render_content(MenuAccess(rt_access['user_name']))
 
 
 # 用户授权路由
 app.layout = valid_token
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=80, debug=True)
+    app.run(host='127.0.0.1', port=80, debug=False)

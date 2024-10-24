@@ -1,6 +1,7 @@
 from database.sql_db.conn import pool
 from typing import Dict, List, Set, Union
 
+
 def exists_user_name(user_name: str) -> bool:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
@@ -10,6 +11,7 @@ def exists_user_name(user_name: str) -> bool:
         result = cursor.fetchone()
         return result is not None
 
+
 def user_password_verify(user_name: str, password_sha256: str) -> bool:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
@@ -18,6 +20,7 @@ def user_password_verify(user_name: str, password_sha256: str) -> bool:
         )
         result = cursor.fetchone()
         return result is not None
+
 
 def get_user_info(user_name: str) -> Dict:
     heads = (
@@ -56,7 +59,7 @@ def get_roles_from_user_name(user_name: str) -> Set[str]:
         return set(result[0].split(','))
 
 
-def get_access_items_from_user_name(user_name: str) -> Set[str]:
+def get_menu_item_and_app_meta_from_user_name(user_name: str) -> Set[str]:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
             """SELECT user_access_items FROM sys_user where user_name = %s;""",
@@ -66,11 +69,11 @@ def get_access_items_from_user_name(user_name: str) -> Set[str]:
         return set(result[0].split(','))
 
 
-def get_access_items_from_roles(roles: Union[List[str], Set[str]]) -> Set[str]:
+def get_menu_item_and_app_meta_from_roles(roles: Union[List[str], Set[str]]) -> Set[str]:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
-            """select role_access_items from sys_role where role_name in %s;""",
-            (roles,),
+            f"""select role_access_items from sys_role where role_name in ({','.join(['%s']*len(roles))});""",
+            tuple(roles),
         )
         access_items = set()
         while True:
@@ -81,7 +84,7 @@ def get_access_items_from_roles(roles: Union[List[str], Set[str]]) -> Set[str]:
         return access_items
 
 
-def get_all_access_items(user_name: str):
-    access_items_from_role = get_access_items_from_roles(get_roles_from_user_name(user_name))
-    access_items_own = get_access_items_from_user_name(user_name)
+def get_all_menu_item_and_app_meta(user_name: str) -> Set[str]:
+    access_items_from_role = get_menu_item_and_app_meta_from_roles(get_roles_from_user_name(user_name))
+    access_items_own = get_menu_item_and_app_meta_from_user_name(user_name)
     return access_items_own.union(access_items_from_role)

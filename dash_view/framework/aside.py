@@ -2,9 +2,9 @@ import feffery_antd_components as fac
 from dash import get_asset_url
 from config.dash_melon_conf import ShowConf
 from server import app
+from common.utilities.util_menu_access import MenuAccess
 
-
-def render_aside_content():
+def render_aside_content(menu_access: MenuAccess):
     return fac.AntdCol(
         [
             # logo 和 app名
@@ -56,36 +56,7 @@ def render_aside_content():
             # 目录
             fac.AntdRow(
                 fac.AntdMenu(
-                    menuItems=[
-                        {
-                            'component': 'SubMenu',
-                            'props': {
-                                'key': f'{sub_menu}',
-                                'title': f'子菜单{sub_menu}',
-                            },
-                            'children': [
-                                {
-                                    'component': 'ItemGroup',
-                                    'props': {
-                                        'key': f'{sub_menu}-{item_group}',
-                                        'title': f'菜单项分组{sub_menu}-{item_group}',
-                                    },
-                                    'children': [
-                                        {
-                                            'component': 'Item',
-                                            'props': {
-                                                'key': f'{sub_menu}-{item_group}-{item}',
-                                                'title': f'菜单项{sub_menu}-{item_group}-{item}',
-                                            },
-                                        }
-                                        for item in range(1, 3)
-                                    ],
-                                }
-                                for item_group in range(1, 3)
-                            ],
-                        }
-                        for sub_menu in range(1, 5)
-                    ],
+                    menuItems=menu_access.menu,
                     mode='inline',
                     theme='dark',
                     className={'height': 'calc(100vh-60px)'},
@@ -103,8 +74,8 @@ def render_aside_content():
             '.ant-menu-submenu-title:hover': {'color': '#fff'},
             '.ant-menu-item-selected': {
                 'background-color': 'rgba(0,0,0,0)',
-                'border-left': '2px solid rgb(64,143,201)',
-                'border-radius': '0',
+                'border-right': '2px solid rgb(64,143,201)',
+                'border-radius': '0.8em',
                 'color': 'rgb(64,143,201)',
             },
         },

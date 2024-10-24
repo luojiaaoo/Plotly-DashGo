@@ -1,2 +1,2 @@
-import hashlib
-print(hashlib.sha256(b'admin123').hexdigest())
+a = set(['1',2,3])
+print(f'in {a}')
