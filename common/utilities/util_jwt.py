@@ -86,11 +86,11 @@ def jwt_encode_save_access_to_session(
     session['Authorization'] = f'Bearer {access_token}'
 
 
-def reload_for_logout(comp_id_reload='global-reload'):
+def reload_for_logout(comp_id_modal='global-token-err-modal'):
     from dash import set_props
 
     clear_access_token_from_session()
-    set_props(comp_id_reload, {'reload': True})
+    set_props(comp_id_modal, {'visible': True})
 
 
 def jwt_decode_from_session(
