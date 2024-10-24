@@ -2,6 +2,7 @@ import feffery_antd_components as fac
 from dash_view.framework.aside import render_aside_content
 from dash.dependencies import Input, Output, State
 from dash_view.framework.head import render_head_content
+from dash_view.framework.func import render_func_content
 from server import app
 from common.utilities.util_menu_access import MenuAccess
 
@@ -52,6 +53,7 @@ def render_content(menu_access: MenuAccess):
                 ],
                 flex=1,
             ),
+            *render_func_content(),
         ],
         className={'width': '100vw', 'height': '100vh'},
     )

@@ -1,2 +1,2 @@
-a = set(['1',2,3])
-print(f'in {a}')
+a = {1:1}
+print(a.get(0))

@@ -86,7 +86,7 @@ def jwt_encode_save_access_to_session(
     session['Authorization'] = f'Bearer {access_token}'
 
 
-def reload_for_logout(comp_id_reload='global_reload'):
+def reload_for_logout(comp_id_reload='global-reload'):
     from dash import set_props
 
     clear_access_token_from_session()
