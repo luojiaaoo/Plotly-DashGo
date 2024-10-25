@@ -1,10 +1,12 @@
-from database.sql_db.dao.user import get_all_menu_item_and_app_meta
-from typing import Dict, List, Set, Union
+from database.sql_db.dao.user import get_all_menu_item_and_access_meta
+from typing import Dict, List, Set
 
 
 class MenuAccess:
+
+
     @classmethod
-    def get_dict_menu_item_and_app_meta(cls, user_name: str) -> Dict[str, List[str]]:
+    def get_dict_menu_item_and_access_meta(cls, user_name: str) -> Dict[str, List[str]]:
         """获取用户可访问的菜单项权限字典
 
         根据用户名获取该用户可以访问的所有菜单项和应用权限，并将其整理为字典格式。
@@ -17,15 +19,15 @@ class MenuAccess:
         Dict[str, List[str]]: 一个字典，其中键是菜单项的模块路径，值是对应的权限列表。
         """
         # 比如 menu_item:  dashboard.workbench:log_info,冒号前为视图的包路径，后面为权限列表
-        all_menu_item_and_app_meta: Set[str] = get_all_menu_item_and_app_meta(user_name=user_name)
-        dict_menu_item_and_app_meta = dict()
-        for _menu_item_and_app_meta in all_menu_item_and_app_meta:
-            module_path, access = _menu_item_and_app_meta.split(':')
-            if dict_menu_item_and_app_meta.get(module_path) is None:
-                dict_menu_item_and_app_meta[module_path] = [access]
+        all_menu_item_and_access_meta: Set[str] = get_all_menu_item_and_access_meta(user_name=user_name)
+        dict_menu_item_and_access_meta = dict()
+        for _menu_item_and_access_meta in all_menu_item_and_access_meta:
+            module_path, access = _menu_item_and_access_meta.split(':')
+            if dict_menu_item_and_access_meta.get(module_path) is None:
+                dict_menu_item_and_access_meta[module_path] = [access]
             else:
-                dict_menu_item_and_app_meta[module_path].append(access)
-        return dict_menu_item_and_app_meta
+                dict_menu_item_and_access_meta[module_path].append(access)
+        return dict_menu_item_and_access_meta
 
     @classmethod
     def gen_menu(self, menu_item: Set[str]):
@@ -71,9 +73,20 @@ class MenuAccess:
         return menu
 
     def __init__(self, user_name) -> None:
-        self.dict_menu_item_and_app_meta = self.get_dict_menu_item_and_app_meta(user_name)
-        self.menu_item = set(list(self.dict_menu_item_and_app_meta.keys()))
+        # 菜单项 -> 权限元的字典
+        self.dict_menu_item_and_access_meta = self.get_dict_menu_item_and_access_meta(user_name)
+        # 所有菜单项
+        self.menu_item = set(list(self.dict_menu_item_and_access_meta.keys()))
+        # 生成AntdMenu的菜单格式
         self.menu = self.gen_menu(self.menu_item)
+
+    def get_access_metas(self, module_path: str) -> List[str]:
+        """获取用户可访问的权限元"""
+        # 传进来的是__name__包路径，去掉前缀才是菜单项
+        menu_item_name = module_path.replace('dash_view.application.', '')
+        return self.dict_menu_item_and_access_meta.get(menu_item_name)
+
+
 
 
 def get_menu_access() -> MenuAccess:
