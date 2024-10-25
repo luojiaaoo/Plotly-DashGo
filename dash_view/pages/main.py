@@ -5,12 +5,13 @@ from dash_view.framework.head import render_head_content
 from dash_view.framework.func import render_func_content
 from server import app
 from common.utilities.util_menu_access import MenuAccess
-from dash import html
+from dash import Patch, dcc
 import importlib
 import feffery_utils_components as fuc
-from config.dash_melon_conf import LoginConf
-
-module_first_page = importlib.import_module(f'dash_view.application.{LoginConf.FIRST_SHOW_PAGE}')
+import dash
+from typing import Dict
+from dash.exceptions import PreventUpdate
+from dash import set_props
 
 # 折叠侧边栏按钮回调
 app.clientside_callback(
@@ -33,9 +34,12 @@ app.clientside_callback(
 
 
 def render_content(menu_access: MenuAccess):
+    # module_page = importlib.import_module(f'dash_view.application.{url}')
     return fac.AntdRow(
         [
+            # 功能组件注入
             *render_func_content(),
+            # 菜单列
             fac.AntdCol(
                 fac.AntdSider(
                     render_aside_content(menu_access),
@@ -49,42 +53,21 @@ def render_content(menu_access: MenuAccess):
                     'background': 'rgb( 43, 47, 58)',
                 },
             ),
+            # 内容列
             fac.AntdCol(
                 [
+                    # head块，包括菜单折叠、面包屑导航、用户信息、全局功能按钮
                     fac.AntdRow(
                         render_head_content(),
                         align='middle',
                         className={'height': '50px', 'box-shadow': '0 1px 4px rgba(0,21,41,.08)'},
                     ),
+                    # tabs块
                     fac.AntdRow(
                         fuc.FefferyDiv(
                             fac.AntdTabs(
-                                items=[
-                                    {
-                                        'label': '工作台',
-                                        'key': LoginConf.FIRST_SHOW_PAGE,
-                                        'closable': True,
-                                        'children': module_first_page.render_content(menu_access),
-                                        'contextMenu': [
-                                            {
-                                                'key': '刷新页面',
-                                                'label': '刷新页面',
-                                                'icon': 'antd-reload',
-                                            },
-                                            {
-                                                'key': '关闭其他',
-                                                'label': '关闭其他',
-                                                'icon': 'antd-close-circle',
-                                            },
-                                            {
-                                                'key': '全部关闭',
-                                                'label': '全部关闭',
-                                                'icon': 'antd-close-circle',
-                                            },
-                                        ],
-                                    }
-                                ],
                                 id='tabs-container',
+                                items=[],
                                 type='editable-card',
                                 className={
                                     'width': '100%',
@@ -100,7 +83,7 @@ def render_content(menu_access: MenuAccess):
                                     'border-style': 'solid',
                                     'padding': '0 5px',
                                     'font-size': '14px',
-                                    'border-radius':'2px'
+                                    'border-radius': '2px',
                                 },
                             },
                         )
@@ -110,4 +93,75 @@ def render_content(menu_access: MenuAccess):
             ),
         ],
         className={'width': '100vw', 'height': '100vh'},
+        id='global-full-screen-container',
     )
+
+
+@app.callback(
+    Output('tabs-container', 'items'),
+    Input('global-url-location', 'href'),
+    prevent_initial_call=True,
+)
+def callback_func(href):
+    # 过滤无效回调
+    if href is None:
+        raise PreventUpdate
+    from yarl import URL
+
+    url = URL(href)
+    try:
+        # 访问路径，第一个为/，去除
+        url_module_path = '.'.join(url.parts[1:])
+        module_page = importlib.import_module(f'dash_view.application.{url_module_path}')
+        # 查询参数
+        url_query: Dict = url.query
+        # 获取锚链接
+        url_fragment: str = url.fragment
+        # 合并查询和锚连接，组成综合参数
+        param = {**url_query, 'url_fragment': url_fragment}
+    except Exception:
+        # 没有该页面对应的模块，返回404
+        from dash_view.pages.page_404 import render
+
+        set_props('global-full-screen-container', {'children': render()})
+        return dash.no_update
+
+    from common.utilities.util_menu_access import get_menu_access
+
+    # 获取用户权限
+    menu_access = get_menu_access()
+    # 没有权限，返回401
+    if url_module_path not in menu_access.menu_item:
+        from dash_view.pages.page_401 import render
+
+        set_props('global-full-screen-container', {'children': render()})
+        return dash.no_update
+
+    p = Patch()
+    p.append(
+        {
+            'label': '工作台',
+            'key': url,
+            'closable': True,
+            'children': module_page.render_content(menu_access, **param),
+            'contextMenu': [
+                {
+                    'key': '刷新页面',
+                    'label': '刷新页面',
+                    'icon': 'antd-reload',
+                },
+                {
+                    'key': '关闭其他',
+                    'label': '关闭其他',
+                    'icon': 'antd-close-circle',
+                },
+                {
+                    'key': '全部关闭',
+                    'label': '全部关闭',
+                    'icon': 'antd-close-circle',
+                },
+            ],
+        }
+    )
+
+    return p

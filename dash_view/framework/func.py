@@ -3,6 +3,7 @@ import feffery_utils_components as fuc
 from dash import dcc, html
 from server import app
 from dash.dependencies import Input, Output
+from common.utilities.util_menu_access import MenuAccess
 
 app.clientside_callback(
     """
@@ -23,6 +24,8 @@ def render_func_content():
         fuc.FefferyReload(id='global-reload'),
         # 全局url监听组件
         fuc.FefferyLocation(id='global-url-location'),
+        # 全局重定向组件容器
+        fac.Fragment(id='global-redirect-container'),
         # 退出登录提示弹窗
         fac.AntdModal(
             html.Div(
