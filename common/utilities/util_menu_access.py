@@ -46,8 +46,10 @@ class MenuAccess:
 
         def get_icon(module_path):
             from dash_view import application  # noqa
-
-            return eval(f'{module_path}.icon')
+            try:
+                return eval(f'{module_path}.icon')
+            except:
+                return None
 
         menu = [
             {
@@ -63,6 +65,7 @@ class MenuAccess:
                         'props': {
                             'key': f'{level2_name}.{level2_name}',
                             'title': get_title(f'application.{level1_name}.{level2_name}'),
+                            'icon': get_icon(f'application.{level1_name}.{level2_name}'),
                         },
                     }
                     for level2_name in level2_name_list
