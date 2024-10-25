@@ -5,6 +5,12 @@ from dash_view.framework.head import render_head_content
 from dash_view.framework.func import render_func_content
 from server import app
 from common.utilities.util_menu_access import MenuAccess
+from dash import html
+import importlib
+import feffery_utils_components as fuc
+from config.dash_melon_conf import LoginConf
+
+module_first_page = importlib.import_module(f'dash_view.application.{LoginConf.FIRST_SHOW_PAGE}')
 
 # 折叠侧边栏按钮回调
 app.clientside_callback(
@@ -29,6 +35,7 @@ app.clientside_callback(
 def render_content(menu_access: MenuAccess):
     return fac.AntdRow(
         [
+            *render_func_content(),
             fac.AntdCol(
                 fac.AntdSider(
                     render_aside_content(menu_access),
@@ -47,13 +54,60 @@ def render_content(menu_access: MenuAccess):
                     fac.AntdRow(
                         render_head_content(),
                         align='middle',
-                        className={'height': '60px', 'box-shadow': '0 1px 4px rgba(0,21,41,.08)'},
+                        className={'height': '50px', 'box-shadow': '0 1px 4px rgba(0,21,41,.08)'},
                     ),
-                    fac.AntdRow(),
+                    fac.AntdRow(
+                        fuc.FefferyDiv(
+                            fac.AntdTabs(
+                                items=[
+                                    {
+                                        'label': '工作台',
+                                        'key': LoginConf.FIRST_SHOW_PAGE,
+                                        'closable': True,
+                                        'children': module_first_page.render_content(menu_access),
+                                        'contextMenu': [
+                                            {
+                                                'key': '刷新页面',
+                                                'label': '刷新页面',
+                                                'icon': 'antd-reload',
+                                            },
+                                            {
+                                                'key': '关闭其他',
+                                                'label': '关闭其他',
+                                                'icon': 'antd-close-circle',
+                                            },
+                                            {
+                                                'key': '全部关闭',
+                                                'label': '全部关闭',
+                                                'icon': 'antd-close-circle',
+                                            },
+                                        ],
+                                    }
+                                ],
+                                id='tabs-container',
+                                type='editable-card',
+                                className={
+                                    'width': '100%',
+                                    'paddingLeft': '15px',
+                                    'paddingRight': '15px',
+                                },
+                            ),
+                            className={
+                                'width': '100%',
+                                'height': '100%',
+                                '& .ant-tabs-nav-list .ant-tabs-tab': {
+                                    'margin': '0 0px',
+                                    'border-style': 'solid',
+                                    'padding': '0 5px',
+                                    'font-size': '14px',
+                                    'border-radius':'2px'
+                                },
+                            },
+                        )
+                    ),
                 ],
-                flex=1,
+                flex='auto',
             ),
-            *render_func_content(),
         ],
         className={'width': '100vw', 'height': '100vh'},
     )

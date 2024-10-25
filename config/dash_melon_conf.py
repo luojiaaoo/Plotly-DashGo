@@ -15,6 +15,7 @@ class LoginConf:
     VERIFY_CODE_SHOW_LOGIN_FAIL_COUNT = conf.getint('login', 'VERIFY_CODE_SHOW_LOGIN_FAIL_COUNT')
     VERIFY_CODE_CHAR_NUM = conf.getint('login', 'VERIFY_CODE_CHAR_NUM')
     JWT_EXPIRED_FORCE_LOGOUT = bool(conf.get('login', 'VERIFY_CODE_CHAR_NUM'))
+    FIRST_SHOW_PAGE = conf.get('login', 'FIRST_SHOW_PAGE')
 
 class FlaskConf:
     COMPRESS_ALGORITHM = conf.get('flask', 'COMPRESS_ALGORITHM')

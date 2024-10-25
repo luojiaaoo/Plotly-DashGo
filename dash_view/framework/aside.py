@@ -70,7 +70,7 @@ def render_aside_content(menu_access: MenuAccess):
         ],
         # 修改目录的样式
         className={
-            '.ant-menu-submenu-title, .ant-menu': {'background-color': 'rgb( 43, 47, 58)'},
+            '.ant-menu-submenu-title, .ant-menu': {'background-color': 'rgb( 43, 47, 58)','overflow':'hidden'},
             '.ant-menu-submenu-title:hover': {'color': '#fff'},
             '.ant-menu-item-selected': {
                 'background-color': 'rgba(0,0,0,0)',
