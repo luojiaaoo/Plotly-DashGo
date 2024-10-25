@@ -140,8 +140,34 @@ def callback_func(href):
     p = Patch()
     p.append(
         {
-            'label': '工作台',
-            'key': url,
+            'label': '1',
+            'key': '1',
+            'closable': True,
+            'children': module_page.render_content(menu_access, **param),
+            'contextMenu': [
+                {
+                    'key': '刷新页面',
+                    'label': '刷新页面',
+                    'icon': 'antd-reload',
+                },
+                {
+                    'key': '关闭其他',
+                    'label': '关闭其他',
+                    'icon': 'antd-close-circle',
+                },
+                {
+                    'key': '全部关闭',
+                    'label': '全部关闭',
+                    'icon': 'antd-close-circle',
+                },
+            ],
+        }
+    )
+
+    p.append(
+        {
+            'label': '2',
+            'key': '2',
             'closable': True,
             'children': module_page.render_content(menu_access, **param),
             'contextMenu': [
