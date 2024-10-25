@@ -5,7 +5,7 @@ from typing import Dict, List, Set, Union
 def exists_user_name(user_name: str) -> bool:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
-            """SELECT user_name FROM sys_user where user_name = %s;""",
+            """SELECT user_name FROM sys_user WHERE user_name = %s;""",
             (user_name,),
         )
         result = cursor.fetchone()
@@ -15,7 +15,7 @@ def exists_user_name(user_name: str) -> bool:
 def user_password_verify(user_name: str, password_sha256: str) -> bool:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
-            """SELECT user_name FROM sys_user where user_name = %s and password_sha256 = %s;""",
+            """SELECT user_name FROM sys_user WHERE user_name = %s and password_sha256 = %s;""",
             (user_name, password_sha256),
         )
         result = cursor.fetchone()
@@ -40,7 +40,7 @@ def get_user_info(user_name: str) -> Dict:
     )
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
-            f"""SELECT {','.join(heads)} FROM sys_user where user_name = %s;""",
+            f"""SELECT {','.join(heads)} FROM sys_user WHERE user_name = %s;""",
             (user_name,),
         )
         result = cursor.fetchone()
@@ -50,7 +50,7 @@ def get_user_info(user_name: str) -> Dict:
 def get_roles_from_user_name(user_name: str) -> Set[str]:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
-            """SELECT role FROM sys_user_role where user_name = %s;""",
+            """SELECT role FROM sys_user_role WHERE user_name = %s;""",
             (user_name,),
         )
         result = cursor.fetchall()
@@ -60,7 +60,7 @@ def get_roles_from_user_name(user_name: str) -> Set[str]:
 def get_menu_item_and_app_meta_from_user_name(user_name: str) -> Set[str]:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
-            """SELECT access_meta FROM sys_user_access_meta where user_name = %s;""",
+            """SELECT access_meta FROM sys_user_access_meta WHERE user_name = %s;""",
             (user_name,),
         )
         result = cursor.fetchall()
@@ -70,7 +70,7 @@ def get_menu_item_and_app_meta_from_user_name(user_name: str) -> Set[str]:
 def get_menu_item_and_app_meta_from_roles(roles: Union[List[str], Set[str]]) -> Set[str]:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
-            f"""select access_meta from sys_role where role_name in ({','.join(['%s']*len(roles))});""",
+            f"""SELECT access_meta FROM sys_role WHERE role_name in ({','.join(['%s']*len(roles))});""",
             tuple(roles),
         )
         result = cursor.fetchall()
@@ -78,6 +78,21 @@ def get_menu_item_and_app_meta_from_roles(roles: Union[List[str], Set[str]]) -> 
 
 
 def get_all_menu_item_and_app_meta(user_name: str) -> Set[str]:
-    access_items_from_role = get_menu_item_and_app_meta_from_roles(get_roles_from_user_name(user_name))
-    access_items_own = get_menu_item_and_app_meta_from_user_name(user_name)
-    return access_items_own.union(access_items_from_role)
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            """
+                SELECT access_meta
+                FROM sys_user_access_meta
+                WHERE user_name = %s
+                UNION
+                SELECT access_meta
+                FROM sys_role
+                WHERE role_name IN 
+                    (SELECT role
+                    FROM sys_user_role
+                    WHERE user_name = %s);
+            """,
+            (user_name, user_name),
+        )
+        result = cursor.fetchall()
+        return set([per_rt[0] for per_rt in result])
