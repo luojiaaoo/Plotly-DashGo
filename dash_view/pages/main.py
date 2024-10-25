@@ -34,7 +34,6 @@ app.clientside_callback(
 
 
 def render_content(menu_access: MenuAccess):
-    # module_page = importlib.import_module(f'dash_view.application.{url}')
     return fac.AntdRow(
         [
             # 功能组件注入
@@ -67,7 +66,13 @@ def render_content(menu_access: MenuAccess):
                         fuc.FefferyDiv(
                             fac.AntdTabs(
                                 id='tabs-container',
-                                items=[],
+                                # fix bug: 必须有一个先置的tab，否则无法正常显示
+                                items=[
+                                    {
+                                        'label': 'init',
+                                        'key': 'init',
+                                    }
+                                ],
                                 type='editable-card',
                                 className={
                                     'width': '100%',
@@ -100,9 +105,10 @@ def render_content(menu_access: MenuAccess):
 @app.callback(
     Output('tabs-container', 'items'),
     Input('global-url-location', 'href'),
+    State('global-tabs-del-init', 'data'),  # fix bug: 存储是否删除tabs组件占位的内容
     prevent_initial_call=True,
 )
-def callback_func(href):
+def callback_func(href, has_del_init_tab):
     # 过滤无效回调
     if href is None:
         raise PreventUpdate
@@ -138,10 +144,14 @@ def callback_func(href):
         return dash.no_update
 
     p = Patch()
+    # fix bug: 先删除tabs组件占位的内容，再加上新的tab
+    if not has_del_init_tab:
+        p.clear()
+        set_props('global-tabs-del-init', {'data': 1})
     p.append(
         {
-            'label': '1',
-            'key': '1',
+            'label': module_page.title,
+            'key': url_module_path,
             'closable': True,
             'children': module_page.render_content(menu_access, **param),
             'contextMenu': [
@@ -163,31 +173,4 @@ def callback_func(href):
             ],
         }
     )
-
-    p.append(
-        {
-            'label': '2',
-            'key': '2',
-            'closable': True,
-            'children': module_page.render_content(menu_access, **param),
-            'contextMenu': [
-                {
-                    'key': '刷新页面',
-                    'label': '刷新页面',
-                    'icon': 'antd-reload',
-                },
-                {
-                    'key': '关闭其他',
-                    'label': '关闭其他',
-                    'icon': 'antd-close-circle',
-                },
-                {
-                    'key': '全部关闭',
-                    'label': '全部关闭',
-                    'icon': 'antd-close-circle',
-                },
-            ],
-        }
-    )
-
     return p

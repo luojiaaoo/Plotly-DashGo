@@ -47,4 +47,6 @@ def render_func_content():
             centered=True,
             cancelButtonProps={'style': {'display': 'none'}},
         ),
+        # fix bug: 存储是否删除tabs组件占位的内容
+        dcc.Store(id='global-tabs-del-init', data=0),
     ]
