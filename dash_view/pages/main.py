@@ -124,7 +124,10 @@ def callback_func(href, has_del_init_tab):
         # 获取锚链接
         url_fragment: str = url.fragment
         # 合并查询和锚连接，组成综合参数
-        param = {**url_query, 'url_fragment': url_fragment}
+        param = {
+            **url_query,
+            **({'url_fragment': url_fragment} if url_fragment else {}),
+        }
     except Exception:
         # 没有该页面对应的模块，返回404
         from dash_view.pages.page_404 import render

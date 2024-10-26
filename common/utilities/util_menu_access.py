@@ -76,6 +76,7 @@ class MenuAccess:
         return menu
 
     def __init__(self, user_name) -> None:
+        self.user_name = user_name
         # 菜单项 -> 权限元的字典
         self.dict_menu_item_and_access_meta = self.get_dict_menu_item_and_access_meta(user_name)
         # 所有菜单项
