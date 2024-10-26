@@ -59,7 +59,11 @@ def render_content(menu_access: MenuAccess):
                     fac.AntdRow(
                         render_head_content(),
                         align='middle',
-                        className={'height': '50px', 'box-shadow': '0 1px 4px rgba(0,21,41,.08)'},
+                        className={
+                            'height': '50px',
+                            'box-shadow': '0 1px 4px rgba(0,21,41,.08)',
+                            'flex': 'None',
+                        },
                     ),
                     # tabs块
                     fac.AntdRow(
@@ -76,13 +80,23 @@ def render_content(menu_access: MenuAccess):
                                 type='editable-card',
                                 className={
                                     'width': '100%',
-                                    'paddingLeft': '15px',
-                                    'paddingRight': '15px',
+                                    'height': '100%',
+                                    'paddingLeft': '8px',
+                                    'paddingRight': '8px',
                                 },
                             ),
                             className={
                                 'width': '100%',
                                 'height': '100%',
+                                '& .ant-tabs-content-holder > .ant-tabs-content': {
+                                    'height': 'calc(100% - 10px)', # 不知道为什么溢出了一部分，减去10像素
+                                },
+                                '& .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane': {
+                                    'height': '100%',
+                                },
+                                '& .ant-tabs-nav': {
+                                    'margin': '8px 0 8px 0',
+                                },
                                 '& .ant-tabs-nav-list .ant-tabs-tab': {
                                     'margin': '0 0px',
                                     'border-style': 'solid',
@@ -91,10 +105,12 @@ def render_content(menu_access: MenuAccess):
                                     'border-radius': '2px',
                                 },
                             },
-                        )
+                        ),
+                        className={'flex': '1'},
                     ),
                 ],
                 flex='auto',
+                className={'display': 'flex', 'flex-direction': 'column'},
             ),
         ],
         className={'width': '100vw', 'height': '100vh'},
