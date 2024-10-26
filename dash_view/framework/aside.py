@@ -59,7 +59,6 @@ def render_aside_content(menu_access: MenuAccess):
                     menuItems=menu_access.menu,
                     mode='inline',
                     theme='dark',
-                    className={'height': 'calc(100vh-60px)'},
                     onlyExpandCurrentSubMenu=True,
                     expandIcon={
                         'expand': fac.AntdIcon(icon='antd-right'),
