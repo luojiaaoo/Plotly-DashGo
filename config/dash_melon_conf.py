@@ -8,6 +8,15 @@ class PathProj:
 conf = ConfigParser()
 conf.read(PathProj.ROOT_PATH/'config'/'dash_melon.ini')
 
+class LogConf:
+    LOG_LEVEL = conf.get('log', 'LOG_LEVEL')
+    HANDLER_CONSOLE = bool(conf.get('log', 'HANDLER_CONSOLE'))
+    HANDLER_LOG_FILE = bool(conf.get('log', 'HANDLER_LOG_FILE'))
+    LOG_FILE_PATH = conf.get('log', 'LOG_FILE_PATH')
+    MAX_MB_PER_LOG_FILE = conf.getint('log', 'MAX_MB_PER_LOG_FILE')
+    MAX_COUNT_LOG_FILE = conf.getint('log', 'MAX_COUNT_LOG_FILE')
+    
+
 class EncryptConf:
     CUSTOM_KEY = conf.get('encrypt', 'CUSTOM_KEY')
 
