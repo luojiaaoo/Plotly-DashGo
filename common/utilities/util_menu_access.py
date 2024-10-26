@@ -66,6 +66,7 @@ class MenuAccess:
                             'key': f'{level2_name}.{level2_name}',
                             'title': get_title(f'application.{level1_name}.{level2_name}'),
                             'icon': get_icon(f'application.{level1_name}.{level2_name}'),
+                            'href': f'/{level1_name}/{level2_name}',
                         },
                     }
                     for level2_name in level2_name_list
