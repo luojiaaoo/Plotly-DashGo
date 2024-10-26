@@ -9,7 +9,7 @@ from dash import Patch, dcc
 import importlib
 import feffery_utils_components as fuc
 import dash
-from typing import Dict
+from typing import Dict, List
 from dash.exceptions import PreventUpdate
 from dash import set_props
 
@@ -89,7 +89,7 @@ def render_content(menu_access: MenuAccess):
                                 'width': '100%',
                                 'height': '100%',
                                 '& .ant-tabs-content-holder > .ant-tabs-content': {
-                                    'height': 'calc(100% - 10px)', # 不知道为什么溢出了一部分，减去10像素
+                                    'height': 'calc(100% - 10px)',  # 不知道为什么溢出了一部分，减去10像素
                                 },
                                 '& .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane': {
                                     'height': '100%',
@@ -118,13 +118,17 @@ def render_content(menu_access: MenuAccess):
     )
 
 
+# 主路由函数+Tab管理
 @app.callback(
-    Output('tabs-container', 'items'),
+    Output('tabs-container', 'items', allow_duplicate=True),
     Input('global-url-location', 'href'),
-    State('global-tabs-del-init', 'data'),  # fix bug: 存储是否删除tabs组件占位的内容
+    [
+        State('global-tabs-del-init', 'data'),  # fix bug: 存储是否删除tabs组件占位的内容
+        State('global-tabs-keys', 'data'),
+    ],
     prevent_initial_call=True,
 )
-def callback_func(href, has_del_init_tab):
+def main_router(href, has_del_init_tab, has_open_tab_keys: List):
     # 过滤无效回调
     if href is None:
         raise PreventUpdate
@@ -132,18 +136,15 @@ def callback_func(href, has_del_init_tab):
 
     url = URL(href)
     try:
-        # 访问路径，第一个为/，去除
-        url_module_path = '.'.join(url.parts[1:])
+        url_module_path = '.'.join(url.parts[1:])  # 访问路径，第一个为/，去除
+        # 导入对应的页面模块
         module_page = importlib.import_module(f'dash_view.application.{url_module_path}')
-        # 查询参数
-        url_query: Dict = url.query
-        # 获取锚链接
-        url_fragment: str = url.fragment
-        # 合并查询和锚连接，组成综合参数
+        url_query: Dict = url.query  # 查询参数
+        url_fragment: str = url.fragment  # 获取锚链接
         param = {
             **url_query,
             **({'url_fragment': url_fragment} if url_fragment else {}),
-        }
+        }  # 合并查询和锚连接，组成综合参数
     except Exception:
         # 没有该页面对应的模块，返回404
         from dash_view.pages.page_404 import render
@@ -161,35 +162,50 @@ def callback_func(href, has_del_init_tab):
 
         set_props('global-full-screen-container', {'children': render()})
         return dash.no_update
-
     p = Patch()
     # fix bug: 先删除tabs组件占位的内容，再加上新的tab
     if not has_del_init_tab:
         p.clear()
         set_props('global-tabs-del-init', {'data': 1})
-    p.append(
-        {
-            'label': module_page.title,
-            'key': url_module_path,
-            'closable': True,
-            'children': module_page.render_content(menu_access, **param),
-            'contextMenu': [
-                {
-                    'key': '刷新页面',
-                    'label': '刷新页面',
-                    'icon': 'antd-reload',
-                },
-                {
-                    'key': '关闭其他',
-                    'label': '关闭其他',
-                    'icon': 'antd-close-circle',
-                },
-                {
-                    'key': '全部关闭',
-                    'label': '全部关闭',
-                    'icon': 'antd-close-circle',
-                },
-            ],
-        }
-    )
+    if url_module_path in has_open_tab_keys:
+        # 如已经打开，直接切换页面即可
+        set_props('tabs-container', {'activeKey': url_module_path})
+        return dash.no_update
+    else:
+        # 未打开，通过Patch组件，将新的tab添加到tabs组件中
+        p.append(
+            {
+                'label': module_page.title,
+                'key': url_module_path,
+                'closable': True,
+                'children': module_page.render_content(menu_access, **param),
+                'contextMenu': [
+                    {
+                        'key': '关闭其他',
+                        'label': '关闭其他',
+                        'icon': 'antd-close-circle',
+                    },
+                ],
+            }
+        )
+        set_props('tabs-container', {'activeKey': url_module_path})
+        # 同步添加到tab的key列表
+        set_props('global-tabs-keys', {'data': has_open_tab_keys + [url_module_path]})
+        return p
+
+
+# Tab关闭
+@app.callback(
+    Output('tabs-container', 'items', allow_duplicate=True),
+    Input('tabs-container', 'latestDeletePane'),
+    State('global-tabs-keys', 'data'),
+    prevent_initial_call=True,
+)
+def close_tab(latestDeletePane_key, has_open_tab_keys: List):
+    print(latestDeletePane_key, has_open_tab_keys)
+    idx_close = has_open_tab_keys.index(latestDeletePane_key)
+    p = Patch()
+    del p[idx_close]
+    has_open_tab_keys.pop(idx_close)
+    set_props('global-tabs-keys', {'data': has_open_tab_keys})
     return p
