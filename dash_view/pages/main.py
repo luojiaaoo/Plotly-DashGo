@@ -219,7 +219,7 @@ def main_router(href, has_open_tab_keys: List):
         return p
 
 
-# 地址栏随activeKey变化
+# 地址栏和菜单随activeKey变化
 app.clientside_callback(
     """
     (activeKey) => {
