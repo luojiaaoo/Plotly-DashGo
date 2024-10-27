@@ -24,6 +24,8 @@ def render_func_content():
         fuc.FefferyReload(id='global-reload'),
         # 全局url监听组件
         fuc.FefferyLocation(id='global-url-location'),
+        # 用于回调更新pathname信息
+        dcc.Location(id='global-dcc-url', refresh=False),
         # 全局重定向组件容器
         fac.Fragment(id='global-redirect-container'),
         # 退出登录提示弹窗
