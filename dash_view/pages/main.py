@@ -44,13 +44,6 @@ def render_content(menu_access: MenuAccess):
             'key': 'dashboard.workbench',
             'children': module_page.render_content(menu_access),
             'closable': False,
-            'contextMenu': [
-                {
-                    'key': '关闭其他',
-                    'label': '关闭其他',
-                    'icon': 'antd-close-circle',
-                },
-            ],
         }
     ]
     return fac.AntdRow(
@@ -176,7 +169,28 @@ def main_router(href, has_open_tab_keys: List):
         set_props('global-full-screen-container', {'children': render()})
         return dash.no_update
     p = Patch()
-    if url_module_path in has_open_tab_keys:
+    if url_module_path in has_open_tab_keys and param.get('flush', None) is not None:
+        # 如果已经打开，但是带有flush的query，就重新打开，通过Patch组件，删除老的，将新的tab添加到tabs组件中
+        old_idx = has_open_tab_keys.index(url_module_path)
+        del p[old_idx]
+        p.insert(
+            old_idx,
+            {
+                'label': module_page.title,
+                'key': url_module_path,
+                'closable': True,
+                'children': module_page.render_content(menu_access, **param),
+                'contextMenu': [
+                    {
+                        'key': '关闭其他',
+                        'label': '关闭其他',
+                        'icon': 'antd-close-circle',
+                    },
+                ],
+            },
+        )
+        set_props('tabs-container', {'activeKey': url_module_path})
+    elif url_module_path in has_open_tab_keys:
         # 如已经打开，直接切换页面即可
         set_props('tabs-container', {'activeKey': url_module_path})
         return dash.no_update
