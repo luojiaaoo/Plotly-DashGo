@@ -34,6 +34,7 @@ app.clientside_callback(
 
 
 def render_content(menu_access: MenuAccess):
+    module_page = importlib.import_module('dash_view.application.dashboard.workbench')
     return fac.AntdRow(
         [
             # 功能组件注入
@@ -70,11 +71,20 @@ def render_content(menu_access: MenuAccess):
                         fuc.FefferyDiv(
                             fac.AntdTabs(
                                 id='tabs-container',
-                                # fix bug: 必须有一个先置的tab，否则无法正常显示
+                                # 初始页面为工作台
                                 items=[
                                     {
-                                        'label': 'init',
-                                        'key': 'init',
+                                        'label': module_page.title,
+                                        'key': 'dashboard.workbench',
+                                        'children': module_page.render_content(menu_access),
+                                        'closable': False,
+                                        'contextMenu': [
+                                            {
+                                                'key': '关闭其他',
+                                                'label': '关闭其他',
+                                                'icon': 'antd-close-circle',
+                                            },
+                                        ],
                                     }
                                 ],
                                 type='editable-card',
@@ -122,16 +132,16 @@ def render_content(menu_access: MenuAccess):
 @app.callback(
     Output('tabs-container', 'items', allow_duplicate=True),
     Input('global-url-location', 'href'),
-    [
-        State('global-tabs-del-init', 'data'),  # fix bug: 存储是否删除tabs组件占位的内容
-        State('global-tabs-keys', 'data'),
-    ],
+    State('tabs-container', 'itemKeys'),
     prevent_initial_call=True,
 )
-def main_router(href, has_del_init_tab, has_open_tab_keys: List):
+def main_router(href, has_open_tab_keys: List):
     # 过滤无效回调
     if href is None:
         raise PreventUpdate
+    # 初始回调，无论tab是否有标签，都是空，所以这里预置一个工作台的key
+    if has_open_tab_keys is None:
+        has_open_tab_keys = ['dashboard.workbench']
     from yarl import URL
 
     url = URL(href)
@@ -163,10 +173,6 @@ def main_router(href, has_del_init_tab, has_open_tab_keys: List):
         set_props('global-full-screen-container', {'children': render()})
         return dash.no_update
     p = Patch()
-    # fix bug: 先删除tabs组件占位的内容，再加上新的tab
-    if not has_del_init_tab:
-        p.clear()
-        set_props('global-tabs-del-init', {'data': 1})
     if url_module_path in has_open_tab_keys:
         # 如已经打开，直接切换页面即可
         set_props('tabs-container', {'activeKey': url_module_path})
@@ -189,23 +195,25 @@ def main_router(href, has_del_init_tab, has_open_tab_keys: List):
             }
         )
         set_props('tabs-container', {'activeKey': url_module_path})
-        # 同步添加到tab的key列表
-        set_props('global-tabs-keys', {'data': has_open_tab_keys + [url_module_path]})
         return p
 
 
 # Tab关闭
 @app.callback(
     Output('tabs-container', 'items', allow_duplicate=True),
-    Input('tabs-container', 'latestDeletePane'),
-    State('global-tabs-keys', 'data'),
+    Input('tabs-container', 'tabCloseCounts'),
+    [
+        State('tabs-container', 'latestDeletePane'),
+        State('tabs-container', 'itemKeys'),
+        State('tabs-container', 'activeKey'),
+    ],
     prevent_initial_call=True,
 )
-def close_tab(latestDeletePane_key, has_open_tab_keys: List):
-    print(latestDeletePane_key, has_open_tab_keys)
+def close_tab(tabCloseCounts, latestDeletePane_key, has_open_tab_keys: List, activeKey):
     idx_close = has_open_tab_keys.index(latestDeletePane_key)
     p = Patch()
     del p[idx_close]
     has_open_tab_keys.pop(idx_close)
-    set_props('global-tabs-keys', {'data': has_open_tab_keys})
+    if activeKey == latestDeletePane_key:
+        set_props('tabs-container', {'activeKey': has_open_tab_keys[-1]})
     return p

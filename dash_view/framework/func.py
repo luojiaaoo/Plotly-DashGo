@@ -47,8 +47,4 @@ def render_func_content():
             centered=True,
             cancelButtonProps={'style': {'display': 'none'}},
         ),
-        # 存储tab的key，和UI保持同步
-        dcc.Store(id='global-tabs-keys', data=[]),
-        # fix bug: 存储是否删除tabs组件占位的内容
-        dcc.Store(id='global-tabs-del-init', data=0),
     ]
