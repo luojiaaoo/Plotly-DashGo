@@ -35,13 +35,17 @@ app.clientside_callback(
 )
 
 
+def module_path2url_path(module_path: str) -> str:
+    return '/' + module_path.replace('.', '/')
+
+
 def render_content(menu_access: MenuAccess):
     # 初始化访问页面
     module_page = importlib.import_module('dash_view.application.dashboard.workbench')
     init_items = [
         {
             'label': module_page.title,
-            'key': 'dashboard.workbench',
+            'key': '/dashboard/workbench',
             'children': module_page.render_content(menu_access),
             'closable': False,
         }
@@ -138,7 +142,7 @@ def main_router(href, has_open_tab_keys: List):
         raise PreventUpdate
     # 初始回调，无论tab是否有标签，都是空，所以这里预置一个工作台的key
     if has_open_tab_keys is None:
-        has_open_tab_keys = ['dashboard.workbench']
+        has_open_tab_keys = ['/dashboard/workbench']
 
     url = URL(href)
     try:
@@ -169,15 +173,16 @@ def main_router(href, has_open_tab_keys: List):
         set_props('global-full-screen-container', {'children': render()})
         return dash.no_update
     p = Patch()
-    if url_module_path in has_open_tab_keys and param.get('flush', None) is not None:
+    key_url_path = module_path2url_path(url_module_path)
+    if key_url_path in has_open_tab_keys and param.get('flush', None) is not None:
         # 如果已经打开，但是带有flush的query，就重新打开，通过Patch组件，删除老的，将新的tab添加到tabs组件中
-        old_idx = has_open_tab_keys.index(url_module_path)
+        old_idx = has_open_tab_keys.index(key_url_path)
         del p[old_idx]
         p.insert(
             old_idx,
             {
                 'label': module_page.title,
-                'key': url_module_path,
+                'key': key_url_path,
                 'closable': True,
                 'children': module_page.render_content(menu_access, **param),
                 'contextMenu': [
@@ -189,17 +194,17 @@ def main_router(href, has_open_tab_keys: List):
                 ],
             },
         )
-        set_props('tabs-container', {'activeKey': url_module_path})
-    elif url_module_path in has_open_tab_keys:
+        set_props('tabs-container', {'activeKey': module_path2url_path(url_module_path)})
+    elif key_url_path in has_open_tab_keys:
         # 如已经打开，直接切换页面即可
-        set_props('tabs-container', {'activeKey': url_module_path})
+        set_props('tabs-container', {'activeKey': key_url_path})
         return dash.no_update
     else:
         # 未打开，通过Patch组件，将新的tab添加到tabs组件中
         p.append(
             {
                 'label': module_page.title,
-                'key': url_module_path,
+                'key': key_url_path,
                 'closable': True,
                 'children': module_page.render_content(menu_access, **param),
                 'contextMenu': [
@@ -211,9 +216,21 @@ def main_router(href, has_open_tab_keys: List):
                 ],
             }
         )
-        set_props('tabs-container', {'activeKey': url_module_path})
+        set_props('tabs-container', {'activeKey': key_url_path})
         return p
 
+
+# # 地址栏随activeKey变化
+# app.clientside_callback(
+#     '''
+#     (activeKey) => {
+#         return activeKey;
+#     }
+#     ''',
+#     Output('global-url-location', 'pathname'),
+#     Input('tabs-container', 'activeKey'),
+#     prevent_initial_call=True,
+# )
 
 # Tab关闭
 @app.callback(
