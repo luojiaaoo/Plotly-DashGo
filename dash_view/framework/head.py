@@ -12,14 +12,18 @@ def render_head_content():
                 type='text',
                 shape='circle',
                 size='large',
-                style={'marginLeft': '5px', 'background': 'rgba(0,0,0,0)'},
+                style={
+                    'marginLeft': '5px',
+                    'marginRight': '15px',
+                    'background': 'rgba(0,0,0,0)',
+                },
             ),
             style={
                 'height': '100%',
                 'display': 'flex',
                 'alignItems': 'center',
             },
-            flex='1',
+            flex='None',
         ),
         # 页首面包屑区域
         fac.AntdCol(
@@ -33,7 +37,7 @@ def render_head_content():
                 },
             ),
             id='header-breadcrumb-col',
-            flex='21',
+            flex='1',
         ),
         # 页首右侧用户信息区域
         fac.AntdCol(
@@ -140,6 +144,6 @@ def render_head_content():
                     'paddingRight': '20px',
                 },
             ),
-            flex='3',
+            flex='None',
         ),
     ]

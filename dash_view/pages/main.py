@@ -130,10 +130,13 @@ def render_content(menu_access: MenuAccess):
 @app.callback(
     Output('tabs-container', 'items', allow_duplicate=True),
     Input('global-url-location', 'href'),
-    State('tabs-container', 'itemKeys'),
+    [
+        State('tabs-container', 'itemKeys'),
+        State('menu-collapse-sider', 'collapsed'),
+    ],
     prevent_initial_call=True,
 )
-def main_router(href, has_open_tab_keys: List):
+def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool):
     # 过滤无效回调
     if href is None:
         raise PreventUpdate
@@ -170,7 +173,8 @@ def main_router(href, has_open_tab_keys: List):
     if key_url_path in has_open_tab_keys and param.get('flush', None) is None:
         set_props('tabs-container', {'activeKey': key_url_path})
         set_props('global-menu', {'currentKey': key_url_path})
-        set_props('global-menu', {'openKeys': [key_url_path_parent]})
+        if not is_collapsed_menu:
+            set_props('global-menu', {'openKeys': [key_url_path_parent]})
         return dash.no_update
 
     # 获取用户权限
@@ -197,7 +201,8 @@ def main_router(href, has_open_tab_keys: List):
         )
         set_props('tabs-container', {'activeKey': key_url_path})
         set_props('global-menu', {'currentKey': key_url_path})
-        set_props('global-menu', {'openKeys': [key_url_path_parent]})
+        if not is_collapsed_menu:
+            set_props('global-menu', {'openKeys': [key_url_path_parent]})
         return dash.no_update
     else:
         # 未打开，通过Patch组件，将新的tab添加到tabs组件中
@@ -211,7 +216,8 @@ def main_router(href, has_open_tab_keys: List):
         )
         set_props('tabs-container', {'activeKey': key_url_path})
         set_props('global-menu', {'currentKey': key_url_path})
-        set_props('global-menu', {'openKeys': [key_url_path_parent]})
+        if not is_collapsed_menu:
+            set_props('global-menu', {'openKeys': [key_url_path_parent]})
         return p
 
 
