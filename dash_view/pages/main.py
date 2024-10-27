@@ -12,6 +12,8 @@ import dash
 from typing import Dict, List
 from dash.exceptions import PreventUpdate
 from dash import set_props
+from flask import request
+from yarl import URL
 
 # 折叠侧边栏按钮回调
 app.clientside_callback(
@@ -34,7 +36,23 @@ app.clientside_callback(
 
 
 def render_content(menu_access: MenuAccess):
+    # 初始化访问页面
     module_page = importlib.import_module('dash_view.application.dashboard.workbench')
+    init_items = [
+        {
+            'label': module_page.title,
+            'key': 'dashboard.workbench',
+            'children': module_page.render_content(menu_access),
+            'closable': False,
+            'contextMenu': [
+                {
+                    'key': '关闭其他',
+                    'label': '关闭其他',
+                    'icon': 'antd-close-circle',
+                },
+            ],
+        }
+    ]
     return fac.AntdRow(
         [
             # 功能组件注入
@@ -72,21 +90,7 @@ def render_content(menu_access: MenuAccess):
                             fac.AntdTabs(
                                 id='tabs-container',
                                 # 初始页面为工作台
-                                items=[
-                                    {
-                                        'label': module_page.title,
-                                        'key': 'dashboard.workbench',
-                                        'children': module_page.render_content(menu_access),
-                                        'closable': False,
-                                        'contextMenu': [
-                                            {
-                                                'key': '关闭其他',
-                                                'label': '关闭其他',
-                                                'icon': 'antd-close-circle',
-                                            },
-                                        ],
-                                    }
-                                ],
+                                items=init_items,
                                 type='editable-card',
                                 className={
                                     'width': '100%',
@@ -142,7 +146,6 @@ def main_router(href, has_open_tab_keys: List):
     # 初始回调，无论tab是否有标签，都是空，所以这里预置一个工作台的key
     if has_open_tab_keys is None:
         has_open_tab_keys = ['dashboard.workbench']
-    from yarl import URL
 
     url = URL(href)
     try:
