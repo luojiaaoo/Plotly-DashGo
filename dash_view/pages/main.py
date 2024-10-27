@@ -195,6 +195,7 @@ def main_router(href, has_open_tab_keys: List):
             },
         )
         set_props('tabs-container', {'activeKey': key_url_path})
+        return dash.no_update
     elif key_url_path in has_open_tab_keys:
         # 如已经打开，直接切换页面即可
         set_props('tabs-container', {'activeKey': key_url_path})
@@ -222,15 +223,17 @@ def main_router(href, has_open_tab_keys: List):
 
 # 地址栏随activeKey变化
 app.clientside_callback(
-    '''
+    """
     (activeKey) => {
-        return activeKey === undefined ? window.dash_clientside.no_update : activeKey;
+        temp=activeKey === undefined ? window.dash_clientside.no_update : activeKey
+        return [temp, temp];
     }
-    ''',
-    Output('global-dcc-url', 'pathname'),
+    """,
+    [Output('global-dcc-url', 'pathname'), Output('global-menu', 'currentKey')],
     Input('tabs-container', 'activeKey'),
     prevent_initial_call=True,
 )
+
 
 # Tab关闭
 @app.callback(

@@ -63,7 +63,7 @@ class MenuAccess:
                     {
                         'component': 'Item',
                         'props': {
-                            'key': f'{level2_name}.{level2_name}',
+                            'key': f'/{level1_name}/{level2_name}',
                             'title': get_title(f'application.{level1_name}.{level2_name}'),
                             'icon': get_icon(f'application.{level1_name}.{level2_name}'),
                             'href': f'/{level1_name}/{level2_name}',

@@ -56,6 +56,7 @@ def render_aside_content(menu_access: MenuAccess):
             # 目录
             fac.AntdRow(
                 fac.AntdMenu(
+                    id='global-menu',
                     menuItems=menu_access.menu,
                     mode='inline',
                     theme='dark',
