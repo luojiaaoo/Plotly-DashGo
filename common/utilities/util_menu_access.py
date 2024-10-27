@@ -55,7 +55,7 @@ class MenuAccess:
             {
                 'component': 'SubMenu',
                 'props': {
-                    'key': f'{level1_name}',
+                    'key': f'/{level1_name}',
                     'title': get_title(f'application.{level1_name}'),
                     'icon': get_icon(f'application.{level1_name}'),
                 },

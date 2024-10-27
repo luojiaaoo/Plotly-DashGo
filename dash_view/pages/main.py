@@ -157,14 +157,19 @@ def main_router(href, has_open_tab_keys: List):
         set_props('global-full-screen-container', {'children': page_404.render()})
         return dash.no_update
 
-    def module_path2url_path(module_path: str) -> str:
-        return '/' + module_path.replace('.', '/')
+    def module_path2url_path(module_path: str, parent_count=0) -> str:
+        if parent_count > 0:
+            return '/' + '/'.join(module_path.split('.')[:-parent_count])
+        else:
+            return '/' + '/'.join(module_path.split('.'))
 
     key_url_path = module_path2url_path(url_module_path)
+    key_url_path_parent = module_path2url_path(url_module_path, 1)
 
     # 如已经打开，并且不带强制刷新参数,直接切换页面即可
     if key_url_path in has_open_tab_keys and param.get('flush', None) is None:
         set_props('tabs-container', {'activeKey': key_url_path})
+        set_props('global-menu', {'openKeys': [key_url_path_parent]})
         return dash.no_update
 
     # 获取用户权限
@@ -173,7 +178,7 @@ def main_router(href, has_open_tab_keys: List):
     if url_module_path not in menu_access.menu_item:
         set_props('global-full-screen-container', {'children': page_401.render()})
         return dash.no_update
-    
+
     ################# 返回页面 #################
     p = Patch()
     if key_url_path in has_open_tab_keys and param.get('flush', None) is not None:
@@ -197,6 +202,7 @@ def main_router(href, has_open_tab_keys: List):
             },
         )
         set_props('tabs-container', {'activeKey': key_url_path})
+        set_props('global-menu', {'openKeys': [key_url_path_parent]})
         return dash.no_update
     else:
         # 未打开，通过Patch组件，将新的tab添加到tabs组件中
@@ -216,6 +222,7 @@ def main_router(href, has_open_tab_keys: List):
             }
         )
         set_props('tabs-container', {'activeKey': key_url_path})
+        set_props('global-menu', {'openKeys': [key_url_path_parent]})
         return p
 
 
@@ -223,11 +230,16 @@ def main_router(href, has_open_tab_keys: List):
 app.clientside_callback(
     """
     (activeKey) => {
-        temp=activeKey === undefined ? window.dash_clientside.no_update : activeKey
-        return [temp, temp];
+        if (activeKey === undefined){
+            return window.dash_clientside.no_update;
+        }
+        return [activeKey, activeKey];
     }
     """,
-    [Output('global-dcc-url', 'pathname'), Output('global-menu', 'currentKey')],
+    [
+        Output('global-dcc-url', 'pathname'),
+        Output('global-menu', 'currentKey'),
+    ],
     Input('tabs-container', 'activeKey'),
     prevent_initial_call=True,
 )
