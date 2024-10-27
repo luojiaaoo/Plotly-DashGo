@@ -15,7 +15,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
         style={
             'width': '100%',
             'height': '100%',
-            'border-style': 'none',
+            'borderStyle': 'none',
         },
         src='https://gushitong.baidu.com/',
     )

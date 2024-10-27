@@ -137,7 +137,7 @@ def render_head_content():
                     'float': 'right',
                     'display': 'flex',
                     'alignItems': 'center',
-                    'padding-right': '20px',
+                    'paddingRight': '20px',
                 },
             ),
             flex='3',

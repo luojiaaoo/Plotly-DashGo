@@ -28,7 +28,7 @@ def render_aside_content(menu_access: MenuAccess):
                             ShowConf.APP_NAME,
                             className={
                                 'fontSize': '20px',
-                                'font-weight': 'bold',
+                                'fontWeight': 'bold',
                                 'color': 'rgb(245,245,245)',
                             },
                         ),
@@ -47,10 +47,10 @@ def render_aside_content(menu_access: MenuAccess):
                     'position': 'sticky',
                     'top': 0,
                     'zIndex': 999,
-                    'padding-top': '12px',
-                    'padding-left': '12px',
-                    'padding-right': '20px',
-                    'padding-bottom': '12px',
+                    'paddingTop': '12px',
+                    'paddingLeft': '12px',
+                    'paddingRight': '20px',
+                    'paddingBottom': '12px',
                 },
             ),
             # 目录
@@ -69,12 +69,12 @@ def render_aside_content(menu_access: MenuAccess):
         ],
         # 修改目录的样式
         className={
-            '.ant-menu-submenu-title, .ant-menu': {'background-color': 'rgb( 43, 47, 58)','overflow':'hidden'},
+            '.ant-menu-submenu-title, .ant-menu': {'backgroundColor': 'rgb( 43, 47, 58)','overflow':'hidden'},
             '.ant-menu-submenu-title:hover': {'color': '#fff'},
             '.ant-menu-item-selected': {
-                'background-color': 'rgba(0,0,0,0)',
-                'border-right': '2px solid rgb(64,143,201)',
-                'border-radius': '0.8em',
+                'backgroundColor': 'rgba(0,0,0,0)',
+                'borderRight': '2px solid rgb(64,143,201)',
+                'borderRadius': '0.8em',
                 'color': 'rgb(64,143,201)',
             },
         },

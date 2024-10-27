@@ -30,10 +30,10 @@ def render_func_content():
         fac.AntdModal(
             html.Div(
                 [
-                    fac.AntdIcon(icon='fc-high-priority', style={'font-size': '28px'}),
+                    fac.AntdIcon(icon='fc-high-priority', style={'fontSize': '28px'}),
                     fac.AntdText(
                         '登录状态已过期/无效，请重新登录',
-                        style={'margin-left': '5px'},
+                        style={'marginLeft': '5px'},
                     ),
                 ]
             ),
