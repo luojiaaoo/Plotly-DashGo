@@ -5,15 +5,16 @@ from dash_view.framework.head import render_head_content
 from dash_view.framework.func import render_func_content
 from server import app
 from common.utilities.util_menu_access import MenuAccess
-from dash import Patch, dcc
+from dash import Patch
 import importlib
 import feffery_utils_components as fuc
 import dash
 from typing import Dict, List
 from dash.exceptions import PreventUpdate
 from dash import set_props
-from flask import request
 from yarl import URL
+from common.utilities.util_menu_access import get_menu_access
+from dash_view.pages import page_404, page_401
 
 # 折叠侧边栏按钮回调
 app.clientside_callback(
@@ -33,10 +34,6 @@ app.clientside_callback(
     State('menu-collapse-sider', 'collapsed'),
     prevent_initial_call=True,
 )
-
-
-def module_path2url_path(module_path: str) -> str:
-    return '/' + module_path.replace('.', '/')
 
 
 def render_content(menu_access: MenuAccess):
@@ -157,23 +154,28 @@ def main_router(href, has_open_tab_keys: List):
         }  # 合并查询和锚连接，组成综合参数
     except Exception:
         # 没有该页面对应的模块，返回404
-        from dash_view.pages.page_404 import render
-
-        set_props('global-full-screen-container', {'children': render()})
+        set_props('global-full-screen-container', {'children': page_404.render()})
         return dash.no_update
 
-    from common.utilities.util_menu_access import get_menu_access
+    def module_path2url_path(module_path: str) -> str:
+        return '/' + module_path.replace('.', '/')
+
+    key_url_path = module_path2url_path(url_module_path)
+
+    # 如已经打开，并且不带强制刷新参数,直接切换页面即可
+    if key_url_path in has_open_tab_keys and param.get('flush', None) is None:
+        set_props('tabs-container', {'activeKey': key_url_path})
+        return dash.no_update
 
     # 获取用户权限
     menu_access = get_menu_access()
     # 没有权限，返回401
     if url_module_path not in menu_access.menu_item:
-        from dash_view.pages.page_401 import render
-
-        set_props('global-full-screen-container', {'children': render()})
+        set_props('global-full-screen-container', {'children': page_401.render()})
         return dash.no_update
+    
+    ################# 返回页面 #################
     p = Patch()
-    key_url_path = module_path2url_path(url_module_path)
     if key_url_path in has_open_tab_keys and param.get('flush', None) is not None:
         # 如果已经打开，但是带有flush的query，就重新打开，通过Patch组件，删除老的，将新的tab添加到tabs组件中
         old_idx = has_open_tab_keys.index(key_url_path)
@@ -194,10 +196,6 @@ def main_router(href, has_open_tab_keys: List):
                 ],
             },
         )
-        set_props('tabs-container', {'activeKey': key_url_path})
-        return dash.no_update
-    elif key_url_path in has_open_tab_keys:
-        # 如已经打开，直接切换页面即可
         set_props('tabs-container', {'activeKey': key_url_path})
         return dash.no_update
     else:
