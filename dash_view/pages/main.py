@@ -192,13 +192,6 @@ def main_router(href, has_open_tab_keys: List):
                 'key': key_url_path,
                 'closable': True,
                 'children': module_page.render_content(menu_access, **param),
-                'contextMenu': [
-                    {
-                        'key': '关闭其他',
-                        'label': '关闭其他',
-                        'icon': 'antd-close-circle',
-                    },
-                ],
             },
         )
         set_props('tabs-container', {'activeKey': key_url_path})
@@ -212,13 +205,6 @@ def main_router(href, has_open_tab_keys: List):
                 'key': key_url_path,
                 'closable': True,
                 'children': module_page.render_content(menu_access, **param),
-                'contextMenu': [
-                    {
-                        'key': '关闭其他',
-                        'label': '关闭其他',
-                        'icon': 'antd-close-circle',
-                    },
-                ],
             }
         )
         set_props('tabs-container', {'activeKey': key_url_path})
