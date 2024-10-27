@@ -126,7 +126,7 @@ def render_content(menu_access: MenuAccess):
     )
 
 
-# 主路由函数+Tab管理
+# 主路由函数：地址栏 -》 Tab新增+Tab切换+菜单展开+菜单选中
 @app.callback(
     Output('tabs-container', 'items', allow_duplicate=True),
     Input('global-url-location', 'href'),
@@ -221,7 +221,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool):
         return p
 
 
-# 地址栏和菜单随activeKey变化
+# 地址栏随tabs的activeKey变化
 app.clientside_callback(
     """
     (activeKey) => {
