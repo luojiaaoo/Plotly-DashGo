@@ -169,6 +169,7 @@ def main_router(href, has_open_tab_keys: List):
     # 如已经打开，并且不带强制刷新参数,直接切换页面即可
     if key_url_path in has_open_tab_keys and param.get('flush', None) is None:
         set_props('tabs-container', {'activeKey': key_url_path})
+        set_props('global-menu', {'currentKey': key_url_path})
         set_props('global-menu', {'openKeys': [key_url_path_parent]})
         return dash.no_update
 
@@ -195,6 +196,7 @@ def main_router(href, has_open_tab_keys: List):
             },
         )
         set_props('tabs-container', {'activeKey': key_url_path})
+        set_props('global-menu', {'currentKey': key_url_path})
         set_props('global-menu', {'openKeys': [key_url_path_parent]})
         return dash.no_update
     else:
@@ -208,6 +210,7 @@ def main_router(href, has_open_tab_keys: List):
             }
         )
         set_props('tabs-container', {'activeKey': key_url_path})
+        set_props('global-menu', {'currentKey': key_url_path})
         set_props('global-menu', {'openKeys': [key_url_path_parent]})
         return p
 
@@ -219,13 +222,10 @@ app.clientside_callback(
         if (activeKey === undefined){
             return window.dash_clientside.no_update;
         }
-        return [activeKey, activeKey];
+        return activeKey;
     }
     """,
-    [
-        Output('global-dcc-url', 'pathname'),
-        Output('global-menu', 'currentKey'),
-    ],
+    Output('global-dcc-url', 'pathname'),
     Input('tabs-container', 'activeKey'),
     prevent_initial_call=True,
 )
