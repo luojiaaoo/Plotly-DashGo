@@ -124,33 +124,31 @@ def render_content(menu_access: MenuAccess):
     [
         State('tabs-container', 'itemKeys'),
         State('menu-collapse-sider', 'collapsed'),
+        State('global-url-location', 'trigger'),
     ],
     prevent_initial_call=True,
 )
-def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool):
+def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger):
     # 过滤无效回调
     if href is None:
         raise PreventUpdate
     has_open_tab_keys = has_open_tab_keys or []
 
     url = URL(href)
+    url_module_path = '.'.join(url.parts[1:])  # 访问路径，第一个为/，去除
+    url_query: Dict = url.query  # 查询参数
+    url_fragment: str = url.fragment  # 获取锚链接
+    param = {
+        **url_query,
+        **({'url_fragment': url_fragment} if url_fragment else {}),
+    }  # 合并查询和锚连接，组成综合参数
     try:
-        url_module_path = '.'.join(url.parts[1:])  # 访问路径，第一个为/，去除
         # 导入对应的页面模块
         module_page = importlib.import_module(f'dash_view.application.{url_module_path}')
-        url_query: Dict = url.query  # 查询参数
-        url_fragment: str = url.fragment  # 获取锚链接
-        param = {
-            **url_query,
-            **({'url_fragment': url_fragment} if url_fragment else {}),
-        }  # 合并查询和锚连接，组成综合参数
     except Exception:
         # 没有该页面对应的模块，返回404
         set_props('global-full-screen-container', {'children': page_404.render()})
         return dash.no_update
-
-    # if '/dashboard/workbench' not in has_open_tab_keys:
-    #     set_props('global-dcc-url', {'pathname', '/dashboard/workbench'})
 
     def module_path2url_path(module_path: str, parent_count=0) -> str:
         if parent_count > 0:
@@ -191,7 +189,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool):
 
     ################# 返回页面 #################
     p = Patch()
-    if not has_open_tab_keys:
+    if trigger == 'load':
         p.clear()
     if key_url_path in has_open_tab_keys and param.get('flush', None) is not None:
         # 如果已经打开，但是带有flush的query，就重新打开，通过Patch组件，删除老的，将新的tab添加到tabs组件中
