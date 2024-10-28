@@ -119,7 +119,11 @@ def render_content(menu_access: MenuAccess):
 
 # 主路由函数：地址栏 -》 Tab新增+Tab切换+菜单展开+菜单选中+面包屑
 @app.callback(
-    Output('tabs-container', 'items', allow_duplicate=True),
+    [
+        Output('tabs-container', 'items', allow_duplicate=True),
+        Output('global-url-last-when-load', 'data'),
+        Output('global-url-timeout-last-when-load', 'delay'),
+    ],
     Input('global-url-location', 'href'),
     [
         State('tabs-container', 'itemKeys'),
@@ -142,6 +146,10 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
         **url_query,
         **({'url_fragment': url_fragment} if url_fragment else {}),
     }  # 合并查询和锚连接，组成综合参数
+    if trigger == 'load':
+        if url_module_path != 'dashboard.workbench':
+            url_module_path = 'dashboard.workbench'
+            param = {}
     try:
         # 导入对应的页面模块
         module_page = importlib.import_module(f'dash_view.application.{url_module_path}')
@@ -225,8 +233,22 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
         set_props('global-menu', {'currentKey': key_url_path})
         if not is_collapsed_menu:
             set_props('global-menu', {'openKeys': [key_url_path_parent]})
-        return p
+        if trigger == 'load':
+            return p, str(URL().with_path(url.path).with_query(url_query).with_fragment(url_fragment)), 0
+        else:
+            return p, dash.no_update, dash.no_update
 
+
+app.clientside_callback(
+    """
+        (timeoutCount,data) => {
+            return data;
+        }
+    """,
+    Output('global-dcc-url', 'href'),
+    Input('global-url-timeout-last-when-load', 'timeoutCount'),
+    State('global-url-last-when-load', 'data'),
+)
 
 # 地址栏随tabs的activeKey变化
 app.clientside_callback(

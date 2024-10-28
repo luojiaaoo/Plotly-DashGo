@@ -49,4 +49,8 @@ def render_func_content():
             centered=True,
             cancelButtonProps={'style': {'display': 'none'}},
         ),
+        # 当标签页重载时，如访问页面不是首页，保存访问地址
+        dcc.Store(id='global-url-last-when-load'),
+        # 触发进入目标页面上面Store保存的访问地址的超时组件
+        fuc.FefferyTimeout(id='global-url-timeout-last-when-load'),
     ]
