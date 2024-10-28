@@ -83,6 +83,8 @@ def render_content(menu_access: MenuAccess):
                         fuc.FefferyDiv(
                             fac.AntdTabs(
                                 id='tabs-container',
+                                tabPaneAnimated=True,
+                                size='small',
                                 # 初始页面为工作台
                                 items=init_items,
                                 type='editable-card',
@@ -104,13 +106,6 @@ def render_content(menu_access: MenuAccess):
                                 },
                                 '& .ant-tabs-nav': {
                                     'margin': '8px 0 8px 0',
-                                },
-                                '& .ant-tabs-nav-list .ant-tabs-tab': {
-                                    'margin': '0 0px',
-                                    'border-style': 'solid',
-                                    'padding': '0 5px',
-                                    'fontSize': '14px',
-                                    'borderRadius': '2px',
                                 },
                             },
                         ),
