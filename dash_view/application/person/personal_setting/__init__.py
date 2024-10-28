@@ -13,7 +13,7 @@ order = 2
 def render_content(menu_access: MenuAccess, **kwargs):
     access_metas: List[str] = menu_access.get_access_metas(__name__)
     if 'show' not in access_metas:
-        return '您没有权限显示该页面的权限'
+        return '您没有权限显示该页面'
     return html.Iframe(
         style={
             'width': '100%',

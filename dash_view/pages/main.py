@@ -121,7 +121,10 @@ def render_content(menu_access: MenuAccess):
     )
 
 
-# 主路由函数：地址栏 -》 Tab新增+Tab切换+菜单展开+菜单选中
+init_breadcrumb_items = [{'title': '首页', 'href': '/dashboard/workbench'}]
+
+
+# 主路由函数：地址栏 -》 Tab新增+Tab切换+菜单展开+菜单选中+面包屑
 @app.callback(
     Output('tabs-container', 'items', allow_duplicate=True),
     Input('global-url-location', 'href'),
@@ -161,11 +164,24 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool):
         else:
             return '/' + '/'.join(module_path.split('.'))
 
+    # 构建key的字符串格式
     key_url_path = module_path2url_path(url_module_path)
     key_url_path_parent = module_path2url_path(url_module_path, 1)
 
+    # 构建面包屑格式
+    def get_title(module_path):
+        from dash_view import application  # noqa
+
+        return eval(f'application.{module_path}.title')
+
+    breadcrumb_items = init_breadcrumb_items
+    _modules: List = url_module_path.split('.')
+    for i in range(len(_modules)):
+        breadcrumb_items = breadcrumb_items + [{'title': get_title('.'.join(_modules[: i + 1]))}]
+
     # 如已经打开，并且不带强制刷新参数,直接切换页面即可
     if key_url_path in has_open_tab_keys and param.get('flush', None) is None:
+        set_props('header-breadcrumb', {'items': breadcrumb_items})
         set_props('tabs-container', {'activeKey': key_url_path})
         set_props('global-menu', {'currentKey': key_url_path})
         if not is_collapsed_menu:
@@ -194,6 +210,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool):
                 'children': module_page.render_content(menu_access, **param),
             },
         )
+        set_props('header-breadcrumb', {'items': breadcrumb_items})
         set_props('tabs-container', {'activeKey': key_url_path})
         set_props('global-menu', {'currentKey': key_url_path})
         if not is_collapsed_menu:
@@ -209,6 +226,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool):
                 'children': module_page.render_content(menu_access, **param),
             }
         )
+        set_props('header-breadcrumb', {'items': breadcrumb_items})
         set_props('tabs-container', {'activeKey': key_url_path})
         set_props('global-menu', {'currentKey': key_url_path})
         if not is_collapsed_menu:

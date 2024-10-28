@@ -3,6 +3,8 @@ from dash import html
 
 
 def render_head_content():
+    from dash_view.pages.main import init_breadcrumb_items
+
     return [
         # 页首左侧折叠按钮区域
         fac.AntdCol(
@@ -28,7 +30,7 @@ def render_head_content():
         # 页首面包屑区域
         fac.AntdCol(
             fac.AntdBreadcrumb(
-                items=[{'title': '首页', 'icon': 'antd-dashboard', 'href': '/#'}],
+                items=init_breadcrumb_items,
                 id='header-breadcrumb',
                 style={
                     'height': '100%',

@@ -46,13 +46,13 @@ class MenuAccess:
         def get_title(module_path):
             from dash_view import application  # noqa
 
-            return eval(f'{module_path}.title')
+            return eval(f'application.{module_path}.title')
 
         def get_order(module_path):
             from dash_view import application  # noqa
 
             try:
-                return eval(f'{module_path}.order')
+                return eval(f'application.{module_path}.order')
             except:
                 return 999
 
@@ -60,16 +60,16 @@ class MenuAccess:
             from dash_view import application  # noqa
 
             try:
-                return eval(f'{module_path}.icon')
+                return eval(f'application.{module_path}.icon')
             except:
                 return None
 
         # 根据order属性排序
         dict_level1_level2 = dict(
-            sorted(dict_level1_level2.items(), key=lambda x: get_order(f'application.{x[0]}'))
+            sorted(dict_level1_level2.items(), key=lambda x: get_order(f'{x[0]}'))
         )
         for level1, level2 in dict_level1_level2.items():
-            level2.sort(key=lambda x: get_order(f'application.{level1}.{x}'))
+            level2.sort(key=lambda x: get_order(f'{level1}.{x}'))
         print(dict_level1_level2)
 
         menu = [
@@ -77,16 +77,16 @@ class MenuAccess:
                 'component': 'SubMenu',
                 'props': {
                     'key': f'/{level1_name}',
-                    'title': get_title(f'application.{level1_name}'),
-                    'icon': get_icon(f'application.{level1_name}'),
+                    'title': get_title(f'{level1_name}'),
+                    'icon': get_icon(f'{level1_name}'),
                 },
                 'children': [
                     {
                         'component': 'Item',
                         'props': {
                             'key': f'/{level1_name}/{level2_name}',
-                            'title': get_title(f'application.{level1_name}.{level2_name}'),
-                            'icon': get_icon(f'application.{level1_name}.{level2_name}'),
+                            'title': get_title(f'{level1_name}.{level2_name}'),
+                            'icon': get_icon(f'{level1_name}.{level2_name}'),
                             'href': f'/{level1_name}/{level2_name}',
                         },
                     }
