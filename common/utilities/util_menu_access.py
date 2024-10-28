@@ -1,6 +1,7 @@
 from database.sql_db.dao.user import get_all_menu_item_and_access_meta
 from typing import Dict, List, Set
-
+from common.utilities.util_logger import Log
+logger = Log.get_logger(__name__)
 
 class MenuAccess:
     default_menu_item_and_access_meta = (
@@ -54,6 +55,7 @@ class MenuAccess:
             try:
                 return eval(f'application.{module_path}.order')
             except:
+                logger.warning(f'{module_path}没有定义order属性')
                 return 999
 
         def get_icon(module_path):
@@ -70,7 +72,6 @@ class MenuAccess:
         )
         for level1, level2 in dict_level1_level2.items():
             level2.sort(key=lambda x: get_order(f'{level1}.{x}'))
-        print(dict_level1_level2)
 
         menu = [
             {
