@@ -306,7 +306,7 @@ def login(
 
     if login.user_login(user_name, password_sha256, is_keep_login_status):
         return (
-            dcc.Location(pathname='/dashborad', refresh=True, id='index-redirect'),
+            dcc.Location(pathname='/dashborad/workbench', refresh=True, id='index-redirect'),
             0,  # 重置登录失败次数
             dash.no_update,
             dash.no_update,
