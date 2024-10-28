@@ -32,6 +32,7 @@ class MenuAccess:
             else:
                 dict_menu_item_and_access_meta[module_path].append(access)
         return dict_menu_item_and_access_meta
+
     @classmethod
     def gen_menu(self, menu_item: Set[str]):
         dict_level1_level2 = dict()
@@ -47,6 +48,14 @@ class MenuAccess:
 
             return eval(f'{module_path}.title')
 
+        def get_order(module_path):
+            from dash_view import application  # noqa
+
+            try:
+                return eval(f'{module_path}.order')
+            except:
+                return 999
+
         def get_icon(module_path):
             from dash_view import application  # noqa
 
@@ -54,6 +63,14 @@ class MenuAccess:
                 return eval(f'{module_path}.icon')
             except:
                 return None
+
+        # 根据order属性排序
+        dict_level1_level2 = dict(
+            sorted(dict_level1_level2.items(), key=lambda x: get_order(f'application.{x[0]}'))
+        )
+        for level1, level2 in dict_level1_level2.items():
+            level2.sort(key=lambda x: get_order(f'application.{level1}.{x}'))
+        print(dict_level1_level2)
 
         menu = [
             {
