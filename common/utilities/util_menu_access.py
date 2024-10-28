@@ -3,7 +3,10 @@ from typing import Dict, List, Set
 
 
 class MenuAccess:
-
+    default_menu_item_and_access_meta = (
+        'person.personal_info:show',
+        'person.personal_setting:show',
+    )
 
     @classmethod
     def get_dict_menu_item_and_access_meta(cls, user_name: str) -> Dict[str, List[str]]:
@@ -20,6 +23,7 @@ class MenuAccess:
         """
         # 比如 menu_item:  dashboard.workbench:log_info,冒号前为视图的包路径，后面为权限列表
         all_menu_item_and_access_meta: Set[str] = get_all_menu_item_and_access_meta(user_name=user_name)
+        all_menu_item_and_access_meta.update(cls.default_menu_item_and_access_meta)
         dict_menu_item_and_access_meta = dict()
         for _menu_item_and_access_meta in all_menu_item_and_access_meta:
             module_path, access = _menu_item_and_access_meta.split(':')
@@ -28,7 +32,6 @@ class MenuAccess:
             else:
                 dict_menu_item_and_access_meta[module_path].append(access)
         return dict_menu_item_and_access_meta
-
     @classmethod
     def gen_menu(self, menu_item: Set[str]):
         dict_level1_level2 = dict()
@@ -46,6 +49,7 @@ class MenuAccess:
 
         def get_icon(module_path):
             from dash_view import application  # noqa
+
             try:
                 return eval(f'{module_path}.icon')
             except:
@@ -90,8 +94,6 @@ class MenuAccess:
         # 传进来的是__name__包路径，去掉前缀才是菜单项
         menu_item_name = module_path.replace('dash_view.application.', '')
         return self.dict_menu_item_and_access_meta.get(menu_item_name)
-
-
 
 
 def get_menu_access() -> MenuAccess:

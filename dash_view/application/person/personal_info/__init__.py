@@ -5,7 +5,7 @@ from common.utilities.util_logger import Log
 from dash import html
 
 # 二级菜单的标题和图标
-title = '监控页'
+title = '个人信息'
 icon = None
 logger = Log.get_logger(__name__)
 
