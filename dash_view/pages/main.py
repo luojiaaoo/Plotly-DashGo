@@ -75,11 +75,12 @@ def render_content(menu_access: MenuAccess):
                                 id='tabs-container',
                                 tabPaneAnimated=True,
                                 size='small',
-                                # 初始页面为工作台
+                                # fix bug: 占位
                                 items=[
                                     {
-                                        'label': '测试',
-                                        'key': '测试',
+                                        'label': '',
+                                        'key': 'init',
+                                        'children': 'init',
                                     }
                                 ],
                                 type='editable-card',
@@ -190,6 +191,8 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool):
 
     ################# 返回页面 #################
     p = Patch()
+    if not has_open_tab_keys:
+        p.clear()
     if key_url_path in has_open_tab_keys and param.get('flush', None) is not None:
         # 如果已经打开，但是带有flush的query，就重新打开，通过Patch组件，删除老的，将新的tab添加到tabs组件中
         old_idx = has_open_tab_keys.index(key_url_path)
