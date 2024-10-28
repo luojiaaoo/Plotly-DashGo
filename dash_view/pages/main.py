@@ -146,10 +146,16 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
         **url_query,
         **({'url_fragment': url_fragment} if url_fragment else {}),
     }  # 合并查询和锚连接，组成综合参数
-    if trigger == 'load':
-        if url_module_path != 'dashboard.workbench':
-            url_module_path = 'dashboard.workbench'
-            param = {}
+
+    # 当重载页面时，如果访问的不是首页，则先访问首页，再自动访问目标页
+    relocation = False
+    last_herf = ''
+    if trigger == 'load' and url_module_path != 'dashboard.workbench':
+        relocation = True
+        url_module_path = 'dashboard.workbench'
+        param = {}
+        # 保存目标页的url
+        last_herf = str(URL().with_path(url.path).with_query(url_query).with_fragment(url_fragment))
     try:
         # 导入对应的页面模块
         module_page = importlib.import_module(f'dash_view.application.{url_module_path}')
@@ -224,7 +230,8 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
             {
                 'label': module_page.title,
                 'key': key_url_path,
-                'closable': True,
+                # 工作台不能关闭
+                'closable': False if key_url_path == '/dashboard/workbench' else True,
                 'children': module_page.render_content(menu_access, **param),
             }
         )
@@ -233,8 +240,8 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
         set_props('global-menu', {'currentKey': key_url_path})
         if not is_collapsed_menu:
             set_props('global-menu', {'openKeys': [key_url_path_parent]})
-        if trigger == 'load':
-            return p, str(URL().with_path(url.path).with_query(url_query).with_fragment(url_fragment)), 0
+        if relocation:
+            return p, last_herf, 200
         else:
             return p, dash.no_update, dash.no_update
 
