@@ -7,6 +7,7 @@ class MenuAccess:
     default_menu_item_and_access_meta = (
         'person.personal_info:show',
         'person.personal_setting:show',
+        'dashboard.workbench:show',
     )
 
     @classmethod

@@ -37,16 +37,6 @@ app.clientside_callback(
 
 
 def render_content(menu_access: MenuAccess):
-    # 初始化访问页面
-    module_page = importlib.import_module('dash_view.application.dashboard.workbench')
-    init_items = [
-        {
-            'label': module_page.title,
-            'key': '/dashboard/workbench',
-            'children': module_page.render_content(menu_access),
-            'closable': False,
-        }
-    ]
     return fac.AntdRow(
         [
             # 功能组件注入
@@ -86,7 +76,12 @@ def render_content(menu_access: MenuAccess):
                                 tabPaneAnimated=True,
                                 size='small',
                                 # 初始页面为工作台
-                                items=init_items,
+                                items=[
+                                    {
+                                        'label': '测试',
+                                        'key': '测试',
+                                    }
+                                ],
                                 type='editable-card',
                                 className={
                                     'width': '100%',
@@ -121,9 +116,6 @@ def render_content(menu_access: MenuAccess):
     )
 
 
-init_breadcrumb_items = [{'title': '首页', 'href': '/dashboard/workbench'}]
-
-
 # 主路由函数：地址栏 -》 Tab新增+Tab切换+菜单展开+菜单选中+面包屑
 @app.callback(
     Output('tabs-container', 'items', allow_duplicate=True),
@@ -138,9 +130,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool):
     # 过滤无效回调
     if href is None:
         raise PreventUpdate
-    # 初始回调，无论tab是否有标签，都是空，所以这里预置一个工作台的key
-    if has_open_tab_keys is None:
-        has_open_tab_keys = ['/dashboard/workbench']
+    has_open_tab_keys = has_open_tab_keys or []
 
     url = URL(href)
     try:
@@ -158,6 +148,9 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool):
         set_props('global-full-screen-container', {'children': page_404.render()})
         return dash.no_update
 
+    # if '/dashboard/workbench' not in has_open_tab_keys:
+    #     set_props('global-dcc-url', {'pathname', '/dashboard/workbench'})
+
     def module_path2url_path(module_path: str, parent_count=0) -> str:
         if parent_count > 0:
             return '/' + '/'.join(module_path.split('.')[:-parent_count])
@@ -174,7 +167,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool):
 
         return eval(f'application.{module_path}.title')
 
-    breadcrumb_items = init_breadcrumb_items
+    breadcrumb_items = [{'title': '首页', 'href': '/dashboard/workbench'}]
     _modules: List = url_module_path.split('.')
     for i in range(len(_modules)):
         breadcrumb_items = breadcrumb_items + [{'title': get_title('.'.join(_modules[: i + 1]))}]
