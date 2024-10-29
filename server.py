@@ -1,30 +1,40 @@
-import os
 from flask import request, session, redirect
 import dash
-from config.dash_melon_conf import ShowConf, FlaskConf
+from config.dash_melon_conf import ShowConf, FlaskConf, BabelConf
 from user_agents import parse
-from logging import Logger
-from config.dash_melon_conf import LoginConf
+from flask_babel import Babel
+from common.utilities.util_logger import Log
 
-logger = Logger(__name__)
+logger = Log.get_logger(__name__)
 
+
+# dash实例
 app = dash.Dash(
     __name__,
     suppress_callback_exceptions=True,
     compress=True,
     update_title=None,
 )
-app.server.config['COMPRESS_ALGORITHM'] = 'br'
-app.server.config['COMPRESS_BR_LEVEL'] = 9
+app.server.config['COMPRESS_ALGORITHM'] = FlaskConf.COMPRESS_ALGORITHM
+app.server.config['COMPRESS_BR_LEVEL'] = FlaskConf.COMPRESS_BR_LEVEL
+app.server.config['BABEL_DEFAULT_LOCALE'] = BabelConf.BABEL_DEFAULT_LOCALE
+app.server.config['BABEL_DEFAULT_TIMEZONE'] = BabelConf.BABEL_DEFAULT_TIMEZONE
 app.server.secret_key = FlaskConf.COOKIE_SESSION_SECRET_KEY
 app.title = ShowConf.WEB_TITLE
+
+# flask实例
 server = app.server
+
+# 国际化
+babel = Babel(app=server)
+
 
 # 首页拦截器
 @server.before_request
 def before_request():
     if request.path == '/':
         return redirect('/dashboard/workbench')
+
 
 # 获取用户浏览器信息
 @server.before_request
@@ -56,6 +66,3 @@ def get_user_agent_info():
                 "<h1 style='color: red'>Chrome内核版本号太低，请升级浏览器</h1>"
                 "<h1 style='color: red'><a href='https://www.google.cn/chrome/'>点击此处</a>可下载最新版Chrome浏览器</h1>"
             )
-
-
-

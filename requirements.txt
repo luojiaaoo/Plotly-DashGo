@@ -8,3 +8,4 @@ pycryptodome==3.21.0
 PyJWT==2.9.0
 user_agents==2.2.0
 yarl==1.16.0
+Flask-Babel==4.0.0

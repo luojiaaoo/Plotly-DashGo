@@ -29,6 +29,11 @@ class LogConf(metaclass=BaseMetaConf):
     MAX_COUNT_LOG_FILE: int = 3
 
 
+class BabelConf(metaclass=BaseMetaConf):
+    BABEL_DEFAULT_LOCALE: str = 'zh_CN'
+    BABEL_DEFAULT_TIMEZONE: str = 'Asia/Shanghai'
+
+
 class EncryptConf(metaclass=BaseMetaConf):
     CUSTOM_KEY: str
 
