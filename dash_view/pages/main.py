@@ -119,7 +119,13 @@ def render_content(menu_access: MenuAccess):
 
 # 主路由函数：地址栏 -》 Tab新增+Tab切换+菜单展开+菜单选中+面包屑
 @app.callback(
-    Output('tabs-container', 'items', allow_duplicate=True),
+    [
+        Output('tabs-container', 'items', allow_duplicate=True),
+        Output('tabs-container', 'activeKey'),
+        Output('global-menu', 'openKeys'),
+        Output('global-menu', 'currentKey'),
+        Output('header-breadcrumb', 'items'),
+    ],
     Input('global-url-location', 'href'),
     [
         State('tabs-container', 'itemKeys'),
@@ -157,7 +163,9 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
         last_herf = str(
             URL()
             .with_path(url.path)
-            .with_query({**url_query, 'flush': str(uuid4())[:8]}) # 添加随机码，强制刷新'global-url-location', 'href'，触发目标页面打开
+            .with_query(
+                {**url_query, 'flush': str(uuid4())[:8]}
+            )  # 添加随机码，强制刷新'global-url-location', 'href'，触发目标页面打开
             .with_fragment(url_fragment)
         )
     try:
@@ -191,12 +199,13 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
 
     # 如已经打开，并且不带强制刷新参数,直接切换页面即可
     if key_url_path in has_open_tab_keys and param.get('flush', None) is None:
-        set_props('header-breadcrumb', {'items': breadcrumb_items})
-        set_props('tabs-container', {'activeKey': key_url_path})
-        set_props('global-menu', {'currentKey': key_url_path})
-        if not is_collapsed_menu:
-            set_props('global-menu', {'openKeys': [key_url_path_parent]})
-        return dash.no_update
+        return [
+            dash.no_update, # tab标签页
+            key_url_path, # tab选中key
+            dash.no_update if is_collapsed_menu else [key_url_path_parent], # 菜单展开
+            key_url_path,   # 菜单选中
+            breadcrumb_items, # 面包屑
+        ]
 
     # 获取用户权限
     menu_access = get_menu_access()
@@ -222,12 +231,13 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
                 'children': module_page.render_content(menu_access, **param),
             },
         )
-        set_props('header-breadcrumb', {'items': breadcrumb_items})
-        set_props('tabs-container', {'activeKey': key_url_path})
-        set_props('global-menu', {'currentKey': key_url_path})
-        if not is_collapsed_menu:
-            set_props('global-menu', {'openKeys': [key_url_path_parent]})
-        return dash.no_update
+        return [
+            p, # tab标签页
+            key_url_path, # tab选中key
+            dash.no_update if is_collapsed_menu else [key_url_path_parent], # 菜单展开
+            key_url_path,   # 菜单选中
+            breadcrumb_items, # 面包屑
+        ]
     else:
         # 未打开，通过Patch组件，将新的tab添加到tabs组件中
         p.append(
@@ -239,18 +249,17 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
                 'children': module_page.render_content(menu_access, **param),
             }
         )
-        if not relocation:
-            set_props('tabs-container', {'activeKey': key_url_path})
-            set_props('header-breadcrumb', {'items': breadcrumb_items})
-            set_props('global-menu', {'currentKey': key_url_path})
-            if not is_collapsed_menu:
-                set_props('global-menu', {'openKeys': [key_url_path_parent]})
         if relocation:
+            # 激活超时组件，马上动态更新到目标页
             set_props('global-url-last-when-load', {'data': last_herf})
             set_props('global-url-timeout-last-when-load', {'delay': 0})
-            return p
-        else:
-            return p
+        return [
+            p, # tab标签页
+            dash.no_update if relocation else key_url_path, # tab选中key
+            dash.no_update if is_collapsed_menu or relocation else [key_url_path_parent], # 菜单展开
+            dash.no_update if relocation else key_url_path,   # 菜单选中
+            dash.no_update if relocation else breadcrumb_items, # 面包屑
+        ]
 
 
 app.clientside_callback(
