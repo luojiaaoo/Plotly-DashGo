@@ -15,7 +15,7 @@ class BaseMetaConf(type):
     def __new__(cls, name, bases, dct):
         sub_conf = conf[name]
         for stat_var_name, type_ in dct['__annotations__'].items():
-            if dct.get(stat_var_name, None) is None:
+            if sub_conf.get(stat_var_name) is not None:
                 dct[stat_var_name] = type_(sub_conf.get(stat_var_name))
         return super().__new__(cls, name, bases, dct)
 
