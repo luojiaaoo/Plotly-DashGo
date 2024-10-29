@@ -1,1 +1,1 @@
-from dash_components.div import NiceDiv
+from dash_components.div import ShadowDiv
