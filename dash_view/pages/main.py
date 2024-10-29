@@ -148,10 +148,6 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
         **({'url_fragment': url_fragment} if url_fragment else {}),
     }  # 合并查询和锚连接，组成综合参数
 
-    # 偶发BUG，未知原因：relocation=True的条件下，二次触发主页+itemKeys更新不及时，已经转过页面的情况下，再次打开了主页
-    if url_last_when_load and url_module_path == 'dashboard.workbench':
-        return dash.no_update
-
     # 当重载页面时，如果访问的不是首页，则先访问首页，再自动访问目标页
     relocation = False
     last_herf = ''
@@ -160,7 +156,14 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
         url_module_path = 'dashboard.workbench'
         param = {}
         # 保存目标页的url
-        last_herf = str(URL().with_path(url.path).with_query(url_query).with_fragment(url_fragment))
+        from uuid import uuid4
+
+        last_herf = str(
+            URL()
+            .with_path(url.path)
+            .with_query({**url_query, 'flush': str(uuid4())[:8]}) # 添加随机码，强制刷新'global-url-location', 'href'，触发目标页面打开
+            .with_fragment(url_fragment)
+        )
     try:
         # 导入对应的页面模块
         module_page = importlib.import_module(f'dash_view.application.{url_module_path}')
@@ -212,17 +215,28 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
         p.clear()
     if key_url_path in has_open_tab_keys and param.get('flush', None) is not None:
         # 如果已经打开，但是带有flush的query，就重新打开，通过Patch组件，删除老的，将新的tab添加到tabs组件中
-        old_idx = has_open_tab_keys.index(key_url_path)
-        del p[old_idx]
-        p.insert(
-            old_idx,
-            {
-                'label': module_page.title,
-                'key': key_url_path,
-                'closable': True,
-                'children': module_page.render_content(menu_access, **param),
-            },
-        )
+        try:
+            old_idx = has_open_tab_keys.index(key_url_path)
+        except ValueError:
+            p.append(
+                {
+                    'label': module_page.title,
+                    'key': key_url_path,
+                    'closable': True,
+                    'children': module_page.render_content(menu_access, **param),
+                },
+            )
+        else:
+            del p[old_idx]
+            p.insert(
+                old_idx,
+                {
+                    'label': module_page.title,
+                    'key': key_url_path,
+                    'closable': True,
+                    'children': module_page.render_content(menu_access, **param),
+                },
+            )
         set_props('header-breadcrumb', {'items': breadcrumb_items})
         set_props('tabs-container', {'activeKey': key_url_path})
         set_props('global-menu', {'currentKey': key_url_path})
@@ -240,8 +254,8 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
                 'children': module_page.render_content(menu_access, **param),
             }
         )
-        set_props('tabs-container', {'activeKey': key_url_path})
         if not relocation:
+            set_props('tabs-container', {'activeKey': key_url_path})
             set_props('header-breadcrumb', {'items': breadcrumb_items})
             set_props('global-menu', {'currentKey': key_url_path})
             if not is_collapsed_menu:
