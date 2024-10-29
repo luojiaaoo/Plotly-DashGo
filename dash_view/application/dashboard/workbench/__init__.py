@@ -12,8 +12,6 @@ logger = Log.get_logger(__name__)
 
 def render_content(menu_access: MenuAccess, **kwargs):
     access_metas: List[str] = menu_access.get_access_metas(__name__)
-    if 'show' not in access_metas:
-        return '您没有权限显示该页面'
     # 获取权限元，根据权限元，用户自定义渲染UI
     access_metas: List[str] = menu_access.get_access_metas(__name__)
     logger.debug(

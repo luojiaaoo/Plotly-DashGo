@@ -200,11 +200,11 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
     # 如已经打开，并且不带强制刷新参数,直接切换页面即可
     if key_url_path in has_open_tab_keys and param.get('flush', None) is None:
         return [
-            dash.no_update, # tab标签页
-            key_url_path, # tab选中key
-            dash.no_update if is_collapsed_menu else [key_url_path_parent], # 菜单展开
-            key_url_path,   # 菜单选中
-            breadcrumb_items, # 面包屑
+            dash.no_update,  # tab标签页
+            key_url_path,  # tab选中key
+            dash.no_update if is_collapsed_menu else [key_url_path_parent],  # 菜单展开
+            key_url_path,  # 菜单选中
+            breadcrumb_items,  # 面包屑
         ]
 
     # 获取用户权限
@@ -232,11 +232,11 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
             },
         )
         return [
-            p, # tab标签页
-            key_url_path, # tab选中key
-            dash.no_update if is_collapsed_menu else [key_url_path_parent], # 菜单展开
-            key_url_path,   # 菜单选中
-            breadcrumb_items, # 面包屑
+            p,  # tab标签页
+            key_url_path,  # tab选中key
+            dash.no_update if is_collapsed_menu else [key_url_path_parent],  # 菜单展开
+            key_url_path,  # 菜单选中
+            breadcrumb_items,  # 面包屑
         ]
     else:
         # 未打开，通过Patch组件，将新的tab添加到tabs组件中
@@ -254,11 +254,11 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
             set_props('global-url-last-when-load', {'data': last_herf})
             set_props('global-url-timeout-last-when-load', {'delay': 0})
         return [
-            p, # tab标签页
-            dash.no_update if relocation else key_url_path, # tab选中key
-            dash.no_update if is_collapsed_menu or relocation else [key_url_path_parent], # 菜单展开
-            dash.no_update if relocation else key_url_path,   # 菜单选中
-            dash.no_update if relocation else breadcrumb_items, # 面包屑
+            p,  # tab标签页
+            dash.no_update if relocation else key_url_path,  # tab选中key
+            dash.no_update if is_collapsed_menu or relocation else [key_url_path_parent],  # 菜单展开
+            dash.no_update if relocation else key_url_path,  # 菜单选中
+            dash.no_update if relocation else breadcrumb_items,  # 面包屑
         ]
 
 
