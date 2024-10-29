@@ -119,11 +119,7 @@ def render_content(menu_access: MenuAccess):
 
 # 主路由函数：地址栏 -》 Tab新增+Tab切换+菜单展开+菜单选中+面包屑
 @app.callback(
-    [
-        Output('tabs-container', 'items', allow_duplicate=True),
-        Output('global-url-last-when-load', 'data'),
-        Output('global-url-timeout-last-when-load', 'delay'),
-    ],
+    Output('tabs-container', 'items', allow_duplicate=True),
     Input('global-url-location', 'href'),
     [
         State('tabs-container', 'itemKeys'),
@@ -250,9 +246,11 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
             if not is_collapsed_menu:
                 set_props('global-menu', {'openKeys': [key_url_path_parent]})
         if relocation:
-            return p, last_herf, 0
+            set_props('global-url-last-when-load', {'data': last_herf})
+            set_props('global-url-timeout-last-when-load', {'delay': 0})
+            return p
         else:
-            return p, dash.no_update, dash.no_update
+            return p
 
 
 app.clientside_callback(
