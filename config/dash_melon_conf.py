@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 from pathlib import Path
+from typing import List
 
 
 class PathProj:
@@ -16,7 +17,10 @@ class BaseMetaConf(type):
         sub_conf = conf[name]
         for stat_var_name, type_ in dct['__annotations__'].items():
             if sub_conf.get(stat_var_name) is not None:
-                dct[stat_var_name] = type_(sub_conf.get(stat_var_name))
+                if type_ == List:
+                    dct[stat_var_name] = sub_conf.get(stat_var_name).split()
+                else:
+                    dct[stat_var_name] = type_(sub_conf.get(stat_var_name))
         return super().__new__(cls, name, bases, dct)
 
 
@@ -30,8 +34,10 @@ class LogConf(metaclass=BaseMetaConf):
 
 
 class BabelConf(metaclass=BaseMetaConf):
-    BABEL_DEFAULT_LOCALE: str = 'zh_CN'
+    BABEL_DEFAULT_LOCALE: str = 'zh'
     BABEL_DEFAULT_TIMEZONE: str = 'Asia/Shanghai'
+    BABEL_TRANSLATION_DIRECTORIES: str = '**/translations'
+    LANGUAGES: List = ['en', 'zh']
 
 
 class EncryptConf(metaclass=BaseMetaConf):

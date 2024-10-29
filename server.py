@@ -19,6 +19,8 @@ app.server.config['COMPRESS_ALGORITHM'] = FlaskConf.COMPRESS_ALGORITHM
 app.server.config['COMPRESS_BR_LEVEL'] = FlaskConf.COMPRESS_BR_LEVEL
 app.server.config['BABEL_DEFAULT_LOCALE'] = BabelConf.BABEL_DEFAULT_LOCALE
 app.server.config['BABEL_DEFAULT_TIMEZONE'] = BabelConf.BABEL_DEFAULT_TIMEZONE
+app.server.config['BABEL_TRANSLATION_DIRECTORIES'] = BabelConf.BABEL_TRANSLATION_DIRECTORIES
+app.server.config['LANGUAGES'] = BabelConf.LANGUAGES
 app.server.secret_key = FlaskConf.COOKIE_SESSION_SECRET_KEY
 app.title = ShowConf.WEB_TITLE
 
@@ -26,7 +28,13 @@ app.title = ShowConf.WEB_TITLE
 server = app.server
 
 # 国际化
+def select_locale():
+    lang = request.args.get('lang', request.accept_languages.best_match(server.config['LANGUAGES']))
+    print(f"Selected language: {lang}") 
+    return lang
+
 babel = Babel(app=server)
+babel.init_app(app=server, locale_selector=select_locale)
 
 
 # 首页拦截器
