@@ -4,6 +4,7 @@ from config.dash_melon_conf import ShowConf, FlaskConf, BabelConf
 from user_agents import parse
 from flask_babel import Babel
 from common.utilities.util_logger import Log
+import pytz
 
 logger = Log.get_logger(__name__)
 
@@ -27,14 +28,30 @@ app.title = ShowConf.WEB_TITLE
 # flask实例
 server = app.server
 
+
 # 国际化
 def select_locale():
-    lang = request.args.get('lang', request.accept_languages.best_match(server.config['LANGUAGES']))
-    print(f"Selected language: {lang}") 
-    return lang
+    # 优先从session中获取
+    lang_session = session.get('lang', None)
+    lang_request = request.args.get('lang', None)
+    lang_auto = request.accept_languages.best_match(server.config['LANGUAGES'])
+    return lang_session or lang_request or lang_auto
+
+
+def select_timezone():
+    # 从请求参数中获取时区信息
+    timezone_session = session.get('lang', None)
+    timezone_request = request.args.get('timezone', default='UTC')
+    timezone = timezone_session or timezone_request
+    # 检查时区是否有效
+    if timezone in pytz.all_timezones:
+        return timezone
+    else:
+        return None  # 返回默认时区
+
 
 babel = Babel(app=server)
-babel.init_app(app=server, locale_selector=select_locale)
+babel.init_app(app=server, locale_selector=select_locale, timezone_selector=select_timezone)
 
 
 # 首页拦截器
