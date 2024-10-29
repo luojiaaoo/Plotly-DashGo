@@ -5,8 +5,8 @@ class NiceDiv(fuc.FefferyDiv):
     def __init__(self, *args, **kwargs):
         kwargs['style'] = {
             'boxSizing': 'border-box',
-            'boxShadow': 'rgba(0, 0, 0, 0.1) 0px 4px 12px',
+            'boxShadow': '0px 0px 5px rgba(0,0,0,.12)',
             'padding': '12px',
-            'margin-bottom': '24px',
+            'borderRadius': '10px',
         }
         super().__init__(*args, **kwargs)
