@@ -1,0 +1,36 @@
+# English translations for PROJECT.
+# Copyright (C) 2024 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2024-10-29 22:25+0800\n"
+"PO-Revision-Date: 2024-10-29 22:13+0800\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.16.0\n"
+
+#: server.py:63
+msgid "<h1 style='color: red'>IP:{}, 请不要使用IE浏览器或360浏览器兼容模式</h1>"
+msgstr ""
+
+#~ msgid "aaa"
+#~ msgstr ""
+
+#~ msgid "Chrome内核版本号太低，请升级浏览器"
+#~ msgstr ""
+
+#~ msgid "点击此处"
+#~ msgstr ""
+
+#~ msgid "可下载最新版Chrome浏览器"
+#~ msgstr ""
+

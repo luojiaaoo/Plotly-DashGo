@@ -3,8 +3,8 @@ import dash
 from config.dash_melon_conf import ShowConf, FlaskConf, BabelConf
 from user_agents import parse
 from flask_babel import Babel
+from flask_babel import gettext as _  # noqa
 from common.utilities.util_logger import Log
-import pytz
 
 logger = Log.get_logger(__name__)
 
@@ -38,20 +38,8 @@ def select_locale():
     return lang_session or lang_request or lang_auto
 
 
-def select_timezone():
-    # 从请求参数中获取时区信息
-    timezone_session = session.get('lang', None)
-    timezone_request = request.args.get('timezone', default='UTC')
-    timezone = timezone_session or timezone_request
-    # 检查时区是否有效
-    if timezone in pytz.all_timezones:
-        return timezone
-    else:
-        return None  # 返回默认时区
-
-
 babel = Babel(app=server)
-babel.init_app(app=server, locale_selector=select_locale, timezone_selector=select_timezone)
+babel.init_app(app=server, locale_selector=select_locale)
 
 
 # 首页拦截器
@@ -71,23 +59,11 @@ def get_user_agent_info():
     if user_agent.browser.version != ():
         bw_version = user_agent.browser.version[0]
         if bw == 'IE':
-            logger.warning(
-                '[sys]请求人:{}||请求IP:{}||请求方法:{}||请求Data:{}',
-                session.get('name'),
-                request_addr,
-                request.method,
-                '用户使用IE内核',
-            )
-            return "<h1 style='color: red'>请不要使用IE浏览器或360浏览器兼容模式</h1>"
-        if bw == 'Chrome' and bw_version < 71:
-            logger.warning(
-                '[sys]请求人:{}||请求IP:{}||请求方法:{}||请求Data:{}',
-                session.get('name'),
-                request_addr,
-                request.method,
-                '用户Chrome内核版本太低',
-            )
             return (
-                "<h1 style='color: red'>Chrome内核版本号太低，请升级浏览器</h1>"
-                "<h1 style='color: red'><a href='https://www.google.cn/chrome/'>点击此处</a>可下载最新版Chrome浏览器</h1>"
+                _("<h1 style='color: red'>IP:{}, 请不要使用IE浏览器或360浏览器兼容模式</h1>").format(request_addr)
+            )
+        elif bw == 'Chrome' and bw_version < 71:
+            return (
+                f"<h1 style='color: red'>IP:{request_addr}, {_("Chrome内核版本号太低，请升级浏览器")}</h1>"
+                f"<h1 style='color: red'><a href='https://www.google.cn/chrome/'>{_('点击此处')}</a>{_('可下载最新版Chrome浏览器')}</h1>"
             )
