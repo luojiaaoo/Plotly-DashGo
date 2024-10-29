@@ -4,47 +4,63 @@ from pathlib import Path
 
 class PathProj:
     ROOT_PATH = Path(__file__).parent.parent
+    CONF_FILE_PATH = ROOT_PATH / 'config' / 'dash_melon.ini'
+
 
 conf = ConfigParser()
-conf.read(PathProj.ROOT_PATH/'config'/'dash_melon.ini')
+conf.read(PathProj.CONF_FILE_PATH)
 
-class LogConf:
-    LOG_LEVEL = conf.get('log', 'LOG_LEVEL')
-    HANDLER_CONSOLE = bool(conf.get('log', 'HANDLER_CONSOLE'))
-    HANDLER_LOG_FILE = bool(conf.get('log', 'HANDLER_LOG_FILE'))
-    LOG_FILE_PATH = conf.get('log', 'LOG_FILE_PATH')
-    MAX_MB_PER_LOG_FILE = conf.getint('log', 'MAX_MB_PER_LOG_FILE')
-    MAX_COUNT_LOG_FILE = conf.getint('log', 'MAX_COUNT_LOG_FILE')
-    
 
-class EncryptConf:
-    CUSTOM_KEY = conf.get('encrypt', 'CUSTOM_KEY')
+class BaseMetaConf(type):
+    def __new__(cls, name, bases, dct):
+        sub_conf = conf[name]
+        for stat_var_name, type_ in dct['__annotations__'].items():
+            dct[stat_var_name] = type_(sub_conf.get(stat_var_name))
+        return super().__new__(cls, name, bases, dct)
 
-class LoginConf:
-    VERIFY_CODE_SHOW_LOGIN_FAIL_COUNT = conf.getint('login', 'VERIFY_CODE_SHOW_LOGIN_FAIL_COUNT')
-    VERIFY_CODE_CHAR_NUM = conf.getint('login', 'VERIFY_CODE_CHAR_NUM')
-    JWT_EXPIRED_FORCE_LOGOUT = bool(conf.get('login', 'VERIFY_CODE_CHAR_NUM'))
-    FIRST_SHOW_PAGE = conf.get('login', 'FIRST_SHOW_PAGE')
 
-class FlaskConf:
-    COMPRESS_ALGORITHM = conf.get('flask', 'COMPRESS_ALGORITHM')
-    COMPRESS_BR_LEVEL = conf.getint('flask', 'COMPRESS_BR_LEVEL')
-    COOKIE_SESSION_SECRET_KEY = conf.get('flask', 'COOKIE_SESSION_SECRET_KEY')
+class LogConf(metaclass=BaseMetaConf):
+    LOG_LEVEL: str
+    HANDLER_CONSOLE: bool
+    HANDLER_LOG_FILE: bool
+    LOG_FILE_PATH: str
+    MAX_MB_PER_LOG_FILE: int
+    MAX_COUNT_LOG_FILE: int
 
-class ShowConf:
-    WEB_TITLE:str = conf.get('show', 'WEB_TITLE')
-    APP_NAME:str = conf.get('show', 'APP_NAME')
 
-class JwtConf:
-    JWT_SECRET_KEY = conf.get('jwt', 'JWT_SECRET_KEY')
-    JWT_ALGORITHM = conf.get('jwt', 'JWT_ALGORITHM')
-    JWT_EXPIRE_MINUTES = conf.getint('jwt', 'JWT_EXPIRE_MINUTES')
+class EncryptConf(metaclass=BaseMetaConf):
+    CUSTOM_KEY: str
 
-class SqlDbConf:
-    HOST = conf.get('sql_db', 'HOST')
-    PORT = conf.getint('sql_db', 'PORT')
-    USER = conf.get('sql_db', 'USER')
-    PASSWORD = conf.get('sql_db', 'PASSWORD')
-    DATABASE = conf.get('sql_db', 'DATABASE')
-    CHARSET = conf.get('sql_db', 'CHARSET')
-    POOL_SIZE = conf.getint('sql_db', 'POOL_SIZE')
+
+class LoginConf(metaclass=BaseMetaConf):
+    VERIFY_CODE_SHOW_LOGIN_FAIL_COUNT: int
+    VERIFY_CODE_CHAR_NUM: int
+    JWT_EXPIRED_FORCE_LOGOUT: bool
+    FIRST_SHOW_PAGE: str
+
+
+class FlaskConf(metaclass=BaseMetaConf):
+    COMPRESS_ALGORITHM: str
+    COMPRESS_BR_LEVEL: int
+    COOKIE_SESSION_SECRET_KEY: str
+
+
+class ShowConf(metaclass=BaseMetaConf):
+    WEB_TITLE: str
+    APP_NAME: str
+
+
+class JwtConf(metaclass=BaseMetaConf):
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str
+    JWT_EXPIRE_MINUTES: int
+
+
+class SqlDbConf(metaclass=BaseMetaConf):
+    HOST: str
+    PORT: int
+    USER: str
+    PASSWORD: str
+    DATABASE: str
+    CHARSET: str
+    POOL_SIZE: int
