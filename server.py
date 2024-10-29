@@ -24,7 +24,7 @@ server = app.server
 @server.before_request
 def before_request():
     if request.path == '/':
-        return redirect(LoginConf.FIRST_SHOW_PAGE)
+        return redirect('/dashboard/workbench')
 
 # 获取用户浏览器信息
 @server.before_request

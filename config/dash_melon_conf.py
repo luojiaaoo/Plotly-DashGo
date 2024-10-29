@@ -15,17 +15,18 @@ class BaseMetaConf(type):
     def __new__(cls, name, bases, dct):
         sub_conf = conf[name]
         for stat_var_name, type_ in dct['__annotations__'].items():
-            dct[stat_var_name] = type_(sub_conf.get(stat_var_name))
+            if dct.get(stat_var_name, None) is None:
+                dct[stat_var_name] = type_(sub_conf.get(stat_var_name))
         return super().__new__(cls, name, bases, dct)
 
 
 class LogConf(metaclass=BaseMetaConf):
-    LOG_LEVEL: str
-    HANDLER_CONSOLE: bool
-    HANDLER_LOG_FILE: bool
+    LOG_LEVEL: str = 'WARNING'
+    HANDLER_CONSOLE: bool = True
+    HANDLER_LOG_FILE: bool = False
     LOG_FILE_PATH: str
-    MAX_MB_PER_LOG_FILE: int
-    MAX_COUNT_LOG_FILE: int
+    MAX_MB_PER_LOG_FILE: int = 50
+    MAX_COUNT_LOG_FILE: int = 3
 
 
 class EncryptConf(metaclass=BaseMetaConf):
@@ -33,15 +34,14 @@ class EncryptConf(metaclass=BaseMetaConf):
 
 
 class LoginConf(metaclass=BaseMetaConf):
-    VERIFY_CODE_SHOW_LOGIN_FAIL_COUNT: int
-    VERIFY_CODE_CHAR_NUM: int
-    JWT_EXPIRED_FORCE_LOGOUT: bool
-    FIRST_SHOW_PAGE: str
+    VERIFY_CODE_SHOW_LOGIN_FAIL_COUNT: int = 5
+    VERIFY_CODE_CHAR_NUM: int = 4
+    JWT_EXPIRED_FORCE_LOGOUT: bool = False
 
 
 class FlaskConf(metaclass=BaseMetaConf):
-    COMPRESS_ALGORITHM: str
-    COMPRESS_BR_LEVEL: int
+    COMPRESS_ALGORITHM: str = 'br'
+    COMPRESS_BR_LEVEL: int = 9
     COOKIE_SESSION_SECRET_KEY: str
 
 
@@ -52,8 +52,8 @@ class ShowConf(metaclass=BaseMetaConf):
 
 class JwtConf(metaclass=BaseMetaConf):
     JWT_SECRET_KEY: str
-    JWT_ALGORITHM: str
-    JWT_EXPIRE_MINUTES: int
+    JWT_ALGORITHM: str = 'HS256'
+    JWT_EXPIRE_MINUTES: int = 1440
 
 
 class SqlDbConf(metaclass=BaseMetaConf):
