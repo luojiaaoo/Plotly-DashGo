@@ -37,7 +37,7 @@ class BabelConf(metaclass=BaseMetaConf):
     BABEL_DEFAULT_LOCALE: str = 'zh'
     BABEL_DEFAULT_TIMEZONE: str = 'Asia/Shanghai'
     BABEL_TRANSLATION_DIRECTORIES: str = '**/translations'
-    LANGUAGES: List = ['en', 'zh']
+    LANGUAGES: List = ['zh', 'en']
 
 
 class EncryptConf(metaclass=BaseMetaConf):
