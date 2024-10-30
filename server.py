@@ -1,4 +1,4 @@
-from flask import request, session, redirect
+from flask import request, session, redirect, send_from_directory
 import dash
 from config.dash_melon_conf import ShowConf, FlaskConf, BabelConf
 from user_agents import parse
@@ -27,6 +27,13 @@ app.title = ShowConf.WEB_TITLE
 
 # flask实例
 server = app.server
+
+# 头像获取接口
+@server.route('/avatar/<user_name>')
+def download_file(user_name):
+    from config.dash_melon_conf import PathProj
+    file_name = f'{user_name}.jpg'
+    return send_from_directory(PathProj.AVATAR_DIR_PATH, file_name)
 
 
 # 国际化

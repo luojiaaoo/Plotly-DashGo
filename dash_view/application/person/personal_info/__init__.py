@@ -7,7 +7,6 @@ from dash import html
 from dash_components import ShadowDiv
 from dash import dcc
 from database.sql_db.dao import user
-from common.utilities.util_path import get_avatar_url
 import dash_callback.application.personal_info_c  # noqa
 from flask_babel import gettext as _  # noqa
 
@@ -36,7 +35,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                     fac.AntdAvatar(
                                         id='personal-info-avatar',
                                         mode='image',
-                                        src=get_avatar_url(menu_access.user_name),
+                                        src=f'/avatar/{menu_access.user_info.user_name}',
                                         alt=menu_access.user_info.user_full_name,
                                         size=120,
                                         className={

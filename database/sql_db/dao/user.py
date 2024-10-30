@@ -30,7 +30,6 @@ class UserInfo:
     user_full_name: str
     status: str
     sex: str
-    avatar_filename: str
     groups: List
     user_type: str
     email: str
@@ -46,7 +45,6 @@ def get_user_info(user_name: str) -> UserInfo:
         'user_full_name',
         'status',
         'sex',
-        'avatar_filename',
         'groups',
         'user_type',
         'email',
@@ -62,18 +60,8 @@ def get_user_info(user_name: str) -> UserInfo:
         )
         result = cursor.fetchone()
         user_dict = dict(zip(heads, result))
-        user_dict.update({'groups':user_dict['groups'].split(',')})
+        user_dict.update({'groups': user_dict['groups'].split(',')})
         return UserInfo(**user_dict)
-
-
-def get_user_avatar_filename(user_name: str):
-    with pool.get_connection() as conn, conn.cursor() as cursor:
-        cursor.execute(
-            """SELECT avatar_filename FROM sys_user WHERE user_name = %s;""",
-            (user_name,),
-        )
-        result = cursor.fetchone()
-        return result[0]
 
 
 def get_roles_from_user_name(user_name: str) -> Set[str]:

@@ -1,17 +1,17 @@
 /*
- Navicat Premium Dump SQL
+ Navicat Premium Data Transfer
 
- Source Server         : dashMelon
+ Source Server         : dash
  Source Server Type    : MySQL
- Source Server Version : 50744 (5.7.44)
+ Source Server Version : 50744
  Source Host           : localhost:3306
  Source Schema         : app
 
  Target Server Type    : MySQL
- Target Server Version : 50744 (5.7.44)
+ Target Server Version : 50744
  File Encoding         : 65001
 
- Date: 30/10/2024 15:12:11
+ Date: 30/10/2024 22:32:16
 */
 
 SET NAMES utf8mb4;
@@ -121,7 +121,6 @@ CREATE TABLE `sys_user`  (
   `password_sha256` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码SHA256值',
   `status` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '正常/停用',
   `sex` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '性别',
-  `avatar_filename` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '头像文件路径',
   `groups` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '部门',
   `user_type` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '超级管理员/部门管理员/普通用户',
   `email` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '电子邮箱',
@@ -137,7 +136,7 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 'admin', '超级管理员', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', '正常', '未知', 'admin.jpg', '', '超级管理员', '', '', '', '2024-10-23 21:59:06', '初始超级管理员');
+INSERT INTO `sys_user` VALUES (1, 'admin', '超级管理员', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', '正常', '未知', '', '超级管理员', '', '', '', '2024-10-23 21:59:06', '初始超级管理员');
 
 -- ----------------------------
 -- Table structure for sys_user_access_meta
