@@ -26,13 +26,25 @@ def render_content(menu_access: MenuAccess, **kwargs):
         [
             ShadowDiv(
                 children=[
-                    fac.AntdAvatar(
-                        id='global-head-avatar',
-                        mode='image',
-                        shape='square',
-                        src=get_avatar_path(menu_access.user_name),
-                        alt=menu_access.user_info.user_full_name,
-                        size=60,
+                    fac.AntdCenter(
+                        fac.AntdButton(
+                            fac.AntdAvatar(
+                                id='global-head-avatar',
+                                mode='image',
+                                shape='square',
+                                src=get_avatar_path(menu_access.user_name),
+                                alt=menu_access.user_info.user_full_name,
+                                size=120,
+                            ),
+                            id='global-head-avatar-botton',
+                            type='text',
+                            shape='circle',
+                            style={
+                                'height': '120px',
+                                'width': '120px',
+                                'marginBottom': '10px',
+                            },
+                        )
                     ),
                     fac.AntdDivider(
                         _('个人信息'),
