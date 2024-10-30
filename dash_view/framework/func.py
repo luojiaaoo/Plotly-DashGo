@@ -53,4 +53,6 @@ def render_func_content():
         dcc.Store(id='global-url-last-when-load'),
         # 触发进入目标页面上面Store保存的访问地址的超时组件
         fuc.FefferyTimeout(id='global-url-timeout-last-when-load'),
+        # 监听窗口大小
+        fuc.FefferyWindowSize(id='global-window-size'),
     ]

@@ -27,12 +27,31 @@ app.clientside_callback(
         }
     }""",
     [
-        Output('menu-collapse-sider', 'collapsed'),
+        Output('menu-collapse-sider', 'collapsed', allow_duplicate=True),
         Output('btn-menu-collapse-sider-menu-icon', 'icon'),
         Output('logo-text', 'style'),
     ],
     Input('btn-menu-collapse-sider-menu', 'nClicks'),
     State('menu-collapse-sider', 'collapsed'),
+    prevent_initial_call=True,
+)
+
+# 宽度小于700px时，侧边栏自动折叠
+app.clientside_callback(
+    """(_width,nClicks,collapsed) => {
+        _width = _width || 999;
+        nClicks = nClicks || 0;
+        if (_width < 700 && !collapsed){
+            return nClicks+1;
+        }
+        return window.dash_clientside.no_update;
+    }""",
+    Output('btn-menu-collapse-sider-menu', 'nClicks'),
+    Input('global-window-size', '_width'),
+    [
+        State('btn-menu-collapse-sider-menu', 'nClicks'),
+        State('menu-collapse-sider', 'collapsed'),
+    ],
     prevent_initial_call=True,
 )
 
