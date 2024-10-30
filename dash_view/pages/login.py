@@ -6,7 +6,7 @@ from dash.dependencies import Input, Output, State
 from server import app
 from dash.exceptions import PreventUpdate
 import dash
-from flask import session
+from dash_view.framework.lang import render_lang_content
 from flask_babel import gettext as _  # noqa
 
 # 定义一个客户端回调函数，用于处理登录验证代码的显示逻辑，总是显示login的路径
@@ -146,7 +146,9 @@ def render_content():
                                             ),
                                             fac.AntdCheckbox(
                                                 id='login-keep-login-status',
-                                                label=_('保持{}小时免登录').format(JwtConf.JWT_EXPIRE_MINUTES//60),
+                                                label=_('保持{}小时免登录').format(
+                                                    JwtConf.JWT_EXPIRE_MINUTES // 60
+                                                ),
                                                 checked=False,
                                                 className={
                                                     'marginTop': '10px',
@@ -175,7 +177,8 @@ def render_content():
                                             fac.Fragment(id='login-location-refresh-container'),
                                             dcc.Store(id='login-password-sha256'),
                                             fac.Fragment(id='login-message-container'),
-                                            fuc.FefferyReload(id='login-reload'),
+                                            # 为了和主页main统一回调
+                                            fuc.FefferyReload(id='global-reload'),
                                         ],
                                         direction='vertical',
                                         className={
@@ -189,22 +192,7 @@ def render_content():
                             'height': '85%',
                             'width': '90%',
                         },
-                        tabBarRightExtraContent=fac.AntdCompact(
-                            [
-                                fac.AntdButton('ZH', id='login-language-zh'),
-                                fac.AntdButton('EN', id='login-language-en'),
-                            ],
-                            className={
-                                '& span': {'fontSize': '10px', 'fontWeight': 'bold'},
-                                '& .ant-btn': {'height': '1em'},
-                                '& #login-language-zh': {'backgroundColor': '#1C69D1', 'color': '#eee'}
-                                if session['lang'] == 'zh'
-                                else {'color': '#999999'},
-                                '& #login-language-en': {'backgroundColor': '#1C69D1', 'color': '#eee'}
-                                if session['lang'] == 'en'
-                                else {'color': '#999999'},
-                            },
-                        ),
+                        tabBarRightExtraContent=render_lang_content(),
                     ),
                 ],
                 className={
@@ -244,26 +232,6 @@ def render_content():
             },
         },
     )
-
-# 切换中文
-@app.callback(
-    Output('login-reload', 'reload', allow_duplicate=True),
-    Input('login-language-zh', 'nClicks'),
-    prevent_initial_call=True,
-)
-def lang_zh(nClicks):
-    session['lang'] = 'zh'
-    return True
-
-#切换英文
-@app.callback(
-    Output('login-reload', 'reload', allow_duplicate=True),
-    Input('login-language-en', 'nClicks'),
-    prevent_initial_call=True,
-)
-def lang_en(nClicks):
-    session['lang'] = 'en'
-    return True
 
 
 @app.callback(

@@ -2,9 +2,10 @@ from common.utilities.util_menu_access import MenuAccess
 from typing import List
 import feffery_antd_components as fac
 from common.utilities.util_logger import Log
+from flask_babel import gettext as _  # noqa
 
 # 二级菜单的标题、图标和显示顺序
-title = '工作台'
+title = _('工作台')
 icon = None
 order = 1
 logger = Log.get_logger(__name__)

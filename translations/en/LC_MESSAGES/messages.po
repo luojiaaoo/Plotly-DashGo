@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-30 10:56+0800\n"
+"POT-Creation-Date: 2024-10-30 11:10+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,21 +18,45 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.16.0\n"
 
-#: server.py:63
+#: server.py:62
 msgid "请不要使用IE浏览器或360浏览器兼容模式"
 msgstr "Please do not use Internet Explorer"
 
-#: server.py:68
+#: server.py:67
 msgid "Chrome内核版本号太低，请升级浏览器"
 msgstr "The Chrome kernel version is too low. Please upgrade the browser"
 
-#: server.py:70
+#: server.py:69
 msgid "点击此处"
 msgstr "Click here"
 
-#: server.py:71
+#: server.py:70
 msgid "可下载最新版Chrome浏览器"
 msgstr "You can download the latest version of Chrome"
+
+#: dash_view/application/dashboard/__init__.py:12
+msgid "仪表盘"
+msgstr "DashBoard"
+
+#: dash_view/application/dashboard/monitor/__init__.py:9
+msgid "监控页"
+msgstr "Monitor"
+
+#: dash_view/application/dashboard/workbench/__init__.py:8
+msgid "工作台"
+msgstr "Workbench"
+
+#: dash_view/application/person/__init__.py:12
+msgid "个人页"
+msgstr "Person"
+
+#: dash_view/application/person/personal_info/__init__.py:11
+msgid "个人信息"
+msgstr "Info"
+
+#: dash_view/application/person/personal_setting/__init__.py:9
+msgid "个人设置"
+msgstr "Setting"
 
 #: dash_view/pages/login.py:86
 msgid "账号密码登录"

@@ -1,4 +1,5 @@
 import pkgutil
+from flask_babel import gettext as _  # noqa
 
 __all__ = []
 for loader, module_name, is_pkg in pkgutil.walk_packages(__path__):
@@ -8,6 +9,6 @@ for loader, module_name, is_pkg in pkgutil.walk_packages(__path__):
 
 # 一级菜单的标题、图标和显示顺序
 
-title = '个人页'
+title = _('个人页')
 icon = 'antd-user'
 order = 9999

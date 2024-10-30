@@ -3,9 +3,10 @@ from typing import List
 import feffery_antd_components as fac
 from common.utilities.util_logger import Log
 from dash import html
+from flask_babel import gettext as _  # noqa
 
 # 二级菜单的标题、图标和显示顺序
-title = '监控页'
+title = _('监控页')
 icon = None
 order = 2
 logger = Log.get_logger(__name__)
