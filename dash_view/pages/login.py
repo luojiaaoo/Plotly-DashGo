@@ -191,20 +191,18 @@ def render_content():
                         },
                         tabBarRightExtraContent=fac.AntdCompact(
                             [
-                                fac.AntdButton(
-                                    'ZH',
-                                    style={'backgroundColor': '#1C69D1', 'color': '#eee'},
-                                    id='login-language-zh',
-                                ),
-                                fac.AntdButton(
-                                    'EN',
-                                    style={'color': '#999999'},
-                                    id='login-language-en',
-                                ),
+                                fac.AntdButton('ZH', id='login-language-zh'),
+                                fac.AntdButton('EN', id='login-language-en'),
                             ],
                             className={
                                 '& span': {'fontSize': '10px', 'fontWeight': 'bold'},
                                 '& .ant-btn': {'height': '1em'},
+                                '& #login-language-zh': {'backgroundColor': '#1C69D1', 'color': '#eee'}
+                                if session['lang'] == 'zh'
+                                else {'color': '#999999'},
+                                '& #login-language-en': {'backgroundColor': '#1C69D1', 'color': '#eee'}
+                                if session['lang'] == 'en'
+                                else {'color': '#999999'},
                             },
                         ),
                     ),
@@ -247,7 +245,7 @@ def render_content():
         },
     )
 
-
+# 切换中文
 @app.callback(
     Output('login-reload', 'reload', allow_duplicate=True),
     Input('login-language-zh', 'nClicks'),
@@ -257,7 +255,7 @@ def lang_zh(nClicks):
     session['lang'] = 'zh'
     return True
 
-
+#切换英文
 @app.callback(
     Output('login-reload', 'reload', allow_duplicate=True),
     Input('login-language-en', 'nClicks'),
