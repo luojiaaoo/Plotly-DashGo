@@ -33,9 +33,8 @@ server = app.server
 def select_locale():
     # 优先从session中获取
     lang_session = session.get('lang', None)
-    lang_request = request.args.get('lang', None)
     lang_auto = request.accept_languages.best_match(server.config['LANGUAGES'])
-    return lang_session or lang_request or lang_auto
+    return lang_session or lang_auto
 
 
 babel = Babel(app=server)

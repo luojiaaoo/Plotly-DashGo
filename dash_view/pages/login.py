@@ -146,7 +146,7 @@ def render_content():
                                             ),
                                             fac.AntdCheckbox(
                                                 id='login-keep-login-status',
-                                                label=f'保持{"{JwtConf.JWT_EXPIRE_MINUTES//60}小时" if JwtConf.JWT_EXPIRE_MINUTES//60<24 else f"{JwtConf.JWT_EXPIRE_MINUTES//60//24}天"}免登录',
+                                                label=_('保持{}小时免登录').format(JwtConf.JWT_EXPIRE_MINUTES//60),
                                                 checked=False,
                                                 className={
                                                     'marginTop': '10px',

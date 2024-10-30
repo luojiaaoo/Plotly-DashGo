@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-30 10:43+0800\n"
+"POT-Creation-Date: 2024-10-30 10:56+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -48,21 +48,25 @@ msgstr "Please enter password"
 
 #: dash_view/pages/login.py:127
 msgid "请输入验证码"
-msgstr "Please enter the verification code"
+msgstr "verification code"
+
+#: dash_view/pages/login.py:149
+msgid "保持{}小时免登录"
+msgstr "keep {} hours login"
 
 #: dash_view/pages/login.py:161
 msgid "登录"
 msgstr "Login"
 
-#: dash_view/pages/login.py:336
+#: dash_view/pages/login.py:334
 msgid "请输入账号和密码"
 msgstr "Please enter your account number and password"
 
-#: dash_view/pages/login.py:343
+#: dash_view/pages/login.py:341
 msgid "验证码错误，请重新输入"
 msgstr "The verification code is incorrect, please re-enter it"
 
-#: dash_view/pages/login.py:359
+#: dash_view/pages/login.py:357
 msgid "用户名或密码错误"
 msgstr "The user name or password is incorrect"
 
