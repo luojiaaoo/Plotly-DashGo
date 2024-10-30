@@ -33,7 +33,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('用户名：'), className='user_info_name'),
+                            fac.AntdText(_('用户：'), className='user_info_name'),
                             fac.AntdText(user_info['user_name'], className='user_info_value'),
                         ]
                     ),

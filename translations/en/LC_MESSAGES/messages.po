@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-30 12:51+0800\n"
+"POT-Creation-Date: 2024-10-30 12:56+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -56,13 +56,12 @@ msgid "个人信息"
 msgstr "Personal Info"
 
 #: dash_view/application/person/personal_info/__init__.py:36
-#, fuzzy
-msgid "用户名："
-msgstr "Please enter your username"
+msgid "用户："
+msgstr "User Name:"
 
 #: dash_view/application/person/personal_info/__init__.py:42
 msgid "全名："
-msgstr "Full name:"
+msgstr "Full Name:"
 
 #: dash_view/application/person/personal_info/__init__.py:48
 msgid "状态："
