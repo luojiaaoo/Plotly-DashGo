@@ -61,7 +61,7 @@ def render_content(menu_access: MenuAccess):
                 [
                     # head块，包括菜单折叠、面包屑导航、用户信息、全局功能按钮
                     fac.AntdRow(
-                        render_head_content(),
+                        render_head_content(menu_access),
                         align='middle',
                         className={
                             'height': '50px',

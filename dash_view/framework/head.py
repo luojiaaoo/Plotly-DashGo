@@ -1,10 +1,16 @@
 import feffery_antd_components as fac
 from dash import html
 from dash_view.framework.lang import render_lang_content
+from common.utilities.util_menu_access import MenuAccess
+from common.utilities.util_path import get_avatar_path
 from flask_babel import gettext as _  # noqa
+from server import app
+from dash.dependencies import Input, Output, State
+import dash
+from dash.exceptions import PreventUpdate
 
 
-def render_head_content():
+def render_head_content(menu_access: MenuAccess):
     return [
         # 页首左侧折叠按钮区域
         fac.AntdCol(
@@ -45,92 +51,28 @@ def render_head_content():
         fac.AntdCol(
             fac.AntdSpace(
                 [
-                    fac.AntdPopover(
-                        fac.AntdBadge(
-                            fac.AntdAvatar(
-                                id='avatar-info',
-                                mode='image',
-                                src='',
-                                size=36,
-                            ),
-                            count=6,
-                            size='small',
+                    fac.AntdBadge(
+                        fac.AntdAvatar(
+                            id='avatar-info',
+                            mode='image',
+                            src=get_avatar_path(menu_access.user_name),
+                            size=36,
                         ),
-                        content=fac.AntdTabs(
-                            items=[
-                                {
-                                    'key': '未读消息',
-                                    'label': '未读消息',
-                                    'children': [
-                                        fac.AntdSpace(
-                                            [
-                                                html.Div(
-                                                    fac.AntdText(f'消息示例{i}'),
-                                                    style={
-                                                        'padding': '5px 10px',
-                                                        'height': 40,
-                                                        'width': 300,
-                                                        'borderBottom': '1px solid #f1f3f5',
-                                                    },
-                                                )
-                                                for i in range(1, 8)
-                                            ],
-                                            direction='vertical',
-                                            style={
-                                                'height': 280,
-                                                'overflowY': 'auto',
-                                            },
-                                        )
-                                    ],
-                                },
-                                {
-                                    'key': '已读消息',
-                                    'label': '已读消息',
-                                    'children': [
-                                        fac.AntdSpace(
-                                            [
-                                                html.Div(
-                                                    fac.AntdText(f'消息示例{i}'),
-                                                    style={
-                                                        'padding': '5px 10px',
-                                                        'height': 40,
-                                                        'width': 300,
-                                                        'borderBottom': '1px solid #f1f3f5',
-                                                    },
-                                                )
-                                                for i in range(8, 15)
-                                            ],
-                                            direction='vertical',
-                                            style={
-                                                'height': 280,
-                                                'overflowY': 'auto',
-                                            },
-                                        )
-                                    ],
-                                },
-                            ],
-                            centered=True,
-                        ),
-                        placement='bottomRight',
+                        # count=6, # todo: 消息通知
+                        size='small',
                     ),
                     fac.AntdDropdown(
-                        id='index-header-dropdown',
-                        title='Luoja',
-                        arrow=True,
+                        id='global-head-user-name-dropdown',
+                        title=menu_access.user_name,
                         menuItems=[
                             {
-                                'title': '个人资料',
-                                'key': '个人资料',
+                                'title': _('个人信息'),
+                                'key': '个人信息',
                                 'icon': 'antd-idcard',
-                            },
-                            {
-                                'title': '布局设置',
-                                'key': '布局设置',
-                                'icon': 'antd-layout',
                             },
                             {'isDivider': True},
                             {
-                                'title': '退出登录',
+                                'title': _('退出登录'),
                                 'key': '退出登录',
                                 'icon': 'antd-logout',
                             },
@@ -150,3 +92,23 @@ def render_head_content():
         ),
         render_lang_content(),
     ]
+
+
+# 个人信息，退出登录
+@app.callback(
+    [
+        Output('global-dcc-url', 'pathname', allow_duplicate=True),
+        Output('global-reload', 'reload', allow_duplicate=True),
+    ],
+    Input('global-head-user-name-dropdown', 'clickedKey'),
+    prevent_initial_call=True,
+)
+def callback_func(clickedKey):
+    if clickedKey == '退出登录':
+        from common.utilities.util_jwt import clear_access_token_from_session
+
+        clear_access_token_from_session()
+        return dash.no_update, True
+    elif clickedKey == '个人信息':
+        return '/person/personal_info', dash.no_update
+    return PreventUpdate

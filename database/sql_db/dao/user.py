@@ -29,7 +29,7 @@ def get_user_info(user_name: str) -> Dict:
         'password_sha256',
         'status',
         'sex',
-        'avatar_path',
+        'avatar_filename',
         'groups',
         'type',
         'email',
@@ -45,6 +45,16 @@ def get_user_info(user_name: str) -> Dict:
         )
         result = cursor.fetchone()
         return dict(zip(heads, result))
+
+
+def get_user_avatar_filename(user_name: str):
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            """SELECT avatar_filename FROM sys_user WHERE user_name = %s;""",
+            (user_name,),
+        )
+        result = cursor.fetchone()
+        return result[0]
 
 
 def get_roles_from_user_name(user_name: str) -> Set[str]:

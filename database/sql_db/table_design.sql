@@ -1,21 +1,36 @@
 /*
- Navicat Premium Data Transfer
+ Navicat Premium Dump SQL
 
- Source Server         : dash
+ Source Server         : dashMelon
  Source Server Type    : MySQL
- Source Server Version : 50744
+ Source Server Version : 50744 (5.7.44)
  Source Host           : localhost:3306
  Source Schema         : app
 
  Target Server Type    : MySQL
- Target Server Version : 50744
+ Target Server Version : 50744 (5.7.44)
  File Encoding         : 65001
 
- Date: 24/10/2024 21:22:27
+ Date: 30/10/2024 14:27:16
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for sys_access_item
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_access_item`;
+CREATE TABLE `sys_access_item`  (
+  `access_item_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `access_item` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `access_label` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`access_item_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of sys_access_item
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for sys_access_meta
@@ -84,13 +99,16 @@ CREATE TABLE `sys_role`  (
   `role_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `access_meta` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`role_id`) USING BTREE,
-  UNIQUE INDEX `uniq_role_name`(`role_name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+  INDEX `uniq_role_name`(`role_name`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_role
 -- ----------------------------
-INSERT INTO `sys_role` VALUES (1, 'role1', 'dashboard.workbench:access1');
+INSERT INTO `sys_role` VALUES (1, 'role1', 'dashboard.workbench:access2');
+INSERT INTO `sys_role` VALUES (2, 'role1', 'dashboard.monitor:access1');
+INSERT INTO `sys_role` VALUES (3, 'role1', 'dashboard.workbench:show');
+INSERT INTO `sys_role` VALUES (4, 'role1', 'dashboard.monitor:show');
 
 -- ----------------------------
 -- Table structure for sys_user
@@ -103,7 +121,7 @@ CREATE TABLE `sys_user`  (
   `password_sha256` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码SHA256值',
   `status` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '正常/停用',
   `sex` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '性别',
-  `avatar_path` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '头像文件路径',
+  `avatar_filename` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '头像文件路径',
   `groups` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '部门',
   `type` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '超级管理员/部门管理员/普通用户',
   `email` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '电子邮箱',
@@ -119,7 +137,7 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 'admin', '超级管理员', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', '正常', '未知', '', '', '超级管理员', '', '', '', '2024-10-23 21:59:06', '超级管理员');
+INSERT INTO `sys_user` VALUES (1, 'admin', '超级管理员', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', '正常', '未知', 'admin.jpg', '', '超级管理员', '', '', '', '2024-10-23 21:59:06', '初始超级管理员');
 
 -- ----------------------------
 -- Table structure for sys_user_access_meta
@@ -130,7 +148,7 @@ CREATE TABLE `sys_user_access_meta`  (
   `user_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `access_meta` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`user_name_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user_access_meta
@@ -147,7 +165,7 @@ CREATE TABLE `sys_user_role`  (
   `role` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   PRIMARY KEY (`user_name_id`) USING BTREE,
   INDEX `idx_user_name`(`user_name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user_role

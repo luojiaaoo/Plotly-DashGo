@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-30 12:56+0800\n"
+"POT-Creation-Date: 2024-10-30 14:27+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -52,6 +52,7 @@ msgstr "Person"
 
 #: dash_view/application/person/personal_info/__init__.py:13
 #: dash_view/application/person/personal_info/__init__.py:29
+#: dash_view/framework/head.py:69
 msgid "个人信息"
 msgstr "Personal Info"
 
@@ -107,9 +108,13 @@ msgstr "Remark:"
 msgid "个人设置"
 msgstr "Personal Setting"
 
-#: dash_view/framework/head.py:33 dash_view/pages/main.py:196
+#: dash_view/framework/head.py:39 dash_view/pages/main.py:196
 msgid "首页"
 msgstr "Home"
+
+#: dash_view/framework/head.py:75
+msgid "退出登录"
+msgstr "Logout"
 
 #: dash_view/pages/login.py:86
 msgid "账号密码登录"
