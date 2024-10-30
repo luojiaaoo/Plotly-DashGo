@@ -7,8 +7,12 @@ from dash_components import ShadowDiv
 from database.sql_db.dao import user
 from flask_babel import gettext as _  # noqa
 
+
 # 二级菜单的标题、图标和显示顺序
-title = _('个人信息')
+def get_title():
+    return _('个人信息')
+
+
 icon = None
 logger = Log.get_logger(__name__)
 order = 1

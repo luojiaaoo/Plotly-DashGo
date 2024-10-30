@@ -5,8 +5,12 @@ from common.utilities.util_logger import Log
 from dash import html
 from flask_babel import gettext as _  # noqa
 
+
 # 二级菜单的标题、图标和显示顺序
-title = _('个人设置')
+def get_title():
+    return _('个人设置')
+
+
 icon = None
 logger = Log.get_logger(__name__)
 order = 2

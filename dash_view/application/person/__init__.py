@@ -7,8 +7,11 @@ for loader, module_name, is_pkg in pkgutil.walk_packages(__path__):
     _module = loader.find_module(module_name).load_module(module_name)
     globals()[module_name] = _module
 
-# 一级菜单的标题、图标和显示顺序
 
-title = _('个人页')
+# 一级菜单的标题、图标和显示顺序
+def get_title():
+    return _('个人页')
+
+
 icon = 'antd-user'
 order = 9999

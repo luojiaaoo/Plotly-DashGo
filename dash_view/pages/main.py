@@ -190,7 +190,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
     def get_title(module_path):
         from dash_view import application  # noqa
 
-        return eval(f'application.{module_path}.title')
+        return eval(f'application.{module_path}.get_title()')
 
     breadcrumb_items = [{'title': '首页', 'href': '/dashboard/workbench'}]
     _modules: List = url_module_path.split('.')
@@ -225,7 +225,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
         p.insert(
             old_idx,
             {
-                'label': module_page.title,
+                'label': module_page.get_title(),
                 'key': key_url_path,
                 'closable': True,
                 'children': module_page.render_content(menu_access, **param),
@@ -242,7 +242,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
         # 未打开，通过Patch组件，将新的tab添加到tabs组件中
         p.append(
             {
-                'label': module_page.title,
+                'label': module_page.get_title(),
                 'key': key_url_path,
                 # 工作台不能关闭
                 'closable': False if key_url_path == '/dashboard/workbench' else True,
