@@ -30,4 +30,4 @@ def callback_func(contents, src, src_):
 
         AvatarFile.save_avatar_file(base64_str=base_str, img_type=img_suffix, user_name=menu_access.user_name)
     # 强制刷新url，实际对象没变
-    return src.split('?')[0]+f'#{str(uuid4())}', src_.split('?')[0]+f'#{str(uuid4())}'
+    return src.split('?')[0]+f'?{str(uuid4())}', src_.split('?')[0]+f'?{str(uuid4())}'
