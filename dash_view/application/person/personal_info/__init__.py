@@ -1,11 +1,14 @@
 from common.utilities.util_menu_access import MenuAccess
 from typing import List
 import feffery_antd_components as fac
+import feffery_utils_components as fuc
 from common.utilities.util_logger import Log
 from dash import html
 from dash_components import ShadowDiv
+from dash import dcc
 from database.sql_db.dao import user
 from common.utilities.util_path import get_avatar_path
+import dash_callback.application.personal_info_c  # noqa
 from flask_babel import gettext as _  # noqa
 
 
@@ -27,28 +30,59 @@ def render_content(menu_access: MenuAccess, **kwargs):
             ShadowDiv(
                 children=[
                     fac.AntdCenter(
-                        fac.AntdButton(
-                            fac.AntdAvatar(
-                                id='global-head-avatar',
-                                mode='image',
-                                shape='square',
-                                src=get_avatar_path(menu_access.user_name),
-                                alt=menu_access.user_info.user_full_name,
-                                size=120,
+                        dcc.Upload(
+                            fac.AntdButton(
+                                [
+                                    fac.AntdAvatar(
+                                        id='personal-info-avatar',
+                                        mode='image',
+                                        src=get_avatar_path(menu_access.user_name),
+                                        alt=menu_access.user_info.user_full_name,
+                                        size=120,
+                                        className={
+                                            'position': 'absolute',
+                                        },
+                                    ),
+                                    fuc.FefferyDiv(
+                                        _('修改头像'),
+                                        className={
+                                            'fontWight': 'bold',
+                                            'color': '#f0f0f0',
+                                            'width': '100%',
+                                            'height': '100%',
+                                            'position': 'absolute',
+                                            'display': 'flex',
+                                            'justify-content': 'center',
+                                            'align-items': 'center',
+                                            'zIndex': 999,
+                                            'background': 'rgba(0, 0, 0, 0.3)',
+                                            'opacity': 0,
+                                            'transition': 'opacity 0.5s ease-in-out',
+                                            'borderRadius': '50%',
+                                            '&:hover': {
+                                                'opacity': 1,
+                                            },
+                                        },
+                                    ),
+                                ],
+                                id='personal-info-avatar-button',
+                                type='text',
+                                shape='circle',
+                                style={
+                                    'height': '120px',
+                                    'width': '120px',
+                                    'marginBottom': '10px',
+                                    'position': 'relative',
+                                },
                             ),
-                            id='global-head-avatar-botton',
-                            type='text',
-                            shape='circle',
-                            style={
-                                'height': '120px',
-                                'width': '120px',
-                                'marginBottom': '10px',
-                            },
-                        )
+                            id='personal-info-avatar-upload-choose',
+                            accept='.jpeg,.jpg,.png',
+                            max_size=10 * 1024 * 1024,
+                        ),
                     ),
                     fac.AntdDivider(
                         _('个人信息'),
-                        innerTextOrientation='left',
+                        innerTextOrientation='center',
                         fontStyle='oblique',
                         lineColor='#808080',
                     ),

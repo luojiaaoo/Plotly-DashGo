@@ -55,7 +55,6 @@ def render_head_content(menu_access: MenuAccess):
                         fac.AntdAvatar(
                             id='global-head-avatar',
                             mode='image',
-                            shape='square',
                             src=get_avatar_path(menu_access.user_name),
                             alt=menu_access.user_info.user_full_name,
                             size=36,
