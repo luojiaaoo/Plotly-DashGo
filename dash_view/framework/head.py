@@ -53,9 +53,11 @@ def render_head_content(menu_access: MenuAccess):
                 [
                     fac.AntdBadge(
                         fac.AntdAvatar(
-                            id='avatar-info',
+                            id='global-head-avatar',
                             mode='image',
+                            shape='square',
                             src=get_avatar_path(menu_access.user_name),
+                            alt=menu_access.user_info.user_full_name,
                             size=36,
                         ),
                         # count=6, # todo: 消息通知
@@ -64,6 +66,7 @@ def render_head_content(menu_access: MenuAccess):
                     fac.AntdDropdown(
                         id='global-head-user-name-dropdown',
                         title=menu_access.user_name,
+                        arrow=True,
                         menuItems=[
                             {
                                 'title': _('个人信息'),

@@ -1,5 +1,7 @@
 from database.sql_db.conn import pool
 from typing import Dict, List, Set, Union
+from dataclasses import dataclass
+from datetime import datetime
 
 
 def exists_user_name(user_name: str) -> bool:
@@ -22,20 +24,35 @@ def user_password_verify(user_name: str, password_sha256: str) -> bool:
         return result is not None
 
 
-def get_user_info(user_name: str) -> Dict:
+@dataclass
+class UserInfo:
+    user_name: str
+    user_full_name: str
+    status: str
+    sex: str
+    avatar_filename: str
+    groups: List
+    user_type: str
+    email: str
+    phone_number: str
+    create_by: str
+    create_datetime: datetime
+    remark: str
+
+
+def get_user_info(user_name: str) -> UserInfo:
     heads = (
         'user_name',
         'user_full_name',
-        'password_sha256',
         'status',
         'sex',
         'avatar_filename',
         'groups',
-        'type',
+        'user_type',
         'email',
         'phone_number',
         'create_by',
-        'create_datatime',
+        'create_datetime',
         'remark',
     )
     with pool.get_connection() as conn, conn.cursor() as cursor:
@@ -44,7 +61,9 @@ def get_user_info(user_name: str) -> Dict:
             (user_name,),
         )
         result = cursor.fetchone()
-        return dict(zip(heads, result))
+        user_dict = dict(zip(heads, result))
+        user_dict.update({'groups':user_dict['groups'].split(',')})
+        return UserInfo(**user_dict)
 
 
 def get_user_avatar_filename(user_name: str):

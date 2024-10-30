@@ -1,7 +1,9 @@
-from database.sql_db.dao.user import get_all_menu_item_and_access_meta
+from database.sql_db.dao.user import get_all_menu_item_and_access_meta, get_user_info, UserInfo
 from typing import Dict, List, Set
 from common.utilities.util_logger import Log
+
 logger = Log.get_logger(__name__)
+
 
 class MenuAccess:
     default_menu_item_and_access_meta = (
@@ -68,9 +70,7 @@ class MenuAccess:
                 return None
 
         # 根据order属性排序
-        dict_level1_level2 = dict(
-            sorted(dict_level1_level2.items(), key=lambda x: get_order(f'{x[0]}'))
-        )
+        dict_level1_level2 = dict(sorted(dict_level1_level2.items(), key=lambda x: get_order(f'{x[0]}')))
         for level1, level2 in dict_level1_level2.items():
             level2.sort(key=lambda x: get_order(f'{level1}.{x}'))
 
@@ -101,6 +101,7 @@ class MenuAccess:
 
     def __init__(self, user_name) -> None:
         self.user_name = user_name
+        self.user_info: UserInfo = get_user_info(user_name)
         # 菜单项 -> 权限元的字典
         self.dict_menu_item_and_access_meta = self.get_dict_menu_item_and_access_meta(user_name)
         # 所有菜单项
