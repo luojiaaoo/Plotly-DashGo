@@ -6,6 +6,8 @@ from dash.dependencies import Input, Output, State
 from server import app
 from dash.exceptions import PreventUpdate
 import dash
+from flask import session
+from flask_babel import gettext as _  # noqa
 
 # 定义一个客户端回调函数，用于处理登录验证代码的显示逻辑，总是显示login的路径
 app.clientside_callback(
@@ -81,7 +83,7 @@ def render_content():
                             {
                                 'key': '账号密码登录',
                                 'label': fac.AntdText(
-                                    '账号密码登录',
+                                    _('账号密码登录'),
                                     className={
                                         'color': 'rgb(22,119,255)',
                                     },
@@ -95,7 +97,7 @@ def render_content():
                                                         fac.AntdInput(
                                                             id='login-username',
                                                             prefix=fac.AntdIcon(icon='antd-user'),
-                                                            placeholder='请输入用户名',
+                                                            placeholder=_('请输入用户名'),
                                                             className={
                                                                 'marginTop': '20px',
                                                             },
@@ -108,7 +110,7 @@ def render_content():
                                                             prefix=fac.AntdIcon(icon='antd-lock'),
                                                             mode='password',
                                                             passwordUseMd5=True,
-                                                            placeholder='请输入密码',
+                                                            placeholder=_('请输入密码'),
                                                             className={
                                                                 'marginTop': '25px',
                                                             },
@@ -122,7 +124,7 @@ def render_content():
                                                     fac.AntdInput(
                                                         id='login-verify-code-input',
                                                         prefix=fac.AntdIcon(icon='antd-right'),
-                                                        placeholder='请输入验证码',
+                                                        placeholder=_('请输入验证码'),
                                                         allowClear=True,
                                                         className={
                                                             'marginRight': '20px',
@@ -144,7 +146,7 @@ def render_content():
                                             ),
                                             fac.AntdCheckbox(
                                                 id='login-keep-login-status',
-                                                label=f'保持{f"{JwtConf.JWT_EXPIRE_MINUTES//60}小时" if JwtConf.JWT_EXPIRE_MINUTES//60<24 else f"{JwtConf.JWT_EXPIRE_MINUTES//60//24}天"}免登录',
+                                                label=f'保持{"{JwtConf.JWT_EXPIRE_MINUTES//60}小时" if JwtConf.JWT_EXPIRE_MINUTES//60<24 else f"{JwtConf.JWT_EXPIRE_MINUTES//60//24}天"}免登录',
                                                 checked=False,
                                                 className={
                                                     'marginTop': '10px',
@@ -156,7 +158,7 @@ def render_content():
                                                 },
                                             ),
                                             fac.AntdButton(
-                                                '登录',
+                                                _('登录'),
                                                 id='login-submit',
                                                 type='primary',
                                                 block=True,
@@ -173,6 +175,7 @@ def render_content():
                                             fac.Fragment(id='login-location-refresh-container'),
                                             dcc.Store(id='login-password-sha256'),
                                             fac.Fragment(id='login-message-container'),
+                                            fuc.FefferyReload(id='login-reload'),
                                         ],
                                         direction='vertical',
                                         className={
@@ -186,6 +189,24 @@ def render_content():
                             'height': '85%',
                             'width': '90%',
                         },
+                        tabBarRightExtraContent=fac.AntdCompact(
+                            [
+                                fac.AntdButton(
+                                    'ZH',
+                                    style={'backgroundColor': '#1C69D1', 'color': '#eee'},
+                                    id='login-language-zh',
+                                ),
+                                fac.AntdButton(
+                                    'EN',
+                                    style={'color': '#999999'},
+                                    id='login-language-en',
+                                ),
+                            ],
+                            className={
+                                '& span': {'fontSize': '10px', 'fontWeight': 'bold'},
+                                '& .ant-btn': {'height': '1em'},
+                            },
+                        ),
                     ),
                 ],
                 className={
@@ -225,6 +246,26 @@ def render_content():
             },
         },
     )
+
+
+@app.callback(
+    Output('login-reload', 'reload', allow_duplicate=True),
+    Input('login-language-zh', 'nClicks'),
+    prevent_initial_call=True,
+)
+def lang_zh(nClicks):
+    session['lang'] = 'zh'
+    return True
+
+
+@app.callback(
+    Output('login-reload', 'reload', allow_duplicate=True),
+    Input('login-language-en', 'nClicks'),
+    prevent_initial_call=True,
+)
+def lang_en(nClicks):
+    session['lang'] = 'en'
+    return True
 
 
 @app.callback(
@@ -292,14 +333,14 @@ def login(
         return (
             dash.no_update,
             dash.no_update,
-            fuc.FefferyFancyMessage('请输入账号和密码', type='error'),
+            fuc.FefferyFancyMessage(_('请输入账号和密码'), type='error'),
             True,
         )
     if need_vc and vc_input != pic_vc_value:
         return (
             dash.no_update,
             dash.no_update,
-            fuc.FefferyFancyMessage('验证码错误，请重新输入', type='error'),
+            fuc.FefferyFancyMessage(_('验证码错误，请重新输入'), type='error'),
             True,
         )
     from common.api.user import login
@@ -315,6 +356,6 @@ def login(
         return (
             dash.no_update,
             (fc or 0) + 1,
-            fuc.FefferyFancyMessage('用户名或密码错误', type='error'),
+            fuc.FefferyFancyMessage(_('用户名或密码错误'), type='error'),
             True,
         )

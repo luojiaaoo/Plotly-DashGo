@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-29 22:25+0800\n"
-"PO-Revision-Date: 2024-10-29 22:13+0800\n"
+"POT-Creation-Date: 2024-10-30 10:25+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
 "Language-Team: en <LL@li.org>\n"
@@ -18,19 +18,51 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.16.0\n"
 
-#: server.py:63
-msgid "<h1 style='color: red'>IP:{}, 请不要使用IE浏览器或360浏览器兼容模式</h1>"
-msgstr ""
+#: server.py:64
+msgid "请不要使用IE浏览器或360浏览器兼容模式"
+msgstr "Please do not use Internet Explorer"
 
-#~ msgid "aaa"
-#~ msgstr ""
+#: server.py:69
+msgid "Chrome内核版本号太低，请升级浏览器"
+msgstr "The Chrome kernel version is too low. Please upgrade the browser"
 
-#~ msgid "Chrome内核版本号太低，请升级浏览器"
-#~ msgstr ""
+#: server.py:71
+msgid "点击此处"
+msgstr "Click here"
 
-#~ msgid "点击此处"
-#~ msgstr ""
+#: server.py:72
+msgid "可下载最新版Chrome浏览器"
+msgstr "You can download the latest version of Chrome"
 
-#~ msgid "可下载最新版Chrome浏览器"
-#~ msgstr ""
+#: dash_view/pages/login.py:86
+msgid "账号密码登录"
+msgstr "password login"
+
+#: dash_view/pages/login.py:100
+msgid "请输入用户名"
+msgstr "Please enter your username"
+
+#: dash_view/pages/login.py:113
+msgid "请输入密码"
+msgstr "Please enter password"
+
+#: dash_view/pages/login.py:127
+msgid "请输入验证码"
+msgstr "Please enter the verification code"
+
+#: dash_view/pages/login.py:161
+msgid "登录"
+msgstr "Login"
+
+#: dash_view/pages/login.py:336
+msgid "请输入账号和密码"
+msgstr "Please enter your account number and password"
+
+#: dash_view/pages/login.py:343
+msgid "验证码错误，请重新输入"
+msgstr "The verification code is incorrect, please re-enter it"
+
+#: dash_view/pages/login.py:359
+msgid "用户名或密码错误"
+msgstr "The user name or password is incorrect"
 

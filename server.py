@@ -59,11 +59,14 @@ def get_user_agent_info():
     if user_agent.browser.version != ():
         bw_version = user_agent.browser.version[0]
         if bw == 'IE':
-            return (
-                _("<h1 style='color: red'>IP:{}, 请不要使用IE浏览器或360浏览器兼容模式</h1>").format(request_addr)
+            return "<h1 style='color: red'>IP:{}, {}</h1>".format(
+                request_addr, _('请不要使用IE浏览器或360浏览器兼容模式')
             )
         elif bw == 'Chrome' and bw_version < 71:
-            return (
-                f"<h1 style='color: red'>IP:{request_addr}, {_("Chrome内核版本号太低，请升级浏览器")}</h1>"
-                f"<h1 style='color: red'><a href='https://www.google.cn/chrome/'>{_('点击此处')}</a>{_('可下载最新版Chrome浏览器')}</h1>"
+            return "<h1 style='color: red'>IP:{}, {}</h1>".format(
+                request_addr,
+                _('Chrome内核版本号太低，请升级浏览器'),
+            ) + "<h1 style='color: red'><a href='https://www.google.cn/chrome/'>{}</a>{}</h1>".format(
+                _('点击此处'),
+                _('可下载最新版Chrome浏览器'),
             )
