@@ -15,6 +15,7 @@ from dash import set_props
 from yarl import URL
 from common.utilities.util_menu_access import get_menu_access
 from dash_view.pages import page_404, page_401
+from flask_babel import gettext as _  # noqa
 
 # 折叠侧边栏按钮回调
 app.clientside_callback(
@@ -192,7 +193,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
 
         return eval(f'application.{module_path}.get_title()')
 
-    breadcrumb_items = [{'title': '首页', 'href': '/dashboard/workbench'}]
+    breadcrumb_items = [{'title': _('首页'), 'href': '/dashboard/workbench'}]
     _modules: List = url_module_path.split('.')
     for i in range(len(_modules)):
         breadcrumb_items = breadcrumb_items + [{'title': get_title('.'.join(_modules[: i + 1]))}]

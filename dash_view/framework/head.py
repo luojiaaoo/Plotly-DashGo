@@ -1,6 +1,7 @@
 import feffery_antd_components as fac
 from dash import html
 from dash_view.framework.lang import render_lang_content
+from flask_babel import gettext as _  # noqa
 
 
 def render_head_content():
@@ -29,7 +30,7 @@ def render_head_content():
         # 页首面包屑区域
         fac.AntdCol(
             fac.AntdBreadcrumb(
-                items=[{'title': '首页', 'href': '/dashboard/workbench'}],
+                items=[{'title': _('首页'), 'href': '/dashboard/workbench'}],
                 id='header-breadcrumb',
                 style={
                     'height': '100%',

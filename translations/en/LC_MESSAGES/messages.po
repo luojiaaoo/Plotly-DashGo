@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-30 11:10+0800\n"
+"POT-Creation-Date: 2024-10-30 11:50+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -38,25 +38,29 @@ msgstr "You can download the latest version of Chrome"
 msgid "仪表盘"
 msgstr "DashBoard"
 
-#: dash_view/application/dashboard/monitor/__init__.py:9
+#: dash_view/application/dashboard/monitor/__init__.py:11
 msgid "监控页"
 msgstr "Monitor"
 
-#: dash_view/application/dashboard/workbench/__init__.py:8
+#: dash_view/application/dashboard/workbench/__init__.py:10
 msgid "工作台"
 msgstr "Workbench"
 
-#: dash_view/application/person/__init__.py:12
+#: dash_view/application/person/__init__.py:13
 msgid "个人页"
 msgstr "Person"
 
-#: dash_view/application/person/personal_info/__init__.py:11
+#: dash_view/application/person/personal_info/__init__.py:13
 msgid "个人信息"
-msgstr "Info"
+msgstr "Personal Info"
 
-#: dash_view/application/person/personal_setting/__init__.py:9
+#: dash_view/application/person/personal_setting/__init__.py:11
 msgid "个人设置"
-msgstr "Setting"
+msgstr "Personal Setting"
+
+#: dash_view/framework/head.py:33 dash_view/pages/main.py:196
+msgid "首页"
+msgstr "Home"
 
 #: dash_view/pages/login.py:86
 msgid "账号密码登录"
@@ -78,19 +82,19 @@ msgstr "verification code"
 msgid "保持{}小时免登录"
 msgstr "keep {} hours login"
 
-#: dash_view/pages/login.py:161
+#: dash_view/pages/login.py:163
 msgid "登录"
 msgstr "Login"
 
-#: dash_view/pages/login.py:334
+#: dash_view/pages/login.py:302
 msgid "请输入账号和密码"
 msgstr "Please enter your account number and password"
 
-#: dash_view/pages/login.py:341
+#: dash_view/pages/login.py:309
 msgid "验证码错误，请重新输入"
 msgstr "The verification code is incorrect, please re-enter it"
 
-#: dash_view/pages/login.py:357
+#: dash_view/pages/login.py:325
 msgid "用户名或密码错误"
 msgstr "The user name or password is incorrect"
 
