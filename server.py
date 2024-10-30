@@ -3,8 +3,10 @@ import dash
 from config.dash_melon_conf import ShowConf, FlaskConf, BabelConf
 from user_agents import parse
 from flask_babel import Babel
+from common.exception import AttackException
 from flask_babel import gettext as _  # noqa
 from common.utilities.util_logger import Log
+from config.dash_melon_conf import PathProj
 
 logger = Log.get_logger(__name__)
 
@@ -28,12 +30,18 @@ app.title = ShowConf.WEB_TITLE
 # flask实例
 server = app.server
 
+
 # 头像获取接口
 @server.route('/avatar/<user_name>')
 def download_file(user_name):
-    from config.dash_melon_conf import PathProj
     file_name = f'{user_name}.jpg'
-    return send_from_directory(PathProj.AVATAR_DIR_PATH, file_name)
+    if '..' in user_name:
+        try:
+            raise AttackException('有人尝试通过头像文件接口攻击')
+        except AttackException as e:
+            logger.warning(e.message, exc_info=True)
+    else:
+        return send_from_directory(PathProj.AVATAR_DIR_PATH, file_name)
 
 
 # 国际化
