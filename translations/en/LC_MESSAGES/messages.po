@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-30 11:50+0800\n"
+"POT-Creation-Date: 2024-10-30 12:51+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -51,8 +51,58 @@ msgid "个人页"
 msgstr "Person"
 
 #: dash_view/application/person/personal_info/__init__.py:13
+#: dash_view/application/person/personal_info/__init__.py:29
 msgid "个人信息"
 msgstr "Personal Info"
+
+#: dash_view/application/person/personal_info/__init__.py:36
+#, fuzzy
+msgid "用户名："
+msgstr "Please enter your username"
+
+#: dash_view/application/person/personal_info/__init__.py:42
+msgid "全名："
+msgstr "Full name:"
+
+#: dash_view/application/person/personal_info/__init__.py:48
+msgid "状态："
+msgstr "Status:"
+
+#: dash_view/application/person/personal_info/__init__.py:49
+msgid "status"
+msgstr ""
+
+#: dash_view/application/person/personal_info/__init__.py:54
+msgid "性别："
+msgstr "Sex:"
+
+#: dash_view/application/person/personal_info/__init__.py:55
+msgid "sex"
+msgstr ""
+
+#: dash_view/application/person/personal_info/__init__.py:60
+msgid "团队："
+msgstr "Group:"
+
+#: dash_view/application/person/personal_info/__init__.py:66
+msgid "类型："
+msgstr "Type:"
+
+#: dash_view/application/person/personal_info/__init__.py:67
+msgid "type"
+msgstr ""
+
+#: dash_view/application/person/personal_info/__init__.py:72
+msgid "邮箱："
+msgstr "E-mail:"
+
+#: dash_view/application/person/personal_info/__init__.py:78
+msgid "电话："
+msgstr "Phone:"
+
+#: dash_view/application/person/personal_info/__init__.py:84
+msgid "说明："
+msgstr "Remark:"
 
 #: dash_view/application/person/personal_setting/__init__.py:11
 msgid "个人设置"
@@ -97,4 +147,36 @@ msgstr "The verification code is incorrect, please re-enter it"
 #: dash_view/pages/login.py:325
 msgid "用户名或密码错误"
 msgstr "The user name or password is incorrect"
+
+#: translations/custom.py:3
+msgid "超级管理员"
+msgstr "Super Admin"
+
+#: translations/custom.py:4
+msgid "团队管理员"
+msgstr "Group Admin"
+
+#: translations/custom.py:5
+msgid "普通用户"
+msgstr "User"
+
+#: translations/custom.py:6
+msgid "未知"
+msgstr "Unkonwn"
+
+#: translations/custom.py:7
+msgid "男"
+msgstr "Male"
+
+#: translations/custom.py:8
+msgid "女"
+msgstr "Female"
+
+#: translations/custom.py:9
+msgid "正常"
+msgstr "Normal"
+
+#: translations/custom.py:10
+msgid "停用"
+msgstr "Disable"
 

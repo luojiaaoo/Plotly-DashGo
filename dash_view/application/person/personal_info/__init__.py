@@ -26,62 +26,62 @@ def render_content(menu_access: MenuAccess, **kwargs):
             ShadowDiv(
                 children=[
                     fac.AntdDivider(
-                        '个人信息',
+                        _('个人信息'),
                         innerTextOrientation='left',
                         fontStyle='oblique',
                         lineColor='#808080',
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText('用户名：', className='user_info_name'),
+                            fac.AntdText(_('用户名：'), className='user_info_name'),
                             fac.AntdText(user_info['user_name'], className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText('全名：', className='user_info_name'),
+                            fac.AntdText(_('全名：'), className='user_info_name'),
                             fac.AntdText(user_info['user_full_name'], className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText('状态：', className='user_info_name'),
-                            fac.AntdText(user_info['status'], className='user_info_value'),
+                            fac.AntdText(_('状态：'), className='user_info_name'),
+                            fac.AntdText(_(user_info['status']), className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText('性别：', className='user_info_name'),
-                            fac.AntdText(user_info['sex'], className='user_info_value'),
+                            fac.AntdText(_('性别：'), className='user_info_name'),
+                            fac.AntdText(_(user_info['sex']), className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText('团队：', className='user_info_name'),
+                            fac.AntdText(_('团队：'), className='user_info_name'),
                             fac.AntdText(user_info['groups'], className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText('类型：', className='user_info_name'),
-                            fac.AntdText(user_info['type'], className='user_info_value'),
+                            fac.AntdText(_('类型：'), className='user_info_name'),
+                            fac.AntdText(_(user_info['type']), className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText('邮箱：', className='user_info_name'),
+                            fac.AntdText(_('邮箱：'), className='user_info_name'),
                             fac.AntdText(user_info['email'], className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText('电话：', className='user_info_name'),
+                            fac.AntdText(_('电话：'), className='user_info_name'),
                             fac.AntdText(user_info['phone_number'], className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText('说明：', className='user_info_name'),
+                            fac.AntdText(_('说明：'), className='user_info_name'),
                             fac.AntdText(user_info['remark']),
                         ]
                     ),
