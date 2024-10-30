@@ -6,6 +6,7 @@ from typing import List
 class PathProj:
     ROOT_PATH = Path(__file__).parent.parent
     CONF_FILE_PATH = ROOT_PATH / 'config' / 'dash_melon.ini'
+    AVATAR_DIR_PATH = ROOT_PATH / 'assets' / 'avatars'
 
 
 conf = ConfigParser()

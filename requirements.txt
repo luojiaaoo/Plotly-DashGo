@@ -9,3 +9,4 @@ PyJWT==2.9.0
 user_agents==2.2.0
 yarl==1.16.0
 Flask-Babel==4.0.0
+pillow==10.4.0

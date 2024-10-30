@@ -7,7 +7,7 @@ from typing import Dict, List
 from dash.exceptions import PreventUpdate
 from dash import set_props
 from yarl import URL
-from common.utilities.util_menu_access import get_menu_access
+from common.utilities.util_menu_access import get_menu_access, MenuAccess
 from dash_view.pages import page_404, page_401
 from flask_babel import gettext as _  # noqa
 
@@ -141,7 +141,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
         ]
 
     # 获取用户权限
-    menu_access = get_menu_access()
+    menu_access: MenuAccess = get_menu_access()
     # 没有权限，返回401
     if url_module_path not in menu_access.menu_item:
         set_props('global-full-screen-container', {'children': page_401.render()})

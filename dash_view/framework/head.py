@@ -2,7 +2,7 @@ import feffery_antd_components as fac
 from dash import html
 from dash_view.framework.lang import render_lang_content
 from common.utilities.util_menu_access import MenuAccess
-from common.utilities.util_path import get_avatar_path
+from common.utilities.util_path import get_avatar_url
 from flask_babel import gettext as _  # noqa
 from server import app
 from dash.dependencies import Input, Output, State
@@ -55,7 +55,7 @@ def render_head_content(menu_access: MenuAccess):
                         fac.AntdAvatar(
                             id='global-head-avatar',
                             mode='image',
-                            src=get_avatar_path(menu_access.user_name),
+                            src=get_avatar_url(menu_access.user_name),
                             alt=menu_access.user_info.user_full_name,
                             size=36,
                         ),
