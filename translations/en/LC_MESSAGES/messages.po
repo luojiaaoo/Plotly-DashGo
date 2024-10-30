@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-30 14:27+0800\n"
+"POT-Creation-Date: 2024-10-30 21:50+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -34,6 +34,22 @@ msgstr "Click here"
 msgid "可下载最新版Chrome浏览器"
 msgstr "You can download the latest version of Chrome"
 
+#: dash_callback/pages/login_c.py:123
+msgid "请输入账号和密码"
+msgstr "Please enter your account number and password"
+
+#: dash_callback/pages/login_c.py:130
+msgid "验证码错误，请重新输入"
+msgstr "The verification code is incorrect, please re-enter it"
+
+#: dash_callback/pages/login_c.py:146
+msgid "用户名或密码错误"
+msgstr "The user name or password is incorrect"
+
+#: dash_callback/pages/main_c.py:128 dash_view/framework/head.py:39
+msgid "首页"
+msgstr "Home"
+
 #: dash_view/application/dashboard/__init__.py:12
 msgid "仪表盘"
 msgstr "DashBoard"
@@ -50,57 +66,45 @@ msgstr "Workbench"
 msgid "个人页"
 msgstr "Person"
 
-#: dash_view/application/person/personal_info/__init__.py:13
-#: dash_view/application/person/personal_info/__init__.py:29
-#: dash_view/framework/head.py:69
+#: dash_view/application/person/personal_info/__init__.py:17
+#: dash_view/application/person/personal_info/__init__.py:83
+#: dash_view/framework/head.py:71
 msgid "个人信息"
 msgstr "Personal Info"
 
-#: dash_view/application/person/personal_info/__init__.py:36
+#: dash_view/application/person/personal_info/__init__.py:90
 msgid "用户："
 msgstr "User Name:"
 
-#: dash_view/application/person/personal_info/__init__.py:42
+#: dash_view/application/person/personal_info/__init__.py:96
 msgid "全名："
 msgstr "Full Name:"
 
-#: dash_view/application/person/personal_info/__init__.py:48
+#: dash_view/application/person/personal_info/__init__.py:102
 msgid "状态："
 msgstr "Status:"
 
-#: dash_view/application/person/personal_info/__init__.py:49
-msgid "status"
-msgstr ""
-
-#: dash_view/application/person/personal_info/__init__.py:54
+#: dash_view/application/person/personal_info/__init__.py:108
 msgid "性别："
 msgstr "Sex:"
 
-#: dash_view/application/person/personal_info/__init__.py:55
-msgid "sex"
-msgstr ""
-
-#: dash_view/application/person/personal_info/__init__.py:60
+#: dash_view/application/person/personal_info/__init__.py:114
 msgid "团队："
 msgstr "Group:"
 
-#: dash_view/application/person/personal_info/__init__.py:66
+#: dash_view/application/person/personal_info/__init__.py:120
 msgid "类型："
 msgstr "Type:"
 
-#: dash_view/application/person/personal_info/__init__.py:67
-msgid "type"
-msgstr ""
-
-#: dash_view/application/person/personal_info/__init__.py:72
+#: dash_view/application/person/personal_info/__init__.py:126
 msgid "邮箱："
 msgstr "E-mail:"
 
-#: dash_view/application/person/personal_info/__init__.py:78
+#: dash_view/application/person/personal_info/__init__.py:132
 msgid "电话："
 msgstr "Phone:"
 
-#: dash_view/application/person/personal_info/__init__.py:84
+#: dash_view/application/person/personal_info/__init__.py:138
 msgid "说明："
 msgstr "Remark:"
 
@@ -108,49 +112,33 @@ msgstr "Remark:"
 msgid "个人设置"
 msgstr "Personal Setting"
 
-#: dash_view/framework/head.py:39 dash_view/pages/main.py:196
-msgid "首页"
-msgstr "Home"
-
-#: dash_view/framework/head.py:75
+#: dash_view/framework/head.py:77
 msgid "退出登录"
 msgstr "Logout"
 
-#: dash_view/pages/login.py:86
+#: dash_view/pages/login.py:36
 msgid "账号密码登录"
 msgstr "password login"
 
-#: dash_view/pages/login.py:100
+#: dash_view/pages/login.py:50
 msgid "请输入用户名"
 msgstr "Please enter your username"
 
-#: dash_view/pages/login.py:113
+#: dash_view/pages/login.py:63
 msgid "请输入密码"
 msgstr "Please enter password"
 
-#: dash_view/pages/login.py:127
+#: dash_view/pages/login.py:77
 msgid "请输入验证码"
 msgstr "verification code"
 
-#: dash_view/pages/login.py:149
+#: dash_view/pages/login.py:99
 msgid "保持{}小时免登录"
 msgstr "keep {} hours login"
 
-#: dash_view/pages/login.py:163
+#: dash_view/pages/login.py:113
 msgid "登录"
 msgstr "Login"
-
-#: dash_view/pages/login.py:302
-msgid "请输入账号和密码"
-msgstr "Please enter your account number and password"
-
-#: dash_view/pages/login.py:309
-msgid "验证码错误，请重新输入"
-msgstr "The verification code is incorrect, please re-enter it"
-
-#: dash_view/pages/login.py:325
-msgid "用户名或密码错误"
-msgstr "The user name or password is incorrect"
 
 #: translations/custom.py:3
 msgid "超级管理员"
@@ -183,4 +171,13 @@ msgstr "Normal"
 #: translations/custom.py:10
 msgid "停用"
 msgstr "Disable"
+
+#~ msgid "status"
+#~ msgstr ""
+
+#~ msgid "sex"
+#~ msgstr ""
+
+#~ msgid "type"
+#~ msgstr ""
 

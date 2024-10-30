@@ -4,4 +4,4 @@ import os
 
 
 def get_avatar_url(user_name: str):
-    return get_asset_url(os.path.join('avatars', get_user_avatar_filename(user_name)))
+    return get_asset_url('avatars/' + get_user_avatar_filename(user_name))

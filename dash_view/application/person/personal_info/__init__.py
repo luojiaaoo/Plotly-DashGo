@@ -44,7 +44,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                         },
                                     ),
                                     fuc.FefferyDiv(
-                                        _('修改头像'),
+                                        fac.AntdIcon(icon='antd-edit', style={'fontSize': '25px'}),
                                         className={
                                             'fontWight': 'bold',
                                             'color': '#f0f0f0',
@@ -65,7 +65,6 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                         },
                                     ),
                                 ],
-                                id='personal-info-avatar-button',
                                 type='text',
                                 shape='circle',
                                 style={
