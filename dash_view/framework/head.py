@@ -100,10 +100,11 @@ def render_head_content(menu_access: MenuAccess):
         Output('global-dcc-url', 'pathname', allow_duplicate=True),
         Output('global-reload', 'reload', allow_duplicate=True),
     ],
-    Input('global-head-user-name-dropdown', 'clickedKey'),
+    Input('global-head-user-name-dropdown', 'nClicks'),
+    State('global-head-user-name-dropdown', 'clickedKey'),
     prevent_initial_call=True,
 )
-def callback_func(clickedKey):
+def callback_func(nClicks, clickedKey):
     if clickedKey == '退出登录':
         from common.utilities.util_jwt import clear_access_token_from_session
 
