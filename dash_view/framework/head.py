@@ -1,5 +1,6 @@
 import feffery_antd_components as fac
 from dash import html
+from dash_view.framework.lang import render_lang_content
 
 
 def render_head_content():
@@ -146,4 +147,5 @@ def render_head_content():
             ),
             flex='None',
         ),
+        render_lang_content(),
     ]
