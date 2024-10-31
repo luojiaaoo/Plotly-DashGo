@@ -6,7 +6,7 @@ from common.utilities.util_logger import Log
 from dash import html
 from dash_components import ShadowDiv
 from dash import dcc
-from database.sql_db.dao import user
+from database.sql_db.dao import dao_user
 import dash_callback.application.personal_info_c  # noqa
 from flask_babel import gettext as _  # noqa
 

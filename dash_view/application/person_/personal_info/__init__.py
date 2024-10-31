@@ -6,7 +6,7 @@ from common.utilities.util_logger import Log
 from dash import html
 from dash_components import ShadowDiv
 from dash import dcc
-from database.sql_db.dao import user
+from database.sql_db.dao import dao_user
 import dash_callback.application.personal_info_c  # noqa
 from flask_babel import gettext as _  # noqa
 
@@ -23,7 +23,7 @@ order = 1
 
 def render_content(menu_access: MenuAccess, **kwargs):
     access_metas: List[str] = menu_access.get_access_metas(__name__)
-    user_info = user.get_user_info(menu_access.user_name)
+    user_info = dao_user.get_user_info(menu_access.user_name)
     return html.Div(
         [
             ShadowDiv(
