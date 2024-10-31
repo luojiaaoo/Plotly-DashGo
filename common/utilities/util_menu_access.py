@@ -1,4 +1,4 @@
-from database.sql_db.dao.dao_user import get_all_menu_item_and_access_meta, get_user_info, UserInfo
+from database.sql_db.dao.dao_user import get_user_menu_item_and_access_meta, get_user_info, UserInfo
 from typing import Dict, List, Set
 from common.utilities.util_logger import Log
 from config.access_factory import AccessFactory
@@ -23,7 +23,7 @@ class MenuAccess:
         # 比如 menu_item:  dashboard_.workbench:log_info,冒号前为视图的包路径，后面为权限列表
         user_name = user_info.user_name
         user_type = user_info.user_type
-        all_menu_item_and_access_meta: Set[str] = get_all_menu_item_and_access_meta(user_name=user_name)
+        all_menu_item_and_access_meta: Set[str] = get_user_menu_item_and_access_meta(user_name=user_name)
         all_menu_item_and_access_meta.update(AccessFactory.default_menu_item_and_access_meta)
         if user_type == '超级管理员':
             all_menu_item_and_access_meta.update(AccessFactory.super_admin_menu_item_and_access_meta)

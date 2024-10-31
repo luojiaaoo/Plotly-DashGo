@@ -1,10 +1,10 @@
-from database.sql_db.dao.dao_user import get_all_menu_item_and_access_meta
+from database.sql_db.dao.dao_user import get_dict_label2menu_item_access_meta
 
 
 # 本应用的权限工厂
 class AccessFactory:
     # 读取数据库中配置的所有权限
-    dict_label2menu_item_access_meta = get_all_menu_item_and_access_meta()
+    dict_label2menu_item_access_meta = get_dict_label2menu_item_access_meta()
 
     # 基础默认权限，主页和个人中心
     default_menu_item_and_access_meta = (

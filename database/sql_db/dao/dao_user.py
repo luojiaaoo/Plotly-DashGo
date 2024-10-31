@@ -94,7 +94,7 @@ def get_menu_item_and_access_meta_from_roles(roles: Union[List[str], Set[str]]) 
         return set([per_rt[0] for per_rt in result])
 
 
-def get_all_menu_item_and_access_meta(user_name: str) -> Set[str]:
+def get_user_menu_item_and_access_meta(user_name: str) -> Set[str]:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
             """
@@ -124,4 +124,4 @@ def get_dict_label2menu_item_access_meta() -> Dict[str, str]:
             """,
         )
         result = cursor.fetchall()
-        return dict(zip(result))
+        return dict(result)
