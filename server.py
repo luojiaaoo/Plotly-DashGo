@@ -1,4 +1,4 @@
-from flask import request, session, redirect, send_from_directory
+from flask import request, session, redirect, send_from_directory, abort
 import dash
 from config.dash_melon_conf import ShowConf, FlaskConf, BabelConf
 from user_agents import parse
@@ -58,9 +58,16 @@ babel.init_app(app=server, locale_selector=select_locale)
 
 # 首页拦截器
 @server.before_request
-def before_request():
+def main_page_redirct():
     if request.path == '/':
         return redirect('/dashboard/workbench')
+
+
+# 恶意访问管理页面拦截器
+@server.before_request
+def ban_admin():
+    if request.path.startswith('/admin'):
+        abort(403)
 
 
 # 获取用户浏览器信息
