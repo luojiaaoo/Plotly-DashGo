@@ -4,7 +4,7 @@ import feffery_antd_components as fac
 import feffery_utils_components as fuc
 from common.utilities.util_logger import Log
 from dash import html
-from dash_components import ShadowDiv
+from dash_components import ShadowDiv,ShadowTab
 from dash import dcc
 from database.sql_db.dao import dao_user
 import dash_callback.application.personal_info_c  # noqa
@@ -20,14 +20,20 @@ icon = None
 logger = Log.get_logger(__name__)
 order = 1
 
-access_metas = (
-    '权限列表-页面',
-)
+access_metas = ('权限列表-页面',)
+
 
 def render_content(menu_access: MenuAccess, **kwargs):
     access_metas: List[str] = menu_access.all_access_metas
     logger.debug(
         f'用户：{menu_access.user_name}，访问：{__name__}，参数列表：{kwargs}，权限元：{access_metas}'
     )
-
-
+    return html.Div(
+        [
+            ShadowTab(
+                columns=[{'title': f'字段{i}', 'dataIndex': f'字段{i}'} for i in range(1, 6)],
+                data=[{f'字段{i}': '示例内容' for i in range(1, 6)}] * 3,
+            ),
+        ],
+        style={'display': 'flex'},
+    )
