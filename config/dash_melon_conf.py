@@ -20,6 +20,8 @@ class BaseMetaConf(type):
             if sub_conf.get(stat_var_name) is not None:
                 if type_ == List:
                     dct[stat_var_name] = sub_conf.get(stat_var_name).split()
+                elif type_ is bool:
+                    dct[stat_var_name] = eval(sub_conf.get(stat_var_name))
                 else:
                     dct[stat_var_name] = type_(sub_conf.get(stat_var_name))
         return super().__new__(cls, name, bases, dct)
