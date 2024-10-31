@@ -20,4 +20,8 @@ icon = None
 logger = Log.get_logger(__name__)
 order = 1
 
+access_metas = {
+    '权限列表-页面': 'show',
+}
+
 # def render_content():

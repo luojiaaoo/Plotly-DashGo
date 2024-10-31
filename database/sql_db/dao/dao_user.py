@@ -114,14 +114,3 @@ def get_user_menu_item_and_access_meta(user_name: str) -> Set[str]:
         result = cursor.fetchall()
         return set([per_rt[0] for per_rt in result])
 
-
-def get_dict_label2menu_item_access_meta() -> Dict[str, str]:
-    with pool.get_connection() as conn, conn.cursor() as cursor:
-        cursor.execute(
-            """
-                SELECT label, menu_item_access_meta
-                FROM sys_menu_item_access_meta;
-            """,
-        )
-        result = cursor.fetchall()
-        return dict(result)

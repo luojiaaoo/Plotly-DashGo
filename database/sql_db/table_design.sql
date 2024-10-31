@@ -34,26 +34,6 @@ CREATE TABLE `sys_group`  (
 -- ----------------------------
 
 -- ----------------------------
--- Table structure for sys_menu_item_access_meta
--- ----------------------------
-DROP TABLE IF EXISTS `sys_menu_item_access_meta`;
-CREATE TABLE `sys_menu_item_access_meta`  (
-  `label` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `menu_item_access_meta` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of sys_menu_item_access_meta
--- ----------------------------
-INSERT INTO `sys_menu_item_access_meta` VALUES ('个人信息页面', 'person_.personal_info:show');
-INSERT INTO `sys_menu_item_access_meta` VALUES ('个人设置页面', 'person_.personal_setting:show');
-INSERT INTO `sys_menu_item_access_meta` VALUES ('工作台页面', 'dashboard_.workbench:show');
-INSERT INTO `sys_menu_item_access_meta` VALUES ('权限列表页面', 'access_.access_meta:show');
-INSERT INTO `sys_menu_item_access_meta` VALUES ('用户授权页面', 'access_.user_auth:show');
-INSERT INTO `sys_menu_item_access_meta` VALUES ('团队管理页面', 'access_.group_auth:show');
-INSERT INTO `sys_menu_item_access_meta` VALUES ('角色管理页面', 'access_.role_auth:show');
-
--- ----------------------------
 -- Table structure for sys_role
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_role`;

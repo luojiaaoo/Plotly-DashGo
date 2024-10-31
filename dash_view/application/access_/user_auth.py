@@ -20,3 +20,6 @@ icon = None
 logger = Log.get_logger(__name__)
 order = 4
 
+access_metas = {
+    '用户权限-页面': 'show',
+}

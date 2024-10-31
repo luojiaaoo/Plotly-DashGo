@@ -3,7 +3,6 @@ from typing import List
 import feffery_antd_components as fac
 from common.utilities.util_logger import Log
 from dash import html
-from common.utilities.util_menu_access import enter_access_check
 from flask_babel import gettext as _  # noqa
 
 
@@ -16,9 +15,12 @@ icon = None
 order = 2
 logger = Log.get_logger(__name__)
 
-@enter_access_check(__name__)
+access_metas = {
+    '监控页-页面': 'show',
+}
+
+
 def render_content(menu_access: MenuAccess, **kwargs):
-    menu_access.get_access_meta_from_label(__name__, '监控页面')
     return html.Iframe(
         style={
             'width': '100%',
