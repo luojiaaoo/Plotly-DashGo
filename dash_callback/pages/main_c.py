@@ -75,7 +75,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
     has_open_tab_keys = has_open_tab_keys or []
 
     url = URL(href)
-    url_module_path = '.'.join(url.parts[1:])  # 访问路径，第一个为/，去除
+    url_menu_item = '.'.join(url.parts[1:])  # 访问路径，第一个为/，去除
     url_query: Dict = url.query  # 查询参数
     url_fragment: str = url.fragment  # 获取锚链接
     param = {
@@ -86,9 +86,9 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
     # 当重载页面时，如果访问的不是首页，则先访问首页，再自动访问目标页
     relocation = False
     last_herf = ''
-    if trigger == 'load' and url_module_path != 'dashboard_.workbench':
+    if trigger == 'load' and url_menu_item != 'dashboard_.workbench':
         relocation = True
-        url_module_path = 'dashboard_.workbench'
+        url_menu_item = 'dashboard_.workbench'
         param = {}
         # 保存目标页的url
         from uuid import uuid4
@@ -103,21 +103,21 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
         )
     try:
         # 导入对应的页面模块
-        module_page = importlib.import_module(f'dash_view.application.{url_module_path}')
+        module_page = importlib.import_module(f'dash_view.application.{url_menu_item}')
     except Exception:
         # 没有该页面对应的模块，返回404
         set_props('global-full-screen-container', {'children': page_404.render()})
         return dash.no_update
 
-    def module_path2url_path(module_path: str, parent_count=0) -> str:
+    def menu_item2url_path(menu_item: str, parent_count=0) -> str:
         if parent_count > 0:
-            return '/' + '/'.join(module_path.split('.')[:-parent_count])
+            return '/' + '/'.join(menu_item.split('.')[:-parent_count])
         else:
-            return '/' + '/'.join(module_path.split('.'))
+            return '/' + '/'.join(menu_item.split('.'))
 
     # 构建key的字符串格式
-    key_url_path = module_path2url_path(url_module_path)
-    key_url_path_parent = module_path2url_path(url_module_path, 1)
+    key_url_path = menu_item2url_path(url_menu_item)
+    key_url_path_parent = menu_item2url_path(url_menu_item, 1)
 
     # 构建面包屑格式
     def get_title(module_path):
@@ -126,7 +126,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
         return eval(f'application.{module_path}.get_title()')
 
     breadcrumb_items = [{'title': _('首页'), 'href': '/dashboard_/workbench'}]
-    _modules: List = url_module_path.split('.')
+    _modules: List = url_menu_item.split('.')
     for i in range(len(_modules)):
         breadcrumb_items = breadcrumb_items + [{'title': get_title('.'.join(_modules[: i + 1]))}]
 
@@ -143,7 +143,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
     # 获取用户权限
     menu_access: MenuAccess = get_menu_access()
     # 没有权限，返回401
-    if url_module_path not in menu_access.menu_item:
+    if url_menu_item not in menu_access.menu_items:
         set_props('global-full-screen-container', {'children': page_401.render()})
         return dash.no_update
 

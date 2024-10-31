@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-31 11:13+0800\n"
+"POT-Creation-Date: 2024-10-31 22:46+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -50,65 +50,85 @@ msgstr "The user name or password is incorrect"
 msgid "首页"
 msgstr "Home"
 
-#: dash_view/application/dashboard_/__init__.py:12
+#: dash_view/application/access_/__init__.py:6
+msgid "权限管理"
+msgstr "Access Mgmt"
+
+#: dash_view/application/access_/access_meta.py:16
+msgid "权限列表"
+msgstr "Access List"
+
+#: dash_view/application/access_/group_auth.py:16
+msgid "团队管理"
+msgstr "Group Mgmt"
+
+#: dash_view/application/access_/role_auth.py:16
+msgid "角色管理"
+msgstr "Role Mgmt"
+
+#: dash_view/application/access_/user_auth.py:16
+msgid "用户权限"
+msgstr "User Auth"
+
+#: dash_view/application/dashboard_/__init__.py:6
 msgid "仪表盘"
 msgstr "DashBoard"
 
-#: dash_view/application/dashboard_/monitor/__init__.py:11
+#: dash_view/application/dashboard_/monitor.py:11
 msgid "监控页"
 msgstr "Monitor"
 
-#: dash_view/application/dashboard_/workbench/__init__.py:10
+#: dash_view/application/dashboard_/workbench.py:10
 msgid "工作台"
 msgstr "Workbench"
 
-#: dash_view/application/person_/__init__.py:13
+#: dash_view/application/person_/__init__.py:6
 msgid "个人页"
 msgstr "Person"
 
-#: dash_view/application/person_/personal_info/__init__.py:16
-#: dash_view/application/person_/personal_info/__init__.py:82
+#: dash_view/application/person_/personal_info.py:16
+#: dash_view/application/person_/personal_info.py:84
 #: dash_view/framework/head.py:70
 msgid "个人信息"
 msgstr "Personal Info"
 
-#: dash_view/application/person_/personal_info/__init__.py:89
+#: dash_view/application/person_/personal_info.py:91
 msgid "用户："
 msgstr "User Name:"
 
-#: dash_view/application/person_/personal_info/__init__.py:95
+#: dash_view/application/person_/personal_info.py:97
 msgid "全名："
 msgstr "Full Name:"
 
-#: dash_view/application/person_/personal_info/__init__.py:101
+#: dash_view/application/person_/personal_info.py:103
 msgid "状态："
 msgstr "Status:"
 
-#: dash_view/application/person_/personal_info/__init__.py:107
+#: dash_view/application/person_/personal_info.py:109
 msgid "性别："
 msgstr "Sex:"
 
-#: dash_view/application/person_/personal_info/__init__.py:113
+#: dash_view/application/person_/personal_info.py:115
 msgid "团队："
 msgstr "Group:"
 
-#: dash_view/application/person_/personal_info/__init__.py:119
+#: dash_view/application/person_/personal_info.py:121
 msgid "类型："
 msgstr "Type:"
 
-#: dash_view/application/person_/personal_info/__init__.py:125
+#: dash_view/application/person_/personal_info.py:127
 msgid "邮箱："
 msgstr "E-mail:"
 
-#: dash_view/application/person_/personal_info/__init__.py:131
+#: dash_view/application/person_/personal_info.py:133
 msgid "电话："
 msgstr "Phone:"
 
-#: dash_view/application/person_/personal_info/__init__.py:137
+#: dash_view/application/person_/personal_info.py:139
 msgid "说明："
 msgstr "Remark:"
 
-#: dash_view/application/person_/personal_setting/__init__.py:11
+#: dash_view/application/person_/personal_setting.py:11
 msgid "个人设置"
 msgstr "Personal Setting"
 

@@ -20,6 +20,6 @@ icon = None
 logger = Log.get_logger(__name__)
 order = 3
 
-access_metas = {
-    '团队管理-页面': 'show',
-}
+access_metas = (
+    '团队管理-页面',
+)

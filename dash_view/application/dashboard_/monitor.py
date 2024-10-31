@@ -15,9 +15,9 @@ icon = None
 order = 2
 logger = Log.get_logger(__name__)
 
-access_metas = {
-    '监控页-页面': 'show',
-}
+access_metas = (
+    '监控页-页面',
+)
 
 
 def render_content(menu_access: MenuAccess, **kwargs):

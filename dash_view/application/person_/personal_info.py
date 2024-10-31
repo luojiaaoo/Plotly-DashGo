@@ -19,12 +19,12 @@ def get_title():
 icon = None
 logger = Log.get_logger(__name__)
 order = 1
-access_metas = {
-    '个人信息-页面': 'show',
-}
+access_metas = (
+    '个人信息-页面',
+)
 
 def render_content(menu_access: MenuAccess, **kwargs):
-    access_metas: List[str] = menu_access.get_access_metas(__name__)
+    access_metas: List[str] = menu_access.all_access_metas
     user_info = dao_user.get_user_info(menu_access.user_name)
     return html.Div(
         [
