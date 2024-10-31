@@ -66,7 +66,7 @@ babel.init_app(app=server, locale_selector=select_locale)
 @server.before_request
 def main_page_redirct():
     if request.path == '/':
-        return redirect('/dashboard/workbench')
+        return redirect('/dashboard_/workbench')
 
 
 # 恶意访问管理页面拦截器

@@ -86,9 +86,9 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
     # 当重载页面时，如果访问的不是首页，则先访问首页，再自动访问目标页
     relocation = False
     last_herf = ''
-    if trigger == 'load' and url_module_path != 'dashboard.workbench':
+    if trigger == 'load' and url_module_path != 'dashboard_.workbench':
         relocation = True
-        url_module_path = 'dashboard.workbench'
+        url_module_path = 'dashboard_.workbench'
         param = {}
         # 保存目标页的url
         from uuid import uuid4
@@ -125,7 +125,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
 
         return eval(f'application.{module_path}.get_title()')
 
-    breadcrumb_items = [{'title': _('首页'), 'href': '/dashboard/workbench'}]
+    breadcrumb_items = [{'title': _('首页'), 'href': '/dashboard_/workbench'}]
     _modules: List = url_module_path.split('.')
     for i in range(len(_modules)):
         breadcrumb_items = breadcrumb_items + [{'title': get_title('.'.join(_modules[: i + 1]))}]
@@ -178,7 +178,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
                 'label': module_page.get_title(),
                 'key': key_url_path,
                 # 工作台不能关闭
-                'closable': False if key_url_path == '/dashboard/workbench' else True,
+                'closable': False if key_url_path == '/dashboard_/workbench' else True,
                 'children': module_page.render_content(menu_access, **param),
             }
         )

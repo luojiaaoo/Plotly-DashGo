@@ -1,17 +1,17 @@
 /*
- Navicat Premium Data Transfer
+ Navicat Premium Dump SQL
 
- Source Server         : dash
+ Source Server         : dashMelon
  Source Server Type    : MySQL
- Source Server Version : 50744
+ Source Server Version : 50744 (5.7.44)
  Source Host           : localhost:3306
  Source Schema         : app
 
  Target Server Type    : MySQL
- Target Server Version : 50744
+ Target Server Version : 50744 (5.7.44)
  File Encoding         : 65001
 
- Date: 30/10/2024 22:32:16
+ Date: 31/10/2024 11:17:32
 */
 
 SET NAMES utf8mb4;
@@ -105,10 +105,10 @@ CREATE TABLE `sys_role`  (
 -- ----------------------------
 -- Records of sys_role
 -- ----------------------------
-INSERT INTO `sys_role` VALUES (1, 'role1', 'dashboard.workbench:access2');
-INSERT INTO `sys_role` VALUES (2, 'role1', 'dashboard.monitor:access1');
-INSERT INTO `sys_role` VALUES (3, 'role1', 'dashboard.workbench:show');
-INSERT INTO `sys_role` VALUES (4, 'role1', 'dashboard.monitor:show');
+INSERT INTO `sys_role` VALUES (1, 'role1', 'dashboard_.workbench:access2');
+INSERT INTO `sys_role` VALUES (2, 'role1', 'dashboard_.monitor:access1');
+INSERT INTO `sys_role` VALUES (3, 'role1', 'dashboard_.workbench:show');
+INSERT INTO `sys_role` VALUES (4, 'role1', 'dashboard_.monitor:show');
 
 -- ----------------------------
 -- Table structure for sys_user
@@ -152,7 +152,7 @@ CREATE TABLE `sys_user_access_meta`  (
 -- ----------------------------
 -- Records of sys_user_access_meta
 -- ----------------------------
-INSERT INTO `sys_user_access_meta` VALUES (1, 'admin', 'dashboard.workbench:access1');
+INSERT INTO `sys_user_access_meta` VALUES (1, 'admin', 'dashboard_.workbench:access1');
 
 -- ----------------------------
 -- Table structure for sys_user_role

@@ -7,9 +7,9 @@ logger = Log.get_logger(__name__)
 
 class MenuAccess:
     default_menu_item_and_access_meta = (
-        'person.personal_info:show',
-        'person.personal_setting:show',
-        'dashboard.workbench:show',
+        'person_.personal_info:show',
+        'person_.personal_setting:show',
+        'dashboard_.workbench:show',
     )
 
     @classmethod
@@ -25,7 +25,7 @@ class MenuAccess:
         返回:
         Dict[str, List[str]]: 一个字典，其中键是菜单项的模块路径，值是对应的权限列表。
         """
-        # 比如 menu_item:  dashboard.workbench:log_info,冒号前为视图的包路径，后面为权限列表
+        # 比如 menu_item:  dashboard_.workbench:log_info,冒号前为视图的包路径，后面为权限列表
         all_menu_item_and_access_meta: Set[str] = get_all_menu_item_and_access_meta(user_name=user_name)
         all_menu_item_and_access_meta.update(cls.default_menu_item_and_access_meta)
         dict_menu_item_and_access_meta = dict()

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-30 21:50+0800\n"
+"POT-Creation-Date: 2024-10-31 11:13+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,19 +18,19 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.16.0\n"
 
-#: server.py:62
+#: server.py:96
 msgid "请不要使用IE浏览器或360浏览器兼容模式"
 msgstr "Please do not use Internet Explorer"
 
-#: server.py:67
+#: server.py:101
 msgid "Chrome内核版本号太低，请升级浏览器"
 msgstr "The Chrome kernel version is too low. Please upgrade the browser"
 
-#: server.py:69
+#: server.py:103
 msgid "点击此处"
 msgstr "Click here"
 
-#: server.py:70
+#: server.py:104
 msgid "可下载最新版Chrome浏览器"
 msgstr "You can download the latest version of Chrome"
 
@@ -46,73 +46,73 @@ msgstr "The verification code is incorrect, please re-enter it"
 msgid "用户名或密码错误"
 msgstr "The user name or password is incorrect"
 
-#: dash_callback/pages/main_c.py:128 dash_view/framework/head.py:39
+#: dash_callback/pages/main_c.py:128 dash_view/framework/head.py:38
 msgid "首页"
 msgstr "Home"
 
-#: dash_view/application/dashboard/__init__.py:12
+#: dash_view/application/dashboard_/__init__.py:12
 msgid "仪表盘"
 msgstr "DashBoard"
 
-#: dash_view/application/dashboard/monitor/__init__.py:11
+#: dash_view/application/dashboard_/monitor/__init__.py:11
 msgid "监控页"
 msgstr "Monitor"
 
-#: dash_view/application/dashboard/workbench/__init__.py:10
+#: dash_view/application/dashboard_/workbench/__init__.py:10
 msgid "工作台"
 msgstr "Workbench"
 
-#: dash_view/application/person/__init__.py:13
+#: dash_view/application/person_/__init__.py:13
 msgid "个人页"
 msgstr "Person"
 
-#: dash_view/application/person/personal_info/__init__.py:17
-#: dash_view/application/person/personal_info/__init__.py:83
-#: dash_view/framework/head.py:71
+#: dash_view/application/person_/personal_info/__init__.py:16
+#: dash_view/application/person_/personal_info/__init__.py:82
+#: dash_view/framework/head.py:70
 msgid "个人信息"
 msgstr "Personal Info"
 
-#: dash_view/application/person/personal_info/__init__.py:90
+#: dash_view/application/person_/personal_info/__init__.py:89
 msgid "用户："
 msgstr "User Name:"
 
-#: dash_view/application/person/personal_info/__init__.py:96
+#: dash_view/application/person_/personal_info/__init__.py:95
 msgid "全名："
 msgstr "Full Name:"
 
-#: dash_view/application/person/personal_info/__init__.py:102
+#: dash_view/application/person_/personal_info/__init__.py:101
 msgid "状态："
 msgstr "Status:"
 
-#: dash_view/application/person/personal_info/__init__.py:108
+#: dash_view/application/person_/personal_info/__init__.py:107
 msgid "性别："
 msgstr "Sex:"
 
-#: dash_view/application/person/personal_info/__init__.py:114
+#: dash_view/application/person_/personal_info/__init__.py:113
 msgid "团队："
 msgstr "Group:"
 
-#: dash_view/application/person/personal_info/__init__.py:120
+#: dash_view/application/person_/personal_info/__init__.py:119
 msgid "类型："
 msgstr "Type:"
 
-#: dash_view/application/person/personal_info/__init__.py:126
+#: dash_view/application/person_/personal_info/__init__.py:125
 msgid "邮箱："
 msgstr "E-mail:"
 
-#: dash_view/application/person/personal_info/__init__.py:132
+#: dash_view/application/person_/personal_info/__init__.py:131
 msgid "电话："
 msgstr "Phone:"
 
-#: dash_view/application/person/personal_info/__init__.py:138
+#: dash_view/application/person_/personal_info/__init__.py:137
 msgid "说明："
 msgstr "Remark:"
 
-#: dash_view/application/person/personal_setting/__init__.py:11
+#: dash_view/application/person_/personal_setting/__init__.py:11
 msgid "个人设置"
 msgstr "Personal Setting"
 
-#: dash_view/framework/head.py:77
+#: dash_view/framework/head.py:76
 msgid "退出登录"
 msgstr "Logout"
 

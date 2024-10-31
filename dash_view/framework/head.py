@@ -35,7 +35,7 @@ def render_head_content(menu_access: MenuAccess):
         # 页首面包屑区域
         fac.AntdCol(
             fac.AntdBreadcrumb(
-                items=[{'title': _('首页'), 'href': '/dashboard/workbench'}],
+                items=[{'title': _('首页'), 'href': '/dashboard_/workbench'}],
                 id='header-breadcrumb',
                 style={
                     'height': '100%',
@@ -112,5 +112,5 @@ def callback_func(nClicks, clickedKey):
         clear_access_token_from_session()
         return dash.no_update, True
     elif clickedKey == '个人信息':
-        return '/person/personal_info', dash.no_update
+        return '/person_/personal_info', dash.no_update
     return PreventUpdate
