@@ -36,3 +36,28 @@ class AccessFactory:
     super_admin_access_meta = dict_access_meta2module_path.keys()
 
     # 检查数据库和应用权限
+    @classmethod
+    def check_access_meta(cls) -> None:
+        from common.utilities.util_logger import Log
+
+        logger = Log.get_logger(__name__)
+
+        # 每个VIEW的权限唯一性检查
+        from collections import Counter
+
+        all_access_metas = []
+        for view in cls.views:
+            all_access_metas.append(view.access_metas)
+        dict_va_cou = Counter(all_access_metas)
+        for va, cou in dict_va_cou.items():
+            if cou > 1:
+                logger.error(f'以下权限多次定义：{va}')
+                raise ValueError(f'以下权限多次定义：{va}')
+
+        # 数据库检查
+        from database.sql_db.dao.dao_user import get_all_access_meta_for_setup_check
+
+        outliers = get_all_access_meta_for_setup_check() - set(cls.dict_access_meta2module_path.keys())
+        if outliers:
+            logger.error(f'数据库中存在未定义的权限：{outliers}')
+            raise ValueError(f'数据库中存在未定义的权限：{outliers}')

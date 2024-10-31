@@ -24,6 +24,18 @@ def user_password_verify(user_name: str, password_sha256: str) -> bool:
         return result is not None
 
 
+def get_all_access_meta_for_setup_check() -> Set[str]:
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            """SELECT access_meta FROM sys_role
+            UNION
+            SELECT access_meta FROM sys_user_access_meta;
+            """
+        )
+        result = cursor.fetchall()
+        return set([per_rt[0] for per_rt in result])
+
+
 @dataclass
 class UserInfo:
     user_name: str
@@ -113,4 +125,3 @@ def get_user_access_meta_plus_role(user_name: str) -> Set[str]:
         )
         result = cursor.fetchall()
         return set([per_rt[0] for per_rt in result])
-
