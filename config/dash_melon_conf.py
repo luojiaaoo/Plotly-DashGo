@@ -18,7 +18,7 @@ class BaseMetaConf(type):
         sub_conf = conf[name]
         for stat_var_name, type_ in dct['__annotations__'].items():
             if sub_conf.get(stat_var_name) is not None:
-                if type_ == List:
+                if type_ is List:
                     dct[stat_var_name] = sub_conf.get(stat_var_name).split()
                 elif type_ is bool:
                     dct[stat_var_name] = eval(sub_conf.get(stat_var_name))
