@@ -2,13 +2,16 @@ from database.sql_db.dao.dao_user import get_user_menu_item_and_access_meta, get
 from typing import Dict, List, Set
 from common.utilities.util_logger import Log
 from config.access_factory import AccessFactory
+from common.exception import AccessException
+import re
+from flask_babel import gettext as _  # noqa
 
 logger = Log.get_logger(__name__)
 
 
 class MenuAccess:
-
-    def get_dict_menu_item_and_access_meta(self, user_info:UserInfo) -> Dict[str, List[str]]:
+    @classmethod
+    def get_dict_menu_item_and_access_meta(cls, user_info: UserInfo) -> Dict[str, List[str]]:
         """获取用户可访问的菜单项权限字典
 
         根据用户名获取该用户可以访问的所有菜单项和应用权限，并将其整理为字典格式。
@@ -58,7 +61,7 @@ class MenuAccess:
 
             try:
                 return eval(f'application.{module_path}.order')
-            except:
+            except Exception:
                 logger.warning(f'{module_path}没有定义order属性')
                 return 999
 
@@ -67,7 +70,7 @@ class MenuAccess:
 
             try:
                 return eval(f'application.{module_path}.icon')
-            except:
+            except Exception:
                 return None
 
         # 根据order属性排序
@@ -114,7 +117,55 @@ class MenuAccess:
         """获取用户可访问的权限元"""
         # 传进来的是__name__包路径，去掉前缀才是菜单项
         menu_item_name = module_path.replace('dash_view.application.', '')
+        # 回调的路径转换为view的路径
+        menu_item_name = menu_item_name.replace('dash_callback.application.', '')
+        menu_item_name = re.sub(r'_c$', '', menu_item_name)
         return self.dict_menu_item_and_access_meta.get(menu_item_name)
+
+    @classmethod
+    def get_access_meta_from_label(cls, module_path: str, label: str) -> str:
+        """获取根据标签获取用户权限元"""
+        # 传进来的是__name__包路径，去掉前缀才是菜单项
+        menu_item_name = module_path.replace('dash_view.application.', '')
+        # 回调的路径转换为view的路径
+        menu_item_name = menu_item_name.replace('dash_callback.application.', '')
+        menu_item_name = re.sub(r'_c$', '', menu_item_name)
+        menu_item_access_meta = AccessFactory.dict_label2menu_item_access_meta.get(label, None)
+        if menu_item_access_meta is None:
+            e = AccessException(f'{module_path}模块： 权限标签({label})不存在，请检查模块代码，权限标签在数据库表sys_menu_item_access_meta中是否存在')
+            logger.warning(e)
+            raise e
+        else:
+            menu_item_, access_meta_ = menu_item_access_meta.split(':')
+            if menu_item_name != menu_item_:
+                e = AccessException(f'{module_path}模块： 权限标签({label})非本模块的授权，请检查模块代码')
+                logger.warning(e)
+                raise e
+            else:
+                return access_meta_
+
+# view入口权限检查器
+def enter_access_check(module_path):
+    def wrap(func):
+        def inner(*args, **kwargs):
+            if 'menu_access' in kwargs:
+                menu_access = kwargs['menu_access']
+            else:
+                menu_access = args[0]
+            print(menu_access.get_access_metas(module_path))
+            try:
+                access_metas: List[str] = menu_access.get_access_metas(module_path)
+                if 'show' not in access_metas:
+                    return _('您没有权限显示该页面')
+                rt = func(*args, **kwargs)
+            except AccessException as e:
+                return _('内部错误：权限异常，请联系开发者')
+            else:
+                return rt
+
+        return inner
+
+    return wrap
 
 
 def get_menu_access() -> MenuAccess:

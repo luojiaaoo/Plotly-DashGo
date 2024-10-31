@@ -3,6 +3,7 @@ from typing import List
 import feffery_antd_components as fac
 from common.utilities.util_logger import Log
 from dash import html
+from common.utilities.util_menu_access import enter_access_check
 from flask_babel import gettext as _  # noqa
 
 
@@ -15,11 +16,9 @@ icon = None
 order = 2
 logger = Log.get_logger(__name__)
 
-
+@enter_access_check(__name__)
 def render_content(menu_access: MenuAccess, **kwargs):
-    access_metas: List[str] = menu_access.get_access_metas(__name__)
-    if 'show' not in access_metas:
-        return '您没有权限显示该页面'
+    menu_access.get_access_meta_from_label(__name__, '监控页面')
     return html.Iframe(
         style={
             'width': '100%',
