@@ -2,7 +2,7 @@ from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad
 import base64
 from Crypto.Random import get_random_bytes
-from config.dash_melon_conf import EncryptConf
+from config.dash_melon_conf import CommonConf
 from typing import Optional
 
 
@@ -15,7 +15,7 @@ def encrypt_data(data: str, key: Optional[str] = None) -> str:
     :return: 加密后的数据，Base64编码的字符串
     """
     if key is None:
-        key = EncryptConf.CUSTOM_KEY
+        key = CommonConf.ENCRYPT_KEY
     key_bytes = bytes.fromhex(key)
 
     # 生成一个随机的16字节IV（初始化向量）
@@ -46,7 +46,7 @@ def decrypt_data(encrypted_data: str, key: Optional[str] = None) -> str:
     :return: 解密后的数据
     """
     if key is None:
-        key = EncryptConf.CUSTOM_KEY
+        key = CommonConf.ENCRYPT_KEY
     key_bytes = bytes.fromhex(key)
 
     # 将Base64编码的字符串解码

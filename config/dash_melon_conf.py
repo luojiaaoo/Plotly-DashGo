@@ -41,8 +41,9 @@ class BabelConf(metaclass=BaseMetaConf):
     LANGUAGES: List = ['zh', 'en']
 
 
-class EncryptConf(metaclass=BaseMetaConf):
-    CUSTOM_KEY: str
+class CommonConf(metaclass=BaseMetaConf):
+    ENCRYPT_KEY: str
+    DASH_SERVE_LOCALLY: bool
 
 
 class LoginConf(metaclass=BaseMetaConf):

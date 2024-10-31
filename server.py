@@ -1,22 +1,25 @@
 from flask import request, session, redirect, send_from_directory, abort
 import dash
-from config.dash_melon_conf import ShowConf, FlaskConf, BabelConf
+from config.dash_melon_conf import ShowConf, FlaskConf, BabelConf, CommonConf
 from user_agents import parse
 from flask_babel import Babel
 from common.exception import AttackException
 from flask_babel import gettext as _  # noqa
 from common.utilities.util_logger import Log
 from config.dash_melon_conf import PathProj
+from common.utilities.util_dash import CustomDash
 
 logger = Log.get_logger(__name__)
 
 
 # dash实例
-app = dash.Dash(
+app = CustomDash(
     __name__,
     suppress_callback_exceptions=True,
     compress=True,
     update_title=None,
+    serve_locally=CommonConf.DASH_SERVE_LOCALLY,
+    extra_hot_reload_paths=[],
 )
 app.server.config['COMPRESS_ALGORITHM'] = FlaskConf.COMPRESS_ALGORITHM
 app.server.config['COMPRESS_BR_LEVEL'] = FlaskConf.COMPRESS_BR_LEVEL
