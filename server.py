@@ -40,7 +40,9 @@ def download_file(user_name):
     file_name = f'{user_name}.jpg'
     if '..' in user_name:
         try:
-            raise AttackException(f'有人尝试通过头像文件接口攻击，url用户名“{user_name}”')
+            raise AttackException(
+                f'有人尝试通过头像文件接口攻击，URL:{request.url}，IP:{request.remote_addr}'
+            )
         except AttackException as e:
             logger.warning(e, exc_info=True)
         abort(403)
@@ -71,6 +73,12 @@ def main_page_redirct():
 @server.before_request
 def ban_admin():
     if request.path.startswith('/admin'):
+        try:
+            raise AttackException(
+                f'有人尝试访问不存在的管理页面，URL:{request.url}，IP:{request.remote_addr}'
+            )
+        except AttackException as e:
+            logger.warning(e, exc_info=True)
         abort(403)
 
 
