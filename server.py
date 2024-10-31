@@ -40,9 +40,10 @@ def download_file(user_name):
     file_name = f'{user_name}.jpg'
     if '..' in user_name:
         try:
-            raise AttackException('有人尝试通过头像文件接口攻击')
+            raise AttackException(f'有人尝试通过头像文件接口攻击，url用户名“{user_name}”')
         except AttackException as e:
-            logger.warning(e.message, exc_info=True)
+            logger.warning(e, exc_info=True)
+        abort(403)
     else:
         return send_from_directory(PathProj.AVATAR_DIR_PATH, file_name)
 
