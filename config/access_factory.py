@@ -42,6 +42,14 @@ class AccessFactory:
 
         logger = Log.get_logger(__name__)
 
+        # 角色类型附加权限检查
+        outliers = set(
+            [*cls.default_access_meta, *cls.group_admin_access_meta, *cls.super_admin_access_meta]
+        ) - set(cls.dict_access_meta2module_path.keys())
+        if outliers:
+            logger.error(f'角色类型附加权限中存在未定义的权限：{outliers}')
+            raise ValueError(f'角色类型附加权限中存在未定义的权限：{outliers}')
+
         # 每个VIEW的权限唯一性检查
         from collections import Counter
 
