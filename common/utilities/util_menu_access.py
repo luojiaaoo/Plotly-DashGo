@@ -1,33 +1,34 @@
-from database.sql_db.dao.user import get_all_menu_item_and_access_meta, get_user_info, UserInfo
+from database.sql_db.dao.dao_user import get_all_menu_item_and_access_meta, get_user_info, UserInfo
 from typing import Dict, List, Set
 from common.utilities.util_logger import Log
+from config.access_factory import AccessFactory
 
 logger = Log.get_logger(__name__)
 
 
 class MenuAccess:
-    default_menu_item_and_access_meta = (
-        'person_.personal_info:show',
-        'person_.personal_setting:show',
-        'dashboard_.workbench:show',
-    )
 
-    @classmethod
-    def get_dict_menu_item_and_access_meta(cls, user_name: str) -> Dict[str, List[str]]:
+    def get_dict_menu_item_and_access_meta(self, user_info:UserInfo) -> Dict[str, List[str]]:
         """获取用户可访问的菜单项权限字典
 
         根据用户名获取该用户可以访问的所有菜单项和应用权限，并将其整理为字典格式。
         这个方法主要用于权限控制，快速查找用户是否有特定菜单项的访问权限。
 
         参数:
-        user_name (str): 用户名，用于查询用户权限。
+        user_info (UserInfo): 用户信息，用于查询用户权限。
 
         返回:
         Dict[str, List[str]]: 一个字典，其中键是菜单项的模块路径，值是对应的权限列表。
         """
         # 比如 menu_item:  dashboard_.workbench:log_info,冒号前为视图的包路径，后面为权限列表
+        user_name = user_info.user_name
+        user_type = user_info.user_type
         all_menu_item_and_access_meta: Set[str] = get_all_menu_item_and_access_meta(user_name=user_name)
-        all_menu_item_and_access_meta.update(cls.default_menu_item_and_access_meta)
+        all_menu_item_and_access_meta.update(AccessFactory.default_menu_item_and_access_meta)
+        if user_type == '超级管理员':
+            all_menu_item_and_access_meta.update(AccessFactory.super_admin_menu_item_and_access_meta)
+        elif user_type == '团队管理员':
+            all_menu_item_and_access_meta.update(AccessFactory.group_admin_menu_item_and_access_meta)
         dict_menu_item_and_access_meta = dict()
         for _menu_item_and_access_meta in all_menu_item_and_access_meta:
             module_path, access = _menu_item_and_access_meta.split(':')
@@ -103,7 +104,7 @@ class MenuAccess:
         self.user_name = user_name
         self.user_info: UserInfo = get_user_info(user_name)
         # 菜单项 -> 权限元的字典
-        self.dict_menu_item_and_access_meta = self.get_dict_menu_item_and_access_meta(user_name)
+        self.dict_menu_item_and_access_meta = self.get_dict_menu_item_and_access_meta(self.user_info)
         # 所有菜单项
         self.menu_item = set(list(self.dict_menu_item_and_access_meta.keys()))
         # 生成AntdMenu的菜单格式

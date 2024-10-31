@@ -11,68 +11,11 @@
  Target Server Version : 50744 (5.7.44)
  File Encoding         : 65001
 
- Date: 31/10/2024 11:17:32
+ Date: 31/10/2024 14:36:21
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
-
--- ----------------------------
--- Table structure for sys_access_item
--- ----------------------------
-DROP TABLE IF EXISTS `sys_access_item`;
-CREATE TABLE `sys_access_item`  (
-  `access_item_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `access_item` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `access_label` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  PRIMARY KEY (`access_item_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of sys_access_item
--- ----------------------------
-
--- ----------------------------
--- Table structure for sys_access_meta
--- ----------------------------
-DROP TABLE IF EXISTS `sys_access_meta`;
-CREATE TABLE `sys_access_meta`  (
-  `access_meta_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `access_meta` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `access_label` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  PRIMARY KEY (`access_meta_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of sys_access_meta
--- ----------------------------
-INSERT INTO `sys_access_meta` VALUES (1, 'dashboard.workbench:access1', '工作台图标1');
-
--- ----------------------------
--- Table structure for sys_dict_data
--- ----------------------------
-DROP TABLE IF EXISTS `sys_dict_data`;
-CREATE TABLE `sys_dict_data`  (
-  `dict_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '全局属性id',
-  `dict_type` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '属性类别',
-  `dict_value` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '属性标签',
-  `dict_sort` smallint(5) UNSIGNED NOT NULL COMMENT '显示顺序',
-  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '备注',
-  PRIMARY KEY (`dict_id`) USING BTREE,
-  UNIQUE INDEX `uniq_dict_value`(`dict_type`, `dict_value`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of sys_dict_data
--- ----------------------------
-INSERT INTO `sys_dict_data` VALUES (1, 'sys_user_sex', '男', 1, '');
-INSERT INTO `sys_dict_data` VALUES (2, 'sys_user_sex', '女', 2, '');
-INSERT INTO `sys_dict_data` VALUES (3, 'sys_user_sex', '未知', 3, '');
-INSERT INTO `sys_dict_data` VALUES (4, 'sys_user_status', '正常', 1, '勿动，绑定功能');
-INSERT INTO `sys_dict_data` VALUES (5, 'sys_user_status', '停用', 2, '勿动，绑定功能');
-INSERT INTO `sys_dict_data` VALUES (6, 'sys_user_type', '超级管理员', 3, '勿动，绑定功能');
-INSERT INTO `sys_dict_data` VALUES (7, 'sys_user_type', '团队管理员', 2, '勿动，绑定功能');
-INSERT INTO `sys_dict_data` VALUES (8, 'sys_user_type', '普通用户', 1, '勿动，绑定功能');
 
 -- ----------------------------
 -- Table structure for sys_group
@@ -89,6 +32,26 @@ CREATE TABLE `sys_group`  (
 -- ----------------------------
 -- Records of sys_group
 -- ----------------------------
+
+-- ----------------------------
+-- Table structure for sys_menu_item_access_meta
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_menu_item_access_meta`;
+CREATE TABLE `sys_menu_item_access_meta`  (
+  `label` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `menu_item_access_meta` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of sys_menu_item_access_meta
+-- ----------------------------
+INSERT INTO `sys_menu_item_access_meta` VALUES ('个人信息页面', 'person_.personal_info:show');
+INSERT INTO `sys_menu_item_access_meta` VALUES ('个人设置页面', 'person_.personal_setting:show');
+INSERT INTO `sys_menu_item_access_meta` VALUES ('工作台页面', 'dashboard_.workbench:show');
+INSERT INTO `sys_menu_item_access_meta` VALUES ('权限列表页面', 'access_.access_meta:show');
+INSERT INTO `sys_menu_item_access_meta` VALUES ('用户授权页面', 'access_.user_auth:show');
+INSERT INTO `sys_menu_item_access_meta` VALUES ('团队管理页面', 'access_.group_auth:show');
+INSERT INTO `sys_menu_item_access_meta` VALUES ('角色管理页面', 'access_.role_auth:show');
 
 -- ----------------------------
 -- Table structure for sys_role
