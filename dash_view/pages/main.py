@@ -37,7 +37,6 @@ def render_content(menu_access: MenuAccess):
                         className={
                             'height': '50px',
                             'boxShadow': '0 1px 4px rgba(0,21,41,.08)',
-                            'flex': 'None',
                         },
                     ),
                     # tabs块
@@ -58,30 +57,40 @@ def render_content(menu_access: MenuAccess):
                                 type='editable-card',
                                 className={
                                     'width': '100%',
-                                    'height': '100%',
+                                    'maxHeight': 'calc(100vh - 50px)',
                                     'paddingLeft': '8px',
                                     'paddingRight': '8px',
                                 },
                             ),
                             className={
                                 'width': '100%',
-                                'height': '100%',
+                                'maxHeight': 'calc(100vh - 50px)',
+                                # 美化滚动条
+                                '& .ant-tabs-content-holder': {
+                                    'maxHeight': '100%',
+                                    'overflow': 'auto',
+                                    '&::-webkit-scrollbar': {'width': '8px'},
+                                    '&::-webkit-scrollbar-track': {'background': '#fff', 'border-radius': '10px'},
+                                    '&::-webkit-scrollbar-thumb': {'background': 'rgba(144,147,153,.2)', 'border-radius': '10px'},
+                                    '&::-webkit-scrollbar-thumb:hover': {'background': 'rgba(144,147,153,.4)'},
+                                },
                                 '& .ant-tabs-content-holder > .ant-tabs-content': {
-                                    'height': 'calc(100% - 10px)',  # 不知道为什么溢出了一部分，减去10像素
+                                    'height': '100%',
                                 },
                                 '& .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane': {
                                     'height': '100%',
+                                    'paddingBottom': '8px',
                                 },
                                 '& .ant-tabs-nav': {
                                     'margin': '8px 0 8px 0',
                                 },
                             },
                         ),
-                        className={'flex': '1'},
+                        className={'maxHeight': 'calc(100vh - 50px)'},
+                        gutter=0,
                     ),
                 ],
                 flex='auto',
-                className={'display': 'flex', 'flexDirection': 'column'},
             ),
         ],
         className={'width': '100vw', 'height': '100vh'},
