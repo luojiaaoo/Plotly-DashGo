@@ -24,7 +24,10 @@ access_metas = ('监控页-页面',)
 def render_content(menu_access: MenuAccess, **kwargs):
     return html.Div(
         [
-            html.Div(id='monitor-sys-info'),
+            fac.AntdParagraph(
+                id='monitor-sys-info',
+                style={'whiteSpace': 'pre', 'fontSize': 15},
+            ),
             fuc.FefferyEventSource(id='monitor-sys-info-sse', url='/stream-sys-monitor', immediate=True),
         ]
     )

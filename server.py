@@ -109,7 +109,7 @@ def get_user_agent_info():
 @app.server.route('/stream-sys-monitor')
 def stream_sys_monitor():
     from common.utilities import util_jwt
-    from common.sse.sse_sys_monitor import get_sys_info
+    from common.sse.sse_sys_monitor import get_sys_info_sse
 
     # 校验登录状态
     rt_access = util_jwt.jwt_decode_from_session(
@@ -121,4 +121,4 @@ def stream_sys_monitor():
     if isinstance(rt_access, util_jwt.AccessFailType):
         return None
     else:
-        return Response(get_sys_info(), mimetype='text/event-stream')
+        return Response(get_sys_info_sse(), mimetype='text/event-stream')
