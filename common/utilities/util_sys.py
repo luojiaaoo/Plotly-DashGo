@@ -52,7 +52,7 @@ def get_sys_info():
     memory_total: str = bytes2human(memory_info.total)
     memory_used: str = bytes2human(memory_info.used)
     memory_free: str = bytes2human(memory_info.free)
-    memory_usage_percent: float = memory_info.percent
+    memory_usage_percent: float = memory_info.percent/100
 
     # 主机信息
     hostname: str = socket.gethostname()
