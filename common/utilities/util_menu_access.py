@@ -8,14 +8,7 @@ logger = Log.get_logger(__name__)
 
 
 class MenuAccess:
-    @staticmethod
-    def trim_module_path2menu_item(module_path):
-        # 传进来的是__name__包路径，去掉前缀才是菜单项
-        menu_item_name = module_path.replace('dash_view.application.', '')
-        # 回调的路径转换为view的路径
-        menu_item_name = menu_item_name.replace('dash_callback.application.', '')
-        menu_item_name = re.sub(r'_c$', '', menu_item_name)
-        return menu_item_name
+
 
     def get_user_all_access_metas(cls, user_info: UserInfo) -> Set[str]:
         from config.access_factory import AccessFactory
@@ -37,13 +30,35 @@ class MenuAccess:
         # 获取所有菜单项
         menu_items = set()
         for access_meta in all_access_meta:
-            module_path = AccessFactory.dict_access_meta2module_path.get(access_meta)
-            menu_item = cls.trim_module_path2menu_item(module_path)
+            menu_item = AccessFactory.dict_access_meta2menu_item.get(access_meta)
             menu_items.add(menu_item)
         return menu_items
+    
+    @staticmethod
+    def get_title(module_path):
+        from dash_view import application  # noqa
+
+        return eval(f'application.{module_path}.get_title()')
+    @staticmethod
+    def get_order(module_path):
+        from dash_view import application  # noqa
+
+        try:
+            return eval(f'application.{module_path}.order')
+        except Exception:
+            logger.warning(f'{module_path}没有定义order属性')
+            return 999
+    @staticmethod
+    def get_icon(module_path):
+        from dash_view import application  # noqa
+
+        try:
+            return eval(f'application.{module_path}.icon')
+        except Exception:
+            return None
 
     @classmethod
-    def gen_menu(self, menu_items: Set[str]):
+    def gen_menu(cls, menu_items: Set[str]):
         # 根据菜单项构建菜单层级
         dict_level1_level2 = dict()
         for per_menu_item in menu_items:
@@ -53,48 +68,28 @@ class MenuAccess:
             else:
                 dict_level1_level2[level1_name].append(level2_name)
 
-        def get_title(module_path):
-            from dash_view import application  # noqa
 
-            return eval(f'application.{module_path}.get_title()')
-
-        def get_order(module_path):
-            from dash_view import application  # noqa
-
-            try:
-                return eval(f'application.{module_path}.order')
-            except Exception:
-                logger.warning(f'{module_path}没有定义order属性')
-                return 999
-
-        def get_icon(module_path):
-            from dash_view import application  # noqa
-
-            try:
-                return eval(f'application.{module_path}.icon')
-            except Exception:
-                return None
 
         # 根据order属性排序
-        dict_level1_level2 = dict(sorted(dict_level1_level2.items(), key=lambda x: get_order(f'{x[0]}')))
+        dict_level1_level2 = dict(sorted(dict_level1_level2.items(), key=lambda x: cls.get_order(f'{x[0]}')))
         for level1, level2 in dict_level1_level2.items():
-            level2.sort(key=lambda x: get_order(f'{level1}.{x}'))
+            level2.sort(key=lambda x: cls.get_order(f'{level1}.{x}'))
 
         menu = [
             {
                 'component': 'SubMenu',
                 'props': {
                     'key': f'/{level1_name}',
-                    'title': get_title(f'{level1_name}'),
-                    'icon': get_icon(f'{level1_name}'),
+                    'title': cls.get_title(f'{level1_name}'),
+                    'icon': cls.get_icon(f'{level1_name}'),
                 },
                 'children': [
                     {
                         'component': 'Item',
                         'props': {
                             'key': f'/{level1_name}/{level2_name}',
-                            'title': get_title(f'{level1_name}.{level2_name}'),
-                            'icon': get_icon(f'{level1_name}.{level2_name}'),
+                            'title': cls.get_title(f'{level1_name}.{level2_name}'),
+                            'icon': cls.get_icon(f'{level1_name}.{level2_name}'),
                             'href': f'/{level1_name}/{level2_name}',
                         },
                     }
@@ -107,12 +102,12 @@ class MenuAccess:
 
     def __init__(self, user_name) -> None:
         from config.access_factory import AccessFactory
+        # 获取应用全部的权限元和菜单的对应关系
+        self.dict_access_meta2menu_item = AccessFactory.dict_access_meta2menu_item
         self.user_name = user_name
         self.user_info: UserInfo = get_user_info(user_name)
         # 用户所有的权限元
         self.all_access_metas: Set[str] = self.get_user_all_access_metas(user_info=self.user_info)
-        # 获取应用全部的权限元和模块的对应关系
-        self.dict_access_meta2module_path = AccessFactory.dict_access_meta2module_path
         # 生成用户的目录路径
         self.menu_items = self.get_user_menu_items(self.all_access_metas)
         # 生成AntdMenu的菜单格式

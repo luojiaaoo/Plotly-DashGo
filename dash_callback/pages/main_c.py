@@ -96,9 +96,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
         last_herf = str(
             URL()
             .with_path(url.path)
-            .with_query(
-                {**url_query, 'flush': str(uuid4())[:8]}
-            )  # 添加随机码，强制刷新'global-url-location', 'href'，触发目标页面打开
+            .with_query({**url_query, 'flush': str(uuid4())[:8]})  # 添加随机码，强制刷新'global-url-location', 'href'，触发目标页面打开
             .with_fragment(url_fragment)
         )
     try:
@@ -120,15 +118,12 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
     key_url_path_parent = menu_item2url_path(url_menu_item, 1)
 
     # 构建面包屑格式
-    def get_title(module_path):
-        from dash_view import application  # noqa
-
-        return eval(f'application.{module_path}.get_title()')
+    from common.utilities.util_menu_access import MenuAccess
 
     breadcrumb_items = [{'title': _('首页'), 'href': '/dashboard_/workbench'}]
     _modules: List = url_menu_item.split('.')
     for i in range(len(_modules)):
-        breadcrumb_items = breadcrumb_items + [{'title': get_title('.'.join(_modules[: i + 1]))}]
+        breadcrumb_items = breadcrumb_items + [{'title': MenuAccess.get_title('.'.join(_modules[: i + 1]))}]
 
     # 如已经打开，并且不带强制刷新参数,直接切换页面即可
     if key_url_path in has_open_tab_keys and param.get('flush', None) is None:

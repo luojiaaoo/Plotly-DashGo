@@ -27,7 +27,7 @@ def lang_en(nClicks):
 
 
 def render_lang_content():
-    from server import select_locale, server
+    from server import get_locale
 
     return fac.AntdCompact(
         [
@@ -37,15 +37,7 @@ def render_lang_content():
         className={
             '& span': {'fontSize': '10px', 'fontWeight': 'bold'},
             '& .ant-btn': {'height': '1.5em'},
-            '& #global-language-zh': {'backgroundColor': '#1C69D1', 'color': '#eee'}
-            if session.get('lang', None)
-            in [
-                'zh',
-                *([None] if (select_locale() or server.config['BABEL_DEFAULT_LOCALE'] == 'zh') else []),
-            ]
-            else {'color': '#999999'},
-            '& #global-language-en': {'backgroundColor': '#1C69D1', 'color': '#eee'}
-            if session.get('lang', None) in ['en', [None]]
-            else {'color': '#999999'},
+            '& #global-language-zh': {'backgroundColor': '#1C69D1', 'color': '#eee'} if get_locale() == 'zh' else {'color': '#999999'},
+            '& #global-language-en': {'backgroundColor': '#1C69D1', 'color': '#eee'} if get_locale() == 'en' else {'color': '#999999'},
         },
     )

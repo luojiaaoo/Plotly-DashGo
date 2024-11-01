@@ -40,9 +40,7 @@ def download_file(user_name):
     file_name = f'{user_name}.jpg'
     if '..' in user_name:
         try:
-            raise AttackException(
-                f'有人尝试通过头像文件接口攻击，URL:{request.url}，IP:{request.remote_addr}'
-            )
+            raise AttackException(f'有人尝试通过头像文件接口攻击，URL:{request.url}，IP:{request.remote_addr}')
         except AttackException as e:
             logger.warning(e, exc_info=True)
         abort(403)
@@ -56,6 +54,10 @@ def select_locale():
     lang_session = session.get('lang', None)
     lang_auto = request.accept_languages.best_match(server.config['LANGUAGES'])
     return lang_session or lang_auto
+
+
+def get_locale():
+    return select_locale() or server.config['BABEL_DEFAULT_LOCALE']
 
 
 babel = Babel(app=server)
@@ -74,9 +76,7 @@ def main_page_redirct():
 def ban_admin():
     if request.path.startswith('/admin'):
         try:
-            raise AttackException(
-                f'有人尝试访问不存在的管理页面，URL:{request.url}，IP:{request.remote_addr}'
-            )
+            raise AttackException(f'有人尝试访问不存在的管理页面，URL:{request.url}，IP:{request.remote_addr}')
         except AttackException as e:
             logger.warning(e, exc_info=True)
         abort(403)
@@ -92,9 +92,7 @@ def get_user_agent_info():
     if user_agent.browser.version != ():
         bw_version = user_agent.browser.version[0]
         if bw == 'IE':
-            return "<h1 style='color: red'>IP:{}, {}</h1>".format(
-                request_addr, _('请不要使用IE浏览器或360浏览器兼容模式')
-            )
+            return "<h1 style='color: red'>IP:{}, {}</h1>".format(request_addr, _('请不要使用IE浏览器或360浏览器兼容模式'))
         elif bw == 'Chrome' and bw_version < 71:
             return "<h1 style='color: red'>IP:{}, {}</h1>".format(
                 request_addr,
