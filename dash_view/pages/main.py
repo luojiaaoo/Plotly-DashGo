@@ -85,5 +85,6 @@ def render_content(menu_access: MenuAccess):
             ),
         ],
         className={'width': '100vw', 'height': '100vh'},
+        wrap=False,
         id='global-full-screen-container',
     )

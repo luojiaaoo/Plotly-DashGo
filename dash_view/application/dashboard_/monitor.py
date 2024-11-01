@@ -36,7 +36,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             layout='vertical',
                             column=2,
                         ),
-                        title='系统信息',
+                        title=_('系统信息'),
                     ),
                     Card(
                         fac.AntdDescriptions(
@@ -48,6 +48,17 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             column=3,
                         ),
                         title='CPU',
+                    ),
+                    Card(
+                        fac.AntdDescriptions(
+                            id='monitor-mem-load-desc',
+                            items=[],
+                            labelStyle={'fontWeight': 'bold'},
+                            bordered=True,
+                            layout='vertical',
+                            column=2,
+                        ),
+                        title=_('内存'),
                     ),
                 ],
                 gap='small',

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-10-31 22:46+0800\n"
+"POT-Creation-Date: 2024-11-01 15:37+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -34,6 +34,62 @@ msgstr "Click here"
 msgid "可下载最新版Chrome浏览器"
 msgstr "You can download the latest version of Chrome"
 
+#: dash_callback/application/dashboard_/monitor_c.py:24
+msgid "域名"
+msgstr "hostname"
+
+#: dash_callback/application/dashboard_/monitor_c.py:25
+msgid "系统类型"
+msgstr "os name"
+
+#: dash_callback/application/dashboard_/monitor_c.py:26
+msgid "计算机名"
+msgstr "computer name"
+
+#: dash_callback/application/dashboard_/monitor_c.py:27
+msgid "核心架构"
+msgstr "os arch"
+
+#: dash_callback/application/dashboard_/monitor_c.py:30
+msgid "型号"
+msgstr "type"
+
+#: dash_callback/application/dashboard_/monitor_c.py:31
+msgid "逻辑核数"
+msgstr "logical cpu num"
+
+#: dash_callback/application/dashboard_/monitor_c.py:32
+msgid "空闲率"
+msgstr "free"
+
+#: dash_callback/application/dashboard_/monitor_c.py:33
+msgid "总使用率"
+msgstr "total usage"
+
+#: dash_callback/application/dashboard_/monitor_c.py:34
+msgid "用户使用率"
+msgstr "user usage"
+
+#: dash_callback/application/dashboard_/monitor_c.py:35
+msgid "系统使用率"
+msgstr "sys usage"
+
+#: dash_callback/application/dashboard_/monitor_c.py:38
+msgid "总量"
+msgstr "total"
+
+#: dash_callback/application/dashboard_/monitor_c.py:39
+msgid "已用"
+msgstr "usage"
+
+#: dash_callback/application/dashboard_/monitor_c.py:40
+msgid "剩余"
+msgstr "free"
+
+#: dash_callback/application/dashboard_/monitor_c.py:41
+msgid "使用率"
+msgstr "usage"
+
 #: dash_callback/pages/login_c.py:123
 msgid "请输入账号和密码"
 msgstr "Please enter your account number and password"
@@ -58,15 +114,15 @@ msgstr "Access Mgmt"
 msgid "权限列表"
 msgstr "Access List"
 
-#: dash_view/application/access_/group_auth.py:16
+#: dash_view/application/access_/group_auth.py:15
 msgid "团队管理"
 msgstr "Group Mgmt"
 
-#: dash_view/application/access_/role_auth.py:16
+#: dash_view/application/access_/role_auth.py:15
 msgid "角色管理"
 msgstr "Role Mgmt"
 
-#: dash_view/application/access_/user_auth.py:16
+#: dash_view/application/access_/user_auth.py:15
 msgid "用户权限"
 msgstr "User Auth"
 
@@ -74,9 +130,17 @@ msgstr "User Auth"
 msgid "仪表盘"
 msgstr "DashBoard"
 
-#: dash_view/application/dashboard_/monitor.py:11
+#: dash_view/application/dashboard_/monitor.py:13
 msgid "监控页"
 msgstr "Monitor"
+
+#: dash_view/application/dashboard_/monitor.py:39
+msgid "系统信息"
+msgstr "System Info"
+
+#: dash_view/application/dashboard_/monitor.py:61
+msgid "内存"
+msgstr "Mem"
 
 #: dash_view/application/dashboard_/workbench.py:10
 msgid "工作台"
@@ -87,44 +151,44 @@ msgid "个人页"
 msgstr "Person"
 
 #: dash_view/application/person_/personal_info.py:16
-#: dash_view/application/person_/personal_info.py:84
+#: dash_view/application/person_/personal_info.py:83
 #: dash_view/framework/head.py:70
 msgid "个人信息"
 msgstr "Personal Info"
 
-#: dash_view/application/person_/personal_info.py:91
+#: dash_view/application/person_/personal_info.py:90
 msgid "用户："
 msgstr "User Name:"
 
-#: dash_view/application/person_/personal_info.py:97
+#: dash_view/application/person_/personal_info.py:96
 msgid "全名："
 msgstr "Full Name:"
 
-#: dash_view/application/person_/personal_info.py:103
+#: dash_view/application/person_/personal_info.py:102
 msgid "状态："
 msgstr "Status:"
 
-#: dash_view/application/person_/personal_info.py:109
+#: dash_view/application/person_/personal_info.py:108
 msgid "性别："
 msgstr "Sex:"
 
-#: dash_view/application/person_/personal_info.py:115
+#: dash_view/application/person_/personal_info.py:114
 msgid "团队："
 msgstr "Group:"
 
-#: dash_view/application/person_/personal_info.py:121
+#: dash_view/application/person_/personal_info.py:120
 msgid "类型："
 msgstr "Type:"
 
-#: dash_view/application/person_/personal_info.py:127
+#: dash_view/application/person_/personal_info.py:126
 msgid "邮箱："
 msgstr "E-mail:"
 
-#: dash_view/application/person_/personal_info.py:133
+#: dash_view/application/person_/personal_info.py:132
 msgid "电话："
 msgstr "Phone:"
 
-#: dash_view/application/person_/personal_info.py:139
+#: dash_view/application/person_/personal_info.py:138
 msgid "说明："
 msgstr "Remark:"
 

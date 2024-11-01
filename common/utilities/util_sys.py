@@ -34,6 +34,7 @@ def bytes2human(n, format_str='%(value).1f%(symbol)s'):
 cpu_info = cpuinfo.get_cpu_info()
 cpu_num = psutil.cpu_count(logical=True)
 
+
 @cache.memoize(ttl=5, typed=True)
 def get_sys_info():
     global cpu_num, cpu_info
@@ -104,4 +105,9 @@ def get_sys_info():
         cpu_user_usage_percent=cpu_user_usage_percent,
         cpu_sys_usage_percent=cpu_sys_usage_percent,
         cpu_all_usage_percent=cpu_all_usage_percent,
+        #  内存
+        memory_total=memory_total,
+        memory_used=memory_used,
+        memory_free=memory_free,
+        memory_usage_percent=memory_usage_percent,
     )
