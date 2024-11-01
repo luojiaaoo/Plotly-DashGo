@@ -4,7 +4,7 @@ import feffery_antd_components as fac
 import feffery_utils_components as fuc
 from common.utilities.util_logger import Log
 from dash import html
-from dash_components import ShadowDiv,ShadowTab
+from dash_components import Table
 from dash import dcc
 from database.sql_db.dao import dao_user
 import dash_callback.application.person_.personal_info_c  # noqa
@@ -30,7 +30,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
     )
     return html.Div(
         [
-            ShadowTab(
+            Table(
                 columns=[{'title': f'字段{i}', 'dataIndex': f'字段{i}'} for i in range(1, 6)],
                 data=[{f'字段{i}': '示例内容' for i in range(1, 6)}] * 3,
             ),

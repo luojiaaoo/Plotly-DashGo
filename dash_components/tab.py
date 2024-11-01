@@ -1,7 +1,7 @@
 import feffery_antd_components as fac
 
 
-class ShadowTab(fac.AntdTable):
+class Table(fac.AntdTable):
     def __init__(self, *args, **kwargs):
         kwargs['style'] = {
             'width': '100%',

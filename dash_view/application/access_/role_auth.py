@@ -4,7 +4,6 @@ import feffery_antd_components as fac
 import feffery_utils_components as fuc
 from common.utilities.util_logger import Log
 from dash import html
-from dash_components import ShadowDiv
 from dash import dcc
 from database.sql_db.dao import dao_user
 import dash_callback.application.person_.personal_info_c  # noqa

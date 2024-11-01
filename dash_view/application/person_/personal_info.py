@@ -4,7 +4,7 @@ import feffery_antd_components as fac
 import feffery_utils_components as fuc
 from common.utilities.util_logger import Log
 from dash import html
-from dash_components import ShadowDiv
+from dash_components import Card
 from dash import dcc
 from database.sql_db.dao import dao_user
 import dash_callback.application.person_.personal_info_c  # noqa
@@ -19,16 +19,15 @@ def get_title():
 icon = None
 logger = Log.get_logger(__name__)
 order = 1
-access_metas = (
-    '个人信息-页面',
-)
+access_metas = ('个人信息-页面',)
+
 
 def render_content(menu_access: MenuAccess, **kwargs):
     access_metas: List[str] = menu_access.all_access_metas
     user_info = dao_user.get_user_info(menu_access.user_name)
     return html.Div(
         [
-            ShadowDiv(
+            Card(
                 children=[
                     fac.AntdCenter(
                         dcc.Upload(
@@ -144,8 +143,10 @@ def render_content(menu_access: MenuAccess, **kwargs):
                 className={
                     'flex': 'None',
                     'min-width': '15em',
-                    'display': 'flex',
-                    'flexDirection': 'column',
+                    '& .ant-card-body': {
+                        'display': 'flex',
+                        'flexDirection': 'column',
+                    },
                     '& .user_info_name': {
                         'word-break': 'keep-all',
                         'font-weight': 'bold',
@@ -157,7 +158,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     },
                 },
             ),
-            ShadowDiv(
+            Card(
                 className={
                     'flex': 'auto',
                     'marginLeft': '8px',

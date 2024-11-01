@@ -1,17 +1,19 @@
-from server import app
-from dash.dependencies import Input, Output, State
+# from server import app
+# from dash.dependencies import Input, Output, State
+# from common.utilities import util_sys
 
-app.clientside_callback(
-    """(data) => {
-        console.log(data);
-        data = data ? JSON.parse(data) : {};
-        window.dash_clientside.set_props(
-            'monitor-sys-info',
-            {
-                children: (data.content ? data.content.replace(/<line-break>/g, '\\n') : '')
-            }
-        );
-    }""",
-    Input('monitor-sys-info-sse', 'data'),
-    prevent_initial_call=True,
-)
+
+# @app.callback(
+#     [
+#         Output('monitor-cpu-num', 'children'),
+#         Output('monitor-cpu-use-percent', 'value'),
+#         Output('monitor-cpu-use-percent', 'children'),
+#     ],
+#     Input('monitor-intervals', 'n_intervals'),
+# )
+# def callback_func(n_intervals):
+#     sys_info = util_sys.get_sys_info()
+#     return (
+#         sys_info.get('cpu_num'),
+#         *([str(sys_info.get('cpu_use_percent'))] * 2),
+#     )
