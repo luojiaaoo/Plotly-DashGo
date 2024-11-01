@@ -106,10 +106,13 @@ class MenuAccess:
         return menu
 
     def __init__(self, user_name) -> None:
+        from config.access_factory import AccessFactory
         self.user_name = user_name
         self.user_info: UserInfo = get_user_info(user_name)
-        # 所有的权限元
+        # 用户所有的权限元
         self.all_access_metas: Set[str] = self.get_user_all_access_metas(user_info=self.user_info)
+        # 获取应用全部的权限元和模块的对应关系
+        self.dict_access_meta2module_path = AccessFactory.dict_access_meta2module_path
         # 生成用户的目录路径
         self.menu_items = self.get_user_menu_items(self.all_access_metas)
         # 生成AntdMenu的菜单格式
