@@ -149,8 +149,6 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
 
     ################# 返回页面 #################
     p = Patch()
-    if trigger == 'load':
-        p.clear()
     if key_url_path in has_open_tab_keys and param.get('flush', None) is not None:
         # 如果已经打开，但是带有flush的query，就重新打开，通过Patch组件，删除老的，将新的tab添加到tabs组件中
         old_idx = has_open_tab_keys.index(key_url_path)

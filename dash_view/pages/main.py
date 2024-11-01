@@ -46,14 +46,7 @@ def render_content(menu_access: MenuAccess):
                                 id='tabs-container',
                                 tabPaneAnimated=True,
                                 size='small',
-                                # fix bug: 占位
-                                items=[
-                                    {
-                                        'label': '',
-                                        'key': 'init',
-                                        'children': 'init',
-                                    }
-                                ],
+                                items=[],
                                 type='editable-card',
                                 className={
                                     'width': '100%',
