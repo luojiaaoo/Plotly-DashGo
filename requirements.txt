@@ -10,3 +10,5 @@ user_agents==2.2.0
 yarl==1.16.0
 Flask-Babel==4.0.0
 pillow==10.4.0
+py-cpuinfo=9.0.0
+cacheout==0.16.0

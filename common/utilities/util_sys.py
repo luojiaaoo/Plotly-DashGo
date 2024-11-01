@@ -4,7 +4,11 @@ import psutil
 import socket
 import platform
 import os
+import cpuinfo
 from flask_babel import gettext as _  # noqa
+from cacheout import Cache
+
+cache = Cache()
 
 
 def bytes2human(n, format_str='%(value).1f%(symbol)s'):
@@ -27,9 +31,15 @@ def bytes2human(n, format_str='%(value).1f%(symbol)s'):
     return format_str % dict(symbol=symbols[0], value=n)
 
 
+cpu_info = cpuinfo.get_cpu_info()
+cpu_num = psutil.cpu_count(logical=True)
+
+@cache.memoize(ttl=5, typed=True)
 def get_sys_info():
-    # 获取CPU总核心数
-    cpu_num = psutil.cpu_count(logical=True)
+    global cpu_num, cpu_info
+    # 获取CPU
+    cpu_name: str = cpu_info['brand_raw']
+    cpu_num = cpu_num
     cpu_usage_percent = psutil.cpu_times_percent()
     cpu_user_usage_percent: float = cpu_usage_percent.user
     cpu_sys_usage_percent: float = cpu_usage_percent.system
@@ -48,7 +58,6 @@ def get_sys_info():
     os_name: str = platform.platform()
     computer_name: str = platform.node()
     os_arch: str = platform.machine()
-    user_dir: str = os.path.abspath(os.getcwd())
 
     # python解释器信息
     current_process = psutil.Process(os.getpid())
@@ -83,13 +92,16 @@ def get_sys_info():
         )
         sys_files.append(disk_data)
     return dict(
-        cpu_num=cpu_num,
-        cpu_use_percent=cpu_use_percent,
-        memory_total=memory_total,
-        memory_used=memory_used,
-        memory_free=memory_free,
-        memory_usage=memory_usage,
+        # 系统信息
         hostname=hostname,
-        computer_ip=computer_ip,
         os_name=os_name,
+        computer_name=computer_name,
+        os_arch=os_arch,
+        # cpu
+        cpu_name=cpu_name,
+        cpu_num=cpu_num,
+        cpu_free_percent=cpu_free_percent,
+        cpu_user_usage_percent=cpu_user_usage_percent,
+        cpu_sys_usage_percent=cpu_sys_usage_percent,
+        cpu_all_usage_percent=cpu_all_usage_percent,
     )
