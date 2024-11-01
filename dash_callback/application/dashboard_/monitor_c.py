@@ -12,6 +12,7 @@ from flask_babel import gettext as _  # noqa
         Output('monitor-cpu-load-desc', 'items'),
         Output('monitor-mem-load-desc', 'items'),
         Output('monitor-process-desc', 'items'),
+        Output('monitor-disk-desc', 'data'),
     ],
     [
         Input('monitor-intervals', 'n_intervals'),
@@ -47,4 +48,5 @@ def callback_func(n_intervals, timeoutCount):
             {'label': fac.AntdText(_('运行时长')), 'children': sys_info['run_time']},
             {'label': fac.AntdText(_('内存使用量')), 'children': sys_info['current_process_memory_usage']},
         ],
+        sys_info['sys_files']
     ]

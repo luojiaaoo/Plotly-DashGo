@@ -71,6 +71,22 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         ),
                         title=_('进程运行状态'),
                     ),
+                    Card(
+                        fac.AntdTable(
+                            id='monitor-disk-desc',
+                            columns=[
+                                {'title': '设备名', 'dataIndex': 'dir_name'},
+                                {'title': '文件系统类型', 'dataIndex': 'sys_type_name'},
+                                {'title': '总容量', 'dataIndex': 'total'},
+                                {'title': '已用', 'dataIndex': 'used'},
+                                {'title': '可用', 'dataIndex': 'free'},
+                                {'title': '使用率', 'dataIndex': 'usage'},
+                                {'title': '挂载点', 'dataIndex': 'type_name'},
+                            ],
+                            data=[],
+                        ),
+                        title=_('磁盘状态'),
+                    ),
                 ],
                 gap='small',
                 wrap='wrap',

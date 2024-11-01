@@ -81,13 +81,15 @@ def get_sys_info():
         disk_data = dict(
             dir_name=i.device,
             sys_type_name=i.fstype,
-            type_name='本地固定磁盘（' + i.mountpoint.replace('\\', '') + '）',
+            type_name=i.mountpoint,
             total=bytes2human(o.total),
             used=bytes2human(o.used),
             free=bytes2human(o.free),
             usage=f'{psutil.disk_usage(i.device).percent}%',
         )
         sys_files.append(disk_data)
+    # import pprint
+    # pprint.pprint(sys_files)
     return dict(
         # 系统信息
         hostname=hostname,
@@ -111,4 +113,6 @@ def get_sys_info():
         start_time=start_time,
         run_time=run_time,
         current_process_memory_usage=current_process_memory_usage,
+        # 磁盘
+        sys_files=sys_files
     )
