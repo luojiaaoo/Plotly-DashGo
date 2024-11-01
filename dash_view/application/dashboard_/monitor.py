@@ -40,28 +40,6 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     ),
                     Card(
                         fac.AntdDescriptions(
-                            id='monitor-cpu-load-desc',
-                            items=[],
-                            labelStyle={'fontWeight': 'bold'},
-                            bordered=True,
-                            layout='vertical',
-                            column=3,
-                        ),
-                        title='CPU',
-                    ),
-                    Card(
-                        fac.AntdDescriptions(
-                            id='monitor-mem-load-desc',
-                            items=[],
-                            labelStyle={'fontWeight': 'bold'},
-                            bordered=True,
-                            layout='vertical',
-                            column=2,
-                        ),
-                        title=_('内存'),
-                    ),
-                    Card(
-                        fac.AntdDescriptions(
                             id='monitor-process-desc',
                             items=[],
                             labelStyle={'fontWeight': 'bold'},
@@ -88,6 +66,28 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             pagination=False,
                         ),
                         title=_('磁盘状态'),
+                    ),
+                    Card(
+                        fac.AntdDescriptions(
+                            id='monitor-cpu-load-desc',
+                            items=[],
+                            labelStyle={'fontWeight': 'bold'},
+                            bordered=True,
+                            layout='vertical',
+                            column=3,
+                        ),
+                        title='CPU',
+                    ),
+                    Card(
+                        fac.AntdDescriptions(
+                            id='monitor-mem-load-desc',
+                            items=[],
+                            labelStyle={'fontWeight': 'bold'},
+                            bordered=True,
+                            layout='vertical',
+                            column=2,
+                        ),
+                        title=_('内存'),
                     ),
                 ],
                 gap='small',
