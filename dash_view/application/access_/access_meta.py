@@ -7,7 +7,7 @@ from dash import html
 from dash_components import ShadowDiv,ShadowTab
 from dash import dcc
 from database.sql_db.dao import dao_user
-import dash_callback.application.personal_info_c  # noqa
+import dash_callback.application.person_.personal_info_c  # noqa
 from flask_babel import gettext as _  # noqa
 
 

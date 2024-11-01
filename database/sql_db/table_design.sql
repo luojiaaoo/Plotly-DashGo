@@ -48,10 +48,6 @@ CREATE TABLE `sys_role`  (
 -- ----------------------------
 -- Records of sys_role
 -- ----------------------------
-INSERT INTO `sys_role` VALUES (1, 'role1', 'dashboard_.workbench:access2');
-INSERT INTO `sys_role` VALUES (2, 'role1', 'dashboard_.monitor:access1');
-INSERT INTO `sys_role` VALUES (3, 'role1', 'dashboard_.workbench:show');
-INSERT INTO `sys_role` VALUES (4, 'role1', 'dashboard_.monitor:show');
 
 -- ----------------------------
 -- Table structure for sys_user
@@ -95,7 +91,6 @@ CREATE TABLE `sys_user_access_meta`  (
 -- ----------------------------
 -- Records of sys_user_access_meta
 -- ----------------------------
-INSERT INTO `sys_user_access_meta` VALUES (1, 'admin', 'dashboard_.workbench:access1');
 
 -- ----------------------------
 -- Table structure for sys_user_role
@@ -112,6 +107,5 @@ CREATE TABLE `sys_user_role`  (
 -- ----------------------------
 -- Records of sys_user_role
 -- ----------------------------
-INSERT INTO `sys_user_role` VALUES (1, 'admin', 'role1');
 
 SET FOREIGN_KEY_CHECKS = 1;

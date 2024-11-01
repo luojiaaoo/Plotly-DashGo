@@ -1,4 +1,4 @@
-from flask import request, session, redirect, send_from_directory, abort
+from flask import request, session, redirect, send_from_directory, abort, Response
 import dash
 from config.dash_melon_conf import ShowConf, FlaskConf, BabelConf, CommonConf
 from user_agents import parse
@@ -103,3 +103,22 @@ def get_user_agent_info():
                 _('点击此处'),
                 _('可下载最新版Chrome浏览器'),
             )
+
+
+# 系统资源监控sse
+@app.server.route('/stream-sys-monitor')
+def stream_sys_monitor():
+    from common.utilities import util_jwt
+    from common.sse.sse_sys_monitor import get_sys_info
+
+    # 校验登录状态
+    rt_access = util_jwt.jwt_decode_from_session(
+        verify_exp=False,
+        force_logout_if_exp=False,
+        ignore_exp=False,
+        force_logout_if_invalid=False,
+    )
+    if isinstance(rt_access, util_jwt.AccessFailType):
+        return None
+    else:
+        return Response(get_sys_info(), mimetype='text/event-stream')
