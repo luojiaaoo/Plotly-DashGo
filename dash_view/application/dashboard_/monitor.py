@@ -84,6 +84,8 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                 {'title': '挂载点', 'dataIndex': 'type_name'},
                             ],
                             data=[],
+                            bordered=True,
+                            pagination=False,
                         ),
                         title=_('磁盘状态'),
                     ),
