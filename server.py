@@ -56,10 +56,6 @@ def select_locale():
     return lang_session or lang_auto
 
 
-def get_locale():
-    return select_locale() or server.config['BABEL_DEFAULT_LOCALE']
-
-
 babel = Babel(app=server)
 babel.init_app(app=server, locale_selector=select_locale)
 

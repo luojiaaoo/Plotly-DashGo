@@ -4,13 +4,11 @@ from dash_view.framework.head import render_head_content
 from dash_view.framework.func import render_func_content
 from common.utilities.util_menu_access import MenuAccess
 import feffery_utils_components as fuc
-from flask_babel import gettext as _  # noqa
+from flask_babel import get_locale, gettext as _  # noqa
 import dash_callback.pages.main_c  # noqa
 
 
 def render_content(menu_access: MenuAccess):
-    from server import get_locale
-
     return fac.AntdConfigProvider(
         fac.AntdRow(
             [
@@ -93,5 +91,5 @@ def render_content(menu_access: MenuAccess):
             wrap=False,
             id='global-full-screen-container',
         ),
-        locale='zh-cn' if get_locale() == 'zh' else 'en-us',
+        locale='zh-cn' if get_locale().language == 'zh' else 'en-us',
     )

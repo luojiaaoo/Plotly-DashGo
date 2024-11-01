@@ -2,6 +2,7 @@ import feffery_antd_components as fac
 from flask import session
 from server import app
 from dash.dependencies import Input, Output
+from flask_babel import get_locale
 
 
 # 切换中文
@@ -27,8 +28,6 @@ def lang_en(nClicks):
 
 
 def render_lang_content():
-    from server import get_locale
-
     return fac.AntdCompact(
         [
             fac.AntdButton('ZH', id='global-language-zh'),
@@ -37,7 +36,7 @@ def render_lang_content():
         className={
             '& span': {'fontSize': '10px', 'fontWeight': 'bold'},
             '& .ant-btn': {'height': '1.5em'},
-            '& #global-language-zh': {'backgroundColor': '#1C69D1', 'color': '#eee'} if get_locale() == 'zh' else {'color': '#999999'},
-            '& #global-language-en': {'backgroundColor': '#1C69D1', 'color': '#eee'} if get_locale() == 'en' else {'color': '#999999'},
+            '& #global-language-zh': {'backgroundColor': '#1C69D1', 'color': '#eee'} if (lang:=get_locale().language) == 'zh' else {'color': '#999999'},
+            '& #global-language-en': {'backgroundColor': '#1C69D1', 'color': '#eee'} if lang == 'en' else {'color': '#999999'},
         },
     )

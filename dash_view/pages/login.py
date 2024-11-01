@@ -3,13 +3,11 @@ import feffery_antd_components as fac
 from config.dash_melon_conf import ShowConf, JwtConf, LoginConf
 from dash import dcc
 from dash_view.framework.lang import render_lang_content
-from flask_babel import gettext as _  # noqa
+from flask_babel import get_locale, gettext as _  # noqa
 import dash_callback.pages.login_c  # noqa
 
 
 def render_content():
-    from server import get_locale
-
     return fac.AntdConfigProvider(
         fuc.FefferyDiv(
             children=[
@@ -183,5 +181,5 @@ def render_content():
                 },
             },
         ),
-        locale='zh-cn' if get_locale() == 'zh' else 'en-us',
+        locale='zh-cn' if get_locale().language == 'zh' else 'en-us',
     )
