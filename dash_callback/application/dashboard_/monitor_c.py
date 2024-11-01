@@ -11,6 +11,7 @@ from flask_babel import gettext as _  # noqa
         Output('monitor-sys-desc', 'items'),
         Output('monitor-cpu-load-desc', 'items'),
         Output('monitor-mem-load-desc', 'items'),
+        Output('monitor-process-desc', 'items'),
     ],
     [
         Input('monitor-intervals', 'n_intervals'),
@@ -39,5 +40,11 @@ def callback_func(n_intervals, timeoutCount):
             {'label': fac.AntdText(_('已用')), 'children': sys_info['memory_used']},
             {'label': fac.AntdText(_('剩余')), 'children': sys_info['memory_free']},
             {'label': fac.AntdText(_('使用率')), 'children': f"{sys_info['memory_usage_percent']*100}%"},
+        ],
+        [
+            {'label': fac.AntdText(_('Python版本')), 'children': sys_info['python_version']},
+            {'label': fac.AntdText(_('启动时间')), 'children': sys_info['start_time']},
+            {'label': fac.AntdText(_('运行时长')), 'children': sys_info['run_time']},
+            {'label': fac.AntdText(_('内存使用量')), 'children': sys_info['current_process_memory_usage']},
         ],
     ]

@@ -52,7 +52,7 @@ def get_sys_info():
     memory_total: str = bytes2human(memory_info.total)
     memory_used: str = bytes2human(memory_info.used)
     memory_free: str = bytes2human(memory_info.free)
-    memory_usage_percent: float = memory_info.percent/100
+    memory_usage_percent: float = memory_info.percent / 100
 
     # 主机信息
     hostname: str = socket.gethostname()
@@ -62,20 +62,16 @@ def get_sys_info():
 
     # python解释器信息
     current_process = psutil.Process(os.getpid())
-    python_name: str = current_process.name()
-    python_version: str = platform.python_version()
-    python_home: str = current_process.exe()
     start_time_stamp = current_process.create_time()
-    start_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time_stamp))
+    python_version: str = platform.python_version()
+    start_time: str = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(start_time_stamp))
     current_time_stamp = time.time()
     difference = current_time_stamp - start_time_stamp
-    # 将时间差转换为天、小时和分钟数
     days = int(difference // (24 * 60 * 60))  # 每天的秒数
     hours = int((difference % (24 * 60 * 60)) // (60 * 60))  # 每小时的秒数
     minutes = int((difference % (60 * 60)) // 60)  # 每分钟的秒数
-    run_time = f'{days}天{hours}小时{minutes}分钟'
-    # 获取该进程的内存信息
-    current_process_memory_info = psutil.Process(os.getpid()).memory_info()
+    run_time: str = f'{days}d/{hours}h/{minutes}m'
+    current_process_memory_usage: str = bytes2human(psutil.Process(os.getpid()).memory_info().rss)
 
     # 磁盘信息
     io = psutil.disk_partitions()
@@ -110,4 +106,9 @@ def get_sys_info():
         memory_used=memory_used,
         memory_free=memory_free,
         memory_usage_percent=memory_usage_percent,
+        # 程序运行状态
+        python_version=python_version,
+        start_time=start_time,
+        run_time=run_time,
+        current_process_memory_usage=current_process_memory_usage,
     )

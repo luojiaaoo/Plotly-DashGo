@@ -60,6 +60,17 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         ),
                         title=_('内存'),
                     ),
+                    Card(
+                        fac.AntdDescriptions(
+                            id='monitor-process-desc',
+                            items=[],
+                            labelStyle={'fontWeight': 'bold'},
+                            bordered=True,
+                            layout='vertical',
+                            column=2,
+                        ),
+                        title=_('进程运行状态'),
+                    ),
                 ],
                 gap='small',
                 wrap='wrap',

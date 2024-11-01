@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-01 15:37+0800\n"
+"POT-Creation-Date: 2024-11-01 15:49+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -34,61 +34,77 @@ msgstr "Click here"
 msgid "可下载最新版Chrome浏览器"
 msgstr "You can download the latest version of Chrome"
 
-#: dash_callback/application/dashboard_/monitor_c.py:24
+#: dash_callback/application/dashboard_/monitor_c.py:25
 msgid "域名"
 msgstr "hostname"
 
-#: dash_callback/application/dashboard_/monitor_c.py:25
+#: dash_callback/application/dashboard_/monitor_c.py:26
 msgid "系统类型"
 msgstr "os name"
 
-#: dash_callback/application/dashboard_/monitor_c.py:26
+#: dash_callback/application/dashboard_/monitor_c.py:27
 msgid "计算机名"
 msgstr "computer name"
 
-#: dash_callback/application/dashboard_/monitor_c.py:27
+#: dash_callback/application/dashboard_/monitor_c.py:28
 msgid "核心架构"
 msgstr "os arch"
 
-#: dash_callback/application/dashboard_/monitor_c.py:30
+#: dash_callback/application/dashboard_/monitor_c.py:31
 msgid "型号"
 msgstr "type"
 
-#: dash_callback/application/dashboard_/monitor_c.py:31
+#: dash_callback/application/dashboard_/monitor_c.py:32
 msgid "逻辑核数"
 msgstr "logical cpu num"
 
-#: dash_callback/application/dashboard_/monitor_c.py:32
+#: dash_callback/application/dashboard_/monitor_c.py:33
 msgid "空闲率"
 msgstr "free"
 
-#: dash_callback/application/dashboard_/monitor_c.py:33
+#: dash_callback/application/dashboard_/monitor_c.py:34
 msgid "总使用率"
 msgstr "total usage"
 
-#: dash_callback/application/dashboard_/monitor_c.py:34
+#: dash_callback/application/dashboard_/monitor_c.py:35
 msgid "用户使用率"
 msgstr "user usage"
 
-#: dash_callback/application/dashboard_/monitor_c.py:35
+#: dash_callback/application/dashboard_/monitor_c.py:36
 msgid "系统使用率"
 msgstr "sys usage"
 
-#: dash_callback/application/dashboard_/monitor_c.py:38
+#: dash_callback/application/dashboard_/monitor_c.py:39
 msgid "总量"
 msgstr "total"
 
-#: dash_callback/application/dashboard_/monitor_c.py:39
+#: dash_callback/application/dashboard_/monitor_c.py:40
 msgid "已用"
 msgstr "usage"
 
-#: dash_callback/application/dashboard_/monitor_c.py:40
+#: dash_callback/application/dashboard_/monitor_c.py:41
 msgid "剩余"
 msgstr "free"
 
-#: dash_callback/application/dashboard_/monitor_c.py:41
+#: dash_callback/application/dashboard_/monitor_c.py:42
 msgid "使用率"
 msgstr "usage"
+
+#: dash_callback/application/dashboard_/monitor_c.py:45
+msgid "Python版本"
+msgstr "Python version"
+
+#: dash_callback/application/dashboard_/monitor_c.py:46
+msgid "启动时间"
+msgstr "setup time"
+
+#: dash_callback/application/dashboard_/monitor_c.py:47
+msgid "运行时长"
+msgstr "run duration"
+
+#: dash_callback/application/dashboard_/monitor_c.py:48
+msgid "内存使用量"
+msgstr "mem usage"
 
 #: dash_callback/pages/login_c.py:123
 msgid "请输入账号和密码"
@@ -141,6 +157,10 @@ msgstr "System Info"
 #: dash_view/application/dashboard_/monitor.py:61
 msgid "内存"
 msgstr "Mem"
+
+#: dash_view/application/dashboard_/monitor.py:72
+msgid "进程运行状态"
+msgstr "Process Status"
 
 #: dash_view/application/dashboard_/workbench.py:10
 msgid "工作台"
