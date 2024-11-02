@@ -7,18 +7,14 @@ logger = Log.get_logger(__name__)
 
 
 class MenuAccess:
-
-
     def get_user_all_access_metas(cls, user_info: UserInfo) -> Set[str]:
         from config.access_factory import AccessFactory
 
         user_name = user_info.user_name
-        user_type = user_info.user_type
+        user_groups: Dict = user_info.user_groups
         all_access_metas: Set[str] = get_user_access_meta_plus_role(user_name=user_name)
         all_access_metas.update(AccessFactory.default_access_meta)
-        if user_type == '超级管理员':
-            all_access_metas.update(AccessFactory.super_admin_access_meta)
-        elif '团队管理员' in user_type:
+        if '团队管理员' in list(user_groups.values()):
             all_access_metas.update(AccessFactory.group_admin_access_meta)
         return all_access_metas
 
@@ -32,12 +28,13 @@ class MenuAccess:
             menu_item = AccessFactory.dict_access_meta2menu_item.get(access_meta)
             menu_items.add(menu_item)
         return menu_items
-    
+
     @staticmethod
     def get_title(module_path):
         from dash_view import application  # noqa
 
         return eval(f'application.{module_path}.get_title()')
+
     @staticmethod
     def get_order(module_path):
         from dash_view import application  # noqa
@@ -47,6 +44,7 @@ class MenuAccess:
         except Exception:
             logger.warning(f'{module_path}没有定义order属性')
             return 999
+
     @staticmethod
     def get_icon(module_path):
         from dash_view import application  # noqa
@@ -58,6 +56,7 @@ class MenuAccess:
 
     @classmethod
     def gen_menu(cls, menu_items: Set[str]):
+        print('>>>',menu_items)
         # 根据菜单项构建菜单层级
         dict_level1_level2 = dict()
         for per_menu_item in menu_items:
@@ -66,8 +65,6 @@ class MenuAccess:
                 dict_level1_level2[level1_name] = [level2_name]
             else:
                 dict_level1_level2[level1_name].append(level2_name)
-
-
 
         # 根据order属性排序
         dict_level1_level2 = dict(sorted(dict_level1_level2.items(), key=lambda x: cls.get_order(f'{x[0]}')))
@@ -101,6 +98,7 @@ class MenuAccess:
 
     def __init__(self, user_name) -> None:
         from config.access_factory import AccessFactory
+
         # 获取应用全部的权限元和菜单的对应关系
         self.dict_access_meta2menu_item = AccessFactory.dict_access_meta2menu_item
         self.user_name = user_name

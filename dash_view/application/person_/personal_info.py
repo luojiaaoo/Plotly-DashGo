@@ -103,31 +103,25 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     fac.AntdSpace(
                         [
                             fac.AntdText(_('状态：'), className='user_info_name'),
-                            fac.AntdText(_(user_info.status), className='user_info_value'),
+                            fac.AntdText(_(user_info.user_status), className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
                             fac.AntdText(_('性别：'), className='user_info_name'),
-                            fac.AntdText(_(user_info.sex), className='user_info_value'),
+                            fac.AntdText(_(user_info.user_sex), className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
                             fac.AntdText(_('团队：'), className='user_info_name'),
-                            fac.AntdText('/'.join(user_info.groups), className='user_info_value'),
-                        ]
-                    ),
-                    fac.AntdSpace(
-                        [
-                            fac.AntdText(_('类型：'), className='user_info_name'),
-                            fac.AntdText(_(user_info.user_type), className='user_info_value'),
+                            fac.AntdText(str(user_info.user_groups), className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
                             fac.AntdText(_('邮箱：'), className='user_info_name'),
-                            fac.AntdText(user_info.email, className='user_info_value'),
+                            fac.AntdText(user_info.user_email, className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
@@ -138,8 +132,8 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('说明：'), className='user_info_name'),
-                            fac.AntdText(user_info.remark),
+                            fac.AntdText(_('描述：'), className='user_info_name'),
+                            fac.AntdText(user_info.user_remark),
                         ]
                     ),
                 ],

@@ -17,15 +17,14 @@ _ = partial(translator.t)
 
 # 二级菜单的标题、图标和显示顺序
 def get_title():
-    return _('权限列表')
+    return _('角色管理')
 
 
 icon = None
 logger = Log.get_logger(__name__)
 order = 1
 
-access_metas = ('权限列表-页面',)
-
+access_metas = ('角色管理-页面',)
 
 def render_content(menu_access: MenuAccess, **kwargs):
     dict_access_meta2menu_item: Dict = menu_access.dict_access_meta2menu_item
@@ -35,9 +34,13 @@ def render_content(menu_access: MenuAccess, **kwargs):
             Card(
                 fac.AntdTable(
                     columns=[
-                        {'title': _('一级菜单'), 'dataIndex': 'level1'},
-                        {'title': _('二级菜单'), 'dataIndex': 'level2'},
-                        {'title': _('权限元'), 'dataIndex': 'access_meta'},
+                        {'title': _('角色名称'), 'dataIndex': 'role_name'},
+                        {'title': _('角色状态'), 'dataIndex': 'level2'},
+                        {'title': _('角色描述'), 'dataIndex': 'access_meta'},
+                        {'title': _('更新时间'), 'dataIndex': 'access_meta'},
+                        {'title': _('更新人'), 'dataIndex': 'access_meta'},
+                        {'title': _('创建时间'), 'dataIndex': 'access_meta'},
+                        {'title': _('操作'), 'dataIndex': 'access_meta'},
                     ],
                     data=[
                         {

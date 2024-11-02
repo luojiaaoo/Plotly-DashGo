@@ -1,5 +1,5 @@
 # 本应用的权限工厂，此处手动导入应用模块
-from dash_view.application.access_ import access_meta, group_auth, role_auth, user_auth
+from dash_view.application.access_ import group_mgmt, role_mgmt, user_auth, group_auth
 from dash_view.application.dashboard_ import workbench, monitor
 from dash_view.application.person_ import personal_info, personal_setting
 
@@ -12,34 +12,52 @@ def trim_module_path2menu_item(module_path):
 
 class AccessFactory:
     views = [
-        access_meta,
-        group_auth,
-        role_auth,
+        group_mgmt,
+        role_mgmt,
         user_auth,
+        group_auth,
         workbench,
         monitor,
         personal_info,
         personal_setting,
     ]
+
+    @classmethod
+    def gen_json_menu_item_access_meta(cls, dict_access_meta2menu_item):
+        from common.utilities.util_menu_access import MenuAccess
+
+        json_menu_item_access_meta = {}
+        for access_meta, menu_item in dict_access_meta2menu_item.items():
+            # 此权限无需分配
+            if menu_item in (cls.default_access_meta) or menu_item in (cls.group_admin_access_meta):
+                continue
+            level1_name = MenuAccess.get_title(menu_item.split('.')[0])
+            level2_name = MenuAccess.get_title(menu_item)
+            access_meta
+            if json_menu_item_access_meta.get(level1_name, None) is None:
+                json_menu_item_access_meta[level1_name] = {level2_name: [access_meta]}
+            else:
+                if json_menu_item_access_meta[level1_name].get(level2_name, None) is None:
+                    json_menu_item_access_meta[level1_name][level2_name] = [access_meta]
+                else:
+                    json_menu_item_access_meta[level1_name][level2_name].append(access_meta)
+        return json_menu_item_access_meta
+
     # 读取每个VIEW中配置的所有权限
     dict_access_meta2module_path = {access_meta: view.__name__ for view in views for access_meta in view.access_metas}
     dict_access_meta2menu_item = {
         access_meta: trim_module_path2menu_item(module_path) for access_meta, module_path in dict_access_meta2module_path.items()
     }
+    json_menu_item_access_meta = gen_json_menu_item_access_meta(dict_access_meta2menu_item)
 
-    # 基础默认权限，主页和个人中心
+    # 基础默认权限，主页和个人中心，每人都有，无需分配
     default_access_meta = (
         '个人信息-页面',
         '个人设置-页面',
         '工作台-页面',
     )
-    # 团队管理员的默认权限，权限列表和用户权限
-    group_admin_access_meta = (
-        '权限列表-页面',
-        '用户权限-页面',
-    )
-    # 超级管理员拥有所有权限
-    super_admin_access_meta = dict_access_meta2module_path.keys()
+    # 团队管理员的默认权限，无需分配
+    group_admin_access_meta = ('团队权限-页面',)
 
     # 检查数据库和应用权限
     @classmethod
@@ -49,7 +67,7 @@ class AccessFactory:
         logger = Log.get_logger(__name__)
 
         # 角色类型附加权限检查
-        outliers = set([*cls.default_access_meta, *cls.group_admin_access_meta, *cls.super_admin_access_meta]) - set(
+        outliers = set([*cls.default_access_meta, *cls.group_admin_access_meta]) - set(
             cls.dict_access_meta2module_path.keys()
         )
         if outliers:

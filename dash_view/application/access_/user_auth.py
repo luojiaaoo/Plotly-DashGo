@@ -20,6 +20,6 @@ def get_title():
 
 icon = None
 logger = Log.get_logger(__name__)
-order = 4
+order = 3
 
 access_metas = ('用户权限-页面',)

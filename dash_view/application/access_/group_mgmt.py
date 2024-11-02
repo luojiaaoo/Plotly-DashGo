@@ -15,11 +15,11 @@ _ = partial(translator.t)
 
 # 二级菜单的标题、图标和显示顺序
 def get_title():
-    return _('角色管理')
+    return _('团队管理')
 
 
 icon = None
 logger = Log.get_logger(__name__)
-order = 2
+order = 4
 
-access_metas = ('角色管理-页面',)
+access_metas = ('团队管理-页面',)
