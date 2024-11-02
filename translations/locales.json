@@ -210,6 +210,18 @@
         },
         "停用": {
             "en-us": "Disable"
+        },
+        "一级菜单": {
+            "en-us": "Level1 Menu"
+        },
+        "二级菜单": {
+            "en-us": "Level2 Menu"
+        },
+        "权限元": {
+            "en-us": "Access Meta"
+        },
+        "应用权限列表": {
+            "en-us": "Access List"
         }
     }
 }
