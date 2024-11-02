@@ -3,7 +3,6 @@ from flask import request
 from server import app
 from dash.dependencies import Input, Output
 import feffery_utils_components as fuc
-from i18n import get_current_locale
 from i18n import translator
 
 
@@ -35,7 +34,7 @@ def render_lang_content():
         className={
             '& span': {'fontSize': '10px', 'fontWeight': 'bold'},
             '& .ant-btn': {'height': '1.5em'},
-            '& #global-language-zh': {'backgroundColor': '#1C69D1', 'color': '#eee'} if get_current_locale() == 'zh-cn' else {'color': '#999999'},
-            '& #global-language-en': {'backgroundColor': '#1C69D1', 'color': '#eee'} if get_current_locale() == 'en-us' else {'color': '#999999'},
+            '& #global-language-zh': {'backgroundColor': '#1C69D1', 'color': '#eee'} if translator.get_current_locale() == 'zh-cn' else {'color': '#999999'},
+            '& #global-language-en': {'backgroundColor': '#1C69D1', 'color': '#eee'} if translator.get_current_locale() == 'en-us' else {'color': '#999999'},
         },
     )

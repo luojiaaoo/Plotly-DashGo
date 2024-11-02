@@ -53,6 +53,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         'level2': {'filterSearch': True},
                         'access_meta': {'filterSearch': True},
                     },
+                    locale=translator.get_current_locale(),
                 ),
                 title=_('应用权限列表'),
             ),
