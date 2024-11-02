@@ -10,11 +10,3 @@ translator = Translator(
         *[os.path.join('./translations/topic_locales', path) for path in os.listdir('./translations/topic_locales')],
     ],
 )
-
-
-def get_current_locale() -> str:
-    """获取当前国际化语种"""
-    return request.cookies.get(translator.cookie_name, 'zh-cn')
-
-
-translator.get_current_locale = get_current_locale
