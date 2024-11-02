@@ -56,7 +56,6 @@ class MenuAccess:
 
     @classmethod
     def gen_menu(cls, menu_items: Set[str]):
-        print('>>>',menu_items)
         # 根据菜单项构建菜单层级
         dict_level1_level2 = dict()
         for per_menu_item in menu_items:

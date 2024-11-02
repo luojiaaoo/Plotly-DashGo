@@ -48,7 +48,10 @@ class AccessFactory:
     dict_access_meta2menu_item = {
         access_meta: trim_module_path2menu_item(module_path) for access_meta, module_path in dict_access_meta2module_path.items()
     }
-    json_menu_item_access_meta = gen_json_menu_item_access_meta(dict_access_meta2menu_item)
+
+    @classmethod
+    def get_json_menu_item_access_meta(cls):
+        return cls.gen_json_menu_item_access_meta(cls.dict_access_meta2menu_item)
 
     # 基础默认权限，主页和个人中心，每人都有，无需分配
     default_access_meta = (
@@ -67,9 +70,7 @@ class AccessFactory:
         logger = Log.get_logger(__name__)
 
         # 角色类型附加权限检查
-        outliers = set([*cls.default_access_meta, *cls.group_admin_access_meta]) - set(
-            cls.dict_access_meta2module_path.keys()
-        )
+        outliers = set([*cls.default_access_meta, *cls.group_admin_access_meta]) - set(cls.dict_access_meta2module_path.keys())
         if outliers:
             logger.error(f'角色类型附加权限中存在未定义的权限：{outliers}')
             raise ValueError(f'角色类型附加权限中存在未定义的权限：{outliers}')
