@@ -9,7 +9,10 @@ from dash import set_props
 from yarl import URL
 from common.utilities.util_menu_access import get_menu_access, MenuAccess
 from dash_view.pages import page_404, page_401
-from flask_babel import gettext as _  # noqa
+from functools import partial
+from i18n import translator
+
+_ = partial(translator.t)
 
 # 折叠侧边栏按钮回调
 app.clientside_callback(

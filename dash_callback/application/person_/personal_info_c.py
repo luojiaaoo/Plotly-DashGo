@@ -5,7 +5,6 @@ import dash
 from server import app
 from common.utilities.util_file_trans import AvatarFile
 from common.utilities.util_menu_access import get_menu_access, MenuAccess
-from flask_babel import gettext as _  # noqa
 from uuid import uuid4
 
 

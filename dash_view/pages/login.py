@@ -3,8 +3,11 @@ import feffery_antd_components as fac
 from config.dash_melon_conf import ShowConf, JwtConf, LoginConf
 from dash import dcc
 from dash_view.framework.lang import render_lang_content
-from flask_babel import get_locale, gettext as _  # noqa
 import dash_callback.pages.login_c  # noqa
+from functools import partial
+from i18n import translator
+
+_ = partial(translator.t)
 
 
 def render_content():

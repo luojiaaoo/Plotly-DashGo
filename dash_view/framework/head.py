@@ -2,11 +2,14 @@ import feffery_antd_components as fac
 from dash import html
 from dash_view.framework.lang import render_lang_content
 from common.utilities.util_menu_access import MenuAccess
-from flask_babel import gettext as _  # noqa
 from server import app
 from dash.dependencies import Input, Output, State
 import dash
 from dash.exceptions import PreventUpdate
+from functools import partial
+from i18n import translator
+
+_ = partial(translator.t)
 
 
 def render_head_content(menu_access: MenuAccess):

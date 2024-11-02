@@ -5,7 +5,6 @@ import socket
 import platform
 import os
 import cpuinfo
-from flask_babel import gettext as _  # noqa
 from cacheout import Cache
 
 cache = Cache()

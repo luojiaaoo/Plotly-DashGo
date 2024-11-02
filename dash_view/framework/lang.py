@@ -1,42 +1,41 @@
 import feffery_antd_components as fac
-from flask import session
+from flask import request
 from server import app
 from dash.dependencies import Input, Output
-from flask_babel import get_locale
-
-
-# 切换中文
-@app.callback(
-    Output('global-reload', 'reload', allow_duplicate=True),
-    Input('global-language-zh', 'nClicks'),
-    prevent_initial_call=True,
-)
-def lang_zh(nClicks):
-    session['lang'] = 'zh'
-    return True
-
-
-# 切换英文
-@app.callback(
-    Output('global-reload', 'reload', allow_duplicate=True),
-    Input('global-language-en', 'nClicks'),
-    prevent_initial_call=True,
-)
-def lang_en(nClicks):
-    session['lang'] = 'en'
-    return True
+import feffery_utils_components as fuc
+from i18n import get_current_locale
+from i18n import translator
 
 
 def render_lang_content():
     return fac.AntdCompact(
         [
-            fac.AntdButton('ZH', id='global-language-zh'),
-            fac.AntdButton('EN', id='global-language-en'),
+            fac.AntdButton(
+                'ZH',
+                id='global-language-zh',
+                clickExecuteJsString="""
+                    window.dash_clientside.set_props('global-locale', { value: 'zh-cn' })
+                    window.dash_clientside.set_props('global-reload', { reload: true })
+                """,
+            ),
+            fac.AntdButton(
+                'EN',
+                id='global-language-en',
+                clickExecuteJsString="""
+                    window.dash_clientside.set_props('global-locale', { value: 'en-us' })
+                    window.dash_clientside.set_props('global-reload', { reload: true })
+                """,
+            ),
+            fuc.FefferyCookie(
+                id='global-locale',
+                expires=3600 * 24 * 365,
+                cookieKey=translator.cookie_name,
+            ),
         ],
         className={
             '& span': {'fontSize': '10px', 'fontWeight': 'bold'},
             '& .ant-btn': {'height': '1.5em'},
-            '& #global-language-zh': {'backgroundColor': '#1C69D1', 'color': '#eee'} if (lang:=get_locale().language) == 'zh' else {'color': '#999999'},
-            '& #global-language-en': {'backgroundColor': '#1C69D1', 'color': '#eee'} if lang == 'en' else {'color': '#999999'},
+            '& #global-language-zh': {'backgroundColor': '#1C69D1', 'color': '#eee'} if get_current_locale() == 'zh-cn' else {'color': '#999999'},
+            '& #global-language-en': {'backgroundColor': '#1C69D1', 'color': '#eee'} if get_current_locale() == 'en-us' else {'color': '#999999'},
         },
     )

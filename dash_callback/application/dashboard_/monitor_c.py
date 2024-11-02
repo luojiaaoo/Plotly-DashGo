@@ -3,7 +3,10 @@ from dash.dependencies import Input, Output, State
 from common.utilities import util_sys
 import feffery_antd_components as fac
 from dash import html
-from flask_babel import gettext as _  # noqa
+from functools import partial
+from i18n import translator
+
+_ = partial(translator.t)
 
 
 @app.callback(
@@ -48,5 +51,5 @@ def callback_func(n_intervals, timeoutCount):
             {'label': fac.AntdText(_('运行时长')), 'children': sys_info['run_time']},
             {'label': fac.AntdText(_('内存使用量')), 'children': sys_info['current_process_memory_usage']},
         ],
-        sys_info['sys_files']
+        sys_info['sys_files'],
     ]

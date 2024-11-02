@@ -3,7 +3,10 @@ from typing import List
 import feffery_antd_components as fac
 from common.utilities.util_logger import Log
 from dash import html
-from flask_babel import gettext as _  # noqa
+from functools import partial
+from i18n import translator
+
+_ = partial(translator.t)
 
 
 # 二级菜单的标题、图标和显示顺序
@@ -15,9 +18,8 @@ icon = None
 logger = Log.get_logger(__name__)
 order = 2
 
-access_metas = (
-    '个人设置-页面',
-)
+access_metas = ('个人设置-页面',)
+
 
 def render_content(menu_access: MenuAccess, **kwargs):
     access_metas: List[str] = menu_access.all_access_metas

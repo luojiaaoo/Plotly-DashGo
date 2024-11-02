@@ -7,7 +7,10 @@ from dash import html
 from dash import dcc
 from database.sql_db.dao import dao_user
 import dash_callback.application.person_.personal_info_c  # noqa
-from flask_babel import gettext as _  # noqa
+from functools import partial
+from i18n import translator
+
+_ = partial(translator.t)
 
 
 # 二级菜单的标题、图标和显示顺序
@@ -19,6 +22,4 @@ icon = None
 logger = Log.get_logger(__name__)
 order = 3
 
-access_metas = (
-    '团队管理-页面',
-)
+access_metas = ('团队管理-页面',)

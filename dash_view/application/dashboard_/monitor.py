@@ -3,9 +3,12 @@ import feffery_utils_components as fuc
 import feffery_antd_components as fac
 from common.utilities.util_logger import Log
 from dash import html, dcc
-from flask_babel import gettext as _  # noqa
 from dash_components import Card
 import dash_callback.application.dashboard_.monitor_c  # noqa
+from functools import partial
+from i18n import translator
+
+_ = partial(translator.t)
 
 
 # 二级菜单的标题、图标和显示顺序

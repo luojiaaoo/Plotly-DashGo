@@ -4,7 +4,6 @@ from dash_view.framework.head import render_head_content
 from dash_view.framework.func import render_func_content
 from common.utilities.util_menu_access import MenuAccess
 import feffery_utils_components as fuc
-from flask_babel import get_locale, gettext as _  # noqa
 import dash_callback.pages.main_c  # noqa
 
 

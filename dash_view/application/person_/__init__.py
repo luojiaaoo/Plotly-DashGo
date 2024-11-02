@@ -1,4 +1,7 @@
-from flask_babel import gettext as _  # noqa
+from functools import partial
+from i18n import translator
+
+_ = partial(translator.t)
 
 
 # 一级菜单的标题、图标和显示顺序

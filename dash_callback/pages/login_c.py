@@ -5,7 +5,6 @@ from dash.dependencies import Input, Output, State
 from server import app
 from dash.exceptions import PreventUpdate
 import dash
-from flask_babel import gettext as _  # noqa
 
 # 定义一个客户端回调函数，用于处理登录验证代码的显示逻辑，总是显示login的路径
 app.clientside_callback(

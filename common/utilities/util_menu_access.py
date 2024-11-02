@@ -2,7 +2,6 @@ from database.sql_db.dao.dao_user import get_user_access_meta_plus_role, get_use
 from typing import Dict, List, Set
 from common.utilities.util_logger import Log
 import re
-from flask_babel import gettext as _  # noqa
 
 logger = Log.get_logger(__name__)
 

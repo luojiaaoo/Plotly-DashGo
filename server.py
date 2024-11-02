@@ -1,16 +1,16 @@
 from flask import request, session, redirect, send_from_directory, abort, Response
-import dash
-from config.dash_melon_conf import ShowConf, FlaskConf, BabelConf, CommonConf
+from config.dash_melon_conf import ShowConf, FlaskConf, CommonConf
 from user_agents import parse
-from flask_babel import Babel
 from common.exception import AttackException
-from flask_babel import gettext as _  # noqa
 from common.utilities.util_logger import Log
 from config.dash_melon_conf import PathProj
 from common.utilities.util_dash import CustomDash
+from functools import partial
+from i18n import translator
+
+_ = partial(translator.t)
 
 logger = Log.get_logger(__name__)
-
 
 # dash实例
 app = CustomDash(
@@ -23,10 +23,6 @@ app = CustomDash(
 )
 app.server.config['COMPRESS_ALGORITHM'] = FlaskConf.COMPRESS_ALGORITHM
 app.server.config['COMPRESS_BR_LEVEL'] = FlaskConf.COMPRESS_BR_LEVEL
-app.server.config['BABEL_DEFAULT_LOCALE'] = BabelConf.BABEL_DEFAULT_LOCALE
-app.server.config['BABEL_DEFAULT_TIMEZONE'] = BabelConf.BABEL_DEFAULT_TIMEZONE
-app.server.config['BABEL_TRANSLATION_DIRECTORIES'] = BabelConf.BABEL_TRANSLATION_DIRECTORIES
-app.server.config['LANGUAGES'] = BabelConf.LANGUAGES
 app.server.secret_key = FlaskConf.COOKIE_SESSION_SECRET_KEY
 app.title = ShowConf.WEB_TITLE
 
@@ -46,18 +42,6 @@ def download_file(user_name):
         abort(403)
     else:
         return send_from_directory(PathProj.AVATAR_DIR_PATH, file_name)
-
-
-# 国际化
-def select_locale():
-    # 优先从session中获取
-    lang_session = session.get('lang', None)
-    lang_auto = request.accept_languages.best_match(server.config['LANGUAGES'])
-    return lang_session or lang_auto
-
-
-babel = Babel(app=server)
-babel.init_app(app=server, locale_selector=select_locale)
 
 
 # 首页拦截器
