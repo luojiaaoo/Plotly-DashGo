@@ -145,3 +145,19 @@ def get_role_info(role_name: str = None):
             )
         result = cursor.fetchall()
         return [RoleInfo(**dict(zip(heads, per_rt))) for per_rt in result]
+
+
+def delete_role(role_name: str) -> bool:
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        conn.start_transaction()
+        try:
+            cursor.execute(
+                """delete FROM sys_role where role_name=%s;""",
+                (role_name,),
+            )
+        except Exception as e:
+            conn.rollback()
+            return False
+        else:
+            conn.commit()
+            return True

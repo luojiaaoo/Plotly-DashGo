@@ -21,6 +21,7 @@ _ = partial(translator.t)
         Input('monitor-intervals', 'n_intervals'),
         Input('monitor-intervals-init', 'timeoutCount'),
     ],
+    prevent_initial_call=True,
 )
 def callback_func(n_intervals, timeoutCount):
     sys_info = util_sys.get_sys_info()

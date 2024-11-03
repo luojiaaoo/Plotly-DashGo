@@ -28,6 +28,10 @@ def render_func_content():
         dcc.Location(id='global-dcc-url', refresh=False),
         # 全局重定向组件容器
         fac.Fragment(id='global-redirect-container'),
+        # 注入全局消息提示容器
+        fac.Fragment(id='global-message-container'),
+        # 注入全局通知信息容器
+        fac.Fragment(id='global-notification-container'),
         # 退出登录提示弹窗
         fac.AntdModal(
             html.Div(

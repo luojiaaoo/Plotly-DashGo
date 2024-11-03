@@ -26,7 +26,6 @@ class AccessFactory:
     def gen_antd_tree_data_menu_item_access_meta(cls, dict_access_meta2menu_item):
         from i18n import translator
         from functools import partial
-        from uuid import uuid4
 
         _ = partial(translator.t)
         from common.utilities.util_menu_access import MenuAccess

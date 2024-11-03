@@ -8,7 +8,7 @@ def render():
             html.Div(
                 [
                     fac.AntdResult(
-                        status='401',
+                        status='403',
                         title='您没有权限访问该页面',
                         subTitle='如续访问，请联系系统管理员',
                         style={'paddingBottom': 0, 'paddingTop': 0},
