@@ -11,7 +11,9 @@ _ = partial(translator.t)
 
 @app.callback(
     [
-        Output('role-mgmt-table', 'data'),
+        # 删除角色弹窗
+        Output('role-mgmt-delete-affirm-modal', 'visible'),
+        Output('role-mgmt-delete-role-name', 'children'),
         Output('role-mgmt-update-role-name', 'children'),
         Output('role-mgmt-update-role-status', 'checked'),
         Output('role-menu-access-tree-select', 'checkedKeys'),
@@ -20,36 +22,41 @@ _ = partial(translator.t)
     State('role-mgmt-table', 'clickedCustom'),
     prevent_initial_call=True,
 )
-def callback_func(nClicksButton, clickedCustom: str):
-    print('clickedCustom:', clickedCustom)
+def update_delete_role(nClicksButton, clickedCustom: str):
     if clickedCustom.startswith('delete'):
         role_name = clickedCustom.split(':')[1]
-        rt = dao_user.delete_role(role_name)
-        if rt:
-            MessageManager.success(content=_('用户删除成功'))
-            return (
-                [
+        return True, role_name, dash.no_update, dash.no_update, dash.no_update
+
+
+@app.callback(
+    Output('role-mgmt-table', 'data'),
+    Input('role-mgmt-delete-affirm-modal', 'okCounts'),
+    State('role-mgmt-delete-role-name', 'children'),
+    prevent_initial_call=True,
+)
+def delete_role_modal(okCounts, role_name):
+    rt = dao_user.delete_role(role_name)
+    if rt:
+        MessageManager.success(content=_('用户删除成功'))
+        return [
+            {
+                **i.__dict__,
+                'operation': [
                     {
-                        **i.__dict__,
-                        'operation': [
-                            {
-                                'content': _('编辑'),
-                                'type': 'primary',
-                                'custom': 'update:' + i.role_name,
-                            },
-                            {
-                                'content': _('删除'),
-                                'type': 'primary',
-                                'custom': 'delete:' + i.role_name,
-                                'danger': True,
-                            },
-                        ],
-                    }
-                    for i in dao_user.get_role_info()
+                        'content': _('编辑'),
+                        'type': 'primary',
+                        'custom': 'update:' + i.role_name,
+                    },
+                    {
+                        'content': _('删除'),
+                        'type': 'primary',
+                        'custom': 'delete:' + i.role_name,
+                        'danger': True,
+                    },
                 ],
-                dash.no_update,
-                dash.no_update,
-                dash.no_update,
-            )
-        else:
-            MessageManager.warning(content=_('用户删除失败'))
+            }
+            for i in dao_user.get_role_info()
+        ]
+    else:
+        MessageManager.warning(content=_('用户删除失败'))
+        return dash.no_update
