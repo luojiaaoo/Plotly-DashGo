@@ -17,7 +17,7 @@ _ = partial(translator.t)
         Output('role-mgmt-delete-role-name', 'children'),
         Output('role-mgmt-update-role-name', 'children'),
         Output('role-mgmt-update-role-status', 'checked'),
-        Output('role-menu-access-tree-select', 'checkedKeys'),
+        Output('role-menu-access-tree-select-update', 'checkedKeys'),
     ],
     Input('role-mgmt-table', 'nClicksButton'),
     State('role-mgmt-table', 'clickedCustom'),
