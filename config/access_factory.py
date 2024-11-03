@@ -53,12 +53,11 @@ class AccessFactory:
                 format_level2.append(
                     {
                         'title': level2,
-                        'key': 'ingore' + str(uuid4),
+                        'key': 'ingore' + level2,
                         'children': [{'title': _(access_meta), 'key': access_meta} for access_meta in access_metas],
                     },
                 )
-            antd_tree_data.append({'title': level1_name, 'key': 'ingore' + str(uuid4), 'children': format_level2})
-        print(antd_tree_data)
+            antd_tree_data.append({'title': level1_name, 'key': 'ingore' + level1_name, 'children': format_level2})
         return antd_tree_data
 
     # 读取每个VIEW中配置的所有权限
