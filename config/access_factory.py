@@ -26,6 +26,7 @@ class AccessFactory:
     def gen_antd_tree_data_menu_item_access_meta(cls, dict_access_meta2menu_item):
         from i18n import translator
         from functools import partial
+        from uuid import uuid4
 
         _ = partial(translator.t)
         from common.utilities.util_menu_access import MenuAccess
@@ -50,9 +51,13 @@ class AccessFactory:
             format_level2 = []
             for level2, access_metas in dict_level2_access_metas.items():
                 format_level2.append(
-                    {'title': level2, 'key': level2, 'children': [{'title': _(access_meta), 'key': access_meta} for access_meta in access_metas]},
+                    {
+                        'title': level2,
+                        'key': 'ingore' + str(uuid4),
+                        'children': [{'title': _(access_meta), 'key': access_meta} for access_meta in access_metas],
+                    },
                 )
-            antd_tree_data.append({'title': level1_name, 'key': level1_name, 'children': format_level2})
+            antd_tree_data.append({'title': level1_name, 'key': 'ingore' + str(uuid4), 'children': format_level2})
         print(antd_tree_data)
         return antd_tree_data
 
