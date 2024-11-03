@@ -27,7 +27,7 @@ access_metas = ('个人信息-页面',)
 
 def render_content(menu_access: MenuAccess, **kwargs):
     access_metas: List[str] = menu_access.all_access_metas
-    user_info = dao_user.get_user_info(menu_access.user_name)
+    user_info = dao_user.get_user_info(menu_access.user_name)[0]
     return html.Div(
         [
             Card(

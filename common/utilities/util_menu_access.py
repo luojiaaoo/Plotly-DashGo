@@ -101,7 +101,7 @@ class MenuAccess:
         # 获取应用全部的权限元和菜单的对应关系
         self.dict_access_meta2menu_item = AccessFactory.dict_access_meta2menu_item
         self.user_name = user_name
-        self.user_info: UserInfo = get_user_info(user_name)
+        self.user_info: UserInfo = get_user_info(user_name)[0]
         # 用户所有的权限元
         self.all_access_metas: Set[str] = self.get_user_all_access_metas(user_info=self.user_info)
         # 生成用户的目录路径

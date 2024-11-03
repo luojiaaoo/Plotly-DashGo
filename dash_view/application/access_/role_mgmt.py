@@ -26,6 +26,7 @@ order = 1
 
 access_metas = ('角色管理-页面',)
 
+
 def render_content(menu_access: MenuAccess, **kwargs):
     dict_access_meta2menu_item: Dict = menu_access.dict_access_meta2menu_item
     logger.debug(f'用户：{menu_access.user_name}，访问：{__name__}，参数列表：{kwargs}，权限元：{access_metas}')
@@ -35,27 +36,16 @@ def render_content(menu_access: MenuAccess, **kwargs):
                 fac.AntdTable(
                     columns=[
                         {'title': _('角色名称'), 'dataIndex': 'role_name'},
-                        {'title': _('角色状态'), 'dataIndex': 'level2'},
-                        {'title': _('角色描述'), 'dataIndex': 'access_meta'},
-                        {'title': _('更新时间'), 'dataIndex': 'access_meta'},
-                        {'title': _('更新人'), 'dataIndex': 'access_meta'},
+                        {'title': _('角色状态'), 'dataIndex': 'role_status'},
+                        {'title': _('角色描述'), 'dataIndex': 'role_remark'},
+                        {'title': _('更新时间'), 'dataIndex': 'update_datetime'},
+                        {'title': _('更新人'), 'dataIndex': 'update_datetime'},
                         {'title': _('创建时间'), 'dataIndex': 'access_meta'},
+                        {'title': _('创建人'), 'dataIndex': 'access_meta'},
                         {'title': _('操作'), 'dataIndex': 'access_meta'},
                     ],
-                    data=[
-                        {
-                            'level1': MenuAccess.get_title(menu_item.split('.')[0]),
-                            'level2': MenuAccess.get_title(menu_item),
-                            'access_meta': access_meta,
-                        }
-                        for access_meta, menu_item in dict_access_meta2menu_item.items()
-                    ],
+                    data=[i.__dict__ for i in dao_user.get_role_info()],
                     bordered=True,
-                    filterOptions={
-                        'level1': {'filterSearch': True},
-                        'level2': {'filterSearch': True},
-                        'access_meta': {'filterSearch': True},
-                    },
                     locale=translator.get_current_locale(),
                 ),
                 title=_('应用权限列表'),

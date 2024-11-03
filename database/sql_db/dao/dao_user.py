@@ -52,7 +52,7 @@ class UserInfo:
     user_remark: str
 
 
-def get_user_info(user_name: str) -> UserInfo:
+def get_user_info(user_name: str = None) -> List[UserInfo]:
     heads = (
         'user_name',
         'user_full_name',
@@ -68,14 +68,25 @@ def get_user_info(user_name: str) -> UserInfo:
         'user_remark',
     )
     with pool.get_connection() as conn, conn.cursor() as cursor:
-        cursor.execute(
-            f"""SELECT {','.join(heads)} FROM sys_user WHERE user_name = %s;""",
-            (user_name,),
-        )
-        result = cursor.fetchone()
-        user_dict = dict(zip(heads, result))
-        user_dict.update({'user_groups': json.loads(user_dict['user_groups'])})
-        return UserInfo(**user_dict)
+        if user_name is None:
+            cursor.execute(f"""SELECT {','.join(heads)} FROM sys_user;""")
+        else:
+            cursor.execute(
+                f"""SELECT {','.join(heads)} FROM sys_user WHERE user_name = %s;""",
+                (user_name,),
+            )
+        user_infos = []
+        result = cursor.fetchall()
+        for per in result:
+            user_dict = dict(zip(heads, per))
+            user_dict.update(
+                {
+                    'user_groups': json.loads(user_dict['user_groups']),
+                    'user_roles': json.loads(user_dict['user_roles']),
+                },
+            )
+            user_infos.append(UserInfo(**user_dict))
+        return user_infos
 
 
 def get_roles_from_user_name(user_name: str) -> Set[str]:
@@ -101,3 +112,36 @@ def get_access_meta_from_roles(roles: Union[List[str], Set[str]]) -> Set[str]:
 def get_user_access_meta_plus_role(user_name: str) -> Set[str]:
     roles = get_roles_from_user_name(user_name)
     return get_access_meta_from_roles(roles)
+
+
+@dataclass
+class RoleInfo:
+    role_name: str
+    role_status: str
+    update_datetime: datetime
+    update_by: str
+    create_datetime: datetime
+    create_by: str
+    role_remark: str
+
+
+def get_role_info(role_name: str = None):
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        heads = (
+            'role_name',
+            'role_status',
+            'update_datetime',
+            'update_by',
+            'create_datetime',
+            'create_by',
+            'role_remark',
+        )
+        if role_name is None:
+            cursor.execute(f"""SELECT {','.join(heads)} FROM sys_role;""")
+        else:
+            cursor.execute(
+                f"""SELECT {','.join(heads)} FROM sys_role where role_name=%s;""",
+                (role_name,),
+            )
+        result = cursor.fetchall()
+        return [RoleInfo(**dict(zip(heads, per_rt))) for per_rt in result]

@@ -11,7 +11,7 @@
  Target Server Version : 50744
  File Encoding         : 65001
 
- Date: 02/11/2024 23:57:10
+ Date: 03/11/2024 14:09:42
 */
 
 SET NAMES utf8mb4;
@@ -25,11 +25,12 @@ CREATE TABLE `sys_group`  (
   `group_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '团队名称',
   `group_roles` json NOT NULL COMMENT '团队拥有的角色分配权限',
   `group_users` json NOT NULL COMMENT '团队人员',
-  `group_status` tinyint(4) NOT NULL COMMENT '团队状态（0：停用，1：启用）',
-  `group_remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '团队描述',
+  `group_status` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '团队状态（0：停用，1：启用）',
   `update_datetime` datetime NOT NULL COMMENT '更新时间',
+  `update_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `create_datetime` datetime NOT NULL COMMENT '创建时间',
-  `create_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '被谁创建'
+  `create_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '被谁创建',
+  `group_remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '团队描述'
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -43,8 +44,9 @@ DROP TABLE IF EXISTS `sys_role`;
 CREATE TABLE `sys_role`  (
   `role_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '角色名',
   `access_metas` json NOT NULL COMMENT '角色拥有的权限',
-  `role_status` tinyint(4) NOT NULL COMMENT '角色状态（0：停用，1：启用）',
+  `role_status` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '正常/停用',
   `update_datetime` datetime NOT NULL COMMENT '更新时间',
+  `update_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '被谁更新',
   `create_datetime` datetime NOT NULL COMMENT '创建时间',
   `create_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '被谁创建',
   `role_remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '角色描述',
@@ -54,7 +56,7 @@ CREATE TABLE `sys_role`  (
 -- ----------------------------
 -- Records of sys_role
 -- ----------------------------
-INSERT INTO `sys_role` VALUES ('admin', '[\"团队管理-页面\", \"角色管理-页面\", \"用户权限-页面\", \"团队权限-页面\", \"工作台-页面\", \"监控页-页面\", \"个人信息-页面\", \"个人设置-页面\"]', 1, '2024-11-02 23:51:13', '2024-11-02 23:51:09', ' ', ' ');
+INSERT INTO `sys_role` VALUES ('admin', '[\"团队管理-页面\", \"角色管理-页面\", \"用户权限-页面\", \"团队权限-页面\", \"工作台-页面\", \"监控页-页面\", \"个人信息-页面\", \"个人设置-页面\"]', '1', '2024-11-02 23:51:13', '', '2024-11-02 23:51:09', ' ', ' ');
 
 -- ----------------------------
 -- Table structure for sys_user
@@ -64,14 +66,15 @@ CREATE TABLE `sys_user`  (
   `user_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '用户名',
   `user_full_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '全名',
   `password_sha256` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码SHA256值',
-  `user_status` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '正常/停用',
+  `user_status` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '正常/停用',
   `user_sex` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '性别',
   `user_roles` json NOT NULL COMMENT '角色',
   `user_groups` json NOT NULL COMMENT '部门及身份',
   `user_email` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '电子邮箱',
   `phone_number` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '电话号码',
+  `update_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '被谁更新',
   `update_datetime` datetime NOT NULL COMMENT '更新时间',
-  `create_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '谁创建用户',
+  `create_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '被谁创建',
   `create_datetime` datetime NOT NULL COMMENT '创建时间',
   `user_remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户描述',
   UNIQUE INDEX `uniq_name`(`user_name`) USING BTREE,
@@ -81,6 +84,6 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES ('admin', '超级管理员', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', '正常', '未知', '[\"admin\"]', '{}', '', '', '2024-11-02 23:36:37', '', '2024-11-02 23:36:53', '初始超级管理员');
+INSERT INTO `sys_user` VALUES ('admin', '超级管理员', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', '正常', '未知', '[\"admin\"]', '{}', '', '', '', '2024-11-02 23:36:37', '', '2024-11-02 23:36:53', '初始超级管理员');
 
 SET FOREIGN_KEY_CHECKS = 1;
