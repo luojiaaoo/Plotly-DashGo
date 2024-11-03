@@ -3,7 +3,7 @@ from typing import List
 import feffery_antd_components as fac
 import feffery_utils_components as fuc
 from common.utilities.util_logger import Log
-from dash_components import Card,Table
+from dash_components import Card, Table
 from dash import html
 from dash import dcc
 from database.sql_db.dao import dao_user
@@ -42,9 +42,37 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         {'title': _('更新人'), 'dataIndex': 'update_by'},
                         {'title': _('创建时间'), 'dataIndex': 'create_datetime'},
                         {'title': _('创建人'), 'dataIndex': 'create_by'},
-                        {'title': _('操作'), 'dataIndex': 'access_meta'},
+                        {'title': _('修改'), 'dataIndex': 'change', 'renderOptions': {'renderType': 'button'}},
+                        {
+                            'title': _('删除'),
+                            'dataIndex': 'delete',
+                            'renderOptions': {
+                                'renderType': 'button',
+                                'renderButtonPopConfirmProps': {
+                                    'title': '确认删除？',
+                                    'okText': '确认',
+                                    'cancelText': '取消',
+                                },
+                            },
+                        },
                     ],
-                    data=[i.__dict__ for i in dao_user.get_role_info()]*100,
+                    data=[
+                        {
+                            **i.__dict__,
+                            'change': {
+                                'content': '修改',
+                                'type': 'primary',
+                                'custom': 'balabalabalabala',
+                            },
+                            'delete': {
+                                'content': '删除',
+                                'type': 'primary',
+                                'custom': 'balabalabalabala',
+                            },
+                        }
+                        for i in dao_user.get_role_info()
+                    ],
+                    pageSize=10,
                 ),
                 title=_('应用权限列表'),
                 className={'flex': 'auto'},
