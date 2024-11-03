@@ -23,7 +23,11 @@ class AccessFactory:
     ]
 
     @classmethod
-    def gen_json_menu_item_access_meta(cls, dict_access_meta2menu_item):
+    def gen_antd_tree_data_menu_item_access_meta(cls, dict_access_meta2menu_item):
+        from i18n import translator
+        from functools import partial
+
+        _ = partial(translator.t)
         from common.utilities.util_menu_access import MenuAccess
 
         json_menu_item_access_meta = {}
@@ -41,7 +45,16 @@ class AccessFactory:
                     json_menu_item_access_meta[level1_name][level2_name] = [access_meta]
                 else:
                     json_menu_item_access_meta[level1_name][level2_name].append(access_meta)
-        return json_menu_item_access_meta
+        antd_tree_data = []
+        for level1_name, dict_level2_access_metas in json_menu_item_access_meta.items():
+            format_level2 = []
+            for level2, access_metas in dict_level2_access_metas.items():
+                format_level2.append(
+                    {'title': level2, 'key': level2, 'children': [{'title': _(access_meta), 'key': access_meta} for access_meta in access_metas]},
+                )
+            antd_tree_data.append({'title': level1_name, 'key': level1_name, 'children': format_level2})
+        print(antd_tree_data)
+        return antd_tree_data
 
     # 读取每个VIEW中配置的所有权限
     dict_access_meta2module_path = {access_meta: view.__name__ for view in views for access_meta in view.access_metas}
@@ -50,14 +63,15 @@ class AccessFactory:
     }
 
     @classmethod
-    def get_json_menu_item_access_meta(cls):
-        return cls.gen_json_menu_item_access_meta(cls.dict_access_meta2menu_item)
+    def get_antd_tree_data_menu_item_access_meta(cls):
+        return cls.gen_antd_tree_data_menu_item_access_meta(cls.dict_access_meta2menu_item)
 
     # 基础默认权限，主页和个人中心，每人都有，无需分配
     default_access_meta = (
         '个人信息-页面',
         '个人设置-页面',
         '工作台-页面',
+        '监控页-页面',
     )
     # 团队管理员的默认权限，无需分配
     group_admin_access_meta = ('团队权限-页面',)
