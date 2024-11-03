@@ -6,6 +6,10 @@ from datetime import datetime
 import json
 
 
+def get_status_str(status):
+    return '启用' if status == 1 else '禁用'
+
+
 def exists_user_name(user_name: str) -> bool:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
@@ -154,6 +158,37 @@ def delete_role(role_name: str) -> bool:
             cursor.execute(
                 """delete FROM sys_role where role_name=%s;""",
                 (role_name,),
+            )
+        except Exception as e:
+            conn.rollback()
+            return False
+        else:
+            conn.commit()
+            return True
+
+
+def add_role(role_name, role_status, role_remark, access_metas):
+    from common.utilities import util_menu_access
+
+    user_name = util_menu_access.get_menu_access().user_name
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        conn.start_transaction()
+        try:
+            cursor.execute(
+                """
+                INSERT INTO `app`.`sys_role` ( `role_name`, `access_metas`, `role_status`, `update_datetime`, `update_by`, `create_datetime`, `create_by`, `role_remark` )
+                VALUES
+                (%s, %s, %s, %s, %s, %s, %s, %s);""",
+                (
+                    role_name,
+                    json.dumps(access_metas, ensure_ascii=False),
+                    get_status_str(role_status),
+                    datetime.now(),
+                    user_name,
+                    datetime.now(),
+                    user_name,
+                    role_remark,
+                ),
             )
         except Exception as e:
             conn.rollback()

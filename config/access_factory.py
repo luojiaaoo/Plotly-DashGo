@@ -33,7 +33,7 @@ class AccessFactory:
         json_menu_item_access_meta = {}
         for access_meta, menu_item in dict_access_meta2menu_item.items():
             # 此权限无需分配
-            if menu_item in (cls.default_access_meta) or menu_item in (cls.group_admin_access_meta):
+            if access_meta in (cls.default_access_meta) or access_meta in (cls.group_admin_access_meta):
                 continue
             level1_name, level2_name = menu_item.split('.')
             if json_menu_item_access_meta.get(level1_name, None) is None:
@@ -59,14 +59,14 @@ class AccessFactory:
                 format_level2.append(
                     {
                         'title': MenuAccess.get_title(f'{level1_name}.{level2_name}'),
-                        'key': 'ignore' + MenuAccess.get_title(f'{level1_name}.{level2_name}'),
+                        'key': 'ignore: <>' + MenuAccess.get_title(f'{level1_name}.{level2_name}'),
                         'children': [{'title': _(access_meta), 'key': access_meta} for access_meta in access_metas],
                     },
                 )
             antd_tree_data.append(
                 {
                     'title': MenuAccess.get_title(f'{level1_name}'),
-                    'key': 'ignore' + MenuAccess.get_title(f'{level1_name}'),
+                    'key': 'ignore: <>' + MenuAccess.get_title(f'{level1_name}'),
                     'children': format_level2,
                 }
             )
