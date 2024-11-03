@@ -36,9 +36,7 @@ class AccessFactory:
             # 此权限无需分配
             if menu_item in (cls.default_access_meta) or menu_item in (cls.group_admin_access_meta):
                 continue
-            level1_name = MenuAccess.get_title(menu_item.split('.')[0])
-            level2_name = MenuAccess.get_title(menu_item)
-            access_meta
+            level1_name, level2_name = menu_item.split('.')
             if json_menu_item_access_meta.get(level1_name, None) is None:
                 json_menu_item_access_meta[level1_name] = {level2_name: [access_meta]}
             else:
@@ -46,18 +44,33 @@ class AccessFactory:
                     json_menu_item_access_meta[level1_name][level2_name] = [access_meta]
                 else:
                     json_menu_item_access_meta[level1_name][level2_name].append(access_meta)
+
+        # 根据order属性排序目录
+        json_menu_item_access_meta = dict(sorted(json_menu_item_access_meta.items(), key=lambda x: MenuAccess.get_order(f'{x[0]}')))
+        for level1_name, dict_level2_access_metas in json_menu_item_access_meta.items():
+            json_menu_item_access_meta[level1_name] = dict(
+                sorted(dict_level2_access_metas.items(), key=lambda x: MenuAccess.get_order(f'{level1_name}.{x[0]}'))
+            )
+
+        # 生成antd_tree的格式
         antd_tree_data = []
         for level1_name, dict_level2_access_metas in json_menu_item_access_meta.items():
             format_level2 = []
-            for level2, access_metas in dict_level2_access_metas.items():
+            for level2_name, access_metas in dict_level2_access_metas.items():
                 format_level2.append(
                     {
-                        'title': level2,
-                        'key': 'ingore' + level2,
+                        'title': MenuAccess.get_title(f'{level1_name}.{level2_name}'),
+                        'key': 'ignore' + MenuAccess.get_title(f'{level1_name}.{level2_name}'),
                         'children': [{'title': _(access_meta), 'key': access_meta} for access_meta in access_metas],
                     },
                 )
-            antd_tree_data.append({'title': level1_name, 'key': 'ingore' + level1_name, 'children': format_level2})
+            antd_tree_data.append(
+                {
+                    'title': MenuAccess.get_title(f'{level1_name}'),
+                    'key': 'ignore' + MenuAccess.get_title(f'{level1_name}'),
+                    'children': format_level2,
+                }
+            )
         return antd_tree_data
 
     # 读取每个VIEW中配置的所有权限
