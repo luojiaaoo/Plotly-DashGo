@@ -182,6 +182,16 @@ def delete_role(role_name: str) -> bool:
                 """delete FROM sys_role where role_name=%s;""",
                 (role_name,),
             )
+            cursor.execute(
+                """UPDATE sys_user
+SET user_roles = JSON_REMOVE(user_roles, JSON_UNQUOTE(JSON_SEARCH(user_roles, 'one', %s)))
+WHERE JSON_SEARCH(user_roles, 'one', %s) IS NOT NULL;
+                """,
+                (
+                    role_name,
+                    role_name,
+                ),
+            )
         except Exception as e:
             conn.rollback()
             return False
