@@ -11,7 +11,7 @@
  Target Server Version : 50744 (5.7.44)
  File Encoding         : 65001
 
- Date: 04/11/2024 22:04:09
+ Date: 04/11/2024 23:04:03
 */
 
 SET NAMES utf8mb4;
@@ -56,7 +56,7 @@ CREATE TABLE `sys_role`  (
 -- ----------------------------
 -- Records of sys_role
 -- ----------------------------
-INSERT INTO `sys_role` VALUES ('super_admin', '[\"角色管理-页面\", \"用户管理-页面\", \"团队管理-页面\"]', '启用', '2024-11-04 21:42:21', 'admin', '2024-11-03 14:19:44', 'admin', '超级管理员角色');
+INSERT INTO `sys_role` VALUES ('admin', '[\"角色管理-页面\", \"用户管理-页面\", \"团队管理-页面\"]', '启用', '2024-11-04 22:07:05', 'admin', '2024-11-03 14:19:44', 'admin', '超级管理员角色');
 
 -- ----------------------------
 -- Table structure for sys_user
@@ -69,7 +69,8 @@ CREATE TABLE `sys_user`  (
   `user_status` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '正常/停用',
   `user_sex` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '性别',
   `user_roles` json NOT NULL COMMENT '角色',
-  `user_groups` json NOT NULL COMMENT '部门及身份',
+  `user_groups` json NOT NULL COMMENT '团队',
+  `user_admin_groups` json NOT NULL COMMENT '团队管理',
   `user_email` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '电子邮箱',
   `phone_number` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '电话号码',
   `update_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '被谁更新',
@@ -84,6 +85,6 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES ('admin', '超级管理员', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', '启用', '未知', '[\"super_admin\"]', '{}', '666666@163.com', '13333333333', 'admin', '2024-11-02 23:36:37', 'admin', '2024-11-02 23:36:53', '初始超级管理员');
+INSERT INTO `sys_user` VALUES ('admin', '超级管理员', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', '启用', '未知', '[\"admin\"]', '[]', '[]', '666666@163.com', '13333333333', 'admin', '2024-11-02 23:36:37', 'admin', '2024-11-02 23:36:53', '初始超级管理员');
 
 SET FOREIGN_KEY_CHECKS = 1;

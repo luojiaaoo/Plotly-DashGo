@@ -52,7 +52,8 @@ class UserInfo:
     user_status: str
     user_sex: str
     user_roles: List
-    user_groups: Dict
+    user_groups: List
+    user_admin_groups: List
     user_email: str
     phone_number: str
     update_datetime: datetime
@@ -70,6 +71,7 @@ def get_user_info(user_name: str = None) -> List[UserInfo]:
         'user_sex',
         'user_roles',
         'user_groups',
+        'user_admin_groups',
         'user_email',
         'phone_number',
         'update_datetime',
@@ -94,6 +96,7 @@ def get_user_info(user_name: str = None) -> List[UserInfo]:
                 {
                     'user_status': get_status_bool(user_dict['user_status']),
                     'user_groups': json.loads(user_dict['user_groups']),
+                    'user_admin_groups': json.loads(user_dict['user_admin_groups']),
                     'user_roles': json.loads(user_dict['user_roles']),
                 },
             )
