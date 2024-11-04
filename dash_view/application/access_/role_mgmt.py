@@ -40,7 +40,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     children=_('添加角色'),
                     type='primary',
                     icon=fac.AntdIcon(icon='antd-plus'),
-                    style={'marginBottom': '10px', 'alignSelf': 'flex-'},
+                    style={'marginBottom': '10px'},
                 )
             ),
             fac.AntdRow(

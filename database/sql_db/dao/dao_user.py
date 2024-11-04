@@ -185,6 +185,8 @@ def delete_role(role_name: str) -> bool:
 
 
 def add_role(role_name, role_status: bool, role_remark, access_metas):
+    if not role_name:
+        return False
     user_name = util_menu_access.get_menu_access().user_name
     with pool.get_connection() as conn, conn.cursor() as cursor:
         conn.start_transaction()

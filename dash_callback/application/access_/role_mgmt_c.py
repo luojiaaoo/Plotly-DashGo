@@ -184,6 +184,9 @@ def open_add_role_modal(nClicks):
 )
 def add_role_c(okCounts, name, role_status, role_remark, access_metas: List[str]):
     """新建角色"""
+    if not name:
+        MessageManager.warning(content=_('角色名不能为空'))
+        return dash.no_update
     access_metas = [i for i in access_metas if not i.startswith('ignore:')]
     rt = dao_user.add_role(name, role_status, role_remark, access_metas)
     if rt:
