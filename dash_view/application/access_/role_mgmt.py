@@ -50,7 +50,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             id='role-mgmt-table',
                             columns=[
                                 {'title': _('角色名称'), 'dataIndex': 'role_name'},
-                                {'title': _('角色状态'), 'dataIndex': 'role_status'},
+                                {'title': _('角色状态'), 'dataIndex': 'role_status', 'renderOptions': {'renderType': 'tags'}},
                                 {'title': _('角色描述'), 'dataIndex': 'role_remark'},
                                 {'title': _('更新时间'), 'dataIndex': 'update_datetime'},
                                 {'title': _('更新人'), 'dataIndex': 'update_by'},
@@ -60,16 +60,17 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             ],
                             data=[
                                 {
+                                    'key': i.role_name,
                                     **i.__dict__,
-                                    'role_status': dao_user.get_status_str(i.role_status),
+                                    'role_status': {'tag': dao_user.get_status_str(i.role_status), 'color': 'cyan' if i.role_status else 'volcano'},
                                     'operation': [
                                         {
-                                            'content': '编辑',
+                                            'content': _('编辑'),
                                             'type': 'primary',
                                             'custom': 'update:' + i.role_name,
                                         },
                                         {
-                                            'content': '删除',
+                                            'content': _('删除'),
                                             'type': 'primary',
                                             'custom': 'delete:' + i.role_name,
                                             'danger': True,

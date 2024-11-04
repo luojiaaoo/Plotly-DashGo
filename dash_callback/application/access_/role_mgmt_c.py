@@ -66,16 +66,16 @@ def update_delete_role(nClicksButton, clickedCustom: str):
     ],
     prevent_initial_call=True,
 )
-def callback_func(okCounts,role_name: str, role_status: bool, role_remark: str, access_metas: List[str]):
+def callback_func(okCounts, role_name: str, role_status: bool, role_remark: str, access_metas: List[str]):
     access_metas = [i for i in access_metas if not i.startswith('ignore:')]
-    print(role_status)
     rt = dao_user.update_role(role_name, role_status, role_remark, access_metas)
     if rt:
         MessageManager.success(content=_('角色更新成功'))
         return [
             {
+                'key': i.role_name,
                 **i.__dict__,
-                'role_status': dao_user.get_status_str(i.role_status),
+                'role_status': {'tag': dao_user.get_status_str(i.role_status), 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
                     {
                         'content': _('编辑'),
@@ -111,8 +111,9 @@ def delete_role_modal(okCounts, role_name):
         MessageManager.success(content=_('角色删除成功'))
         return [
             {
+                'key': i.role_name,
                 **i.__dict__,
-                'role_status': dao_user.get_status_str(i.role_status),
+                'role_status': {'tag': dao_user.get_status_str(i.role_status), 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
                     {
                         'content': _('编辑'),
@@ -194,7 +195,7 @@ def add_role_c(okCounts, name, role_status, role_remark, access_metas: List[str]
         return [
             {
                 **i.__dict__,
-                'role_status': dao_user.get_status_str(i.role_status),
+                'role_status': {'tag': dao_user.get_status_str(i.role_status)},
                 'operation': [
                     {
                         'content': _('编辑'),
