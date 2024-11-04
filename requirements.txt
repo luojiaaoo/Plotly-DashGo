@@ -8,7 +8,7 @@ pycryptodome==3.21.0
 PyJWT==2.9.0
 user_agents==2.2.0
 yarl==1.16.0
-feffery_dash_utils==0.1.5
+feffery_dash_utils==0.1.4
 pillow==10.4.0
 py-cpuinfo==9.0.0
 cacheout==0.16.0

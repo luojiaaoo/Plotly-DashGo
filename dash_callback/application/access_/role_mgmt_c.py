@@ -65,24 +65,43 @@ def delete_role_modal(okCounts, role_name):
 
 @app.callback(
     [
+        Output('role-mgmt-add-role-name-form', 'validateStatus', allow_duplicate=True),
+        Output('role-mgmt-add-role-name-form', 'help', allow_duplicate=True),
+    ],
+    Input('role-mgmt-add-role-name', 'debounceValue'),
+    prevent_initial_call=True,
+)
+def check_role_name(role_name):
+    if not role_name:
+        return 'error', _('请填写角色名')
+    if not dao_user.exists_role_name(role_name):
+        return 'success', _('该角色名名可用')
+    else:
+        return 'error', _('该角色名已存在')
+
+
+@app.callback(
+    [
         Output('role-mgmt-add-modal', 'visible'),
         Output('role-mgmt-add-role-name', 'value'),
         Output('role-mgmt-add-role-status', 'checked'),
         Output('role-mgmt-add-role-remark', 'value'),
         Output('role-menu-access-tree-select-add', 'checkedKeys'),
+        Output('role-mgmt-add-role-name-form', 'validateStatus', allow_duplicate=True),
+        Output('role-mgmt-add-role-name-form', 'help', allow_duplicate=True),
     ],
     Input('role-mgmt-button-add', 'nClicks'),
     prevent_initial_call=True,
 )
 def open_add_role_modal(nClicks):
-    return True, '', True, '', []
+    return True, '', True, '', [], None, None
 
 
 @app.callback(
     Output('role-mgmt-table', 'data', allow_duplicate=True),
     Input('role-mgmt-add-modal', 'okCounts'),
     [
-        State('role-mgmt-add-role-name', 'value'),
+        State('role-mgmt-add-role-name', 'debounceValue'),
         State('role-mgmt-add-role-status', 'checked'),
         State('role-mgmt-add-role-remark', 'value'),
         State('role-menu-access-tree-select-add', 'checkedKeys'),
@@ -90,7 +109,7 @@ def open_add_role_modal(nClicks):
     prevent_initial_call=True,
 )
 def add_role_c(okCounts, name, role_status, role_remark, access_metas: List[str]):
-    access_metas = [i for i in access_metas if not i.startswith('ignore: <>')]
+    access_metas = [i for i in access_metas if not i.startswith('ignore:')]
     rt = dao_user.add_role(name, role_status, role_remark, access_metas)
     if rt:
         MessageManager.success(content=_('用户添加成功'))

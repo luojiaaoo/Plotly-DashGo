@@ -116,8 +116,16 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         children=[
                             fac.AntdForm(
                                 [
-                                    fac.AntdFormItem(fac.AntdInput(id='role-mgmt-add-role-name'), label=_('角色名')),
-                                    fac.AntdFormItem(fac.AntdSwitch(id='role-mgmt-add-role-status',checked=True), label=_('角色状态')),
+                                    fac.AntdFormItem(
+                                        fac.AntdInput(id='role-mgmt-add-role-name', debounceWait=500),
+                                        label=_('角色名'),
+                                        required=True,
+                                        id='role-mgmt-add-role-name-form',
+                                        hasFeedback=True,
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdSwitch(id='role-mgmt-add-role-status', checked=True), label=_('角色状态'), required=True
+                                    ),
                                     fac.AntdFormItem(fac.AntdInput(id='role-mgmt-add-role-remark', mode='text-area'), label=_('角色描述')),
                                     fac.AntdFormItem(
                                         fac.AntdTree(
@@ -128,6 +136,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                             showLine=False,
                                         ),
                                         label=_('菜单权限'),
+                                        required=True,
                                     ),
                                 ],
                                 labelCol={'span': 5},

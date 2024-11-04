@@ -59,14 +59,14 @@ class AccessFactory:
                 format_level2.append(
                     {
                         'title': MenuAccess.get_title(f'{level1_name}.{level2_name}'),
-                        'key': 'ignore: <>' + MenuAccess.get_title(f'{level1_name}.{level2_name}'),
+                        'key': 'ignore:' + MenuAccess.get_title(f'{level1_name}.{level2_name}'),
                         'children': [{'title': _(access_meta), 'key': access_meta} for access_meta in access_metas],
                     },
                 )
             antd_tree_data.append(
                 {
                     'title': MenuAccess.get_title(f'{level1_name}'),
-                    'key': 'ignore: <>' + MenuAccess.get_title(f'{level1_name}'),
+                    'key': 'ignore:' + MenuAccess.get_title(f'{level1_name}'),
                     'children': format_level2,
                 }
             )

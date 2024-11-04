@@ -196,3 +196,12 @@ def add_role(role_name, role_status, role_remark, access_metas):
         else:
             conn.commit()
             return True
+
+def exists_role_name(role_name):
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            """SELECT count(1) FROM sys_role WHERE role_name = %s;""",
+            (role_name,),
+        )
+        result = cursor.fetchone()
+        return bool(result[0])
