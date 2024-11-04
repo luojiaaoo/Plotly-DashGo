@@ -1,5 +1,5 @@
 # 本应用的权限工厂，此处手动导入应用模块
-from dash_view.application.access_ import group_mgmt, role_mgmt, user_auth, group_auth
+from dash_view.application.access_ import group_mgmt, role_mgmt, group_auth, user_mgmt
 from dash_view.application.dashboard_ import workbench, monitor
 from dash_view.application.person_ import personal_info, personal_setting
 
@@ -14,7 +14,7 @@ class AccessFactory:
     views = [
         group_mgmt,
         role_mgmt,
-        user_auth,
+        user_mgmt,
         group_auth,
         workbench,
         monitor,

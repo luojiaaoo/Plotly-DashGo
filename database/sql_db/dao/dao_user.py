@@ -56,8 +56,9 @@ class UserInfo:
     user_email: str
     phone_number: str
     update_datetime: datetime
-    create_by: str
+    update_by: str
     create_datetime: datetime
+    create_by: str
     user_remark: str
 
 
@@ -72,8 +73,9 @@ def get_user_info(user_name: str = None) -> List[UserInfo]:
         'user_email',
         'phone_number',
         'update_datetime',
-        'create_by',
+        'update_by',
         'create_datetime',
+        'create_by',
         'user_remark',
     )
     with pool.get_connection() as conn, conn.cursor() as cursor:
@@ -90,6 +92,7 @@ def get_user_info(user_name: str = None) -> List[UserInfo]:
             user_dict = dict(zip(heads, per))
             user_dict.update(
                 {
+                    'user_status': get_status_bool(user_dict['user_status']),
                     'user_groups': json.loads(user_dict['user_groups']),
                     'user_roles': json.loads(user_dict['user_roles']),
                 },
