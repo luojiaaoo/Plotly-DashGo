@@ -61,6 +61,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             data=[
                                 {
                                     **i.__dict__,
+                                    'role_status': dao_user.get_status_str(i.role_status),
                                     'operation': [
                                         {
                                             'content': '编辑',
@@ -110,7 +111,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         title=_('角色编辑'),
                         mask=False,
                         maskClosable=False,
-                        id='role-mgmt-change-modal',
+                        id='role-mgmt-update-modal',
                     ),
                     fac.AntdModal(
                         children=[

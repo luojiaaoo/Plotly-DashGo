@@ -3,11 +3,16 @@ from typing import Dict, List, Set, Union
 from itertools import chain
 from dataclasses import dataclass
 from datetime import datetime
+from common.utilities import util_menu_access
 import json
 
 
 def get_status_str(status):
     return '启用' if status == 1 else '禁用'
+
+
+def get_status_bool(status: str):
+    return True if status == '启用' else False
 
 
 def exists_user_name(user_name: str) -> bool:
@@ -121,7 +126,8 @@ def get_user_access_meta_plus_role(user_name: str) -> Set[str]:
 @dataclass
 class RoleInfo:
     role_name: str
-    role_status: str
+    access_metas: List[str]
+    role_status: bool
     update_datetime: datetime
     update_by: str
     create_datetime: datetime
@@ -129,10 +135,11 @@ class RoleInfo:
     role_remark: str
 
 
-def get_role_info(role_name: str = None):
+def get_role_info(role_name: str = None) -> List[RoleInfo]:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         heads = (
             'role_name',
+            'access_metas',
             'role_status',
             'update_datetime',
             'update_by',
@@ -147,8 +154,18 @@ def get_role_info(role_name: str = None):
                 f"""SELECT {','.join(heads)} FROM sys_role where role_name=%s;""",
                 (role_name,),
             )
+        role_infos = []
         result = cursor.fetchall()
-        return [RoleInfo(**dict(zip(heads, per_rt))) for per_rt in result]
+        for per in result:
+            role_dict = dict(zip(heads, per))
+            role_dict.update(
+                {
+                    'access_metas': json.loads(role_dict['access_metas']),
+                    'role_status': get_status_bool(role_dict['role_status']),
+                },
+            )
+            role_infos.append(RoleInfo(**role_dict))
+        return role_infos
 
 
 def delete_role(role_name: str) -> bool:
@@ -167,9 +184,7 @@ def delete_role(role_name: str) -> bool:
             return True
 
 
-def add_role(role_name, role_status, role_remark, access_metas):
-    from common.utilities import util_menu_access
-
+def add_role(role_name, role_status: bool, role_remark, access_metas):
     user_name = util_menu_access.get_menu_access().user_name
     with pool.get_connection() as conn, conn.cursor() as cursor:
         conn.start_transaction()
@@ -197,6 +212,7 @@ def add_role(role_name, role_status, role_remark, access_metas):
             conn.commit()
             return True
 
+
 def exists_role_name(role_name):
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
@@ -205,3 +221,21 @@ def exists_role_name(role_name):
         )
         result = cursor.fetchone()
         return bool(result[0])
+
+
+def update_role(role_name, role_status: bool, role_remark, access_metas: List[str]):
+    user_name = util_menu_access.get_menu_access().user_name
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        conn.start_transaction()
+        try:
+            cursor.execute(
+                """
+                update app.sys_role set access_metas=%s, role_status=%s, update_datetime=%s, update_by=%s, role_remark=%s where role_name=%s;""",
+                (json.dumps(access_metas, ensure_ascii=False), get_status_str(role_status), datetime.now(), user_name, role_remark, role_name),
+            )
+        except Exception as e:
+            conn.rollback()
+            return False
+        else:
+            conn.commit()
+            return True
