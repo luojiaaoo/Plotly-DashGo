@@ -25,6 +25,7 @@ order = 3
 
 access_metas = ('用户管理-页面',)
 
+
 def render_content(menu_access: MenuAccess, **kwargs):
     from config.access_factory import AccessFactory
 
@@ -88,19 +89,25 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         children=[
                             fac.AntdForm(
                                 [
-                                    fac.AntdFormItem(fac.AntdText(id='user-mgmt-update-role-name'), label=_('角色名')),
-                                    fac.AntdFormItem(fac.AntdSwitch(id='user-mgmt-update-role-status'), label=_('角色状态')),
-                                    fac.AntdFormItem(fac.AntdInput(id='user-mgmt-update-role-remark', mode='text-area'), label=_('角色描述')),
+                                    fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-name'), label=_('用户名')),
+                                    fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-full-name'), label=_('全名')),
+                                    fac.AntdFormItem(fac.AntdSwitch(id='user-mgmt-add-user-status'), label=_('用户状态')),
+                                    fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-remark', mode='text-area'), label=_('用户描述')),
                                     fac.AntdFormItem(
-                                        fac.AntdTree(
-                                            id='role-menu-access-tree-select-update',
-                                            treeData=AccessFactory.get_antd_tree_data_menu_item_access_meta(),
-                                            multiple=True,
-                                            checkable=True,
-                                            showLine=False,
+                                        fac.AntdSelect(
+                                            id='user-mgmt-add-user-sex',
+                                            options=[
+                                                {'label': _('男'), 'value': '男'},
+                                                {'label': _('女'), 'value': '女'},
+                                                {'label': _('未知'), 'value': '未知'},
+                                            ],
                                         ),
-                                        label=_('菜单权限'),
+                                        label=_('性别'),
                                     ),
+                                    fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-email'), label=_('邮箱')),
+                                    fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-phone-number'), label=_('电话号码')),
+                                    fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-phone-number'), label=_('角色')),
+                                    fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-phone-number'), label=_('团队')),
                                 ],
                                 labelCol={'span': 5},
                                 wrapperCol={'span': 19},
@@ -110,57 +117,17 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         renderFooter=True,
                         okText=_('确定'),
                         cancelText=_('取消'),
-                        title=_('角色编辑'),
-                        mask=False,
-                        maskClosable=False,
-                        id='user-mgmt-update-modal',
-                    ),
-                    fac.AntdModal(
-                        children=[
-                            fac.AntdForm(
-                                [
-                                    fac.AntdFormItem(
-                                        fac.AntdInput(id='user-mgmt-add-role-name', debounceWait=500),
-                                        label=_('角色名'),
-                                        required=True,
-                                        id='user-mgmt-add-role-name-form',
-                                        hasFeedback=True,
-                                    ),
-                                    fac.AntdFormItem(
-                                        fac.AntdSwitch(id='user-mgmt-add-role-status', checked=True), label=_('角色状态'), required=True
-                                    ),
-                                    fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-role-remark', mode='text-area'), label=_('角色描述')),
-                                    fac.AntdFormItem(
-                                        fac.AntdTree(
-                                            id='role-menu-access-tree-select-add',
-                                            treeData=AccessFactory.get_antd_tree_data_menu_item_access_meta(),
-                                            multiple=True,
-                                            checkable=True,
-                                            showLine=False,
-                                        ),
-                                        label=_('菜单权限'),
-                                        required=True,
-                                    ),
-                                ],
-                                labelCol={'span': 5},
-                                wrapperCol={'span': 19},
-                            )
-                        ],
-                        destroyOnClose=False,
-                        renderFooter=True,
-                        okText=_('确定'),
-                        cancelText=_('取消'),
-                        title=_('添加角色'),
+                        title=_('用户编辑'),
                         mask=False,
                         maskClosable=False,
                         id='user-mgmt-add-modal',
                     ),
                     fac.AntdModal(
                         children=[
-                            fac.AntdText(_('您确定要删除角色')),
+                            fac.AntdText(_('您确定要删除用户')),
                             fac.AntdText(
                                 'xxxx',
-                                id='user-mgmt-delete-role-name',
+                                id='user-mgmt-delete-user-name',
                                 type='danger',
                                 underline=True,
                             ),

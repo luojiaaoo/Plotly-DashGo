@@ -195,7 +195,7 @@ def add_role_c(okCounts, name, role_status, role_remark, access_metas: List[str]
         return [
             {
                 **i.__dict__,
-                'role_status': {'tag': dao_user.get_status_str(i.role_status)},
+                'role_status': {'tag': dao_user.get_status_str(i.role_status), 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
                     {
                         'content': _('编辑'),
