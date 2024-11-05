@@ -7,7 +7,7 @@ from dash import html
 from dash import dcc
 from dash_components import Card, Table
 from database.sql_db.dao import dao_user
-import dash_callback.application.person_.personal_info_c  # noqa
+import dash_callback.application.access_.user_mgmt_c  # noqa
 from functools import partial
 from i18n import translator
 
@@ -27,8 +27,6 @@ access_metas = ('用户管理-页面',)
 
 
 def render_content(menu_access: MenuAccess, **kwargs):
-    from config.access_factory import AccessFactory
-
     logger.debug(f'用户：{menu_access.user_name}，访问：{__name__}，参数列表：{kwargs}，权限元：{access_metas}')
     return fac.AntdCol(
         [
@@ -89,38 +87,55 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         children=[
                             fac.AntdForm(
                                 [
-                                    fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-name'), label=_('用户名')),
-                                    fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-full-name'), label=_('全名')),
-                                    fac.AntdFormItem(fac.AntdSwitch(id='user-mgmt-add-user-status'), label=_('用户状态')),
-                                    fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-remark', mode='text-area'), label=_('用户描述')),
-                                    fac.AntdFormItem(
-                                        fac.AntdSelect(
-                                            id='user-mgmt-add-user-sex',
-                                            options=[
-                                                {'label': _('男'), 'value': '男'},
-                                                {'label': _('女'), 'value': '女'},
-                                                {'label': _('未知'), 'value': '未知'},
-                                            ],
-                                        ),
-                                        label=_('性别'),
+                                    fac.AntdFlex(
+                                        [
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-name'), label=_('用户名'), id='user-mgmt-add-user-name-form'),
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-full-name'), label=_('全名')),
+                                        ]
                                     ),
-                                    fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-email'), label=_('邮箱')),
-                                    fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-phone-number'), label=_('电话号码')),
-                                    fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-phone-number'), label=_('角色')),
-                                    fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-phone-number'), label=_('团队')),
+                                    fac.AntdFlex(
+                                        [
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-email'), label=_('邮箱')),
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-phone-number'), label=_('电话号码')),
+                                        ]
+                                    ),
+                                    fac.AntdFlex(
+                                        [
+                                            fac.AntdFormItem(fac.AntdSwitch(id='user-mgmt-add-user-status'), label=_('用户状态')),
+                                            fac.AntdFormItem(
+                                                fac.AntdSelect(
+                                                    id='user-mgmt-add-user-sex',
+                                                    options=[
+                                                        {'label': _('男'), 'value': '男'},
+                                                        {'label': _('女'), 'value': '女'},
+                                                        {'label': _('未知'), 'value': '未知'},
+                                                    ],
+                                                    defaultValue='男',
+                                                ),
+                                                label=_('性别'),
+                                            ),
+                                        ]
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdInput(id='user-mgmt-add-user-remark', mode='text-area'), label=_('用户描述'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
+                                    ),
+                                    fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-roles'), label=_('角色'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}),
+                                    fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-groups'), label=_('团队'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}),
+                                    fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-admin-groups'), label=_('管理团队'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}),
                                 ],
-                                labelCol={'span': 5},
-                                wrapperCol={'span': 19},
+                                labelAlign='left',
+                                className={'.ant-form-item': {'marginBottom': '12px', 'marginRight': '8px'}},
                             )
                         ],
                         destroyOnClose=False,
                         renderFooter=True,
                         okText=_('确定'),
                         cancelText=_('取消'),
-                        title=_('用户编辑'),
+                        title=_('添加用户'),
                         mask=False,
                         maskClosable=False,
                         id='user-mgmt-add-modal',
+                        style={'boxSizing': 'border-box'},
                     ),
                     fac.AntdModal(
                         children=[
