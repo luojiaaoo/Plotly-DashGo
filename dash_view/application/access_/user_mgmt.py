@@ -106,7 +106,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                     ),
                                     fac.AntdFlex(
                                         [
-                                            fac.AntdFormItem(fac.AntdSwitch(id='user-mgmt-add-user-status'), label=_('用户状态')),
+                                            fac.AntdFormItem(fac.AntdSwitch(id='user-mgmt-add-user-status'), label=_('用户状态'), style={'flex': 1}),
                                             fac.AntdFormItem(
                                                 fac.AntdSelect(
                                                     id='user-mgmt-add-user-sex',
@@ -116,9 +116,12 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                                         {'label': _('未知'), 'value': '未知'},
                                                     ],
                                                     defaultValue='男',
+                                                    allowClear=False,
                                                 ),
                                                 label=_('性别'),
+                                                style={'flex': 1},
                                             ),
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-password'), label=_('密码'), style={'flex': 2}),
                                         ]
                                     ),
                                     fac.AntdFormItem(
