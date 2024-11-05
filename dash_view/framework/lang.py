@@ -10,7 +10,14 @@ def render_lang_content():
     return fac.AntdCompact(
         [
             fac.AntdButton(
-                'ZH',
+                [
+                    'ZH',
+                    fuc.FefferyCookie(
+                        id='global-locale',
+                        expires=3600 * 24 * 365,
+                        cookieKey=translator.cookie_name,
+                    ),
+                ],
                 id='global-language-zh',
                 clickExecuteJsString="""
                     window.dash_clientside.set_props('global-locale', { value: 'zh-cn' })
@@ -24,11 +31,6 @@ def render_lang_content():
                     window.dash_clientside.set_props('global-locale', { value: 'en-us' })
                     window.dash_clientside.set_props('global-reload', { reload: true })
                 """,
-            ),
-            fuc.FefferyCookie(
-                id='global-locale',
-                expires=3600 * 24 * 365,
-                cookieKey=translator.cookie_name,
             ),
         ],
         className={
