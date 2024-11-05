@@ -9,6 +9,7 @@ config = {
     'database': SqlDbConf.DATABASE,
     'charset': SqlDbConf.CHARSET,
     'pool_size': SqlDbConf.POOL_SIZE,
+    'autocommit': False,
 }
 pool = mysql.connector.pooling.MySQLConnectionPool(**config)
 

@@ -176,7 +176,6 @@ def get_role_info(role_name: str = None) -> List[RoleInfo]:
 
 def delete_role(role_name: str) -> bool:
     with pool.get_connection() as conn, conn.cursor() as cursor:
-        conn.start_transaction()
         try:
             cursor.execute(
                 """delete FROM sys_role where role_name=%s;""",
@@ -205,7 +204,6 @@ def add_role(role_name, role_status: bool, role_remark, access_metas):
         return False
     user_name = util_menu_access.get_menu_access().user_name
     with pool.get_connection() as conn, conn.cursor() as cursor:
-        conn.start_transaction()
         try:
             cursor.execute(
                 """
@@ -244,7 +242,6 @@ def exists_role_name(role_name):
 def update_role(role_name, role_status: bool, role_remark, access_metas: List[str]):
     user_name = util_menu_access.get_menu_access().user_name
     with pool.get_connection() as conn, conn.cursor() as cursor:
-        conn.start_transaction()
         try:
             cursor.execute(
                 """
