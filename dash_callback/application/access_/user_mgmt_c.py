@@ -10,7 +10,7 @@ from i18n import translator
 _ = partial(translator.t)
 
 
-################### 新建角色
+################### 新建用户
 @app.callback(
     [
         Output('user-mgmt-add-user-name-form', 'validateStatus', allow_duplicate=True),
@@ -107,3 +107,22 @@ def add_user(okCounts, user_name, user_full_name, user_email, phone_number, user
     else:
         MessageManager.warning(content=_('用户添加失败'))
         return dash.no_update
+
+# ################### 删除用户
+# @app.callback(
+#     [
+#         # 删除角色弹窗
+#         Output('role-mgmt-delete-affirm-modal', 'visible'),
+#         Output('role-mgmt-delete-role-name', 'children'),
+#         # 更新角色弹窗
+#         Output('role-mgmt-update-modal', 'visible'),
+#         Output('role-mgmt-update-role-name', 'children'),
+#         Output('role-mgmt-update-role-status', 'checked'),
+#         Output('role-mgmt-update-role-remark', 'value'),
+#         Output('role-menu-access-tree-select-update', 'checkedKeys'),
+#     ],
+#     Input('role-mgmt-table', 'nClicksButton'),
+#     State('role-mgmt-table', 'clickedCustom'),
+#     prevent_initial_call=True,
+# )
+# def update_delete_role(nClicksButton, clickedCustom: str):

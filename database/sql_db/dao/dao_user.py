@@ -117,6 +117,7 @@ def add_user(
     phone_number: str,
     user_remark: str,
 ) -> bool:
+    """新建用户"""
     import hashlib
 
     if not user_name:
@@ -125,36 +126,65 @@ def add_user(
     user_name_op = util_menu_access.get_menu_access().user_name
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
-            cursor.execute(
-                """
-                INSERT INTO sys_user (user_name, user_full_name ,password_sha256, user_status, user_sex, user_roles, user_groups, user_admin_groups, user_email, phone_number, create_by, create_datetime, update_by, update_datetime, user_remark) 
-                VALUES
-                (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-                ;""",
-                (
-                    user_name,
-                    user_full_name,
-                    hashlib.sha256(password.encode('utf-8')).hexdigest(),
-                    get_status_str(user_status),
-                    user_sex,
-                    json.dumps(user_roles, ensure_ascii=False),
-                    json.dumps(user_groups, ensure_ascii=False),
-                    json.dumps(user_admin_groups, ensure_ascii=False),
-                    user_email,
-                    phone_number,
-                    user_name_op,
-                    datetime.now(),
-                    user_name_op,
-                    datetime.now(),
-                    user_remark,
-                ),
-            )
+            is_ok = True
+            is_finish = False
+            # 给sys_role, sys_group表加锁，保证加入的角色和团队都存在
+            if is_ok and user_roles:
+                cursor.execute(
+                    f"""SELECT count(1) FROM sys_role WHERE role_name in ({','.join(['%s']*len(user_roles))}) for update;""",
+                    tuple(user_roles),
+                )
+                if cursor.fetchall()[0][0] != len(user_roles):
+                    is_ok = False
+            if is_ok and user_groups:
+                cursor.execute(
+                    f"""SELECT count(1) FROM sys_group WHERE group_name in ({','.join(['%s']*len(user_groups))}) for update;""",
+                    tuple(user_groups),
+                )
+                if cursor.fetchall()[0][0] != len(user_groups):
+                    is_ok = False
+            if is_ok and user_admin_groups:
+                cursor.execute(
+                    f"""SELECT count(1) FROM sys_group WHERE group_name in ({','.join(['%s']*len(user_admin_groups))}) for update;""",
+                    tuple(user_admin_groups),
+                )
+                if cursor.fetchall()[0][0] != len(user_admin_groups):
+                    is_ok = False
+            if is_ok:
+                cursor.execute(
+                    """
+                    INSERT INTO sys_user (user_name, user_full_name ,password_sha256, user_status, user_sex, user_roles, user_groups, user_admin_groups, user_email, phone_number, create_by, create_datetime, update_by, update_datetime, user_remark) 
+                    VALUES
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+                    ;""",
+                    (
+                        user_name,
+                        user_full_name,
+                        hashlib.sha256(password.encode('utf-8')).hexdigest(),
+                        get_status_str(user_status),
+                        user_sex,
+                        json.dumps(user_roles, ensure_ascii=False),
+                        json.dumps(user_groups, ensure_ascii=False),
+                        json.dumps(user_admin_groups, ensure_ascii=False),
+                        user_email,
+                        phone_number,
+                        user_name_op,
+                        datetime.now(),
+                        user_name_op,
+                        datetime.now(),
+                        user_remark,
+                    ),
+                )
+                is_finish = True
         except Exception as e:
             conn.rollback()
             return False
         else:
             conn.commit()
-            return True
+            if is_finish:
+                return True
+            else:
+                return False
 
 
 def get_roles_from_user_name(user_name: str) -> Set[str]:
@@ -168,13 +198,16 @@ def get_roles_from_user_name(user_name: str) -> Set[str]:
 
 
 def get_access_meta_from_roles(roles: Union[List[str], Set[str]]) -> Set[str]:
-    with pool.get_connection() as conn, conn.cursor() as cursor:
-        cursor.execute(
-            f"""SELECT access_metas FROM sys_role WHERE role_name in ({','.join(['%s']*len(roles))});""",
-            tuple(roles),
-        )
-        result = cursor.fetchall()
-        return set(chain(*[json.loads(per_rt[0]) for per_rt in result]))
+    if roles:
+        with pool.get_connection() as conn, conn.cursor() as cursor:
+            cursor.execute(
+                f"""SELECT access_metas FROM sys_role WHERE role_name in ({','.join(['%s']*len(roles))});""",
+                tuple(roles),
+            )
+            result = cursor.fetchall()
+            return set(chain(*[json.loads(per_rt[0]) for per_rt in result]))
+    else:
+        return set()
 
 
 def get_user_access_meta_plus_role(user_name: str) -> Set[str]:
