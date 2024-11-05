@@ -130,9 +130,11 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                         labelCol={'flex': '1'},
                                         wrapperCol={'flex': '5'},
                                     ),
-                                    fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-roles'), label=_('角色'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}),
-                                    fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-groups'), label=_('团队'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}),
-                                    fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-admin-groups'), label=_('管理团队'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}),
+                                    fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-roles', mode='multiple'), label=_('角色'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}),
+                                    fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-groups', mode='multiple'), label=_('团队'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}),
+                                    fac.AntdFormItem(
+                                        fac.AntdSelect(id='user-mgmt-add-admin-groups', mode='multiple'), label=_('管理团队'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
+                                    ),
                                 ],
                                 labelAlign='left',
                                 className={'.ant-form-item': {'marginBottom': '12px', 'marginRight': '8px'}},

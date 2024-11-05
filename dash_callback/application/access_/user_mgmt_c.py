@@ -36,9 +36,9 @@ def check_role_name(user_name):
         Output('user-mgmt-add-user-full-name', 'value'),
         Output('user-mgmt-add-user-status', 'checked'),
         Output('user-mgmt-add-user-remark', 'value'),
-        Output('user-mgmt-add-roles', 'value'),
-        Output('user-mgmt-add-groups', 'value'),
-        Output('user-mgmt-add-admin-groups', 'value'),
+        Output('user-mgmt-add-roles', 'options'),
+        Output('user-mgmt-add-groups', 'options'),
+        Output('user-mgmt-add-admin-groups', 'options'),
         Output('user-mgmt-add-user-email', 'value'),
         Output('user-mgmt-add-phone-number', 'value'),
         Output('user-mgmt-add-user-name-form', 'validateStatus', allow_duplicate=True),
@@ -49,4 +49,5 @@ def check_role_name(user_name):
 )
 def open_add_role_modal(nClicks):
     """显示新建用户的弹窗"""
-    return True, '', '', True, '', [], [], [], '', '', None, None
+    return True, '', '', True, '', [i.role_name for i in dao_user.get_role_info()], [], [], '', '', None, None
+
