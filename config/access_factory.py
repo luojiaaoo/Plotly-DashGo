@@ -31,7 +31,7 @@ class AccessFactory:
         json_menu_item_access_meta = {}
         for access_meta, menu_item in dict_access_meta2menu_item.items():
             # 此权限无需分配
-            if access_meta in (*cls.default_access_meta, *cls.admin_access_meta):
+            if access_meta in (*cls.default_access_meta, *cls.admin_access_meta, *cls.group_access_meta):
                 continue
             level1_name, level2_name = menu_item.split('.')
             if json_menu_item_access_meta.get(level1_name, None) is None:
@@ -85,7 +85,10 @@ class AccessFactory:
     )
 
     # 系统管理员+团队管理员默认权限
-    admin_access_meta = ('用户管理-页面',)
+    group_access_meta = ('用户管理-页面',)
+
+    # 系统管理员+团队管理员默认权限
+    admin_access_meta = ('用户管理-页面', '角色管理-页面')
 
     # 检查数据库和应用权限
     @classmethod

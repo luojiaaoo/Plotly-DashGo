@@ -13,11 +13,14 @@ class MenuAccess:
 
         user_name = user_info.user_name
         all_access_metas: Set[str] = get_user_access_meta_plus_role(user_name=user_name)
-        # 所以用户添加默认权限
+        # 所有用户添加默认权限
         all_access_metas.update(AccessFactory.default_access_meta)
-        # 管理员添加管理员权限
-        if 'admin' in user_info.user_roles or is_group_admin(user_name):
+        # admin角色添加默认权限
+        if 'admin' in user_info.user_roles:
             all_access_metas.update(AccessFactory.admin_access_meta)
+        # 团队管理员添加默认权限
+        if is_group_admin(user_name):
+            all_access_metas.update(AccessFactory.group_access_meta)
         return all_access_metas
 
     @classmethod

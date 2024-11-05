@@ -69,12 +69,18 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                             'type': 'primary',
                                             'custom': 'update:' + i.user_name,
                                         },
-                                        {
-                                            'content': _('删除'),
-                                            'type': 'primary',
-                                            'custom': 'delete:' + i.user_name,
-                                            'danger': True,
-                                        },
+                                        *(
+                                            [
+                                                {
+                                                    'content': _('删除'),
+                                                    'type': 'primary',
+                                                    'custom': 'delete:' + i.user_name,
+                                                    'danger': True,
+                                                }
+                                            ]
+                                            if i.user_name != 'admin'
+                                            else []
+                                        ),
                                     ],
                                 }
                                 for i in dao_user.get_user_info()
