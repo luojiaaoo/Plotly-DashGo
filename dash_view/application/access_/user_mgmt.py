@@ -89,7 +89,12 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                 [
                                     fac.AntdFlex(
                                         [
-                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-name'), label=_('用户名'), id='user-mgmt-add-user-name-form'),
+                                            fac.AntdFormItem(
+                                                fac.AntdInput(id='user-mgmt-add-user-name', debounceWait=500),
+                                                label=_('用户名'),
+                                                id='user-mgmt-add-user-name-form',
+                                                hasFeedback=True,
+                                            ),
                                             fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-full-name'), label=_('全名')),
                                         ]
                                     ),
