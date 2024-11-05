@@ -135,7 +135,6 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                             showLine=False,
                                         ),
                                         label=_('菜单权限'),
-                                        required=True,
                                     ),
                                 ],
                                 labelCol={'span': 5},

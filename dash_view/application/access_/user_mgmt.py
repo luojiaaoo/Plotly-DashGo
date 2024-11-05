@@ -92,10 +92,11 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                             fac.AntdFormItem(
                                                 fac.AntdInput(id='user-mgmt-add-user-name', debounceWait=500),
                                                 label=_('用户名'),
+                                                required=True,
                                                 id='user-mgmt-add-user-name-form',
                                                 hasFeedback=True,
                                             ),
-                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-full-name'), label=_('全名')),
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-full-name'), label=_('全名'), required=True),
                                         ]
                                     ),
                                     fac.AntdFlex(
@@ -106,7 +107,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                     ),
                                     fac.AntdFlex(
                                         [
-                                            fac.AntdFormItem(fac.AntdSwitch(id='user-mgmt-add-user-status'), label=_('用户状态'), style={'flex': 1}),
+                                            fac.AntdFormItem(fac.AntdSwitch(id='user-mgmt-add-user-status'), label=_('用户状态'), required=True, style={'flex': 1}),
                                             fac.AntdFormItem(
                                                 fac.AntdSelect(
                                                     id='user-mgmt-add-user-sex',
@@ -121,7 +122,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                                 label=_('性别'),
                                                 style={'flex': 1},
                                             ),
-                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-password'), label=_('密码'), style={'flex': 2}),
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-password'), label=_('密码'), style={'flex': 1.5}),
                                         ]
                                     ),
                                     fac.AntdFormItem(

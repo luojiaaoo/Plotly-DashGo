@@ -104,6 +104,62 @@ def get_user_info(user_name: str = None) -> List[UserInfo]:
         return user_infos
 
 
+def add_user(
+    user_name: str,
+    user_full_name: str,
+    password: str,
+    user_status: bool,
+    user_sex: str,
+    user_roles: List[str],
+    user_groups: List[str],
+    user_admin_groups: List[str],
+    user_email: str,
+    phone_number: str,
+    user_remark: str,
+) -> bool:
+    import hashlib
+
+    if not user_name:
+        return False
+    password = password.strip()
+    user_name_op = util_menu_access.get_menu_access().user_name
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        try:
+            cursor.execute(
+                """
+                INSERT INTO sys_user (user_name, user_full_name ,password_sha256, user_status, user_sex, user_roles, user_groups, user_admin_groups, user_email, phone_number, create_by, create_datetime, update_by, update_datetime, user_remark) 
+                VALUES
+                (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+                ;""",
+                (
+                    user_name,
+                    user_full_name,
+                    hashlib.sha256(password.encode('utf-8')).hexdigest(),
+                    get_status_str(user_status),
+                    user_sex,
+                    json.dumps(user_roles, ensure_ascii=False),
+                    json.dumps(user_groups, ensure_ascii=False),
+                    json.dumps(user_admin_groups, ensure_ascii=False),
+                    user_email,
+                    phone_number,
+                    user_name_op,
+                    datetime.now(),
+                    user_name_op,
+                    datetime.now(),
+                    user_remark,
+                ),
+            )
+        except Exception as e:
+            import traceback
+
+            traceback.print_exc()
+            conn.rollback()
+            return False
+        else:
+            conn.commit()
+            return True
+
+
 def get_roles_from_user_name(user_name: str) -> Set[str]:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
@@ -202,12 +258,12 @@ WHERE JSON_SEARCH(user_roles, 'one', %s) IS NOT NULL;
 def add_role(role_name, role_status: bool, role_remark, access_metas):
     if not role_name:
         return False
-    user_name = util_menu_access.get_menu_access().user_name
+    user_name_op = util_menu_access.get_menu_access().user_name
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
             cursor.execute(
                 """
-                INSERT INTO `app`.`sys_role` ( `role_name`, `access_metas`, `role_status`, `update_datetime`, `update_by`, `create_datetime`, `create_by`, `role_remark` )
+                INSERT INTO app.sys_role ( role_name, access_metas, role_status, update_datetime, update_by, create_datetime, create_by, role_remark )
                 VALUES
                 (%s, %s, %s, %s, %s, %s, %s, %s);""",
                 (
@@ -215,9 +271,9 @@ def add_role(role_name, role_status: bool, role_remark, access_metas):
                     json.dumps(access_metas, ensure_ascii=False),
                     get_status_str(role_status),
                     datetime.now(),
-                    user_name,
+                    user_name_op,
                     datetime.now(),
-                    user_name,
+                    user_name_op,
                     role_remark,
                 ),
             )
@@ -240,13 +296,13 @@ def exists_role_name(role_name):
 
 
 def update_role(role_name, role_status: bool, role_remark, access_metas: List[str]):
-    user_name = util_menu_access.get_menu_access().user_name
+    user_name_op = util_menu_access.get_menu_access().user_name
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
             cursor.execute(
                 """
                 update app.sys_role set access_metas=%s, role_status=%s, update_datetime=%s, update_by=%s, role_remark=%s where role_name=%s;""",
-                (json.dumps(access_metas, ensure_ascii=False), get_status_str(role_status), datetime.now(), user_name, role_remark, role_name),
+                (json.dumps(access_metas, ensure_ascii=False), get_status_str(role_status), datetime.now(), user_name_op, role_remark, role_name),
             )
         except Exception as e:
             conn.rollback()
