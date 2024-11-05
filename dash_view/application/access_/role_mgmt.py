@@ -154,7 +154,6 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         children=[
                             fac.AntdText(_('您确定要删除角色')),
                             fac.AntdText(
-                                'xxxx',
                                 id='role-mgmt-delete-role-name',
                                 type='danger',
                                 underline=True,

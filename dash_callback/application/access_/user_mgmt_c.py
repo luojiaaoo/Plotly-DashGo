@@ -12,9 +12,22 @@ _ = partial(translator.t)
 
 @app.callback(
     [
-        # 删除角色弹窗
+        # 删除用户弹窗
         Output('user-mgmt-delete-affirm-modal', 'visible'),
         Output('user-mgmt-delete-user-name', 'children'),
+        # 更新用户弹窗
+        Output('user-mgmt-update-modal', 'visible'),
+        Output('user-mgmt-update-user-name', 'children'),
+        Output('user-mgmt-update-user-full-name', 'value'),
+        Output('user-mgmt-update-user-email', 'value'),
+        Output('user-mgmt-update-phone-number', 'value'),
+        Output('user-mgmt-update-user-status', 'checked'),
+        Output('user-mgmt-update-user-sex', 'value'),
+        Output('user-mgmt-update-password', 'value'),
+        Output('user-mgmt-update-user-remark', 'value'),
+        Output('user-mgmt-update-roles', 'value'),
+        Output('user-mgmt-update-groups', 'value'),
+        Output('user-mgmt-update-admin-groups', 'value'),
     ],
     Input('user-mgmt-table', 'nClicksButton'),
     State('user-mgmt-table', 'clickedCustom'),
@@ -26,6 +39,22 @@ def update_delete_role(nClicksButton, clickedCustom: str):
         return [
             True,
             user_name,
+        ] + [dash.no_update] * 12
+    elif clickedCustom.startswith('update:'):
+        user_info = dao_user.get_user_info(user_name)[0]
+        return [dash.no_update] * 2 + [
+            True,
+            user_info.user_name,
+            user_info.user_full_name,
+            user_info.user_email,
+            user_info.phone_number,
+            user_info.user_status,
+            user_info.user_sex,
+            '',
+            user_info.user_remark,
+            user_info.user_roles,
+            user_info.user_groups,
+            user_info.user_admin_groups,
         ]
 
 
