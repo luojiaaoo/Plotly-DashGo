@@ -68,12 +68,18 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                             'type': 'primary',
                                             'custom': 'update:' + i.role_name,
                                         },
-                                        {
-                                            'content': _('删除'),
-                                            'type': 'primary',
-                                            'custom': 'delete:' + i.role_name,
-                                            'danger': True,
-                                        },
+                                        *(
+                                            [
+                                                {
+                                                    'content': _('删除'),
+                                                    'type': 'primary',
+                                                    'custom': 'delete:' + i.role_name,
+                                                    'danger': True,
+                                                }
+                                            ]
+                                            if i.role_name != 'admin'
+                                            else []
+                                        ),
                                     ],
                                 }
                                 for i in dao_user.get_role_info()
@@ -95,7 +101,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                             treeData=AccessFactory.get_antd_tree_data_menu_item_access_meta(),
                                             multiple=True,
                                             checkable=True,
-                                            showLine=False,
+                                            showLine=True,
                                         ),
                                         label=_('菜单权限'),
                                     ),
@@ -132,7 +138,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                             treeData=AccessFactory.get_antd_tree_data_menu_item_access_meta(),
                                             multiple=True,
                                             checkable=True,
-                                            showLine=False,
+                                            showLine=True,
                                         ),
                                         label=_('菜单权限'),
                                     ),

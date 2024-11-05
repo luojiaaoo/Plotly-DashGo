@@ -31,7 +31,7 @@ class AccessFactory:
         json_menu_item_access_meta = {}
         for access_meta, menu_item in dict_access_meta2menu_item.items():
             # 此权限无需分配
-            if access_meta in (cls.default_access_meta):
+            if access_meta in (*cls.default_access_meta, *cls.admin_access_meta):
                 continue
             level1_name, level2_name = menu_item.split('.')
             if json_menu_item_access_meta.get(level1_name, None) is None:
@@ -45,9 +45,7 @@ class AccessFactory:
         # 根据order属性排序目录
         json_menu_item_access_meta = dict(sorted(json_menu_item_access_meta.items(), key=lambda x: MenuAccess.get_order(f'{x[0]}')))
         for level1_name, dict_level2_access_metas in json_menu_item_access_meta.items():
-            json_menu_item_access_meta[level1_name] = dict(
-                sorted(dict_level2_access_metas.items(), key=lambda x: MenuAccess.get_order(f'{level1_name}.{x[0]}'))
-            )
+            json_menu_item_access_meta[level1_name] = dict(sorted(dict_level2_access_metas.items(), key=lambda x: MenuAccess.get_order(f'{level1_name}.{x[0]}')))
 
         # 生成antd_tree的格式
         antd_tree_data = []
@@ -72,9 +70,7 @@ class AccessFactory:
 
     # 读取每个VIEW中配置的所有权限
     dict_access_meta2module_path = {access_meta: view.__name__ for view in views for access_meta in view.access_metas}
-    dict_access_meta2menu_item = {
-        access_meta: trim_module_path2menu_item(module_path) for access_meta, module_path in dict_access_meta2module_path.items()
-    }
+    dict_access_meta2menu_item = {access_meta: trim_module_path2menu_item(module_path) for access_meta, module_path in dict_access_meta2module_path.items()}
 
     @classmethod
     def get_antd_tree_data_menu_item_access_meta(cls):
@@ -87,6 +83,9 @@ class AccessFactory:
         '工作台-页面',
         '监控页-页面',
     )
+
+    # 系统管理员+团队管理员默认权限
+    admin_access_meta = ('用户管理-页面',)
 
     # 检查数据库和应用权限
     @classmethod

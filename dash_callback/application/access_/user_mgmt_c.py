@@ -22,11 +22,13 @@ _ = partial(translator.t)
         Output('user-mgmt-update-user-email', 'value'),
         Output('user-mgmt-update-phone-number', 'value'),
         Output('user-mgmt-update-user-status', 'checked'),
+        Output('user-mgmt-update-user-status', 'readOnly'),
         Output('user-mgmt-update-user-sex', 'value'),
         Output('user-mgmt-update-password', 'value'),
         Output('user-mgmt-update-user-remark', 'value'),
         Output('user-mgmt-update-roles', 'value'),
         Output('user-mgmt-update-roles', 'options'),
+        Output('user-mgmt-update-roles', 'disabled'),
     ],
     Input('user-mgmt-table', 'nClicksButton'),
     State('user-mgmt-table', 'clickedCustom'),
@@ -38,7 +40,7 @@ def update_delete_role(nClicksButton, clickedCustom: str):
         return [
             True,
             user_name,
-        ] + [dash.no_update] * 11
+        ] + [dash.no_update] * 13
     elif clickedCustom.startswith('update:'):
         user_info = dao_user.get_user_info(user_name)[0]
         return [dash.no_update] * 2 + [
@@ -48,11 +50,13 @@ def update_delete_role(nClicksButton, clickedCustom: str):
             user_info.user_email,
             user_info.phone_number,
             user_info.user_status,
+            False if user_name != 'admin' else True,
             user_info.user_sex,
             '',
             user_info.user_remark,
             user_info.user_roles,
             [i.role_name for i in dao_user.get_role_info()],
+            False if user_name != 'admin' else True,
         ]
 
 
@@ -91,12 +95,18 @@ def update_user(okCounts, user_name, user_full_name, user_email, phone_number, u
                         'type': 'primary',
                         'custom': 'update:' + i.user_name,
                     },
-                    {
-                        'content': _('删除'),
-                        'type': 'primary',
-                        'custom': 'delete:' + i.user_name,
-                        'danger': True,
-                    },
+                    *(
+                        [
+                            {
+                                'content': _('删除'),
+                                'type': 'primary',
+                                'custom': 'delete:' + i.user_name,
+                                'danger': True,
+                            }
+                        ]
+                        if i.user_name != 'admin'
+                        else []
+                    ),
                 ],
             }
             for i in dao_user.get_user_info()
@@ -147,7 +157,7 @@ def open_add_role_modal(nClicks):
     """显示新建用户的弹窗"""
     from uuid import uuid4
 
-    return True, '', '', True, '', [i.role_name for i in dao_user.get_role_info()], [],  '', '', str(uuid4())[:12].replace('-', ''), None, None
+    return True, '', '', True, '', [i.role_name for i in dao_user.get_role_info()], [], '', '', str(uuid4())[:12].replace('-', ''), None, None
 
 
 @app.callback(
@@ -185,12 +195,18 @@ def add_user(okCounts, user_name, user_full_name, user_email, phone_number, user
                         'type': 'primary',
                         'custom': 'update:' + i.user_name,
                     },
-                    {
-                        'content': _('删除'),
-                        'type': 'primary',
-                        'custom': 'delete:' + i.user_name,
-                        'danger': True,
-                    },
+                    *(
+                        [
+                            {
+                                'content': _('删除'),
+                                'type': 'primary',
+                                'custom': 'delete:' + i.user_name,
+                                'danger': True,
+                            }
+                        ]
+                        if i.user_name != 'admin'
+                        else []
+                    ),
                 ],
             }
             for i in dao_user.get_user_info()
@@ -223,12 +239,18 @@ def delete_role_modal(okCounts, user_name):
                         'type': 'primary',
                         'custom': 'update:' + i.user_name,
                     },
-                    {
-                        'content': _('删除'),
-                        'type': 'primary',
-                        'custom': 'delete:' + i.user_name,
-                        'danger': True,
-                    },
+                    *(
+                        [
+                            {
+                                'content': _('删除'),
+                                'type': 'primary',
+                                'custom': 'delete:' + i.user_name,
+                                'danger': True,
+                            }
+                        ]
+                        if i.user_name != 'admin'
+                        else []
+                    ),
                 ],
             }
             for i in dao_user.get_user_info()

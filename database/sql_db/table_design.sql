@@ -11,7 +11,7 @@
  Target Server Version : 50744 (5.7.44)
  File Encoding         : 65001
 
- Date: 05/11/2024 22:26:30
+ Date: 05/11/2024 22:50:44
 */
 
 SET NAMES utf8mb4;
@@ -58,8 +58,8 @@ CREATE TABLE `sys_role`  (
 -- ----------------------------
 -- Records of sys_role
 -- ----------------------------
-INSERT INTO `sys_role` VALUES ('admin', '[\"角色管理-页面\", \"用户管理-页面\"]', '启用', '2024-11-04 22:07:05', 'admin', '2024-11-03 14:19:44', 'admin', '超级管理员角色');
-INSERT INTO `sys_role` VALUES ('4324', '[\"角色管理-页面\"]', '禁用', '2024-11-05 22:18:55', 'admin', '2024-11-05 22:18:51', 'admin', '123');
+INSERT INTO `sys_role` VALUES ('admin', '[\"角色管理-页面\"]', '启用', '2024-11-04 22:07:05', 'admin', '2024-11-03 14:19:44', 'admin', '超级管理员角色');
+INSERT INTO `sys_role` VALUES ('4324', '[\"角色管理-页面\"]', '启用', '2024-11-05 22:47:47', 'admin', '2024-11-05 22:18:51', 'admin', '123');
 
 -- ----------------------------
 -- Table structure for sys_user

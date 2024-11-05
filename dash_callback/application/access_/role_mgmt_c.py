@@ -19,6 +19,7 @@ _ = partial(translator.t)
         Output('role-mgmt-update-modal', 'visible'),
         Output('role-mgmt-update-role-name', 'children'),
         Output('role-mgmt-update-role-status', 'checked'),
+        Output('role-mgmt-update-role-status', 'readOnly'),
         Output('role-mgmt-update-role-remark', 'value'),
         Output('role-menu-access-tree-select-update', 'checkedKeys'),
     ],
@@ -39,6 +40,7 @@ def update_delete_role(nClicksButton, clickedCustom: str):
             dash.no_update,
             dash.no_update,
             dash.no_update,
+            dash.no_update,
         ]
     elif clickedCustom.startswith('update:'):
         role_info = dao_user.get_role_info(role_name)[0]
@@ -49,6 +51,7 @@ def update_delete_role(nClicksButton, clickedCustom: str):
             True,
             role_info.role_name,
             role_info.role_status,
+            False if role_name != 'admin' else True,
             role_info.role_remark,
             role_info.access_metas,
         ]
@@ -82,12 +85,18 @@ def callback_func(okCounts, role_name: str, role_status: bool, role_remark: str,
                         'type': 'primary',
                         'custom': 'update:' + i.role_name,
                     },
-                    {
-                        'content': _('删除'),
-                        'type': 'primary',
-                        'custom': 'delete:' + i.role_name,
-                        'danger': True,
-                    },
+                    *(
+                        [
+                            {
+                                'content': _('删除'),
+                                'type': 'primary',
+                                'custom': 'delete:' + i.role_name,
+                                'danger': True,
+                            }
+                        ]
+                        if i.role_name != 'admin'
+                        else []
+                    ),
                 ],
             }
             for i in dao_user.get_role_info()
@@ -120,12 +129,18 @@ def delete_role_modal(okCounts, role_name):
                         'type': 'primary',
                         'custom': 'update:' + i.role_name,
                     },
-                    {
-                        'content': _('删除'),
-                        'type': 'primary',
-                        'custom': 'delete:' + i.role_name,
-                        'danger': True,
-                    },
+                    *(
+                        [
+                            {
+                                'content': _('删除'),
+                                'type': 'primary',
+                                'custom': 'delete:' + i.role_name,
+                                'danger': True,
+                            }
+                        ]
+                        if i.role_name != 'admin'
+                        else []
+                    ),
                 ],
             }
             for i in dao_user.get_role_info()
@@ -194,6 +209,7 @@ def add_role_c(okCounts, name, role_status, role_remark, access_metas: List[str]
         MessageManager.success(content=_('角色添加成功'))
         return [
             {
+                'key': i.role_name,
                 **i.__dict__,
                 'role_status': {'tag': dao_user.get_status_str(i.role_status), 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
@@ -202,12 +218,18 @@ def add_role_c(okCounts, name, role_status, role_remark, access_metas: List[str]
                         'type': 'primary',
                         'custom': 'update:' + i.role_name,
                     },
-                    {
-                        'content': _('删除'),
-                        'type': 'primary',
-                        'custom': 'delete:' + i.role_name,
-                        'danger': True,
-                    },
+                    *(
+                        [
+                            {
+                                'content': _('删除'),
+                                'type': 'primary',
+                                'custom': 'delete:' + i.role_name,
+                                'danger': True,
+                            }
+                        ]
+                        if i.role_name != 'admin'
+                        else []
+                    ),
                 ],
             }
             for i in dao_user.get_role_info()

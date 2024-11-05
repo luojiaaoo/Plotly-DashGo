@@ -1,4 +1,4 @@
-from database.sql_db.dao.dao_user import get_user_access_meta_plus_role, get_user_info, UserInfo
+from database.sql_db.dao.dao_user import get_user_access_meta_plus_role, get_user_info, UserInfo, is_group_admin
 from typing import Dict, List, Set
 from common.exception import NotFoundUsername
 from common.utilities.util_logger import Log
@@ -13,7 +13,11 @@ class MenuAccess:
 
         user_name = user_info.user_name
         all_access_metas: Set[str] = get_user_access_meta_plus_role(user_name=user_name)
+        # 所以用户添加默认权限
         all_access_metas.update(AccessFactory.default_access_meta)
+        # 管理员添加管理员权限
+        if 'admin' in user_info.user_roles or is_group_admin(user_name):
+            all_access_metas.update(AccessFactory.admin_access_meta)
         return all_access_metas
 
     @classmethod
