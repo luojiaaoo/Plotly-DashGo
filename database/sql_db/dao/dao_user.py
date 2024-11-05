@@ -150,9 +150,6 @@ def add_user(
                 ),
             )
         except Exception as e:
-            import traceback
-
-            traceback.print_exc()
             conn.rollback()
             return False
         else:

@@ -19,7 +19,7 @@ _ = partial(translator.t)
     Input('user-mgmt-add-user-name', 'debounceValue'),
     prevent_initial_call=True,
 )
-def check_role_name(user_name):
+def check_user_name(user_name):
     """校验新建用户名的有效性"""
     if not user_name:
         return 'error', _('请填写名用户名')
@@ -75,7 +75,7 @@ def open_add_role_modal(nClicks):
         State('user-mgmt-add-admin-groups', 'value'),
     ],
 )
-def callback_func(okCounts, user_name, user_full_name, user_email, phone_number, user_status: bool, user_sex, password, user_remark, user_roles, user_groups, user_admin_groups):
+def add_user(okCounts, user_name, user_full_name, user_email, phone_number, user_status: bool, user_sex, password, user_remark, user_roles, user_groups, user_admin_groups):
     """新建用户"""
     if not user_name or not user_full_name:
         MessageManager.warning(content=_('用户名/全名不能为空'))
