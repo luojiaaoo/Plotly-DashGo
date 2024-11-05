@@ -232,7 +232,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         renderFooter=True,
                         okText=_('确定'),
                         cancelText=_('取消'),
-                        title=_('添加用户'),
+                        title=_('更新用户'),
                         mask=False,
                         maskClosable=False,
                         id='user-mgmt-update-modal',

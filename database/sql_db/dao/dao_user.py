@@ -104,6 +104,74 @@ def get_user_info(user_name: str = None) -> List[UserInfo]:
         return user_infos
 
 
+def update_user(user_name, user_full_name, password, user_status: bool, user_sex, user_roles, user_groups, user_admin_groups, user_email, phone_number, user_remark):
+    import hashlib
+
+    user_name_op = util_menu_access.get_menu_access().user_name
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        try:
+            is_ok = True
+            is_finish = False
+            # 给sys_role, sys_group表加锁，保证加入的角色和团队都存在
+            if is_ok and user_roles:
+                cursor.execute(
+                    f"""SELECT count(1) FROM sys_role WHERE role_name in ({','.join(['%s']*len(user_roles))}) for update;""",
+                    tuple(user_roles),
+                )
+                if cursor.fetchall()[0][0] != len(user_roles):
+                    is_ok = False
+            if is_ok and user_groups:
+                cursor.execute(
+                    f"""SELECT count(1) FROM sys_group WHERE group_name in ({','.join(['%s']*len(user_groups))}) for update;""",
+                    tuple(user_groups),
+                )
+                if cursor.fetchall()[0][0] != len(user_groups):
+                    is_ok = False
+            if is_ok and user_admin_groups:
+                cursor.execute(
+                    f"""SELECT count(1) FROM sys_group WHERE group_name in ({','.join(['%s']*len(user_admin_groups))}) for update;""",
+                    tuple(user_admin_groups),
+                )
+                if cursor.fetchall()[0][0] != len(user_admin_groups):
+                    is_ok = False
+            if is_ok:
+                cursor.execute(
+                    f"""
+                    update sys_user 
+                    set 
+                    user_full_name=%s,{'password_sha256=%s,' if password else ''} user_status=%s, user_sex=%s,
+                    user_roles=%s, user_groups=%s, user_admin_groups=%s, user_email=%s,
+                    phone_number=%s, update_by=%s, update_datetime=%s, user_remark=%s where user_name=%s;""",
+                    (
+                        user_full_name,
+                        *([hashlib.sha256(password.encode('utf-8')).hexdigest()] if password else []),
+                        get_status_str(user_status),
+                        user_sex,
+                        json.dumps(user_roles, ensure_ascii=False),
+                        json.dumps(user_groups, ensure_ascii=False),
+                        json.dumps(user_admin_groups, ensure_ascii=False),
+                        user_email,
+                        phone_number,
+                        user_name_op,
+                        datetime.now(),
+                        user_remark,
+                        user_name,
+                    ),
+                )
+                is_finish = True
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            conn.rollback()
+            return False
+        else:
+            conn.commit()
+            if is_finish:
+                return True
+            else:
+                return False
+
+
 def add_user(
     user_name: str,
     user_full_name: str,
@@ -120,7 +188,7 @@ def add_user(
     """新建用户"""
     import hashlib
 
-    if not user_name:
+    if not user_name or not user_full_name:
         return False
     password = password.strip()
     user_name_op = util_menu_access.get_menu_access().user_name
@@ -308,7 +376,7 @@ def add_role(role_name, role_status: bool, role_remark, access_metas):
         try:
             cursor.execute(
                 """
-                INSERT INTO app.sys_role ( role_name, access_metas, role_status, update_datetime, update_by, create_datetime, create_by, role_remark )
+                INSERT INTO sys_role ( role_name, access_metas, role_status, update_datetime, update_by, create_datetime, create_by, role_remark )
                 VALUES
                 (%s, %s, %s, %s, %s, %s, %s, %s);""",
                 (
@@ -346,7 +414,7 @@ def update_role(role_name, role_status: bool, role_remark, access_metas: List[st
         try:
             cursor.execute(
                 """
-                update app.sys_role set access_metas=%s, role_status=%s, update_datetime=%s, update_by=%s, role_remark=%s where role_name=%s;""",
+                update sys_role set access_metas=%s, role_status=%s, update_datetime=%s, update_by=%s, role_remark=%s where role_name=%s;""",
                 (json.dumps(access_metas, ensure_ascii=False), get_status_str(role_status), datetime.now(), user_name_op, role_remark, role_name),
             )
         except Exception as e:
