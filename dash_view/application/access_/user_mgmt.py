@@ -125,7 +125,10 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                         ]
                                     ),
                                     fac.AntdFormItem(
-                                        fac.AntdInput(id='user-mgmt-add-user-remark', mode='text-area'), label=_('用户描述'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
+                                        fac.AntdInput(id='user-mgmt-add-user-remark', mode='text-area', autoSize={'minRows': 1, 'maxRows': 3}),
+                                        label=_('用户描述'),
+                                        labelCol={'flex': '1'},
+                                        wrapperCol={'flex': '5'},
                                     ),
                                     fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-roles'), label=_('角色'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}),
                                     fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-groups'), label=_('团队'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}),

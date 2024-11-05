@@ -124,10 +124,8 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                         id='role-mgmt-add-role-name-form',
                                         hasFeedback=True,
                                     ),
-                                    fac.AntdFormItem(
-                                        fac.AntdSwitch(id='role-mgmt-add-role-status', checked=True), label=_('角色状态'), required=True
-                                    ),
-                                    fac.AntdFormItem(fac.AntdInput(id='role-mgmt-add-role-remark', mode='text-area'), label=_('角色描述')),
+                                    fac.AntdFormItem(fac.AntdSwitch(id='role-mgmt-add-role-status', checked=True), label=_('角色状态'), required=True),
+                                    fac.AntdFormItem(fac.AntdInput(id='role-mgmt-add-role-remark', mode='text-area', autoSize={'minRows': 1, 'maxRows': 3}), label=_('角色描述')),
                                     fac.AntdFormItem(
                                         fac.AntdTree(
                                             id='role-menu-access-tree-select-add',
