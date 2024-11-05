@@ -431,7 +431,8 @@ def update_role(role_name, role_status: bool, role_remark, access_metas: List[st
 
 
 ################################### 团队
-        
+
+
 @dataclass
 class GroupInfo:
     group_name: str
@@ -445,7 +446,8 @@ class GroupInfo:
     create_by: str
     group_remark: str
 
-def get_group_info(group_name: str = None) -> List[str]:
+
+def get_group_info(group_name: str = None) -> List[GroupInfo]:
     heads = (
         'group_name',
         'group_status',
@@ -454,6 +456,7 @@ def get_group_info(group_name: str = None) -> List[str]:
         'update_by',
         'create_datetime',
         'create_by',
+        'group_remark',
     )
     with pool.get_connection() as conn, conn.cursor() as cursor:
         if group_name is None:
@@ -471,9 +474,35 @@ def get_group_info(group_name: str = None) -> List[str]:
                 {
                     'group_status': get_status_bool(group_dict['group_status']),
                     'group_roles': json.loads(group_dict['group_roles']),
-                    'group_users':
-                    'group_admin_users':
+                    'group_users': get_users_from_group_name(group_dict['group_name']),
+                    'group_admin_users': get_admin_users_from_group_name(group_dict['group_name']),
                 },
             )
-            group_infos.append(UserInfo(**group_dict))
+            group_infos.append(GroupInfo(**group_dict))
         return group_infos
+
+
+def get_users_from_group_name(group_name: str) -> List[UserInfo]:
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            """        
+            SELECT user_name
+            FROM sys_user
+            WHERE JSON_SEARCH(user_groups, 'one', %s) IS NOT NULL""",
+            (group_name,),
+        )
+        result = cursor.fetchall()
+        return [i[0] for i in result]
+
+
+def get_admin_users_from_group_name(group_name: str) -> List[UserInfo]:
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            """        
+            SELECT user_name
+            FROM sys_user
+            WHERE JSON_SEARCH(user_admin_groups, 'one', %s) IS NOT NULL""",
+            (group_name,),
+        )
+        result = cursor.fetchall()
+        return [i[0] for i in result]

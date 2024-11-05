@@ -58,24 +58,24 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             ],
                             data=[
                                 {
-                                    'key': i.role_name,
+                                    'key': i.group_name,
                                     **i.__dict__,
-                                    'role_status': {'tag': dao_user.get_status_str(i.role_status), 'color': 'cyan' if i.role_status else 'volcano'},
+                                    'group_status': {'tag': dao_user.get_status_str(i.group_status), 'color': 'cyan' if i.group_status else 'volcano'},
                                     'operation': [
                                         {
                                             'content': _('编辑'),
                                             'type': 'primary',
-                                            'custom': 'update:' + i.role_name,
+                                            'custom': 'update:' + i.group_name,
                                         },
                                         {
                                             'content': _('删除'),
                                             'type': 'primary',
-                                            'custom': 'delete:' + i.role_name,
+                                            'custom': 'delete:' + i.group_name,
                                             'danger': True,
                                         },
                                     ],
                                 }
-                                for i in dao_user.get_role_info()
+                                for i in dao_user.get_group_info()
                             ],
                             pageSize=10,
                         ),
