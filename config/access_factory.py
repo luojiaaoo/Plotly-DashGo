@@ -1,5 +1,5 @@
 # 本应用的权限工厂，此处手动导入应用模块
-from dash_view.application.access_ import group_mgmt, role_mgmt, group_auth, user_mgmt
+from dash_view.application.access_ import role_mgmt, user_mgmt
 from dash_view.application.dashboard_ import workbench, monitor
 from dash_view.application.person_ import personal_info, personal_setting
 
@@ -12,10 +12,8 @@ def trim_module_path2menu_item(module_path):
 
 class AccessFactory:
     views = [
-        group_mgmt,
         role_mgmt,
         user_mgmt,
-        group_auth,
         workbench,
         monitor,
         personal_info,
@@ -33,7 +31,7 @@ class AccessFactory:
         json_menu_item_access_meta = {}
         for access_meta, menu_item in dict_access_meta2menu_item.items():
             # 此权限无需分配
-            if access_meta in (cls.default_access_meta) or access_meta in (cls.group_admin_access_meta):
+            if access_meta in (cls.default_access_meta):
                 continue
             level1_name, level2_name = menu_item.split('.')
             if json_menu_item_access_meta.get(level1_name, None) is None:
@@ -89,8 +87,6 @@ class AccessFactory:
         '工作台-页面',
         '监控页-页面',
     )
-    # 团队管理员的默认权限，无需分配
-    group_admin_access_meta = ('团队权限-页面',)
 
     # 检查数据库和应用权限
     @classmethod
@@ -100,7 +96,7 @@ class AccessFactory:
         logger = Log.get_logger(__name__)
 
         # 角色类型附加权限检查
-        outliers = set([*cls.default_access_meta, *cls.group_admin_access_meta]) - set(cls.dict_access_meta2module_path.keys())
+        outliers = set(cls.default_access_meta) - set(cls.dict_access_meta2module_path.keys())
         if outliers:
             logger.error(f'角色类型附加权限中存在未定义的权限：{outliers}')
             raise ValueError(f'角色类型附加权限中存在未定义的权限：{outliers}')

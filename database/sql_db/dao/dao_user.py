@@ -53,8 +53,6 @@ class UserInfo:
     user_status: str
     user_sex: str
     user_roles: List
-    user_groups: List
-    user_admin_groups: List
     user_email: str
     phone_number: str
     update_datetime: datetime
@@ -71,8 +69,6 @@ def get_user_info(user_name: str = None) -> List[UserInfo]:
         'user_status',
         'user_sex',
         'user_roles',
-        'user_groups',
-        'user_admin_groups',
         'user_email',
         'phone_number',
         'update_datetime',
@@ -96,8 +92,6 @@ def get_user_info(user_name: str = None) -> List[UserInfo]:
             user_dict.update(
                 {
                     'user_status': get_status_bool(user_dict['user_status']),
-                    'user_groups': json.loads(user_dict['user_groups']),
-                    'user_admin_groups': json.loads(user_dict['user_admin_groups']),
                     'user_roles': json.loads(user_dict['user_roles']),
                 },
             )
@@ -105,7 +99,7 @@ def get_user_info(user_name: str = None) -> List[UserInfo]:
         return user_infos
 
 
-def update_user(user_name, user_full_name, password, user_status: bool, user_sex, user_roles, user_groups, user_admin_groups, user_email, phone_number, user_remark):
+def update_user(user_name, user_full_name, password, user_status: bool, user_sex, user_roles, user_email, phone_number, user_remark):
     import hashlib
 
     user_name_op = util_menu_access.get_menu_access().user_name
@@ -113,7 +107,7 @@ def update_user(user_name, user_full_name, password, user_status: bool, user_sex
         try:
             is_ok = True
             is_finish = False
-            # 给sys_role, sys_group表加锁，保证加入的角色和团队都存在
+            # 给sys_role表加锁，保证加入的角色和团队都存在
             if is_ok and user_roles:
                 cursor.execute(
                     f"""SELECT count(1) FROM sys_role WHERE role_name in ({','.join(['%s']*len(user_roles))}) for update;""",
@@ -121,27 +115,13 @@ def update_user(user_name, user_full_name, password, user_status: bool, user_sex
                 )
                 if cursor.fetchall()[0][0] != len(user_roles):
                     is_ok = False
-            if is_ok and user_groups:
-                cursor.execute(
-                    f"""SELECT count(1) FROM sys_group WHERE group_name in ({','.join(['%s']*len(user_groups))}) for update;""",
-                    tuple(user_groups),
-                )
-                if cursor.fetchall()[0][0] != len(user_groups):
-                    is_ok = False
-            if is_ok and user_admin_groups:
-                cursor.execute(
-                    f"""SELECT count(1) FROM sys_group WHERE group_name in ({','.join(['%s']*len(user_admin_groups))}) for update;""",
-                    tuple(user_admin_groups),
-                )
-                if cursor.fetchall()[0][0] != len(user_admin_groups):
-                    is_ok = False
             if is_ok:
                 cursor.execute(
                     f"""
                     update sys_user 
                     set 
                     user_full_name=%s,{'password_sha256=%s,' if password else ''} user_status=%s, user_sex=%s,
-                    user_roles=%s, user_groups=%s, user_admin_groups=%s, user_email=%s,
+                    user_roles=%s, user_email=%s,
                     phone_number=%s, update_by=%s, update_datetime=%s, user_remark=%s where user_name=%s;""",
                     (
                         user_full_name,
@@ -149,8 +129,6 @@ def update_user(user_name, user_full_name, password, user_status: bool, user_sex
                         get_status_str(user_status),
                         user_sex,
                         json.dumps(user_roles, ensure_ascii=False),
-                        json.dumps(user_groups, ensure_ascii=False),
-                        json.dumps(user_admin_groups, ensure_ascii=False),
                         user_email,
                         phone_number,
                         user_name_op,
@@ -161,9 +139,6 @@ def update_user(user_name, user_full_name, password, user_status: bool, user_sex
                 )
                 is_finish = True
         except Exception as e:
-            import traceback
-
-            traceback.print_exc()
             conn.rollback()
             return False
         else:
@@ -181,8 +156,6 @@ def add_user(
     user_status: bool,
     user_sex: str,
     user_roles: List[str],
-    user_groups: List[str],
-    user_admin_groups: List[str],
     user_email: str,
     phone_number: str,
     user_remark: str,
@@ -198,7 +171,7 @@ def add_user(
         try:
             is_ok = True
             is_finish = False
-            # 给sys_role, sys_group表加锁，保证加入的角色和团队都存在
+            # 给sys_role表加锁，保证加入的角色和团队都存在
             if is_ok and user_roles:
                 cursor.execute(
                     f"""SELECT count(1) FROM sys_role WHERE role_name in ({','.join(['%s']*len(user_roles))}) for update;""",
@@ -206,26 +179,12 @@ def add_user(
                 )
                 if cursor.fetchall()[0][0] != len(user_roles):
                     is_ok = False
-            if is_ok and user_groups:
-                cursor.execute(
-                    f"""SELECT count(1) FROM sys_group WHERE group_name in ({','.join(['%s']*len(user_groups))}) for update;""",
-                    tuple(user_groups),
-                )
-                if cursor.fetchall()[0][0] != len(user_groups):
-                    is_ok = False
-            if is_ok and user_admin_groups:
-                cursor.execute(
-                    f"""SELECT count(1) FROM sys_group WHERE group_name in ({','.join(['%s']*len(user_admin_groups))}) for update;""",
-                    tuple(user_admin_groups),
-                )
-                if cursor.fetchall()[0][0] != len(user_admin_groups):
-                    is_ok = False
             if is_ok:
                 cursor.execute(
                     """
-                    INSERT INTO sys_user (user_name, user_full_name ,password_sha256, user_status, user_sex, user_roles, user_groups, user_admin_groups, user_email, phone_number, create_by, create_datetime, update_by, update_datetime, user_remark) 
+                    INSERT INTO sys_user (user_name, user_full_name ,password_sha256, user_status, user_sex, user_roles, user_email, phone_number, create_by, create_datetime, update_by, update_datetime, user_remark) 
                     VALUES
-                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+                    (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
                     ;""",
                     (
                         user_name,
@@ -234,8 +193,6 @@ def add_user(
                         get_status_str(user_status),
                         user_sex,
                         json.dumps(user_roles, ensure_ascii=False),
-                        json.dumps(user_groups, ensure_ascii=False),
-                        json.dumps(user_admin_groups, ensure_ascii=False),
                         user_email,
                         phone_number,
                         user_name_op,
@@ -428,81 +385,3 @@ def update_role(role_name, role_status: bool, role_remark, access_metas: List[st
         else:
             conn.commit()
             return True
-
-
-################################### 团队
-
-
-@dataclass
-class GroupInfo:
-    group_name: str
-    group_roles: List[str]
-    group_status: bool
-    group_users: List[str]
-    group_admin_users: List[str]
-    update_datetime: datetime
-    update_by: str
-    create_datetime: datetime
-    create_by: str
-    group_remark: str
-
-
-def get_group_info(group_name: str = None) -> List[GroupInfo]:
-    heads = (
-        'group_name',
-        'group_status',
-        'group_roles',
-        'update_datetime',
-        'update_by',
-        'create_datetime',
-        'create_by',
-        'group_remark',
-    )
-    with pool.get_connection() as conn, conn.cursor() as cursor:
-        if group_name is None:
-            cursor.execute(f"""SELECT {','.join(heads)} FROM sys_group;""")
-        else:
-            cursor.execute(
-                f"""SELECT {','.join(heads)} FROM sys_group WHERE group_name = %s;""",
-                (group_name,),
-            )
-        group_infos = []
-        result = cursor.fetchall()
-        for per in result:
-            group_dict = dict(zip(heads, per))
-            group_dict.update(
-                {
-                    'group_status': get_status_bool(group_dict['group_status']),
-                    'group_roles': json.loads(group_dict['group_roles']),
-                    'group_users': get_users_from_group_name(group_dict['group_name']),
-                    'group_admin_users': get_admin_users_from_group_name(group_dict['group_name']),
-                },
-            )
-            group_infos.append(GroupInfo(**group_dict))
-        return group_infos
-
-
-def get_users_from_group_name(group_name: str) -> List[UserInfo]:
-    with pool.get_connection() as conn, conn.cursor() as cursor:
-        cursor.execute(
-            """        
-            SELECT user_name
-            FROM sys_user
-            WHERE JSON_SEARCH(user_groups, 'one', %s) IS NOT NULL""",
-            (group_name,),
-        )
-        result = cursor.fetchall()
-        return [i[0] for i in result]
-
-
-def get_admin_users_from_group_name(group_name: str) -> List[UserInfo]:
-    with pool.get_connection() as conn, conn.cursor() as cursor:
-        cursor.execute(
-            """        
-            SELECT user_name
-            FROM sys_user
-            WHERE JSON_SEARCH(user_admin_groups, 'one', %s) IS NOT NULL""",
-            (group_name,),
-        )
-        result = cursor.fetchall()
-        return [i[0] for i in result]

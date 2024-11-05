@@ -132,10 +132,6 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                         wrapperCol={'flex': '5'},
                                     ),
                                     fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-roles', mode='multiple'), label=_('角色'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}),
-                                    fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-groups', mode='multiple'), label=_('团队'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}),
-                                    fac.AntdFormItem(
-                                        fac.AntdSelect(id='user-mgmt-add-admin-groups', mode='multiple'), label=_('管理团队'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
-                                    ),
                                 ],
                                 labelAlign='left',
                                 className={'.ant-form-item': {'marginBottom': '12px', 'marginRight': '8px'}},
@@ -216,12 +212,6 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                     ),
                                     fac.AntdFormItem(
                                         fac.AntdSelect(id='user-mgmt-update-roles', mode='multiple'), label=_('角色'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
-                                    ),
-                                    fac.AntdFormItem(
-                                        fac.AntdSelect(id='user-mgmt-update-groups', mode='multiple'), label=_('团队'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
-                                    ),
-                                    fac.AntdFormItem(
-                                        fac.AntdSelect(id='user-mgmt-update-admin-groups', mode='multiple'), label=_('管理团队'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
                                     ),
                                 ],
                                 labelAlign='left',

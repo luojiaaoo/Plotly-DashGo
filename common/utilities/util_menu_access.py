@@ -12,11 +12,8 @@ class MenuAccess:
         from config.access_factory import AccessFactory
 
         user_name = user_info.user_name
-        user_admin_groups: Dict = user_info.user_admin_groups
         all_access_metas: Set[str] = get_user_access_meta_plus_role(user_name=user_name)
         all_access_metas.update(AccessFactory.default_access_meta)
-        if len(user_admin_groups) > 0:
-            all_access_metas.update(AccessFactory.group_admin_access_meta)
         return all_access_metas
 
     @classmethod

@@ -27,10 +27,6 @@ _ = partial(translator.t)
         Output('user-mgmt-update-user-remark', 'value'),
         Output('user-mgmt-update-roles', 'value'),
         Output('user-mgmt-update-roles', 'options'),
-        Output('user-mgmt-update-groups', 'value'),
-        Output('user-mgmt-update-groups', 'options'),
-        Output('user-mgmt-update-admin-groups', 'value'),
-        Output('user-mgmt-update-admin-groups', 'options'),
     ],
     Input('user-mgmt-table', 'nClicksButton'),
     State('user-mgmt-table', 'clickedCustom'),
@@ -42,7 +38,7 @@ def update_delete_role(nClicksButton, clickedCustom: str):
         return [
             True,
             user_name,
-        ] + [dash.no_update] * 15
+        ] + [dash.no_update] * 11
     elif clickedCustom.startswith('update:'):
         user_info = dao_user.get_user_info(user_name)[0]
         return [dash.no_update] * 2 + [
@@ -57,10 +53,6 @@ def update_delete_role(nClicksButton, clickedCustom: str):
             user_info.user_remark,
             user_info.user_roles,
             [i.role_name for i in dao_user.get_role_info()],
-            user_info.user_groups,
-            [],
-            user_info.user_admin_groups,
-            [],
         ]
 
 
@@ -78,16 +70,14 @@ def update_delete_role(nClicksButton, clickedCustom: str):
         State('user-mgmt-update-password', 'value'),
         State('user-mgmt-update-user-remark', 'value'),
         State('user-mgmt-update-roles', 'value'),
-        State('user-mgmt-update-groups', 'value'),
-        State('user-mgmt-update-admin-groups', 'value'),
     ],
     prevent_initial_call=True,
 )
-def update_user(okCounts, user_name, user_full_name, user_email, phone_number, user_status, user_sex, password, user_remark, user_roles, user_groups, user_admin_groups):
+def update_user(okCounts, user_name, user_full_name, user_email, phone_number, user_status, user_sex, password, user_remark, user_roles):
     if not user_name or not user_full_name:
         MessageManager.warning(content=_('用户名/全名不能为空'))
         return dash.no_update
-    rt = dao_user.update_user(user_name, user_full_name, password, user_status, user_sex, user_roles, user_groups, user_admin_groups, user_email, phone_number, user_remark)
+    rt = dao_user.update_user(user_name, user_full_name, password, user_status, user_sex, user_roles, user_email, phone_number, user_remark)
     if rt:
         MessageManager.success(content=_('用户更新成功'))
         return [
@@ -144,10 +134,6 @@ def check_user_name(user_name):
         Output('user-mgmt-add-user-remark', 'value'),
         Output('user-mgmt-add-roles', 'options'),
         Output('user-mgmt-add-roles', 'value'),
-        Output('user-mgmt-add-groups', 'options'),
-        Output('user-mgmt-add-groups', 'value'),
-        Output('user-mgmt-add-admin-groups', 'options'),
-        Output('user-mgmt-add-admin-groups', 'value'),
         Output('user-mgmt-add-user-email', 'value'),
         Output('user-mgmt-add-phone-number', 'value'),
         Output('user-mgmt-add-password', 'value'),
@@ -161,7 +147,7 @@ def open_add_role_modal(nClicks):
     """显示新建用户的弹窗"""
     from uuid import uuid4
 
-    return True, '', '', True, '', [i.role_name for i in dao_user.get_role_info()], [], [], [], [], [], '', '', str(uuid4())[:12].replace('-', ''), None, None
+    return True, '', '', True, '', [i.role_name for i in dao_user.get_role_info()], [],  '', '', str(uuid4())[:12].replace('-', ''), None, None
 
 
 @app.callback(
@@ -177,17 +163,15 @@ def open_add_role_modal(nClicks):
         State('user-mgmt-add-password', 'value'),
         State('user-mgmt-add-user-remark', 'value'),
         State('user-mgmt-add-roles', 'value'),
-        State('user-mgmt-add-groups', 'value'),
-        State('user-mgmt-add-admin-groups', 'value'),
     ],
     prevent_initial_call=True,
 )
-def add_user(okCounts, user_name, user_full_name, user_email, phone_number, user_status: bool, user_sex, password, user_remark, user_roles, user_groups, user_admin_groups):
+def add_user(okCounts, user_name, user_full_name, user_email, phone_number, user_status: bool, user_sex, password, user_remark, user_roles):
     """新建用户"""
     if not user_name or not user_full_name:
         MessageManager.warning(content=_('用户名/全名不能为空'))
         return dash.no_update
-    rt = dao_user.add_user(user_name, user_full_name, password, user_status, user_sex, user_roles, user_groups, user_admin_groups, user_email, phone_number, user_remark)
+    rt = dao_user.add_user(user_name, user_full_name, password, user_status, user_sex, user_roles, user_email, phone_number, user_remark)
     if rt:
         MessageManager.success(content=_('用户添加成功'))
         return [

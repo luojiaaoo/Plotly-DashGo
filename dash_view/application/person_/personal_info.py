@@ -114,12 +114,6 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('团队：'), className='user_info_name'),
-                            fac.AntdText(str(user_info.user_groups), className='user_info_value'),
-                        ]
-                    ),
-                    fac.AntdSpace(
-                        [
                             fac.AntdText(_('邮箱：'), className='user_info_name'),
                             fac.AntdText(user_info.user_email, className='user_info_value'),
                         ]
