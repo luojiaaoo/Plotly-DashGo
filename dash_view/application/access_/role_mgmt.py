@@ -30,7 +30,7 @@ access_metas = ('角色管理-页面',)
 def render_content(menu_access: MenuAccess, **kwargs):
     from config.access_factory import AccessFactory
 
-    logger.debug(f'用户：{menu_access.user_name}，访问：{__name__}，参数列表：{kwargs}，权限元：{access_metas}')
+    logger.debug(f'用户：{menu_access.user_name}，访问：{__name__}，参数列表：{kwargs}，权限元：{menu_access.all_access_metas}')
     return fac.AntdCol(
         [
             fac.AntdRow(

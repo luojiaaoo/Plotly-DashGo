@@ -1,5 +1,6 @@
 from database.sql_db.dao.dao_user import get_user_access_meta_plus_role, get_user_info, UserInfo
 from typing import Dict, List, Set
+from common.exception import NotFoundUsername
 from common.utilities.util_logger import Log
 import re
 
@@ -101,7 +102,10 @@ class MenuAccess:
         # 获取应用全部的权限元和菜单的对应关系
         self.dict_access_meta2menu_item = AccessFactory.dict_access_meta2menu_item
         self.user_name = user_name
-        self.user_info: UserInfo = get_user_info(user_name)[0]
+        try:
+            self.user_info: UserInfo = get_user_info(user_name)[0]
+        except IndexError:
+            raise NotFoundUsername(f'用户名不存在: {user_name}')
         # 用户所有的权限元
         self.all_access_metas: Set[str] = self.get_user_all_access_metas(user_info=self.user_info)
         # 生成用户的目录路径
