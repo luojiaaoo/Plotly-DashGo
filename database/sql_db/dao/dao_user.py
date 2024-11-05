@@ -62,7 +62,7 @@ class UserInfo:
     user_remark: str
 
 
-def get_user_info(user_name: str = None) -> List[UserInfo]:
+def get_user_info(user_name: Union[str, List] = None) -> List[UserInfo]:
     heads = (
         'user_name',
         'user_full_name',
@@ -80,6 +80,8 @@ def get_user_info(user_name: str = None) -> List[UserInfo]:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         if user_name is None:
             cursor.execute(f"""SELECT {','.join(heads)} FROM sys_user;""")
+        elif isinstance(user_name, list):
+            cursor.execute(f"""SELECT {','.join(heads)} FROM sys_user WHERE user_name in ({','.join(['%s'] * len(user_name))});""", tuple(user_name))
         else:
             cursor.execute(
                 f"""SELECT {','.join(heads)} FROM sys_user WHERE user_name = %s;""",
@@ -439,6 +441,7 @@ def get_group_info(group_name: str = None) -> List[GroupInfo]:
             group_infos.append(GroupInfo(**group_dict))
         return group_infos
 
+
 def is_group_admin(user_name) -> bool:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
@@ -450,3 +453,16 @@ def is_group_admin(user_name) -> bool:
         )
         result = cursor.fetchone()
         return bool(result[0])
+    
+def get_dict_group_name_users_roles(user_name) -> bool:
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            """        
+            SELECT group_name, group_users, group_roles
+            FROM sys_group
+            WHERE JSON_SEARCH(group_admin_users, 'one', %s) IS NOT NULL""",
+            (user_name,),
+        )
+        result = cursor.fetchall()
+        return dict([(rt[0], (rt[1], rt[2])) for rt in result])
+

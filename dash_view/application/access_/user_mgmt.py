@@ -1,4 +1,5 @@
 from common.utilities.util_menu_access import MenuAccess
+from database.sql_db.dao.dao_user import is_group_admin
 from typing import List
 import feffery_antd_components as fac
 import feffery_utils_components as fuc
@@ -26,8 +27,42 @@ order = 3
 access_metas = ('用户管理-页面',)
 
 
+def get_user_table_data(menu_access: MenuAccess):
+    if 'admin' in menu_access.user_info.user_roles:
+        return[
+            {
+                'key': i.user_name,
+                **i.__dict__,
+                'user_status': {'tag': dao_user.get_status_str(i.user_status), 'color': 'cyan' if i.user_status else 'volcano'},
+                'operation': [
+                    {
+                        'content': _('编辑'),
+                        'type': 'primary',
+                        'custom': 'update:' + i.user_name,
+                    },
+                    *(
+                        [
+                            {
+                                'content': _('删除'),
+                                'type': 'primary',
+                                'custom': 'delete:' + i.user_name,
+                                'danger': True,
+                            }
+                        ]
+                        if i.user_name != 'admin'
+                        else []
+                    ),
+                ],
+            }
+            for i in dao_user.get_user_info()
+        ]
+    elif is_group_admin(menu_access.user_name):
+        
+
+
 def render_content(menu_access: MenuAccess, **kwargs):
     logger.debug(f'用户：{menu_access.user_name}，访问：{__name__}，参数列表：{kwargs}，权限元：{menu_access.all_access_metas}')
+
     return fac.AntdCol(
         [
             fac.AntdRow(
@@ -58,33 +93,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                 {'title': _('创建人'), 'dataIndex': 'create_by'},
                                 {'title': _('操作'), 'dataIndex': 'operation', 'renderOptions': {'renderType': 'button'}},
                             ],
-                            data=[
-                                {
-                                    'key': i.user_name,
-                                    **i.__dict__,
-                                    'user_status': {'tag': dao_user.get_status_str(i.user_status), 'color': 'cyan' if i.user_status else 'volcano'},
-                                    'operation': [
-                                        {
-                                            'content': _('编辑'),
-                                            'type': 'primary',
-                                            'custom': 'update:' + i.user_name,
-                                        },
-                                        *(
-                                            [
-                                                {
-                                                    'content': _('删除'),
-                                                    'type': 'primary',
-                                                    'custom': 'delete:' + i.user_name,
-                                                    'danger': True,
-                                                }
-                                            ]
-                                            if i.user_name != 'admin'
-                                            else []
-                                        ),
-                                    ],
-                                }
-                                for i in dao_user.get_user_info()
-                            ],
+                            data=get_user_table_data(menu_access),
                             pageSize=10,
                         ),
                         style={'width': '100%'},
