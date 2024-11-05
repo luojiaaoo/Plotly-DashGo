@@ -10,6 +10,25 @@ from i18n import translator
 _ = partial(translator.t)
 
 
+@app.callback(
+    [
+        # 删除角色弹窗
+        Output('user-mgmt-delete-affirm-modal', 'visible'),
+        Output('user-mgmt-delete-user-name', 'children'),
+    ],
+    Input('user-mgmt-table', 'nClicksButton'),
+    State('user-mgmt-table', 'clickedCustom'),
+    prevent_initial_call=True,
+)
+def update_delete_role(nClicksButton, clickedCustom: str):
+    user_name = clickedCustom.split(':')[1]
+    if clickedCustom.startswith('delete:'):
+        return [
+            True,
+            user_name,
+        ]
+
+
 ################### 新建用户
 @app.callback(
     [
@@ -59,7 +78,7 @@ def open_add_role_modal(nClicks):
 
 
 @app.callback(
-    Output('user-mgmt-table', 'data'),
+    Output('user-mgmt-table', 'data', allow_duplicate=True),
     Input('user-mgmt-add-modal', 'okCounts'),
     [
         State('user-mgmt-add-user-name', 'debounceValue'),
@@ -74,6 +93,7 @@ def open_add_role_modal(nClicks):
         State('user-mgmt-add-groups', 'value'),
         State('user-mgmt-add-admin-groups', 'value'),
     ],
+    prevent_initial_call=True,
 )
 def add_user(okCounts, user_name, user_full_name, user_email, phone_number, user_status: bool, user_sex, password, user_remark, user_roles, user_groups, user_admin_groups):
     """新建用户"""
@@ -108,21 +128,40 @@ def add_user(okCounts, user_name, user_full_name, user_email, phone_number, user
         MessageManager.warning(content=_('用户添加失败'))
         return dash.no_update
 
-# ################### 删除用户
-# @app.callback(
-#     [
-#         # 删除角色弹窗
-#         Output('role-mgmt-delete-affirm-modal', 'visible'),
-#         Output('role-mgmt-delete-role-name', 'children'),
-#         # 更新角色弹窗
-#         Output('role-mgmt-update-modal', 'visible'),
-#         Output('role-mgmt-update-role-name', 'children'),
-#         Output('role-mgmt-update-role-status', 'checked'),
-#         Output('role-mgmt-update-role-remark', 'value'),
-#         Output('role-menu-access-tree-select-update', 'checkedKeys'),
-#     ],
-#     Input('role-mgmt-table', 'nClicksButton'),
-#     State('role-mgmt-table', 'clickedCustom'),
-#     prevent_initial_call=True,
-# )
-# def update_delete_role(nClicksButton, clickedCustom: str):
+
+################### 删除用户
+@app.callback(
+    Output('user-mgmt-table', 'data', allow_duplicate=True),
+    Input('user-mgmt-delete-affirm-modal', 'okCounts'),
+    State('user-mgmt-delete-user-name', 'children'),
+    prevent_initial_call=True,
+)
+def delete_role_modal(okCounts, user_name):
+    """删除角色"""
+    rt = dao_user.delete_user(user_name)
+    if rt:
+        MessageManager.success(content=_('用户删除成功'))
+        return [
+            {
+                'key': i.user_name,
+                **i.__dict__,
+                'user_status': {'tag': dao_user.get_status_str(i.user_status), 'color': 'cyan' if i.user_status else 'volcano'},
+                'operation': [
+                    {
+                        'content': _('编辑'),
+                        'type': 'primary',
+                        'custom': 'update:' + i.user_name,
+                    },
+                    {
+                        'content': _('删除'),
+                        'type': 'primary',
+                        'custom': 'delete:' + i.user_name,
+                        'danger': True,
+                    },
+                ],
+            }
+            for i in dao_user.get_user_info()
+        ]
+    else:
+        MessageManager.warning(content=_('用户删除失败'))
+        return dash.no_update

@@ -187,6 +187,21 @@ def add_user(
                 return False
 
 
+def delete_user(user_name: str) -> bool:
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        try:
+            cursor.execute(
+                """delete FROM sys_user where user_name=%s;""",
+                (user_name,),
+            )
+        except Exception as e:
+            conn.rollback()
+            return False
+        else:
+            conn.commit()
+            return True
+
+
 def get_roles_from_user_name(user_name: str) -> Set[str]:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
