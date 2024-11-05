@@ -23,9 +23,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `sys_group`;
 CREATE TABLE `sys_group`  (
   `group_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '团队名称',
-  `group_roles` json NOT NULL COMMENT '团队拥有的角色分配权限',
-  `group_users` json NOT NULL COMMENT '团队人员',
   `group_status` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '团队状态（0：停用，1：启用）',
+  `group_roles` json NOT NULL COMMENT '团队拥有的角色分配权限',
   `update_datetime` datetime NOT NULL COMMENT '更新时间',
   `update_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `create_datetime` datetime NOT NULL COMMENT '创建时间',

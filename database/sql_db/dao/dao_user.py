@@ -45,6 +45,7 @@ def get_all_access_meta_for_setup_check() -> Set[str]:
         return set(chain(*[json.loads(per_rt[0]) for per_rt in result]))
 
 
+########################### 用户
 @dataclass
 class UserInfo:
     user_name: str
@@ -161,6 +162,7 @@ def update_user(user_name, user_full_name, password, user_status: bool, user_sex
                 is_finish = True
         except Exception as e:
             import traceback
+
             traceback.print_exc()
             conn.rollback()
             return False
@@ -268,6 +270,9 @@ def delete_user(user_name: str) -> bool:
         else:
             conn.commit()
             return True
+
+
+########################################## 角色
 
 
 def get_roles_from_user_name(user_name: str) -> Set[str]:
@@ -423,3 +428,52 @@ def update_role(role_name, role_status: bool, role_remark, access_metas: List[st
         else:
             conn.commit()
             return True
+
+
+################################### 团队
+        
+@dataclass
+class GroupInfo:
+    group_name: str
+    group_roles: List[str]
+    group_status: bool
+    group_users: List[str]
+    group_admin_users: List[str]
+    update_datetime: datetime
+    update_by: str
+    create_datetime: datetime
+    create_by: str
+    group_remark: str
+
+def get_group_info(group_name: str = None) -> List[str]:
+    heads = (
+        'group_name',
+        'group_status',
+        'group_roles',
+        'update_datetime',
+        'update_by',
+        'create_datetime',
+        'create_by',
+    )
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        if group_name is None:
+            cursor.execute(f"""SELECT {','.join(heads)} FROM sys_group;""")
+        else:
+            cursor.execute(
+                f"""SELECT {','.join(heads)} FROM sys_group WHERE group_name = %s;""",
+                (group_name,),
+            )
+        group_infos = []
+        result = cursor.fetchall()
+        for per in result:
+            group_dict = dict(zip(heads, per))
+            group_dict.update(
+                {
+                    'group_status': get_status_bool(group_dict['group_status']),
+                    'group_roles': json.loads(group_dict['group_roles']),
+                    'group_users':
+                    'group_admin_users':
+                },
+            )
+            group_infos.append(UserInfo(**group_dict))
+        return group_infos
