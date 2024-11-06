@@ -453,8 +453,8 @@ def is_group_admin(user_name) -> bool:
             """        
             SELECT count(1)
             FROM sys_group
-            WHERE JSON_SEARCH(group_admin_users, 'one', %s) IS NOT NULL""",
-            (user_name,),
+            WHERE JSON_SEARCH(group_admin_users, 'one', %s) IS NOT NULL and group_status=%s""",
+            (user_name, get_status_str(True)),
         )
         result = cursor.fetchone()
         return bool(result[0])
