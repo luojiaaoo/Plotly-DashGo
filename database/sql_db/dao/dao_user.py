@@ -103,6 +103,50 @@ def get_user_info(user_name: Union[str, List] = None, exclude_role_admin=False) 
         return user_infos
 
 
+def add_role2user(user_name, role_name):
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        try:
+            cursor.execute(
+                """
+                UPDATE sys_user
+                SET user_roles = JSON_ARRAY_APPEND(user_roles, '$', %s)
+                WHERE user_name = %s AND NOT JSON_CONTAINS(user_roles, JSON_QUOTE(%s))
+                """,
+                (role_name, user_name, role_name),
+            )
+        except Exception as e:
+            conn.rollback()
+            return False
+        else:
+            conn.commit()
+            return True
+
+
+def del_role2user(user_name, role_name):
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        try:
+            cursor.execute(
+                """
+                    UPDATE sys_user
+                    SET user_roles = JSON_REMOVE(
+                        user_roles,
+                        JSON_UNQUOTE(JSON_SEARCH(user_roles, 'one', %s))
+                    )
+                    WHERE user_name = %s;
+                """,
+                (role_name, user_name),
+            )
+        except Exception as e:
+            import traceback
+
+            traceback.print_exc()
+            conn.rollback()
+            return False
+        else:
+            conn.commit()
+            return True
+
+
 def update_user(user_name, user_full_name, password, user_status: bool, user_sex, user_roles, user_email, phone_number, user_remark):
     import hashlib
 
@@ -486,6 +530,22 @@ def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
                     }
                 )
         return all_
+
+
+def update_user_roles_from_group(user_name, group_name, roles_in_range):
+    is_ok = True
+    user_roles = set(get_roles_from_user_name(user_name))
+    roles_in_range = set(roles_in_range)
+    # 新增的权限
+    for i in set(roles_in_range) - user_roles:
+        is_ok = is_ok and add_role2user(user_name, i)
+        print('新增权限', i, is_ok)
+    # 需要删除的权限
+    for i in user_roles & (set(get_group_info(group_name)[0].group_roles) - roles_in_range):
+        is_ok = is_ok and del_role2user(user_name, i)
+        print('删除权限', i, is_ok)
+    print(is_ok)
+    return is_ok
 
 
 def exists_group_name(group_name: str):

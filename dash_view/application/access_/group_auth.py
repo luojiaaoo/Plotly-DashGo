@@ -8,7 +8,7 @@ from dash import html
 from dash import dcc
 from database.sql_db.dao import dao_user
 from typing import Dict
-from dash_callback.application.access_ import role_mgmt_c  # noqa
+from dash_callback.application.access_ import group_auth_c  # noqa
 from functools import partial
 from i18n import translator
 
@@ -29,7 +29,7 @@ logger = Log.get_logger(__name__)
 def render_content(menu_access: MenuAccess, **kwargs):
     return Card(
         Table(
-            id='group-mgmt-table',
+            id='group-auth-table',
             columns=[
                 {'title': _('团队名称'), 'dataIndex': 'group_name', 'width': '10%'},
                 {'title': _('团队描述'), 'dataIndex': 'group_remark', 'width': '15%'},
@@ -39,7 +39,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
             ],
             data=[
                 {
-                    'key': f"{i['group_name']}+{i['user_name']}",
+                    'key': f"{i['group_name']}:::{i['user_name']}",
                     'group_name': i['group_name'],
                     'group_remark': i['group_remark'],
                     'user_name': i['user_name'],
