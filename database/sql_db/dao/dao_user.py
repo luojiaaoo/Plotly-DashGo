@@ -106,20 +106,30 @@ def get_user_info(user_name: Union[str, List] = None, exclude_role_admin=False) 
 def add_role2user(user_name, role_name):
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
-            cursor.execute(
-                """
-                UPDATE sys_user
-                SET user_roles = JSON_ARRAY_APPEND(user_roles, '$', %s)
-                WHERE user_name = %s AND NOT JSON_CONTAINS(user_roles, JSON_QUOTE(%s))
-                """,
-                (role_name, user_name, role_name),
-            )
+            is_ok = True
+            # 给sys_role表加锁，保证加入的角色和团队都存在
+            if is_ok:
+                cursor.execute(
+                    """SELECT count(1) FROM sys_role WHERE role_name = %s for update;""",
+                    (role_name,),
+                )
+                if cursor.fetchall()[0][0] != 1:
+                    is_ok = False
+            if is_ok:
+                cursor.execute(
+                    """
+                    UPDATE sys_user
+                    SET user_roles = JSON_ARRAY_APPEND(user_roles, '$', %s)
+                    WHERE user_name = %s AND NOT JSON_CONTAINS(user_roles, JSON_QUOTE(%s))
+                    """,
+                    (role_name, user_name, role_name),
+                )
         except Exception as e:
             conn.rollback()
             return False
         else:
             conn.commit()
-            return True
+            return is_ok
 
 
 def del_role2user(user_name, role_name):
@@ -137,9 +147,6 @@ def del_role2user(user_name, role_name):
                 (role_name, user_name),
             )
         except Exception as e:
-            import traceback
-
-            traceback.print_exc()
             conn.rollback()
             return False
         else:
@@ -154,7 +161,6 @@ def update_user(user_name, user_full_name, password, user_status: bool, user_sex
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
             is_ok = True
-            is_finish = False
             # 给sys_role表加锁，保证加入的角色和团队都存在
             if is_ok and user_roles:
                 cursor.execute(
@@ -185,16 +191,12 @@ def update_user(user_name, user_full_name, password, user_status: bool, user_sex
                         user_name,
                     ),
                 )
-                is_finish = True
         except Exception as e:
             conn.rollback()
             return False
         else:
             conn.commit()
-            if is_finish:
-                return True
-            else:
-                return False
+            return is_ok
 
 
 def add_user(
@@ -218,8 +220,7 @@ def add_user(
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
             is_ok = True
-            is_finish = False
-            # 给sys_role表加锁，保证加入的角色和团队都存在
+            # 给sys_role表加锁，保证加入的角色都存在
             if is_ok and user_roles:
                 cursor.execute(
                     f"""SELECT count(1) FROM sys_role WHERE role_name in ({','.join(['%s']*len(user_roles))}) for update;""",
@@ -250,23 +251,38 @@ def add_user(
                         user_remark,
                     ),
                 )
-                is_finish = True
         except Exception as e:
             conn.rollback()
             return False
         else:
             conn.commit()
-            if is_finish:
-                return True
-            else:
-                return False
+            return is_ok
 
 
 def delete_user(user_name: str) -> bool:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
+            # 删除用户行
             cursor.execute(
                 """delete FROM sys_user where user_name=%s;""",
+                (user_name,),
+            )
+            # 删除团队的用户
+            cursor.execute(
+                """
+                UPDATE sys_group
+                SET group_users = JSON_REMOVE(group_users, JSON_UNQUOTE(JSON_SEARCH(group_users, 'one', %s)))
+                WHERE JSON_SEARCH(group_users, 'one', %s) IS NOT NULL;
+                """,
+                (user_name,),
+            )
+            # 删除团队的管理员用户
+            cursor.execute(
+                """
+                UPDATE sys_group
+                SET group_admin_users = JSON_REMOVE(group_admin_users, JSON_UNQUOTE(JSON_SEARCH(group_admin_users, 'one', %s)))
+                WHERE JSON_SEARCH(group_admin_users, 'one', %s) IS NOT NULL;
+                """,
                 (user_name,),
             )
         except Exception as e:
@@ -358,19 +374,28 @@ def get_role_info(role_name: str = None, exclude_role_admin=False) -> List[RoleI
 def delete_role(role_name: str) -> bool:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
+            # 删除角色
             cursor.execute(
                 """delete FROM sys_role where role_name=%s;""",
                 (role_name,),
             )
+            # 删除用户角色
             cursor.execute(
-                """UPDATE sys_user
-SET user_roles = JSON_REMOVE(user_roles, JSON_UNQUOTE(JSON_SEARCH(user_roles, 'one', %s)))
-WHERE JSON_SEARCH(user_roles, 'one', %s) IS NOT NULL;
+                """
+                UPDATE sys_user
+                SET user_roles = JSON_REMOVE(user_roles, JSON_UNQUOTE(JSON_SEARCH(user_roles, 'one', %s)))
+                WHERE JSON_SEARCH(user_roles, 'one', %s) IS NOT NULL;
                 """,
-                (
-                    role_name,
-                    role_name,
-                ),
+                (role_name, role_name),
+            )
+            # 删除团队角色
+            cursor.execute(
+                """
+                UPDATE sys_group
+                SET group_roles = JSON_REMOVE(group_roles, JSON_UNQUOTE(JSON_SEARCH(group_roles, 'one', %s)))
+                WHERE JSON_SEARCH(group_roles, 'one', %s) IS NOT NULL;
+                """,
+                (role_name, role_name),
             )
         except Exception as e:
             conn.rollback()
@@ -539,12 +564,9 @@ def update_user_roles_from_group(user_name, group_name, roles_in_range):
     # 新增的权限
     for i in set(roles_in_range) - user_roles:
         is_ok = is_ok and add_role2user(user_name, i)
-        print('新增权限', i, is_ok)
     # 需要删除的权限
     for i in user_roles & (set(get_group_info(group_name)[0].group_roles) - roles_in_range):
         is_ok = is_ok and del_role2user(user_name, i)
-        print('删除权限', i, is_ok)
-    print(is_ok)
     return is_ok
 
 
@@ -564,34 +586,50 @@ def add_group(group_name, group_status, group_remark, group_roles, group_admin_u
     user_name_op = util_menu_access.get_menu_access().user_name
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
-            cursor.execute(
-                """
-                INSERT INTO sys_group (group_name, group_status, group_roles, group_users, group_admin_users, update_datetime, update_by, create_datetime, create_by, group_remark) 
-                VALUES 
-                (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);
-                """,
-                (
-                    group_name,
-                    get_status_str(group_status),
-                    json.dumps(group_roles, ensure_ascii=False),
-                    json.dumps(group_users, ensure_ascii=False),
-                    json.dumps(group_admin_users, ensure_ascii=False),
-                    datetime.now(),
-                    user_name_op,
-                    datetime.now(),
-                    user_name_op,
-                    group_remark,
-                ),
-            )
+            is_ok = True
+            # 给sys_role表加锁，保证加入的角色都存在
+            if is_ok and group_roles:
+                cursor.execute(
+                    f"""SELECT count(1) FROM sys_role WHERE role_name in ({','.join(['%s']*len(group_roles))}) for update;""",
+                    tuple(group_roles),
+                )
+                if cursor.fetchall()[0][0] != len(group_roles):
+                    is_ok = False
+            user_names = (*group_admin_users, *group_users)
+            # 给用户表加锁，保证加入的成员和管理员都存在
+            if is_ok and user_names:
+                cursor.execute(
+                    f"""SELECT count(1) FROM sys_user WHERE user_name in ({','.join(['%s']*len(user_names))}) for update;""",
+                    tuple(user_names),
+                )
+                if cursor.fetchall()[0][0] != len(user_names):
+                    is_ok = False
+            else:
+                cursor.execute(
+                    """
+                    INSERT INTO sys_group (group_name, group_status, group_roles, group_users, group_admin_users, update_datetime, update_by, create_datetime, create_by, group_remark) 
+                    VALUES 
+                    (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);
+                    """,
+                    (
+                        group_name,
+                        get_status_str(group_status),
+                        json.dumps(group_roles, ensure_ascii=False),
+                        json.dumps(group_users, ensure_ascii=False),
+                        json.dumps(group_admin_users, ensure_ascii=False),
+                        datetime.now(),
+                        user_name_op,
+                        datetime.now(),
+                        user_name_op,
+                        group_remark,
+                    ),
+                )
         except Exception as e:
-            import traceback
-
-            traceback.print_exc()
             conn.rollback()
             return False
         else:
             conn.commit()
-            return True
+            return is_ok
 
 
 def delete_group(group_name: str) -> bool:
@@ -613,23 +651,42 @@ def update_group(group_name, group_status, group_remark, group_roles, group_admi
     user_name_op = util_menu_access.get_menu_access().user_name
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
-            cursor.execute(
-                """
-                update sys_group set group_name=%s, group_status=%s, group_roles=%s, group_users=%s, group_admin_users=%s, update_datetime=%s, update_by=%s, group_remark=%s;""",
-                (
-                    group_name,
-                    get_status_str(group_status),
-                    json.dumps(group_roles, ensure_ascii=False),
-                    json.dumps(group_users, ensure_ascii=False),
-                    json.dumps(group_admin_users, ensure_ascii=False),
-                    datetime.now(),
-                    user_name_op,
-                    group_remark,
-                ),
-            )
+            is_ok = True
+            # 给sys_role表加锁，保证加入的角色都存在
+            if is_ok and group_roles:
+                cursor.execute(
+                    f"""SELECT count(1) FROM sys_role WHERE role_name in ({','.join(['%s']*len(group_roles))}) for update;""",
+                    tuple(group_roles),
+                )
+                if cursor.fetchall()[0][0] != len(group_roles):
+                    is_ok = False
+            user_names = (*group_admin_users, *group_users)
+            # 给用户表加锁，保证加入的成员和管理员都存在
+            if is_ok and user_names:
+                cursor.execute(
+                    f"""SELECT count(1) FROM sys_user WHERE user_name in ({','.join(['%s']*len(user_names))}) for update;""",
+                    tuple(user_names),
+                )
+                if cursor.fetchall()[0][0] != len(user_names):
+                    is_ok = False
+            if is_ok:
+                cursor.execute(
+                    """
+                    update sys_group set group_name=%s, group_status=%s, group_roles=%s, group_users=%s, group_admin_users=%s, update_datetime=%s, update_by=%s, group_remark=%s;""",
+                    (
+                        group_name,
+                        get_status_str(group_status),
+                        json.dumps(group_roles, ensure_ascii=False),
+                        json.dumps(group_users, ensure_ascii=False),
+                        json.dumps(group_admin_users, ensure_ascii=False),
+                        datetime.now(),
+                        user_name_op,
+                        group_remark,
+                    ),
+                )
         except Exception as e:
             conn.rollback()
             return False
         else:
             conn.commit()
-            return True
+            return is_ok
