@@ -12,11 +12,12 @@ class Table(fac.AntdTable):
             kwargs['style'] = {'width': '100%'}
         kwargs['size'] = 'small'
         kwargs['pagination'] = {
-            'pageSize': kwargs['pageSize'],
+            'pageSize': 10 if kwargs.get('pageSize', None) is None else kwargs['pageSize'],
             'showSizeChanger': True,
             'pageSizeOptions': [10, 20, 30, 40, 50, 100],
             'showQuickJumper': True,
             'position': 'bottomLeft',
         }
-        kwargs.pop('pageSize')
+        if kwargs.get('pageSize', None) is not None:
+            kwargs.pop('pageSize') 
         super().__init__(*args, **kwargs)
