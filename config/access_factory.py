@@ -1,5 +1,5 @@
 # 本应用的权限工厂，此处手动导入应用模块
-from dash_view.application.access_ import role_mgmt, user_mgmt
+from dash_view.application.access_ import role_mgmt, user_mgmt, group_auth, group_mgmt
 from dash_view.application.dashboard_ import workbench, monitor
 from dash_view.application.person_ import personal_info, personal_setting
 
@@ -14,6 +14,8 @@ class AccessFactory:
     views = [
         role_mgmt,
         user_mgmt,
+        group_auth,
+        group_mgmt,
         workbench,
         monitor,
         personal_info,
@@ -84,11 +86,11 @@ class AccessFactory:
         '监控页-页面',
     )
 
-    # 系统管理员+团队管理员默认权限
-    group_access_meta = ('用户管理-页面',)
+    # 团队管理员默认权限
+    group_access_meta = ('团队授权-页面',)
 
-    # 系统管理员+团队管理员默认权限
-    admin_access_meta = ('用户管理-页面', '角色管理-页面')
+    # 系统管理员默认权限
+    admin_access_meta = ('用户管理-页面', '角色管理-页面', '团队管理-页面')
 
     # 检查数据库和应用权限
     @classmethod

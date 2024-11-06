@@ -412,7 +412,8 @@ def get_group_info(group_name: str = None) -> List[GroupInfo]:
         'group_status',
         'group_roles',
         'group_users',
-        'group_admin_users' 'update_datetime',
+        'group_admin_users',
+        'update_datetime',
         'update_by',
         'create_datetime',
         'create_by',
@@ -453,7 +454,8 @@ def is_group_admin(user_name) -> bool:
         )
         result = cursor.fetchone()
         return bool(result[0])
-    
+
+
 def get_dict_group_name_users_roles(user_name) -> bool:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
@@ -465,4 +467,3 @@ def get_dict_group_name_users_roles(user_name) -> bool:
         )
         result = cursor.fetchall()
         return dict([(rt[0], (rt[1], rt[2])) for rt in result])
-
