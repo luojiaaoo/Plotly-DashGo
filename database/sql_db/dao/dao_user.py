@@ -295,6 +295,15 @@ def delete_user(user_name: str) -> bool:
             return True
 
 
+def filter_users_enabled(user_names):
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            f"""SELECT user_name FROM sys_user WHERE user_name in ({','.join(['%s']*len(user_names))}) and user_status = %s;""",
+            (*(user_names), get_status_str(True)),
+        )
+        return [i[0] for i in cursor.fetchall()]
+
+
 ########################################## 角色
 
 
@@ -570,7 +579,7 @@ def get_dict_group_name_users_roles(user_name, exclude_disabled=False) -> Dict[s
             group_users = json.loads(group_users)
             group_roles = json.loads(group_roles)
             for user_name in group_users:
-                if exclude_disabled and not group_status:
+                if exclude_disabled and (not group_status or not filter_users_enabled([user_name])):
                     continue
                 all_.append(
                     {
@@ -687,7 +696,6 @@ def update_group(group_name, group_status, group_remark, group_roles, group_admi
                     tuple(group_roles),
                 )
                 if cursor.fetchall()[0][0] != len(group_roles):
-                    print(11111111111)
                     is_ok = False
             user_names = set([*group_admin_users, *group_users])
             # 给用户表加锁，保证加入的成员和管理员都存在
@@ -714,9 +722,6 @@ def update_group(group_name, group_status, group_remark, group_roles, group_admi
                     ),
                 )
         except Exception as e:
-            import traceback
-
-            traceback.print_exc()
             conn.rollback()
             return False
         else:
