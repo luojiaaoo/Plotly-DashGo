@@ -129,9 +129,16 @@ def login(
             fuc.FefferyFancyMessage(_('验证码错误，请重新输入'), type='error'),
             True,
         )
-    from common.api.user import login
+    def user_login(user_name: str, password_sha256: str, is_keep_login_status: bool) -> bool:
+        from database.sql_db.dao.dao_user import user_password_verify
+        from common.utilities.util_jwt import jwt_encode_save_access_to_session
 
-    if login.user_login(user_name, password_sha256, is_keep_login_status):
+        if user_password_verify(user_name=user_name, password_sha256=password_sha256):
+            jwt_encode_save_access_to_session({'user_name': user_name}, session_permanent=is_keep_login_status)
+            return True
+        return False
+
+    if user_login(user_name, password_sha256, is_keep_login_status):
         return (
             dcc.Location(pathname='/dashboard_/workbench', refresh=True, id='index-redirect'),
             0,  # 重置登录失败次数
