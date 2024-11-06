@@ -516,3 +516,17 @@ def add_group(group_name, group_status, group_remark, group_roles, group_admin_u
         else:
             conn.commit()
             return True
+
+def delete_group(group_name: str) -> bool:
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        try:
+            cursor.execute(
+                """delete FROM sys_group where group_name=%s;""",
+                (group_name,),
+            )
+        except Exception as e:
+            conn.rollback()
+            return False
+        else:
+            conn.commit()
+            return True

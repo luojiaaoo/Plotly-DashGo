@@ -45,7 +45,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                 [
                     Card(
                         Table(
-                            id='role-mgmt-table',
+                            id='group-mgmt-table',
                             columns=[
                                 {'title': _('团队名称'), 'dataIndex': 'group_name'},
                                 {'title': _('团队状态'), 'dataIndex': 'group_status', 'renderOptions': {'renderType': 'tags'}},
@@ -125,6 +125,26 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         maskClosable=False,
                         id='group-mgmt-add-modal',
                         style={'boxSizing': 'border-box'},
+                    ),
+                    fac.AntdModal(
+                        children=[
+                            fac.AntdText(_('您确定要删除团队')),
+                            fac.AntdText(
+                                id='group-mgmt-delete-group-name',
+                                type='danger',
+                                underline=True,
+                            ),
+                            fac.AntdText('?'),
+                        ],
+                        destroyOnClose=False,
+                        renderFooter=True,
+                        okText=_('确定'),
+                        cancelText=_('取消'),
+                        okButtonProps={'danger': True},
+                        title=_('确认要删除？'),
+                        mask=False,
+                        maskClosable=False,
+                        id='group-mgmt-delete-affirm-modal',
                     ),
                 ],
             ),

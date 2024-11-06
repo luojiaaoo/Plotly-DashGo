@@ -10,6 +10,26 @@ from i18n import translator
 _ = partial(translator.t)
 
 
+@app.callback(
+    [
+        # 删除弹窗
+        Output('group-mgmt-delete-affirm-modal', 'visible'),
+        Output('group-mgmt-delete-group-name', 'children'),
+    ],
+    Input('group-mgmt-table', 'nClicksButton'),
+    State('group-mgmt-table', 'clickedCustom'),
+    prevent_initial_call=True,
+)
+def update_delete_group(nClicksButton, clickedCustom: str):
+    """触发更新和删除弹窗显示"""
+    group_name = clickedCustom.split(':')[1]
+    if clickedCustom.startswith('delete:'):
+        return [
+            True,
+            group_name,
+        ]
+
+
 ########################################## 新增团队
 @app.callback(
     [
@@ -62,7 +82,7 @@ def show_add_group_modal(nClicks):
 
 
 @app.callback(
-    Output('role-mgmt-table', 'data'),
+    Output('group-mgmt-table', 'data', allow_duplicate=True),
     Input('group-mgmt-add-modal', 'okCounts'),
     [
         State('group-mgmt-add-group-name', 'value'),
@@ -72,6 +92,7 @@ def show_add_group_modal(nClicks):
         State('group-mgmt-add-group-admin-users', 'value'),
         State('group-mgmt-add-group-users', 'value'),
     ],
+    prevent_initial_call=True,
 )
 def add_group(okCounts, group_name, group_status, group_remark, group_roles, group_admin_users, group_users):
     """新建团队"""
@@ -104,4 +125,42 @@ def add_group(okCounts, group_name, group_status, group_remark, group_roles, gro
         ]
     else:
         MessageManager.warning(content=_('团队添加失败'))
+        return dash.no_update
+
+
+########################################## 删除团队
+@app.callback(
+    Output('group-mgmt-table', 'data', allow_duplicate=True),
+    Input('group-mgmt-delete-affirm-modal', 'okCounts'),
+    State('group-mgmt-delete-group-name', 'children'),
+    prevent_initial_call=True,
+)
+def delete_role_modal(okCounts, group_name):
+    """删除角色"""
+    rt = dao_user.delete_group(group_name)
+    if rt:
+        MessageManager.success(content=_('团队删除成功'))
+        return [
+            {
+                'key': i.group_name,
+                **i.__dict__,
+                'group_status': {'tag': dao_user.get_status_str(i.group_status), 'color': 'cyan' if i.group_status else 'volcano'},
+                'operation': [
+                    {
+                        'content': _('编辑'),
+                        'type': 'primary',
+                        'custom': 'update:' + i.group_name,
+                    },
+                    {
+                        'content': _('删除'),
+                        'type': 'primary',
+                        'custom': 'delete:' + i.group_name,
+                        'danger': True,
+                    },
+                ],
+            }
+            for i in dao_user.get_group_info()
+        ]
+    else:
+        MessageManager.warning(content=_('团队删除失败'))
         return dash.no_update
