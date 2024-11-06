@@ -29,7 +29,7 @@ access_metas = (
 
 def render_content(menu_access: MenuAccess, **kwargs):
     all_access_metas = menu_access.all_access_metas
-    fac.AntdFlex(
+    return fac.AntdFlex(
         [
             *(
                 [

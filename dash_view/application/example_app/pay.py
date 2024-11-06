@@ -29,7 +29,7 @@ access_metas = (
 
 def render_content(menu_access: MenuAccess, **kwargs):
     all_access_metas = menu_access.all_access_metas
-    fac.AntdFlex(
+    return fac.AntdFlex(
         [
             *(
                 [
@@ -38,6 +38,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             title=_('您的余额'),
                             value=fuc.FefferyCountUp(end=112893, duration=3),
                         ),
+                        title='您的余额',
                     )
                 ]
                 if '支付页-可用余额' in all_access_metas

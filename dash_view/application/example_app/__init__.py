@@ -10,4 +10,4 @@ def get_title():
 
 
 icon = 'antd-alipay'
-order = 0
+order = 1
