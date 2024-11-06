@@ -302,7 +302,7 @@ def get_roles_from_user_name(user_name: str, exclude_disabled=False) -> Set[str]
     with pool.get_connection() as conn, conn.cursor() as cursor:
         if exclude_disabled:
             cursor.execute(
-                """SELECT user_roles FROM sys_user WHERE user_name = %s and role_status = %s;""",
+                """SELECT user_roles FROM sys_user WHERE user_name = %s and user_status = %s;""",
                 (user_name, get_status_str(True)),
             )
         else:
@@ -311,21 +311,31 @@ def get_roles_from_user_name(user_name: str, exclude_disabled=False) -> Set[str]
                 (user_name,),
             )
         result = cursor.fetchone()
-        return set(json.loads(result[0]))
+        role_names = json.loads(result[0])
+        return set(filter_roles_enabled(role_names) if exclude_disabled else role_names)
 
 
-def get_access_meta_from_roles(roles: Union[List[str], Set[str]], exclude_disabled=False) -> Set[str]:
-    if roles:
+def filter_roles_enabled(role_names):
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            f"""SELECT role_name FROM sys_role WHERE role_name in ({','.join(['%s']*len(role_names))}) and role_status = %s;""",
+            (*(role_names), get_status_str(True)),
+        )
+        return [i[0] for i in cursor.fetchall()]
+
+
+def get_access_meta_from_roles(role_names: Union[List[str], Set[str]], exclude_disabled=False) -> Set[str]:
+    if role_names:
         with pool.get_connection() as conn, conn.cursor() as cursor:
             if exclude_disabled:
                 cursor.execute(
-                    f"""SELECT access_metas FROM sys_role WHERE role_name in ({','.join(['%s']*len(roles))}) and role_status = %s;""",
-                    (*(roles), get_status_str(True)),
+                    f"""SELECT access_metas FROM sys_role WHERE role_name in ({','.join(['%s']*len(role_names))}) and role_status = %s;""",
+                    (*(role_names), get_status_str(True)),
                 )
             else:
                 cursor.execute(
-                    f"""SELECT access_metas FROM sys_role WHERE role_name in ({','.join(['%s']*len(roles))});""",
-                    tuple(roles),
+                    f"""SELECT access_metas FROM sys_role WHERE role_name in ({','.join(['%s']*len(role_names))});""",
+                    tuple(role_names),
                 )
             result = cursor.fetchall()
             return set(chain(*[json.loads(per_rt[0]) for per_rt in result]))
@@ -334,8 +344,8 @@ def get_access_meta_from_roles(roles: Union[List[str], Set[str]], exclude_disabl
 
 
 def get_user_access_meta_plus_role(user_name: str) -> Set[str]:
-    roles = get_roles_from_user_name(user_name, exclude_disabled=True)
-    return get_access_meta_from_roles(roles, exclude_disabled=True)
+    role_names = get_roles_from_user_name(user_name, exclude_disabled=True)
+    return get_access_meta_from_roles(role_names, exclude_disabled=True)
 
 
 @dataclass
@@ -677,8 +687,9 @@ def update_group(group_name, group_status, group_remark, group_roles, group_admi
                     tuple(group_roles),
                 )
                 if cursor.fetchall()[0][0] != len(group_roles):
+                    print(11111111111)
                     is_ok = False
-            user_names = (*group_admin_users, *group_users)
+            user_names = set([*group_admin_users, *group_users])
             # 给用户表加锁，保证加入的成员和管理员都存在
             if is_ok and user_names:
                 cursor.execute(
@@ -703,6 +714,9 @@ def update_group(group_name, group_status, group_remark, group_roles, group_admi
                     ),
                 )
         except Exception as e:
+            import traceback
+
+            traceback.print_exc()
             conn.rollback()
             return False
         else:

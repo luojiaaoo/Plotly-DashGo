@@ -33,7 +33,11 @@ def change_role(recentlySelectRow, recentlySelectDataIndex, recentlySelectValue)
                 'group_remark': i['group_remark'],
                 'user_name': i['user_name'],
                 'user_full_name': i['user_full_name'],
-                'user_roles': {'options': [{'label': group_role, 'value': group_role} for group_role in i['group_roles']], 'mode': 'multiple', 'value': i['user_roles']},
+                'user_roles': {
+                    'options': [{'label': group_role, 'value': group_role} for group_role in dao_user.filter_roles_enabled(i['group_roles'])],
+                    'mode': 'multiple',
+                    'value': i['user_roles'],
+                },
             }
             for i in dao_user.get_dict_group_name_users_roles(get_menu_access().user_name, exclude_disabled=True)
         ]
