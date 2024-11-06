@@ -460,17 +460,32 @@ def is_group_admin(user_name) -> bool:
         return bool(result[0])
 
 
-def get_dict_group_name_users_roles(user_name) -> bool:
+def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
             """        
-            SELECT group_name, group_users, group_roles
+            SELECT group_name, group_users, group_roles, group_remark
             FROM sys_group
             WHERE JSON_SEARCH(group_admin_users, 'one', %s) IS NOT NULL""",
             (user_name,),
         )
         result = cursor.fetchall()
-        return dict([(rt[0], (rt[1], rt[2])) for rt in result])
+        all_ = []
+        for group_name, group_users, group_roles, group_remark in result:
+            group_users = json.loads(group_users)
+            group_roles = json.loads(group_roles)
+            for user_name in group_users:
+                all_.append(
+                    {
+                        'group_remark': group_remark,
+                        'group_name': group_name,
+                        'user_name': user_name,
+                        'group_roles': group_roles,
+                        'user_roles': list(set(get_roles_from_user_name(user_name)) & set(group_roles)),
+                        'user_full_name': get_user_info(user_name)[0].user_full_name,
+                    }
+                )
+        return all_
 
 
 def exists_group_name(group_name: str):
