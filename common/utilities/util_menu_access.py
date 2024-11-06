@@ -107,7 +107,7 @@ class MenuAccess:
         self.dict_access_meta2menu_item = AccessFactory.dict_access_meta2menu_item
         self.user_name = user_name
         try:
-            self.user_info: UserInfo = get_user_info(user_name)[0]
+            self.user_info: UserInfo = get_user_info(user_name, exclude_disabled=True, exclude_role_admin=False)[0]
         except IndexError:
             raise NotFoundUsername(f'用户名不存在: {user_name}')
         # 用户所有的权限元

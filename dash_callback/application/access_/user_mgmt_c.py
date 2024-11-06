@@ -129,7 +129,7 @@ def check_user_name(user_name):
     """校验新建用户名的有效性"""
     if not user_name:
         return 'error', _('请填写名用户名')
-    if not dao_user.exists_user_name(user_name):
+    if not dao_user.exists_user_name(user_name, exclude_disabled=False):
         return 'success', _('该用户名名可用')
     else:
         return 'error', _('该用户名已存在')

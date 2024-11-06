@@ -46,7 +46,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     'user_full_name': i['user_full_name'],
                     'user_roles': {'options': [{'label': group_role, 'value': group_role} for group_role in i['group_roles']], 'mode': 'multiple', 'value': i['user_roles']},
                 }
-                for i in dao_user.get_dict_group_name_users_roles(menu_access.user_name)
+                for i in dao_user.get_dict_group_name_users_roles(menu_access.user_name, exclude_disabled=True)
             ],
             pageSize=10,
         ),

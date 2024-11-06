@@ -28,8 +28,8 @@ def exists_user_name(user_name: str) -> bool:
 def user_password_verify(user_name: str, password_sha256: str) -> bool:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
-            """SELECT user_name FROM sys_user WHERE user_name = %s and password_sha256 = %s;""",
-            (user_name, password_sha256),
+            """SELECT user_name FROM sys_user WHERE user_name = %s and password_sha256 = %s and user_status = %s;""",
+            (user_name, password_sha256, get_status_str(True)),
         )
         result = cursor.fetchone()
         return result is not None
@@ -62,7 +62,7 @@ class UserInfo:
     user_remark: str
 
 
-def get_user_info(user_name: Union[str, List] = None, exclude_role_admin=False) -> List[UserInfo]:
+def get_user_info(user_name: Union[str, List] = None, exclude_role_admin=False, exclude_disabled=False) -> List[UserInfo]:
     heads = (
         'user_name',
         'user_full_name',
@@ -97,6 +97,8 @@ def get_user_info(user_name: Union[str, List] = None, exclude_role_admin=False) 
                     'user_roles': json.loads(user_dict['user_roles']),
                 },
             )
+            if exclude_disabled and not user_dict['user_status']:
+                continue
             if exclude_role_admin and 'admin' in user_dict['user_roles']:
                 continue
             user_infos.append(UserInfo(**user_dict))
@@ -296,23 +298,35 @@ def delete_user(user_name: str) -> bool:
 ########################################## 角色
 
 
-def get_roles_from_user_name(user_name: str) -> Set[str]:
+def get_roles_from_user_name(user_name: str, exclude_disabled=False) -> Set[str]:
     with pool.get_connection() as conn, conn.cursor() as cursor:
-        cursor.execute(
-            """SELECT user_roles FROM sys_user WHERE user_name = %s;""",
-            (user_name,),
-        )
+        if exclude_disabled:
+            cursor.execute(
+                """SELECT user_roles FROM sys_user WHERE user_name = %s and role_status = %s;""",
+                (user_name, get_status_str(True)),
+            )
+        else:
+            cursor.execute(
+                """SELECT user_roles FROM sys_user WHERE user_name = %s;""",
+                (user_name,),
+            )
         result = cursor.fetchone()
         return set(json.loads(result[0]))
 
 
-def get_access_meta_from_roles(roles: Union[List[str], Set[str]]) -> Set[str]:
+def get_access_meta_from_roles(roles: Union[List[str], Set[str]], exclude_disabled=False) -> Set[str]:
     if roles:
         with pool.get_connection() as conn, conn.cursor() as cursor:
-            cursor.execute(
-                f"""SELECT access_metas FROM sys_role WHERE role_name in ({','.join(['%s']*len(roles))});""",
-                tuple(roles),
-            )
+            if exclude_disabled:
+                cursor.execute(
+                    f"""SELECT access_metas FROM sys_role WHERE role_name in ({','.join(['%s']*len(roles))}) and role_status = %s;""",
+                    (*(roles), get_status_str(True)),
+                )
+            else:
+                cursor.execute(
+                    f"""SELECT access_metas FROM sys_role WHERE role_name in ({','.join(['%s']*len(roles))});""",
+                    tuple(roles),
+                )
             result = cursor.fetchall()
             return set(chain(*[json.loads(per_rt[0]) for per_rt in result]))
     else:
@@ -320,8 +334,8 @@ def get_access_meta_from_roles(roles: Union[List[str], Set[str]]) -> Set[str]:
 
 
 def get_user_access_meta_plus_role(user_name: str) -> Set[str]:
-    roles = get_roles_from_user_name(user_name)
-    return get_access_meta_from_roles(roles)
+    roles = get_roles_from_user_name(user_name, exclude_disabled=True)
+    return get_access_meta_from_roles(roles, exclude_disabled=True)
 
 
 @dataclass
@@ -336,7 +350,7 @@ class RoleInfo:
     role_remark: str
 
 
-def get_role_info(role_name: str = None, exclude_role_admin=False) -> List[RoleInfo]:
+def get_role_info(role_name: str = None, exclude_role_admin=False, exclude_disabled=False) -> List[RoleInfo]:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         heads = (
             'role_name',
@@ -365,6 +379,8 @@ def get_role_info(role_name: str = None, exclude_role_admin=False) -> List[RoleI
                     'role_status': get_status_bool(role_dict['role_status']),
                 },
             )
+            if exclude_disabled and not role_dict['role_status']:
+                continue
             if exclude_role_admin and 'admin' == role_dict['role_name']:
                 continue
             role_infos.append(RoleInfo(**role_dict))
@@ -529,28 +545,30 @@ def is_group_admin(user_name) -> bool:
         return bool(result[0])
 
 
-def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
+def get_dict_group_name_users_roles(user_name, exclude_disabled=False) -> Dict[str, Union[str, Set]]:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
             """        
-            SELECT group_name, group_users, group_roles, group_remark
+            SELECT group_name, group_users, group_roles, group_remark, group_status
             FROM sys_group
             WHERE JSON_SEARCH(group_admin_users, 'one', %s) IS NOT NULL""",
             (user_name,),
         )
         result = cursor.fetchall()
         all_ = []
-        for group_name, group_users, group_roles, group_remark in result:
+        for group_name, group_users, group_roles, group_remark, group_status in result:
             group_users = json.loads(group_users)
             group_roles = json.loads(group_roles)
             for user_name in group_users:
+                if exclude_disabled and not group_status:
+                    continue
                 all_.append(
                     {
                         'group_remark': group_remark,
                         'group_name': group_name,
                         'user_name': user_name,
                         'group_roles': group_roles,
-                        'user_roles': list(set(get_roles_from_user_name(user_name)) & set(group_roles)),
+                        'user_roles': list(set(get_roles_from_user_name(user_name, exclude_disabled=True)) & set(group_roles)),
                         'user_full_name': get_user_info(user_name)[0].user_full_name,
                     }
                 )
@@ -559,7 +577,7 @@ def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
 
 def update_user_roles_from_group(user_name, group_name, roles_in_range):
     is_ok = True
-    user_roles = set(get_roles_from_user_name(user_name))
+    user_roles = set(get_roles_from_user_name(user_name, exclude_disabled=True))
     roles_in_range = set(roles_in_range)
     # 新增的权限
     for i in set(roles_in_range) - user_roles:
