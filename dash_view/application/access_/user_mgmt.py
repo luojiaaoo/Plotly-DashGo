@@ -130,7 +130,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                                 label=_('性别'),
                                                 style={'flex': 1},
                                             ),
-                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-password'), label=_('密码'), style={'flex': 1.5}),
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-password'), label=_('密码'), required=True, style={'flex': 1.5}),
                                         ]
                                     ),
                                     fac.AntdFormItem(

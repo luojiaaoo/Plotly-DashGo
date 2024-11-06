@@ -1,7 +1,14 @@
-# 本应用的权限工厂，此处手动导入应用模块
+# 本应用的权限工厂，此处手动导入应用模块 - 内置应用，请勿修改
 from dash_view.application.access_ import role_mgmt, user_mgmt, group_auth, group_mgmt
 from dash_view.application.dashboard_ import workbench, monitor
 from dash_view.application.person_ import personal_info, personal_setting
+
+################## 【开始】此处导入您的应用 ###################
+from dash_view.application.example_app import pay, buy
+
+apps = [pay, buy]
+
+################## 【结束】此处导入您的应用 ###################
 
 
 def trim_module_path2menu_item(module_path):
@@ -11,16 +18,7 @@ def trim_module_path2menu_item(module_path):
 
 
 class AccessFactory:
-    views = [
-        role_mgmt,
-        user_mgmt,
-        group_auth,
-        group_mgmt,
-        workbench,
-        monitor,
-        personal_info,
-        personal_setting,
-    ]
+    views = [role_mgmt, user_mgmt, group_auth, group_mgmt, workbench, monitor, personal_info, personal_setting, *apps]
 
     @classmethod
     def gen_antd_tree_data_menu_item_access_meta(cls, dict_access_meta2menu_item):

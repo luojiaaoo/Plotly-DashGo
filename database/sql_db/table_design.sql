@@ -1,7 +1,7 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : app
+ Source Server         : dashMelon
  Source Server Type    : MySQL
  Source Server Version : 50744 (5.7.44)
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 50744 (5.7.44)
  File Encoding         : 65001
 
- Date: 05/11/2024 22:50:44
+ Date: 06/11/2024 14:02:14
 */
 
 SET NAMES utf8mb4;
@@ -37,7 +37,6 @@ CREATE TABLE `sys_group`  (
 -- ----------------------------
 -- Records of sys_group
 -- ----------------------------
-INSERT INTO `sys_group` VALUES ('团队1', '启用', '[\"admin\"]', 'null', 'null', '2024-11-01 21:45:46', 'admin', '2024-11-01 21:45:53', 'admin', '我们是团队1');
 
 -- ----------------------------
 -- Table structure for sys_role
@@ -58,8 +57,10 @@ CREATE TABLE `sys_role`  (
 -- ----------------------------
 -- Records of sys_role
 -- ----------------------------
-INSERT INTO `sys_role` VALUES ('admin', '[\"角色管理-页面\"]', '启用', '2024-11-04 22:07:05', 'admin', '2024-11-03 14:19:44', 'admin', '超级管理员角色');
-INSERT INTO `sys_role` VALUES ('4324', '[\"角色管理-页面\"]', '启用', '2024-11-05 22:47:47', 'admin', '2024-11-05 22:18:51', 'admin', '123');
+INSERT INTO `sys_role` VALUES ('admin', '[]', '启用', '2024-11-04 22:07:05', 'admin', '2024-11-03 14:19:44', 'admin', '超级管理员角色');
+INSERT INTO `sys_role` VALUES ('支付余额查看', '[\"支付页-可用余额\"]', '启用', '2024-11-06 13:58:11', 'admin', '2024-11-06 13:58:11', 'admin', '支付余额查看');
+INSERT INTO `sys_role` VALUES ('今年支付额查看', '[\"支付页-今年支付额\"]', '启用', '2024-11-06 13:58:32', 'admin', '2024-11-06 13:58:32', 'admin', '今年支付额查看');
+INSERT INTO `sys_role` VALUES ('购买权限', '[\"购买页-页面\", \"购买页-已买商品\", \"购买页-购物车\"]', '启用', '2024-11-06 13:58:54', 'admin', '2024-11-06 13:58:49', 'admin', '\n购买权限');
 
 -- ----------------------------
 -- Table structure for sys_user
@@ -86,7 +87,8 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES ('123', '123', 'f31c8323487da5cdbe2ce12f982e5d5b8cee6b6940b7021be64138b2c4080d41', '启用', '女', '[\"admin\"]', '123', '123', 'admin', '2024-11-05 22:18:43', 'admin', '2024-11-05 22:18:37', '123');
 INSERT INTO `sys_user` VALUES ('admin', '超级管理员', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', '启用', '未知', '[\"admin\"]', '666666@163.com', '13333333333', 'admin', '2024-11-02 23:36:37', 'admin', '2024-11-02 23:36:53', '初始超级管理员');
+INSERT INTO `sys_user` VALUES ('xiaoHong', '小红', '278c5625a81c83ffcb888a63c907b8559543f3c1f2666bcccb1ce285f692be57', '启用', '男', '[\"购买权限\"]', '', '', 'admin', '2024-11-06 14:01:40', 'admin', '2024-11-06 14:01:40', '消费者');
+INSERT INTO `sys_user` VALUES ('xiaoMing', '小明', 'e10582e36a7f03a6e84db0aea05276e34a4ef26f4ac77a320c78d3a13f110482', '启用', '男', '[\"支付余额查看\"]', 'xiaoMing@163.com', '13929721112', 'admin', '2024-11-06 14:00:44', 'admin', '2024-11-06 14:00:44', '查看余额');
 
 SET FOREIGN_KEY_CHECKS = 1;
