@@ -164,7 +164,7 @@ def check_role_name(role_name):
     if not role_name:
         return 'error', _('请填写角色名')
     if not dao_user.exists_role_name(role_name):
-        return 'success', _('该角色名名可用')
+        return 'success', _('该角色名可用')
     else:
         return 'error', _('该角色名已存在')
 

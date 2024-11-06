@@ -62,7 +62,7 @@ class UserInfo:
     user_remark: str
 
 
-def get_user_info(user_name: Union[str, List] = None) -> List[UserInfo]:
+def get_user_info(user_name: Union[str, List] = None, exclude_role_admin=False) -> List[UserInfo]:
     heads = (
         'user_name',
         'user_full_name',
@@ -97,6 +97,8 @@ def get_user_info(user_name: Union[str, List] = None) -> List[UserInfo]:
                     'user_roles': json.loads(user_dict['user_roles']),
                 },
             )
+            if exclude_role_admin and 'admin' in user_dict['user_roles']:
+                continue
             user_infos.append(UserInfo(**user_dict))
         return user_infos
 
@@ -274,7 +276,7 @@ class RoleInfo:
     role_remark: str
 
 
-def get_role_info(role_name: str = None) -> List[RoleInfo]:
+def get_role_info(role_name: str = None, exclude_role_admin=False) -> List[RoleInfo]:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         heads = (
             'role_name',
@@ -303,6 +305,8 @@ def get_role_info(role_name: str = None) -> List[RoleInfo]:
                     'role_status': get_status_bool(role_dict['role_status']),
                 },
             )
+            if exclude_role_admin and 'admin' == role_dict['role_name']:
+                continue
             role_infos.append(RoleInfo(**role_dict))
         return role_infos
 
@@ -467,3 +471,48 @@ def get_dict_group_name_users_roles(user_name) -> bool:
         )
         result = cursor.fetchall()
         return dict([(rt[0], (rt[1], rt[2])) for rt in result])
+
+
+def exists_group_name(group_name: str):
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        cursor.execute(
+            """SELECT count(1) FROM sys_group WHERE group_name = %s;""",
+            (group_name,),
+        )
+        result = cursor.fetchone()
+        return bool(result[0])
+
+
+def add_group(group_name, group_status, group_remark, group_roles, group_admin_users, group_users):
+    if exists_group_name(group_name):
+        return False
+    user_name_op = util_menu_access.get_menu_access().user_name
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        try:
+            cursor.execute(
+                """
+                INSERT INTO sys_group (group_name, group_status, group_roles, group_users, group_admin_users, update_datetime, update_by, create_datetime, create_by, group_remark) 
+                VALUES 
+                (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);
+                """,
+                (
+                    group_name,
+                    get_status_str(group_status),
+                    json.dumps(group_roles, ensure_ascii=False),
+                    json.dumps(group_users, ensure_ascii=False),
+                    json.dumps(group_admin_users, ensure_ascii=False),
+                    datetime.now(),
+                    user_name_op,
+                    datetime.now(),
+                    user_name_op,
+                    group_remark,
+                ),
+            )
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            conn.rollback()
+            return False
+        else:
+            conn.commit()
+            return True

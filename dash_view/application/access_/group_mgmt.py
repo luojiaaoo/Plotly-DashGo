@@ -8,7 +8,7 @@ from dash import html
 from dash import dcc
 from database.sql_db.dao import dao_user
 from typing import Dict
-from dash_callback.application.access_ import role_mgmt_c  # noqa
+from dash_callback.application.access_ import group_mgmt_c  # noqa
 from functools import partial
 from i18n import translator
 
@@ -34,7 +34,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
         [
             fac.AntdRow(
                 fac.AntdButton(
-                    id='role-mgmt-button-add',
+                    id='group-mgmt-button-add',
                     children=_('添加团队'),
                     type='primary',
                     icon=fac.AntdIcon(icon='antd-plus'),
@@ -80,6 +80,51 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             pageSize=10,
                         ),
                         style={'width': '100%'},
+                    ),
+                    fac.AntdModal(
+                        children=[
+                            fac.AntdForm(
+                                [
+                                    fac.AntdFlex(
+                                        [
+                                            fac.AntdFormItem(
+                                                fac.AntdInput(id='group-mgmt-add-group-name', debounceWait=500),
+                                                label=_('团队名'),
+                                                id='group-mgmt-add-group-name-form',
+                                                hasFeedback=True,
+                                            ),
+                                            fac.AntdFormItem(fac.AntdSwitch(id='group-mgmt-add-group-status'), label=_('团队状态'), required=True),
+                                        ]
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdInput(id='group-mgmt-add-group-remark', mode='text-area', autoSize={'minRows': 1, 'maxRows': 3}),
+                                        label=_('团队描述'),
+                                        labelCol={'flex': '1'},
+                                        wrapperCol={'flex': '5'},
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdSelect(id='group-mgmt-add-group-roles', mode='multiple'), label=_('绑定角色'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdSelect(id='group-mgmt-add-group-admin-users', mode='multiple'), label=_('管理员'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdSelect(id='group-mgmt-add-group-users', mode='multiple'), label=_('成员'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
+                                    ),
+                                ],
+                                labelAlign='left',
+                                className={'.ant-form-item': {'marginBottom': '12px', 'marginRight': '8px'}},
+                            )
+                        ],
+                        destroyOnClose=False,
+                        renderFooter=True,
+                        okText=_('确定'),
+                        cancelText=_('取消'),
+                        title=_('添加团队'),
+                        mask=False,
+                        maskClosable=False,
+                        id='group-mgmt-add-modal',
+                        style={'boxSizing': 'border-box'},
                     ),
                 ],
             ),
