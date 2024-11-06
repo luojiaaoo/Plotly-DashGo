@@ -510,6 +510,7 @@ def add_group(group_name, group_status, group_remark, group_roles, group_admin_u
             )
         except Exception as e:
             import traceback
+
             traceback.print_exc()
             conn.rollback()
             return False
@@ -517,12 +518,39 @@ def add_group(group_name, group_status, group_remark, group_roles, group_admin_u
             conn.commit()
             return True
 
+
 def delete_group(group_name: str) -> bool:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
             cursor.execute(
                 """delete FROM sys_group where group_name=%s;""",
                 (group_name,),
+            )
+        except Exception as e:
+            conn.rollback()
+            return False
+        else:
+            conn.commit()
+            return True
+
+
+def update_group(group_name, group_status, group_remark, group_roles, group_admin_users, group_users):
+    user_name_op = util_menu_access.get_menu_access().user_name
+    with pool.get_connection() as conn, conn.cursor() as cursor:
+        try:
+            cursor.execute(
+                """
+                update sys_group set group_name=%s, group_status=%s, group_roles=%s, group_users=%s, group_admin_users=%s, update_datetime=%s, update_by=%s, group_remark=%s;""",
+                (
+                    group_name,
+                    get_status_str(group_status),
+                    json.dumps(group_roles, ensure_ascii=False),
+                    json.dumps(group_users, ensure_ascii=False),
+                    json.dumps(group_admin_users, ensure_ascii=False),
+                    datetime.now(),
+                    user_name_op,
+                    group_remark,
+                ),
             )
         except Exception as e:
             conn.rollback()

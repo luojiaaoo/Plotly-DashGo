@@ -146,6 +146,49 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         maskClosable=False,
                         id='group-mgmt-delete-affirm-modal',
                     ),
+                    fac.AntdModal(
+                        children=[
+                            fac.AntdForm(
+                                [
+                                    fac.AntdFlex(
+                                        [
+                                            fac.AntdFormItem(fac.AntdText(id='group-mgmt-update-group-name'), label=_('团队名')),
+                                            fac.AntdFormItem(fac.AntdSwitch(id='group-mgmt-update-group-status'), label=_('团队状态'), required=True),
+                                        ]
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdInput(id='group-mgmt-update-group-remark', mode='text-area', autoSize={'minRows': 1, 'maxRows': 3}),
+                                        label=_('团队描述'),
+                                        labelCol={'flex': '1'},
+                                        wrapperCol={'flex': '5'},
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdSelect(id='group-mgmt-update-group-roles', mode='multiple'), label=_('绑定角色'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdSelect(id='group-mgmt-update-group-admin-users', mode='multiple'),
+                                        label=_('管理员'),
+                                        labelCol={'flex': '1'},
+                                        wrapperCol={'flex': '5'},
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdSelect(id='group-mgmt-update-group-users', mode='multiple'), label=_('成员'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
+                                    ),
+                                ],
+                                labelAlign='left',
+                                className={'.ant-form-item': {'marginBottom': '12px', 'marginRight': '8px'}},
+                            )
+                        ],
+                        destroyOnClose=False,
+                        renderFooter=True,
+                        okText=_('确定'),
+                        cancelText=_('取消'),
+                        title=_('更新团队'),
+                        mask=False,
+                        maskClosable=False,
+                        id='group-mgmt-update-modal',
+                        style={'boxSizing': 'border-box'},
+                    ),
                 ],
             ),
         ],
