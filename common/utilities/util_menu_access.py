@@ -117,7 +117,7 @@ class MenuAccess:
         self.menu = self.gen_menu(self.menu_items)
 
 
-def get_menu_access() -> MenuAccess:
+def get_menu_access(only_get_user_name=False) -> MenuAccess:
     """
     在已登录状态下，获取菜单访问权限。
 
@@ -139,4 +139,7 @@ def get_menu_access() -> MenuAccess:
         ignore_exp=not LoginConf.JWT_EXPIRED_FORCE_LOGOUT,
         force_logout_if_invalid=True,
     )
-    return MenuAccess(user_name=rt_access['user_name'])
+    if only_get_user_name:
+        return rt_access['user_name']
+    else:
+        return MenuAccess(user_name=rt_access['user_name'])

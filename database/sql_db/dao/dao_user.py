@@ -1,21 +1,23 @@
 from database.sql_db.conn import pool
-from typing import Dict, List, Set, Union
-from itertools import chain
+from typing import Dict, List, Set, Union, Optional
+from itertools import chain, repeat
 from dataclasses import dataclass
 from datetime import datetime
 from common.utilities import util_menu_access
 import json
+from common.utilities.util_logger import Log
+from common.utilities.util_menu_access import get_menu_access
+
+logger = Log.get_logger(__name__)
 
 
-def get_status_str(status):
-    return '启用' if status == 1 else '禁用'
-
-
-def get_status_bool(status: str):
-    return True if status == '启用' else False
+class Status:
+    ENABLE = 1
+    DISABLE = 0
 
 
 def exists_user_name(user_name: str) -> bool:
+    """是否存在这个用户名"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
             """SELECT user_name FROM sys_user WHERE user_name = %s;""",
@@ -26,21 +28,20 @@ def exists_user_name(user_name: str) -> bool:
 
 
 def user_password_verify(user_name: str, password_sha256: str) -> bool:
+    """密码校验，排除未启用账号"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
             """SELECT user_name FROM sys_user WHERE user_name = %s and password_sha256 = %s and user_status = %s;""",
-            (user_name, password_sha256, get_status_str(True)),
+            (user_name, password_sha256, Status.ENABLE),
         )
         result = cursor.fetchone()
         return result is not None
 
 
 def get_all_access_meta_for_setup_check() -> Set[str]:
+    """获取所有权限，对应用权限检查"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
-        cursor.execute(
-            """SELECT access_metas FROM sys_role
-            """
-        )
+        cursor.execute("""SELECT access_metas FROM sys_role;""")
         result = cursor.fetchall()
         return set(chain(*[json.loads(per_rt[0]) for per_rt in result]))
 
@@ -62,13 +63,13 @@ class UserInfo:
     user_remark: str
 
 
-def get_user_info(user_name: Union[str, List] = None, exclude_role_admin=False, exclude_disabled=False) -> List[UserInfo]:
-    heads = (
+def get_user_info(user_names: Optional[List] = None, exclude_role_admin=False, exclude_disabled=False) -> List[UserInfo]:
+    """获取用户信息对象"""
+    heads = [
         'user_name',
         'user_full_name',
         'user_status',
         'user_sex',
-        'user_roles',
         'user_email',
         'phone_number',
         'update_datetime',
@@ -76,57 +77,57 @@ def get_user_info(user_name: Union[str, List] = None, exclude_role_admin=False, 
         'create_datetime',
         'create_by',
         'user_remark',
-    )
+    ]
     with pool.get_connection() as conn, conn.cursor() as cursor:
-        if user_name is None:
-            cursor.execute(f"""SELECT {','.join(heads)} FROM sys_user;""")
-        elif isinstance(user_name, list):
-            cursor.execute(f"""SELECT {','.join(heads)} FROM sys_user WHERE user_name in ({','.join(['%s'] * len(user_name))});""", tuple(user_name))
-        else:
-            cursor.execute(
-                f"""SELECT {','.join(heads)} FROM sys_user WHERE user_name = %s;""",
-                (user_name,),
-            )
+        sql = f"""
+            SELECT {','.join(['u.'+i for i in heads])}, JSON_ARRAYAGG(ur.user_role) as user_roles
+            FROM sys_user u JOIN sys_user_role ur 
+            on u.user_name = ur.user_name
+        """
+        sql_place = []
+        if user_names is not None:
+            sql += f" WHERE user_name in ({','.join(['%s']*len(user_names))})"
+            sql_place.extend(user_names)
+        if exclude_role_admin:
+            sql += " AND JSON_SEARCH(user_roles, 'one', %s) IS NULL"
+            sql_place.append('admin')
+        if exclude_disabled:
+            sql += ' AND user_status=%s'
+            sql_place.append(Status.ENABLE)
+        cursor.execute(sql, sql_place)
         user_infos = []
         result = cursor.fetchall()
         for per in result:
-            user_dict = dict(zip(heads, per))
+            user_dict = dict(zip(heads + ['user_roles'], per))
             user_dict.update(
                 {
-                    'user_status': get_status_bool(user_dict['user_status']),
                     'user_roles': json.loads(user_dict['user_roles']),
                 },
             )
-            if exclude_disabled and not user_dict['user_status']:
-                continue
-            if exclude_role_admin and 'admin' in user_dict['user_roles']:
-                continue
             user_infos.append(UserInfo(**user_dict))
         return user_infos
 
 
-def add_role2user(user_name, role_name):
+def add_role_for_user(user_name: str, role_name: str):
+    """给用户添加权限"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
             is_ok = True
-            # 给sys_role表加锁，保证加入的角色和团队都存在
+            # 给sys_role表加锁，保证加入的角色都存在
             if is_ok:
                 cursor.execute(
-                    """SELECT count(1) FROM sys_role WHERE role_name = %s for update;""",
+                    'select * from sys_role r join sys_role_access_meta ram on r.role_name=ram.role_name WHERE r.role_name = %s for update;',
                     (role_name,),
                 )
                 if cursor.fetchall()[0][0] != 1:
                     is_ok = False
             if is_ok:
                 cursor.execute(
-                    """
-                    UPDATE sys_user
-                    SET user_roles = JSON_ARRAY_APPEND(user_roles, '$', %s)
-                    WHERE user_name = %s AND NOT JSON_CONTAINS(user_roles, JSON_QUOTE(%s))
-                    """,
-                    (role_name, user_name, role_name),
+                    'insert into sys_user_role(user_name,role_name) values(%s,%s);',
+                    (user_name, role_name),
                 )
-        except Exception as e:
+        except Exception:
+            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}给用户{user_name}添加角色{role_name}时，出现异常', exc_info=True)
             conn.rollback()
             return False
         else:
@@ -134,21 +135,15 @@ def add_role2user(user_name, role_name):
             return is_ok
 
 
-def del_role2user(user_name, role_name):
+def del_role_for_user(user_name, role_name):
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
             cursor.execute(
-                """
-                    UPDATE sys_user
-                    SET user_roles = JSON_REMOVE(
-                        user_roles,
-                        JSON_UNQUOTE(JSON_SEARCH(user_roles, 'one', %s))
-                    )
-                    WHERE user_name = %s;
-                """,
+                'delete from sys_user_role where role_name=%s and user_name=%s',
                 (role_name, user_name),
             )
-        except Exception as e:
+        except Exception:
+            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}给用户{user_name}删除角色{role_name}时，出现异常', exc_info=True)
             conn.rollback()
             return False
         else:
@@ -157,34 +152,32 @@ def del_role2user(user_name, role_name):
 
 
 def update_user(user_name, user_full_name, password, user_status: bool, user_sex, user_roles, user_email, phone_number, user_remark):
-    import hashlib
+    from hashlib import sha256
 
-    user_name_op = util_menu_access.get_menu_access().user_name
+    user_name_op = util_menu_access.get_menu_access(only_get_user_name=True)
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
             is_ok = True
             # 给sys_role表加锁，保证加入的角色和团队都存在
             if is_ok and user_roles:
                 cursor.execute(
-                    f"""SELECT count(1) FROM sys_role WHERE role_name in ({','.join(['%s']*len(user_roles))}) for update;""",
+                    f'select r.role_name from sys_role r join sys_role_access_meta ram on r.role_name=ram.role_name group by r.role_name having r.role_name in ({','.join(['%s']*len(user_roles))}) for update;',
                     tuple(user_roles),
                 )
-                if cursor.fetchall()[0][0] != len(user_roles):
+                if len(list(cursor.fetchall())) != len(user_roles):
                     is_ok = False
             if is_ok:
                 cursor.execute(
                     f"""
                     update sys_user 
                     set 
-                    user_full_name=%s,{'password_sha256=%s,' if password else ''} user_status=%s, user_sex=%s,
-                    user_roles=%s, user_email=%s,
+                    user_full_name=%s,{'password_sha256=%s,' if password else ''} user_status=%s, user_sex=%s, user_email=%s,
                     phone_number=%s, update_by=%s, update_datetime=%s, user_remark=%s where user_name=%s;""",
                     (
                         user_full_name,
-                        *([hashlib.sha256(password.encode('utf-8')).hexdigest()] if password else []),
-                        get_status_str(user_status),
+                        *([sha256(password.encode('utf-8')).hexdigest()] if password else []),
+                        user_status,
                         user_sex,
-                        json.dumps(user_roles, ensure_ascii=False),
                         user_email,
                         phone_number,
                         user_name_op,
@@ -193,7 +186,10 @@ def update_user(user_name, user_full_name, password, user_status: bool, user_sex
                         user_name,
                     ),
                 )
+                cursor.execute('delete from sys_user_role where user_name = %s', (user_name,))
+                cursor.execute(f'INSERT INTO sys_user_role (user_name, role_name) VALUES {','.join(['(%s,%s)']*len(user_roles))}', chain(*zip(repeat(user_name), user_roles)))
         except Exception as e:
+            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新用户{user_name}时，出现异常', exc_info=True)
             conn.rollback()
             return False
         else:
