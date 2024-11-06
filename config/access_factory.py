@@ -116,9 +116,9 @@ class AccessFactory:
                 raise ValueError(f'以下权限多次定义：{va}')
 
         # 数据库检查
-        from database.sql_db.dao.dao_user import get_all_access_meta_for_setup_check
+        from database.sql_db.dao import dao_user
 
-        outliers = get_all_access_meta_for_setup_check() - set(cls.dict_access_meta2module_path.keys())
+        outliers = dao_user.get_all_access_meta_for_setup_check() - set(cls.dict_access_meta2module_path.keys())
         if outliers:
             logger.error(f'数据库中存在未定义的权限：{outliers}')
             raise ValueError(f'数据库中存在未定义的权限：{outliers}')

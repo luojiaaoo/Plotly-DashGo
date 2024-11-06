@@ -1,25 +1,24 @@
-from database.sql_db.dao.dao_user import get_user_access_meta_plus_role, get_user_info, UserInfo, is_group_admin
-from typing import Dict, List, Set
+from database.sql_db.dao import dao_user
+from typing import Set
 from common.exception import NotFoundUsername
 from common.utilities.util_logger import Log
-import re
 
 logger = Log.get_logger(__name__)
 
 
 class MenuAccess:
-    def get_user_all_access_metas(cls, user_info: UserInfo) -> Set[str]:
+    def get_user_all_access_metas(cls, user_info: dao_user.UserInfo) -> Set[str]:
         from config.access_factory import AccessFactory
 
         user_name = user_info.user_name
-        all_access_metas: Set[str] = get_user_access_meta_plus_role(user_name=user_name)
+        all_access_metas: Set[str] = dao_user.get_user_access_meta_plus_role(user_name=user_name)
         # 所有用户添加默认权限
         all_access_metas.update(AccessFactory.default_access_meta)
         # admin角色添加默认权限
         if 'admin' in user_info.user_roles:
             all_access_metas.update(AccessFactory.admin_access_meta)
         # 团队管理员添加默认权限
-        if is_group_admin(user_name):
+        if dao_user.is_group_admin(user_name):
             all_access_metas.update(AccessFactory.group_access_meta)
         return all_access_metas
 
@@ -107,7 +106,7 @@ class MenuAccess:
         self.dict_access_meta2menu_item = AccessFactory.dict_access_meta2menu_item
         self.user_name = user_name
         try:
-            self.user_info: UserInfo = get_user_info(user_name, exclude_disabled=True, exclude_role_admin=False)[0]
+            self.user_info: dao_user.UserInfo = dao_user.get_user_info(user_name, exclude_disabled=True, exclude_role_admin=False)[0]
         except IndexError:
             raise NotFoundUsername(f'用户名不存在: {user_name}')
         # 用户所有的权限元

@@ -5,6 +5,10 @@ from dash.dependencies import Input, Output, State
 from server import app
 from dash.exceptions import PreventUpdate
 import dash
+from functools import partial
+from i18n import translator
+
+_ = partial(translator.t)
 
 # 定义一个客户端回调函数，用于处理登录验证代码的显示逻辑，总是显示login的路径
 app.clientside_callback(
@@ -130,10 +134,10 @@ def login(
             True,
         )
     def user_login(user_name: str, password_sha256: str, is_keep_login_status: bool) -> bool:
-        from database.sql_db.dao.dao_user import user_password_verify
+        from database.sql_db.dao import dao_user
         from common.utilities.util_jwt import jwt_encode_save_access_to_session
 
-        if user_password_verify(user_name=user_name, password_sha256=password_sha256):
+        if dao_user.user_password_verify(user_name=user_name, password_sha256=password_sha256):
             jwt_encode_save_access_to_session({'user_name': user_name}, session_permanent=is_keep_login_status)
             return True
         return False

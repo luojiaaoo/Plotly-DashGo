@@ -1,6 +1,5 @@
 from common.utilities.util_menu_access import MenuAccess
 from typing import List
-import feffery_antd_components as fac
 from common.utilities.util_logger import Log
 from functools import partial
 from i18n import translator

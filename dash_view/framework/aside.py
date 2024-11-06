@@ -1,7 +1,6 @@
 import feffery_antd_components as fac
 from dash import get_asset_url
 from config.dash_melon_conf import ShowConf
-from server import app
 from common.utilities.util_menu_access import MenuAccess
 
 def render_aside_content(menu_access: MenuAccess):

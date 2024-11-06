@@ -1,10 +1,7 @@
 from common.utilities.util_menu_access import MenuAccess
-import feffery_utils_components as fuc
 import feffery_antd_components as fac
 from common.utilities.util_logger import Log
-from dash import html, dcc
 from dash_components import Card, Table
-import dash_callback.application.dashboard_.monitor_c  # noqa
 from functools import partial
 from i18n import translator
 

@@ -1,10 +1,9 @@
 from server import app
-from dash.dependencies import Input, Output, State
+from dash.dependencies import Input, Output
 import dash
 from common.utilities.util_menu_access import get_menu_access
 from database.sql_db.dao import dao_user
 from dash_components import MessageManager
-from typing import List
 from functools import partial
 from i18n import translator
 

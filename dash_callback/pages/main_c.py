@@ -7,7 +7,7 @@ from typing import Dict, List
 from dash.exceptions import PreventUpdate
 from dash import set_props
 from yarl import URL
-from common.utilities.util_menu_access import get_menu_access, MenuAccess
+from common.utilities.util_menu_access import get_menu_access
 from dash_view.pages import page_404, page_401
 from functools import partial
 from i18n import translator

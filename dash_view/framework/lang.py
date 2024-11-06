@@ -1,7 +1,4 @@
 import feffery_antd_components as fac
-from flask import request
-from server import app
-from dash.dependencies import Input, Output
 import feffery_utils_components as fuc
 from i18n import translator
 
