@@ -84,17 +84,18 @@ def get_user_info(user_names: Optional[List] = None, exclude_role_admin=False, e
             FROM sys_user u JOIN sys_user_role ur 
             on u.user_name = ur.user_name
         """
+        condition = []
         sql_place = []
         if user_names is not None:
-            sql += f" WHERE user_name in ({','.join(['%s']*len(user_names))})"
+            condition.append(f"u.user_name in ({','.join(['%s']*len(user_names))})")
             sql_place.extend(user_names)
         if exclude_role_admin:
-            sql += " AND JSON_SEARCH(user_roles,'one',%s) IS NULL"
+            condition.append("JSON_SEARCH(user_roles,'one',%s) IS NULL")
             sql_place.append('admin')
         if exclude_disabled:
-            sql += ' AND user_status=%s'
+            condition.append('u.user_status=%s')
             sql_place.append(Status.ENABLE)
-        cursor.execute(sql, sql_place)
+        cursor.execute(f'{sql} where {" and ".join(condition)}', sql_place)
         user_infos = []
         result = cursor.fetchall()
         for per in result:
@@ -330,70 +331,74 @@ class RoleInfo:
     role_remark: str
 
 
-def get_role_info(role_name: str = None, exclude_role_admin=False, exclude_disabled=False) -> List[RoleInfo]:
+def get_role_info(role_names: Optional[List] = None, exclude_role_admin=False, exclude_disabled=True) -> List[RoleInfo]:
+    """获取角色信息"""
+    heads = (
+        'role_name',
+        'role_status',
+        'update_datetime',
+        'update_by',
+        'create_datetime',
+        'create_by',
+        'role_remark',
+    )
     with pool.get_connection() as conn, conn.cursor() as cursor:
-        heads = (
-            'role_name',
-            'access_metas',
-            'role_status',
-            'update_datetime',
-            'update_by',
-            'create_datetime',
-            'create_by',
-            'role_remark',
-        )
-        if role_name is None:
-            cursor.execute(f"""SELECT {','.join(heads)} FROM sys_role;""")
-        else:
-            cursor.execute(
-                f"""SELECT {','.join(heads)} FROM sys_role where role_name=%s;""",
-                (role_name,),
-            )
+        sql = f"""
+            SELECT {','.join(['u.'+i for i in heads])},JSON_ARRAYAGG(ram.access_meta) as access_metas
+            FROM sys_role r JOIN sys_role_access_meta ram
+            on r.role_name = ram.role_name
+        """
+        sql_place = []
+        condition = []
+        if role_names is not None:
+            condition.append(f"r.role_name in ({','.join(['%s']*len(role_names))})")
+            sql_place.extend(role_names)
+        if exclude_role_admin:
+            condition.append('r.role_name != %s')
+            sql_place.append('admin')
+        if exclude_disabled:
+            condition.append('r.role_status=%s')
+            sql_place.append(Status.ENABLE)
+        cursor.execute(f'{sql} where {" and ".join(condition)}', sql_place)
         role_infos = []
         result = cursor.fetchall()
         for per in result:
-            role_dict = dict(zip(heads, per))
+            role_dict = dict(zip(heads + ['access_metas'], per))
             role_dict.update(
                 {
                     'access_metas': json.loads(role_dict['access_metas']),
-                    'role_status': get_status_bool(role_dict['role_status']),
                 },
             )
-            if exclude_disabled and not role_dict['role_status']:
-                continue
-            if exclude_role_admin and 'admin' == role_dict['role_name']:
-                continue
             role_infos.append(RoleInfo(**role_dict))
         return role_infos
 
 
 def delete_role(role_name: str) -> bool:
+    """删除角色"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
-            # 删除角色
+            # 删除角色表
             cursor.execute(
-                """delete FROM sys_role where role_name=%s;""",
+                'delete FROM sys_role where role_name=%s;',
                 (role_name,),
             )
-            # 删除用户角色
+            # 删除角色权限表
             cursor.execute(
-                """
-                UPDATE sys_user
-                SET user_roles = JSON_REMOVE(user_roles,JSON_UNQUOTE(JSON_SEARCH(user_roles,'one',%s)))
-                WHERE JSON_SEARCH(user_roles,'one',%s) IS NOT NULL;
-                """,
-                (role_name, role_name),
+                'delete FROM sys_role_access_meta where role_name=%s;',
+                (role_name,),
             )
-            # 删除团队角色
+            # 删除用户角色表
             cursor.execute(
-                """
-                UPDATE sys_group
-                SET group_roles = JSON_REMOVE(group_roles,JSON_UNQUOTE(JSON_SEARCH(group_roles,'one',%s)))
-                WHERE JSON_SEARCH(group_roles,'one',%s) IS NOT NULL;
-                """,
-                (role_name, role_name),
+                'delete FROM sys_user_role where role_name=%s;',
+                (role_name,),
+            )
+            # 删除团队角色表
+            cursor.execute(
+                'delete FROM sys_group_role where role_name=%s;',
+                (role_name,),
             )
         except Exception as e:
+            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}删除角色{role_name}时，出现异常', exc_info=True)
             conn.rollback()
             return False
         else:
@@ -401,7 +406,8 @@ def delete_role(role_name: str) -> bool:
             return True
 
 
-def add_role(role_name, role_status: bool, role_remark, access_metas):
+def create_role(role_name, role_status: bool, role_remark, access_metas):
+    """新建角色"""
     if not role_name:
         return False
     user_name_op = util_menu_access.get_menu_access().user_name
@@ -409,13 +415,12 @@ def add_role(role_name, role_status: bool, role_remark, access_metas):
         try:
             cursor.execute(
                 """
-                INSERT INTO sys_role ( role_name,access_metas,role_status,update_datetime,update_by,create_datetime,create_by,role_remark )
+                INSERT INTO sys_role ( role_name,role_status,update_datetime,update_by,create_datetime,create_by,role_remark)
                 VALUES
-                (%s,%s,%s,%s,%s,%s,%s,%s);""",
+                (%s,%s,%s,%s,%s,%s,%s);""",
                 (
                     role_name,
-                    json.dumps(access_metas, ensure_ascii=False),
-                    get_status_str(role_status),
+                    role_status,
                     datetime.now(),
                     user_name_op,
                     datetime.now(),
@@ -423,7 +428,12 @@ def add_role(role_name, role_status: bool, role_remark, access_metas):
                     role_remark,
                 ),
             )
+            if access_metas:
+                cursor.execute(
+                    f'INSERT INTO sys_role_access_meta (role_name,access_meta) VALUES {','.join(['(%s,%s)']*len(access_metas))}', chain(*zip(repeat(role_name), access_metas))
+                )
         except Exception as e:
+            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}创建角色{role_name}时，出现异常', exc_info=True)
             conn.rollback()
             return False
         else:
@@ -432,6 +442,7 @@ def add_role(role_name, role_status: bool, role_remark, access_metas):
 
 
 def exists_role_name(role_name):
+    """是否存在角色名称"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
             """SELECT count(1) FROM sys_role WHERE role_name = %s;""",
@@ -442,23 +453,24 @@ def exists_role_name(role_name):
 
 
 def update_role(role_name, role_status: bool, role_remark, access_metas: List[str]):
+    """更新角色"""
     user_name_op = util_menu_access.get_menu_access().user_name
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
             cursor.execute(
-                """
-                update sys_role set access_metas=%s,role_status=%s,update_datetime=%s,update_by=%s,role_remark=%s where role_name=%s;""",
-                (json.dumps(access_metas, ensure_ascii=False), get_status_str(role_status), datetime.now(), user_name_op, role_remark, role_name),
+                'update sys_role set role_status=%s,update_datetime=%s,update_by=%s,role_remark=%s where role_name=%s;',
+                (role_status, datetime.now(), user_name_op, role_remark, role_name),
             )
+            cursor.execute('delete from sys_role_access_meta where role_name = %s', (role_name,))
+            if access_metas:
+                cursor.execute(f'INSERT INTO role_name (role_name,access_meta) VALUES {','.join(['(%s,%s)']*len(access_metas))}', chain(*zip(repeat(role_name), access_metas)))
         except Exception as e:
+            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新角色{role_name}时，出现异常', exc_info=True)
             conn.rollback()
             return False
         else:
             conn.commit()
             return True
-
-
-#################################### 团队
 
 
 @dataclass
@@ -480,8 +492,6 @@ def get_group_info(group_name: str = None) -> List[GroupInfo]:
         'group_name',
         'group_status',
         'group_roles',
-        'group_users',
-        'group_admin_users',
         'update_datetime',
         'update_by',
         'create_datetime',
