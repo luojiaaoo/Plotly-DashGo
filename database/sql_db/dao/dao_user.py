@@ -294,7 +294,9 @@ def delete_user(user_name: str) -> bool:
 def get_roles_from_user_name(user_name: str, exclude_disabled=True) -> List[str]:
     """根据用户查询角色"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
-        sql = 'SELECT u.user_name,JSON_ARRAYAGG(r.role_name) FROM sys_user u JOIN sys_user_role ur on u.user_name=ur.user_name join sys_role r on ur.user_role = r.role_name where u.user_name=%s'
+        sql = (
+            'SELECT JSON_ARRAYAGG(r.role_name) FROM sys_user u JOIN sys_user_role ur on u.user_name=ur.user_name join sys_role r on ur.user_role = r.role_name where u.user_name=%s'
+        )
         sql_place = [user_name]
         if exclude_disabled:
             sql += ' and u.user_status=%s and r.role_status=%s'
@@ -487,55 +489,67 @@ class GroupInfo:
     group_remark: str
 
 
-def get_group_info(group_name: str = None) -> List[GroupInfo]:
-    heads = (
+def get_group_info(group_names: Optional[List] = None, exclude_disabled=True) -> List[GroupInfo]:
+    """获取团队信息"""
+    heads = [
         'group_name',
         'group_status',
-        'group_roles',
         'update_datetime',
         'update_by',
         'create_datetime',
         'create_by',
         'group_remark',
-    )
+        'group_roles',
+        'user_name_plus',
+    ]
     with pool.get_connection() as conn, conn.cursor() as cursor:
-        if group_name is None:
-            cursor.execute(f"""SELECT {','.join(heads)} FROM sys_group;""")
-        else:
-            cursor.execute(
-                f"""SELECT {','.join(heads)} FROM sys_group WHERE group_name = %s;""",
-                (group_name,),
-            )
+        sql = """
+            select g.group_name,group_status,update_datetime,update_by,create_datetime,create_by,group_remark,JSON_ARRAYAGG(role_name),JSON_ARRAYAGG(case gu.is_admin WHEN %s then CONCAT(%s,user_name) else user_name end) as user_name_plus 
+            from sys_group g JOIN sys_group_role gr on g.group_name = gr.group_name JOIN sys_group_user gu on g.group_name=gu.group_name 
+        """
+        group_by = 'group by g.group_name,group_status,update_datetime,update_by,create_datetime,create_by,group_remark'
+        sql_place = [Status.ENABLE, 'is_admin:']
+        condition = []
+        if group_names is not None:
+            condition.append(f'g.group_name in ({','.join(['%s']*len(group_names))})')
+            sql_place.extend(group_names)
+        if exclude_disabled:
+            condition.append('group_status!=%s')
+            sql_place.append(Status.ENABLE)
+        cursor.execute(f'{sql} where {" and ".join(condition)} {group_by}', sql_place)
         group_infos = []
         result = cursor.fetchall()
         for per in result:
             group_dict = dict(zip(heads, per))
             group_dict.update(
                 {
-                    'group_status': get_status_bool(group_dict['group_status']),
-                    'group_roles': json.loads(group_dict['group_roles']),
-                    'group_users': json.loads(group_dict['group_users']),
-                    'group_admin_users': json.loads(group_dict['group_admin_users']),
+                    'group_roles': list(set(json.loads(group_dict['group_roles']))),
+                    'user_name_plus': set(json.loads(group_dict['user_name_plus'])),
+                    'group_users': [i for i in group_dict['user_name_plus'] if not str(i).startswith('is_admin:')],
+                    'group_admin_users': [str(i).replace('is_admin:', '') for i in group_dict['user_name_plus'] if str(i).startswith('is_admin:')],
                 },
             )
+            group_dict.pop('user_name_plus')
             group_infos.append(GroupInfo(**group_dict))
         return group_infos
 
 
 def is_group_admin(user_name) -> bool:
+    """判断是不是团队管理员，排除禁用的团队"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
             """        
             SELECT count(1)
-            FROM sys_group
-            WHERE JSON_SEARCH(group_admin_users,'one',%s) IS NOT NULL and group_status=%s""",
-            (user_name, get_status_str(True)),
+            FROM sys_group g join sys_group_user gu on g.group_name = gu.group_name
+            WHERE gu.user_name=%s and g.group_status=%s and gu.is_admin=%s""",
+            (user_name, Status.ENABLE, Status.ENABLE),
         )
         result = cursor.fetchone()
         return bool(result[0])
 
 
 def get_dict_group_name_users_roles(user_name, exclude_disabled=False) -> Dict[str, Union[str, Set]]:
+    '''根据用户名获取可管理的团队、人员和可管理的角色'''
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
             """        
