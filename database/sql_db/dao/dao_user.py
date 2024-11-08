@@ -539,9 +539,16 @@ def is_group_admin(user_name) -> bool:
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
             """        
-            SELECT count(1)
-            FROM sys_group g join sys_group_user gu on g.group_name = gu.group_name
-            WHERE gu.user_name=%s and g.group_status=%s and gu.is_admin=%s""",
+                SELECT
+                count(1)
+                FROM
+                sys_group g
+                join sys_group_user gu on g.group_name = gu.group_name
+                WHERE
+                gu.user_name = %s
+                and g.group_status = %s
+                and gu.is_admin = %s
+            """,
             (user_name, Status.ENABLE, Status.ENABLE),
         )
         result = cursor.fetchone()
@@ -549,18 +556,54 @@ def is_group_admin(user_name) -> bool:
 
 
 def get_dict_group_name_users_roles(user_name, exclude_disabled=False) -> Dict[str, Union[str, Set]]:
-    '''根据用户名获取可管理的团队、人员和可管理的角色'''
+    """根据用户名获取可管理的团队、人员和可管理的角色"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
             """        
-            SELECT group_name,group_users,group_roles,group_remark,group_status
-            FROM sys_group
-            WHERE JSON_SEARCH(group_admin_users,'one',%s) IS NOT NULL""",
-            (user_name,),
+                select
+                a.group_name,
+                a.group_remark,
+                a.group_roles,
+                b.group_user_names,
+                b.group_full_names,
+                b.group_user_statuses
+                from
+                (
+                    select
+                    g.group_name,
+                    g.group_remark,
+                    JSON_ARRAYAGG (gr.role_name) as group_roles
+                    from
+                    sys_group g
+                    join sys_group_role gr on g.group_name = gr.group_name
+                    JOIN sys_group_user gu on g.group_name = gu.group_name
+                    JOIN sys_user u on gu.user_name = u.user_name
+                    where
+                    gu.user_name = %s
+                    and g.group_status = %s
+                    and gu.is_admin = %s
+                    group by
+                    g.group_name,
+                    g.group_remark
+                ) as a
+                join (
+                    select
+                    gu.group_name,
+                    JSON_ARRAYAGG (gu.user_name) as group_user_names,
+                    JSON_ARRAYAGG (u.user_status) as group_user_statuses,
+                    JSON_ARRAYAGG (u.user_full_name) as group_full_names
+                    from
+                    sys_group_user gu
+                    join sys_user u on gu.user_name = u.user_name
+                    group by
+                    group_name
+                ) b on a.group_name = b.group_name
+            """,
+            (user_name, Status.ENABLE, Status.ENABLE),
         )
         result = cursor.fetchall()
         all_ = []
-        for group_name, group_users, group_roles, group_remark, group_status in result:
+        for group_name, group_remark, group_roles, group_user_names, group_user_full_names, group_user_status in result:
             group_users = json.loads(group_users)
             group_roles = json.loads(group_roles)
             for user_name in group_users:
