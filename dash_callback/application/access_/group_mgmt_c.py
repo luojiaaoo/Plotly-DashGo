@@ -44,7 +44,7 @@ def update_delete_group(nClicksButton, clickedCustom: str):
         return [dash.no_update] * 2 + [
             True,
             group_info.group_name,
-            group_info.group_status,
+            bool(group_info.group_status),
             group_info.group_remark,
             [i.role_name for i in dao_user.get_role_info(exclude_role_admin=True)],
             group_info.group_roles,

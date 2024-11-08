@@ -48,7 +48,7 @@ def update_delete_role(nClicksButton, clickedCustom: str):
             user_info.user_full_name,
             user_info.user_email,
             user_info.phone_number,
-            user_info.user_status,
+            bool(user_info.user_status),
             False if user_name != 'admin' else True,
             user_info.user_sex,
             '',

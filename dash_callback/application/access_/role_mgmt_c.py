@@ -50,7 +50,7 @@ def update_delete_role(nClicksButton, clickedCustom: str):
         ] + [
             True,
             role_info.role_name,
-            role_info.role_status,
+            bool(role_info.role_status),
             False if role_name != 'admin' else True,
             role_info.role_remark,
             role_info.access_metas,
