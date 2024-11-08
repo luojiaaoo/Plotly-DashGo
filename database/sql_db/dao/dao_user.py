@@ -619,21 +619,28 @@ def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
                     sys_group_user gu
                     join (
                         select
-                        u.user_name,
-                        u.user_full_name,
-                        u.user_status,
-                        JSON_ARRAYAGG(ur.role_name) as user_roles
+                        a.user_name,
+                        a.user_full_name,
+                        a.user_status,
+                        b.user_roles
                         from
-                        sys_user u
-                        left JOIN sys_user_role ur on u.user_name = ur.user_name
-                        left JOIN sys_role r on ur.role_name = r.role_name
-                        WHERE
-                        r.role_status = %s
-                        or r.role_status is Null
-                        group by
-                        u.user_name,
-                        u.user_full_name,
-                        u.user_status
+                        sys_user a
+                        left JOIN (
+                            select
+                            u.user_name,
+                            u.user_status,
+                            JSON_ARRAYAGG(ur.role_name) as user_roles
+                            from
+                            sys_user u
+                            left JOIN sys_user_role ur on u.user_name = ur.user_name
+                            left JOIN sys_role r on ur.role_name = r.role_name
+                            WHERE
+                            r.role_status = %s
+                            or r.role_status is Null
+                            group by
+                            u.user_name,
+                            u.user_status
+                        ) b on a.user_name = b.user_name
                     ) u on gu.user_name = u.user_name
                     group by
                     group_name
@@ -656,7 +663,7 @@ def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
                         'group_name': group_name,
                         'user_name': user_name,
                         'group_roles': group_roles,
-                        'user_roles': list(set(group_user_role_list) & set(group_roles)),
+                        'user_roles': list(set(group_user_role_list) & set(group_roles)) if group_user_role_list is not None else [],
                         'user_full_name': user_full_name,
                         'user_status': user_status,
                     }
