@@ -565,7 +565,7 @@ def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
                 b.group_user_names,
                 b.group_full_names,
                 b.group_user_statuses,
-                b.group_user_role_lists
+                b.group_user_roles
                 from
                 (
                     select
@@ -577,8 +577,10 @@ def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
                     join sys_group_role gr on g.group_name = gr.group_name
                     JOIN sys_group_user gu on g.group_name = gu.group_name
                     JOIN sys_user u on gu.user_name = u.user_name
+                    left JOIN sys_role r on gr.role_name = r.role_name
                     where
-                    gu.user_name = %s
+                    r.role_status = %s
+                    and gu.user_name = %s
                     and g.group_status = %s
                     and gu.is_admin = %s
                     group by
@@ -591,7 +593,7 @@ def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
                     JSON_ARRAYAGG(gu.user_name) as group_user_names,
                     JSON_ARRAYAGG(u.user_status) as group_user_statuses,
                     JSON_ARRAYAGG(u.user_full_name) as group_full_names,
-                    JSON_ARRAYAGG(u.user_roles) as group_user_role_lists
+                    JSON_ARRAYAGG(u.user_roles) as group_user_roles
                     from
                     sys_group_user gu
                     join (
@@ -616,7 +618,7 @@ def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
                     group_name
                 ) b on a.group_name = b.group_name
             """,
-            (user_name, Status.ENABLE, Status.ENABLE, Status.ENABLE),
+            (Status.ENABLE, user_name, Status.ENABLE, Status.ENABLE, Status.ENABLE),
         )
         result = cursor.fetchall()
         all_ = []
@@ -642,7 +644,7 @@ def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
 
 
 def update_user_roles_from_group(user_name, group_name, roles_in_range):
-    '''再团队授权页，更新用户权限'''
+    """再团队授权页，更新用户权限"""
     is_ok = True
     user_roles = set(get_roles_from_user_name(user_name, exclude_disabled=True))
     roles_in_range = set(roles_in_range)
@@ -656,7 +658,7 @@ def update_user_roles_from_group(user_name, group_name, roles_in_range):
 
 
 def exists_group_name(group_name: str):
-    '''是否已经存在这个团队名'''
+    """是否已经存在这个团队名"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
             """SELECT count(1) FROM sys_group WHERE group_name = %s;""",
@@ -667,7 +669,7 @@ def exists_group_name(group_name: str):
 
 
 def create_group(group_name, group_status, group_remark, group_roles, group_admin_users, group_users):
-    '''添加团队'''
+    """添加团队"""
     if exists_group_name(group_name):
         return False
     user_name_op = util_menu_access.get_menu_access().user_name
@@ -710,7 +712,9 @@ def create_group(group_name, group_status, group_remark, group_roles, group_admi
                 )
                 # 插入团队角色表
                 if group_roles:
-                    cursor.execute(f'INSERT INTO sys_group_role (group_name,role_name) VALUES {','.join(['(%s,%s)']*len(group_roles))}', chain(*zip(repeat(group_name), group_roles)))
+                    cursor.execute(
+                        f'INSERT INTO sys_group_role (group_name,role_name) VALUES {','.join(['(%s,%s)']*len(group_roles))}', chain(*zip(repeat(group_name), group_roles))
+                    )
                 # 插入团队用户表
                 if user_names:
                     cursor.execute(f'INSERT INTO sys_group_user (group_name,user_name) VALUES {','.join(['(%s,%s)']*len(user_names))}', chain(*zip(repeat(group_name), user_names)))
@@ -724,7 +728,7 @@ def create_group(group_name, group_status, group_remark, group_roles, group_admi
 
 
 def delete_group(group_name: str) -> bool:
-    '''删除团队'''
+    """删除团队"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
             cursor.execute(
@@ -749,7 +753,7 @@ def delete_group(group_name: str) -> bool:
 
 
 def update_group(group_name, group_status, group_remark, group_roles, group_admin_users, group_users):
-    '''更新团队'''
+    """更新团队"""
     user_name_op = util_menu_access.get_menu_access().user_name
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
@@ -786,8 +790,10 @@ def update_group(group_name, group_status, group_remark, group_roles, group_admi
                 # 插入团队角色表
                 cursor.execute('delete from sys_group_role where group_name = %s', (group_roles,))
                 if group_roles:
-                    cursor.execute(f'INSERT INTO sys_group_role (group_name,role_name) VALUES {','.join(['(%s,%s)']*len(group_roles))}', chain(*zip(repeat(group_name), group_roles)))
-                # 插入团队用户表
+                    cursor.execute(
+                        f'INSERT INTO sys_group_role (group_name,role_name) VALUES {','.join(['(%s,%s)']*len(group_roles))}', chain(*zip(repeat(group_name), group_roles))
+                    )
+                    # 插入团队用户表
                     cursor.execute('delete from sys_group_user where group_name = %s', (group_roles,))
                 if user_names:
                     cursor.execute(f'INSERT INTO sys_group_user (group_name,user_name) VALUES {','.join(['(%s,%s)']*len(user_names))}', chain(*zip(repeat(group_name), user_names)))

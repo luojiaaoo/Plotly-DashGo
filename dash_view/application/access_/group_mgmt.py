@@ -55,7 +55,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                 {
                                     'key': i.group_name,
                                     **i.__dict__,
-                                    'group_status': {'tag': dao_user.get_status_str(i.group_status), 'color': 'cyan' if i.group_status else 'volcano'},
+                                    'group_status': {'tag': '启用' if i.group_status else '停用', 'color': 'cyan' if i.group_status else 'volcano'},
                                     'operation': [
                                         {
                                             'content': _('编辑'),
@@ -70,7 +70,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                         },
                                     ],
                                 }
-                                for i in dao_user.get_group_info()
+                                for i in dao_user.get_group_info(exclude_disabled=False)
                             ],
                             pageSize=10,
                         ),

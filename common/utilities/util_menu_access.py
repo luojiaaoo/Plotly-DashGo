@@ -11,7 +11,7 @@ class MenuAccess:
         from config.access_factory import AccessFactory
 
         user_name = user_info.user_name
-        all_access_metas: Set[str] = dao_user.get_user_access_meta_plus_role(user_name=user_name)
+        all_access_metas: Set[str] = dao_user.get_user_access_meta(user_name=user_name, exclude_disabled=True)
         # 所有用户添加默认权限
         all_access_metas.update(AccessFactory.default_access_meta)
         # admin角色添加默认权限
@@ -106,7 +106,7 @@ class MenuAccess:
         self.dict_access_meta2menu_item = AccessFactory.dict_access_meta2menu_item
         self.user_name = user_name
         try:
-            self.user_info: dao_user.UserInfo = dao_user.get_user_info(user_name, exclude_disabled=True, exclude_role_admin=False)[0]
+            self.user_info: dao_user.UserInfo = dao_user.get_user_info([user_name], exclude_disabled=True, exclude_role_admin=False)[0]
         except IndexError:
             raise NotFoundUsername(f'用户名不存在: {user_name}')
         # 用户所有的权限元

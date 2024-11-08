@@ -39,8 +39,8 @@ def update_delete_group(nClicksButton, clickedCustom: str):
             group_name,
         ] + [dash.no_update] * 10
     elif clickedCustom.startswith('update:'):
-        group_info = dao_user.get_group_info(group_name)[0]
-        user_names = [i.user_name for i in dao_user.get_user_info(exclude_role_admin=True)]
+        group_info = dao_user.get_group_info([group_name], exclude_disabled=False)[0]
+        user_names = [i.user_name for i in dao_user.get_user_info(exclude_disabled=True, exclude_role_admin=True)]
         return [dash.no_update] * 2 + [
             True,
             group_info.group_name,
@@ -77,7 +77,7 @@ def update_group_c(okCounts, group_name, group_status, group_remark, group_roles
             {
                 'key': i.group_name,
                 **i.__dict__,
-                'group_status': {'tag': dao_user.get_status_str(i.group_status), 'color': 'cyan' if i.group_status else 'volcano'},
+                'group_status': {'tag': '启用' if i.group_status else '停用', 'color': 'cyan' if i.group_status else 'volcano'},
                 'operation': [
                     {
                         'content': _('编辑'),
@@ -92,7 +92,7 @@ def update_group_c(okCounts, group_name, group_status, group_remark, group_roles
                     },
                 ],
             }
-            for i in dao_user.get_group_info()
+            for i in dao_user.get_group_info(exclude_disabled=False)
         ]
     else:
         MessageManager.warning(content=_('团队更新失败'))
@@ -168,14 +168,14 @@ def add_group(okCounts, group_name, group_status, group_remark, group_roles, gro
     if not group_name:
         MessageManager.warning(content=_('角色名不能为空'))
         return dash.no_update
-    rt = dao_user.add_group(group_name, group_status, group_remark, group_roles, group_admin_users, group_users)
+    rt = dao_user.create_group(group_name, group_status, group_remark, group_roles, group_admin_users, group_users)
     if rt:
         MessageManager.success(content=_('团队添加成功'))
         return [
             {
                 'key': i.group_name,
                 **i.__dict__,
-                'group_status': {'tag': dao_user.get_status_str(i.group_status), 'color': 'cyan' if i.group_status else 'volcano'},
+                'group_status': {'tag': '启用' if i.group_status else '停用', 'color': 'cyan' if i.group_status else 'volcano'},
                 'operation': [
                     {
                         'content': _('编辑'),
@@ -190,7 +190,7 @@ def add_group(okCounts, group_name, group_status, group_remark, group_roles, gro
                     },
                 ],
             }
-            for i in dao_user.get_group_info()
+            for i in dao_user.get_group_info(exclude_disabled=False)
         ]
     else:
         MessageManager.warning(content=_('团队添加失败'))
@@ -213,7 +213,7 @@ def delete_role_modal(okCounts, group_name):
             {
                 'key': i.group_name,
                 **i.__dict__,
-                'group_status': {'tag': dao_user.get_status_str(i.group_status), 'color': 'cyan' if i.group_status else 'volcano'},
+                'group_status': {'tag': '启用' if i.group_status else '停用', 'color': 'cyan' if i.group_status else 'volcano'},
                 'operation': [
                     {
                         'content': _('编辑'),
@@ -228,7 +228,7 @@ def delete_role_modal(okCounts, group_name):
                     },
                 ],
             }
-            for i in dao_user.get_group_info()
+            for i in dao_user.get_group_info(exclude_disabled=False)
         ]
     else:
         MessageManager.warning(content=_('团队删除失败'))

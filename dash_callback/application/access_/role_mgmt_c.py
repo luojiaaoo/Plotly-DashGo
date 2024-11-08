@@ -43,7 +43,7 @@ def update_delete_role(nClicksButton, clickedCustom: str):
             dash.no_update,
         ]
     elif clickedCustom.startswith('update:'):
-        role_info = dao_user.get_role_info(role_name)[0]
+        role_info = dao_user.get_role_info([role_name], exclude_disabled=False)[0]
         return [
             dash.no_update,
             dash.no_update,
@@ -78,7 +78,7 @@ def callback_func(okCounts, role_name: str, role_status: bool, role_remark: str,
             {
                 'key': i.role_name,
                 **i.__dict__,
-                'role_status': {'tag': dao_user.get_status_str(i.role_status), 'color': 'cyan' if i.role_status else 'volcano'},
+                'role_status': {'tag': '启用' if i.role_status else '停用', 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
                     {
                         'content': _('编辑'),
@@ -99,7 +99,7 @@ def callback_func(okCounts, role_name: str, role_status: bool, role_remark: str,
                     ),
                 ],
             }
-            for i in dao_user.get_role_info()
+            for i in dao_user.get_role_info(exclude_disabled=False)
         ]
     else:
         MessageManager.warning(content=_('角色更新失败'))
@@ -122,7 +122,7 @@ def delete_role_modal(okCounts, role_name):
             {
                 'key': i.role_name,
                 **i.__dict__,
-                'role_status': {'tag': dao_user.get_status_str(i.role_status), 'color': 'cyan' if i.role_status else 'volcano'},
+                'role_status': {'tag': '启用' if i.role_status else '停用', 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
                     {
                         'content': _('编辑'),
@@ -143,7 +143,7 @@ def delete_role_modal(okCounts, role_name):
                     ),
                 ],
             }
-            for i in dao_user.get_role_info()
+            for i in dao_user.get_role_info(exclude_disabled=False)
         ]
     else:
         MessageManager.warning(content=_('角色删除失败'))
@@ -204,14 +204,14 @@ def add_role_c(okCounts, name, role_status, role_remark, access_metas: List[str]
         MessageManager.warning(content=_('角色名不能为空'))
         return dash.no_update
     access_metas = [i for i in access_metas if not i.startswith('ignore:')]
-    rt = dao_user.add_role(name, role_status, role_remark, access_metas)
+    rt = dao_user.create_role(name, role_status, role_remark, access_metas)
     if rt:
         MessageManager.success(content=_('角色添加成功'))
         return [
             {
                 'key': i.role_name,
                 **i.__dict__,
-                'role_status': {'tag': dao_user.get_status_str(i.role_status), 'color': 'cyan' if i.role_status else 'volcano'},
+                'role_status': {'tag': '启用' if i.role_status else '停用', 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
                     {
                         'content': _('编辑'),
@@ -232,7 +232,7 @@ def add_role_c(okCounts, name, role_status, role_remark, access_metas: List[str]
                     ),
                 ],
             }
-            for i in dao_user.get_role_info()
+            for i in dao_user.get_role_info(exclude_disabled=False)
         ]
     else:
         MessageManager.warning(content=_('角色添加失败'))

@@ -56,7 +56,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                 {
                                     'key': i.role_name,
                                     **i.__dict__,
-                                    'role_status': {'tag': dao_user.get_status_str(i.role_status), 'color': 'cyan' if i.role_status else 'volcano'},
+                                    'role_status': {'tag': '启用' if i.role_status else '停用', 'color': 'cyan' if i.role_status else 'volcano'},
                                     'operation': [
                                         {
                                             'content': _('编辑'),
@@ -77,7 +77,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                         ),
                                     ],
                                 }
-                                for i in dao_user.get_role_info()
+                                for i in dao_user.get_role_info(exclude_disabled=False)
                             ],
                             pageSize=10,
                         ),

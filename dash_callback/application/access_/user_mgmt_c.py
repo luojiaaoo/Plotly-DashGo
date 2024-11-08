@@ -41,7 +41,7 @@ def update_delete_role(nClicksButton, clickedCustom: str):
             user_name,
         ] + [dash.no_update] * 13
     elif clickedCustom.startswith('update:'):
-        user_info = dao_user.get_user_info(user_name)[0]
+        user_info = dao_user.get_user_info([user_name], exclude_disabled=False)[0]
         return [dash.no_update] * 2 + [
             True,
             user_info.user_name,
@@ -54,7 +54,7 @@ def update_delete_role(nClicksButton, clickedCustom: str):
             '',
             user_info.user_remark,
             user_info.user_roles,
-            [i.role_name for i in dao_user.get_role_info()],
+            [i.role_name for i in dao_user.get_role_info(exclude_disabled=True)],
             False if user_name != 'admin' else True,
         ]
 
@@ -87,7 +87,7 @@ def update_user(okCounts, user_name, user_full_name, user_email, phone_number, u
             {
                 'key': i.user_name,
                 **i.__dict__,
-                'user_status': {'tag': dao_user.get_status_str(i.user_status), 'color': 'cyan' if i.user_status else 'volcano'},
+                'user_status': {'tag': '启用' if i.user_status else '停用', 'color': 'cyan' if i.user_status else 'volcano'},
                 'operation': [
                     {
                         'content': _('编辑'),
@@ -108,7 +108,7 @@ def update_user(okCounts, user_name, user_full_name, user_email, phone_number, u
                     ),
                 ],
             }
-            for i in dao_user.get_user_info()
+            for i in dao_user.get_user_info(exclude_disabled=False)
         ]
     else:
         MessageManager.warning(content=_('用户更新失败'))
@@ -128,7 +128,7 @@ def check_user_name(user_name):
     """校验新建用户名的有效性"""
     if not user_name:
         return 'error', _('请填写名用户名')
-    if not dao_user.exists_user_name(user_name, exclude_disabled=False):
+    if not dao_user.exists_user_name(user_name):
         return 'success', _('该用户名名可用')
     else:
         return 'error', _('该用户名已存在')
@@ -156,7 +156,7 @@ def open_add_role_modal(nClicks):
     """显示新建用户的弹窗"""
     from uuid import uuid4
 
-    return True, '', '', True, '', [i.role_name for i in dao_user.get_role_info()], [], '', '', str(uuid4())[:12].replace('-', ''), None, None
+    return True, '', '', True, '', [i.role_name for i in dao_user.get_role_info(exclude_disabled=True)], [], '', '', str(uuid4())[:12].replace('-', ''), None, None
 
 
 @app.callback(
@@ -180,14 +180,14 @@ def add_user(okCounts, user_name, user_full_name, user_email, phone_number, user
     if not user_name or not user_full_name or password:
         MessageManager.warning(content=_('用户名/全名/密码不能为空'))
         return dash.no_update
-    rt = dao_user.add_user(user_name, user_full_name, password, user_status, user_sex, user_roles, user_email, phone_number, user_remark)
+    rt = dao_user.create_user(user_name, user_full_name, password, user_status, user_sex, user_roles, user_email, phone_number, user_remark)
     if rt:
         MessageManager.success(content=_('用户添加成功'))
         return [
             {
                 'key': i.user_name,
                 **i.__dict__,
-                'user_status': {'tag': dao_user.get_status_str(i.user_status), 'color': 'cyan' if i.user_status else 'volcano'},
+                'user_status': {'tag': '启用' if i.user_status else '停用', 'color': 'cyan' if i.user_status else 'volcano'},
                 'operation': [
                     {
                         'content': _('编辑'),
@@ -208,7 +208,7 @@ def add_user(okCounts, user_name, user_full_name, user_email, phone_number, user
                     ),
                 ],
             }
-            for i in dao_user.get_user_info()
+            for i in dao_user.get_user_info(exclude_disabled=False)
         ]
     else:
         MessageManager.warning(content=_('用户添加失败'))
@@ -231,7 +231,7 @@ def delete_role_modal(okCounts, user_name):
             {
                 'key': i.user_name,
                 **i.__dict__,
-                'user_status': {'tag': dao_user.get_status_str(i.user_status), 'color': 'cyan' if i.user_status else 'volcano'},
+                'user_status': {'tag': '启用' if i.user_status else '停用', 'color': 'cyan' if i.user_status else 'volcano'},
                 'operation': [
                     {
                         'content': _('编辑'),
@@ -252,7 +252,7 @@ def delete_role_modal(okCounts, user_name):
                     ),
                 ],
             }
-            for i in dao_user.get_user_info()
+            for i in dao_user.get_user_info(exclude_disabled=False)
         ]
     else:
         MessageManager.warning(content=_('用户删除失败'))
