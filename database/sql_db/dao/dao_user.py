@@ -674,7 +674,7 @@ def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
 def update_user_roles_from_group(user_name, group_name, roles_in_range):
     """再团队授权页，更新用户权限"""
     is_ok = True
-    user_roles = set(get_roles_from_user_name(user_name, exclude_disabled=True))
+    user_roles = set(get_roles_from_user_name(user_name, exclude_disabled=False))
     roles_in_range = set(roles_in_range)
     # 新增的权限
     for i in set(roles_in_range) - user_roles:
