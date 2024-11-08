@@ -335,7 +335,7 @@ class RoleInfo:
 
 def get_role_info(role_names: Optional[List] = None, exclude_role_admin=False, exclude_disabled=True) -> List[RoleInfo]:
     """获取角色信息"""
-    heads = (
+    heads = [
         'role_name',
         'role_status',
         'update_datetime',
@@ -343,13 +343,14 @@ def get_role_info(role_names: Optional[List] = None, exclude_role_admin=False, e
         'create_datetime',
         'create_by',
         'role_remark',
-    )
+    ]
     with pool.get_connection() as conn, conn.cursor() as cursor:
         sql = f"""
-            SELECT {','.join(['u.'+i for i in heads])},JSON_ARRAYAGG(ram.access_meta) as access_metas
-            FROM sys_role r JOIN sys_role_access_meta ram
+            SELECT {','.join(['r.'+i for i in heads])},JSON_ARRAYAGG(ram.access_meta) as access_metas
+            FROM sys_role r left JOIN sys_role_access_meta ram
             on r.role_name = ram.role_name
         """
+        group_by = 'GROUP BY r.role_name,r.role_status,r.update_datetime,r.update_by,r.create_datetime,r.create_by,r.role_remark'
         sql_place = []
         condition = []
         if role_names is not None:
@@ -361,14 +362,14 @@ def get_role_info(role_names: Optional[List] = None, exclude_role_admin=False, e
         if exclude_disabled:
             condition.append('r.role_status=%s')
             sql_place.append(Status.ENABLE)
-        cursor.execute(f'{sql} where {" and ".join(condition)}', sql_place)
+        cursor.execute(f'{sql} {"where" if condition else ""} {" and ".join(condition)} {group_by}', sql_place)
         role_infos = []
         result = cursor.fetchall()
         for per in result:
             role_dict = dict(zip(heads + ['access_metas'], per))
             role_dict.update(
                 {
-                    'access_metas': json.loads(role_dict['access_metas']),
+                    'access_metas': [i for i in json.loads(role_dict['access_metas']) if i],
                 },
             )
             role_infos.append(RoleInfo(**role_dict))
