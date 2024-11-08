@@ -19,7 +19,10 @@ _ = partial(translator.t)
     ],
 )
 def change_role(recentlySelectRow, recentlySelectDataIndex, recentlySelectValue):
-    group_name, user_name = recentlySelectRow['key'].split(':::')
+    from uuid import uuid4
+
+    group_name = recentlySelectRow['group_name']
+    user_name = recentlySelectRow['user_name']
     if recentlySelectDataIndex != 'user_roles':
         return dash.no_update
     rt = dao_user.update_user_roles_from_group(user_name, group_name, recentlySelectValue)
@@ -27,7 +30,7 @@ def change_role(recentlySelectRow, recentlySelectDataIndex, recentlySelectValue)
         MessageManager.success(content=_('权限更新成功'))
         return [
             {
-                'key': f"{i['group_name']}:::{i['user_name']}",
+                'key': f"{i['group_name']}:::{i['user_name']}+{uuid4()}",  # 强制刷新多选数据
                 'group_name': i['group_name'],
                 'group_remark': i['group_remark'],
                 'user_name': i['user_name'],
