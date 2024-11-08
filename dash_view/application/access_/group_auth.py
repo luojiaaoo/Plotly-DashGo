@@ -26,10 +26,11 @@ def render_content(menu_access: MenuAccess, **kwargs):
             id='group-auth-table',
             columns=[
                 {'title': _('团队名称'), 'dataIndex': 'group_name', 'width': '10%'},
-                {'title': _('团队描述'), 'dataIndex': 'group_remark', 'width': '15%'},
+                {'title': _('团队描述'), 'dataIndex': 'group_remark', 'width': '10%'},
                 {'title': _('用户名'), 'dataIndex': 'user_name', 'width': '10%'},
-                {'title': _('全名'), 'dataIndex': 'user_full_name', 'width': '10%'},
-                {'title': _('角色'), 'dataIndex': 'user_roles', 'renderOptions': {'renderType': 'select'}, 'width': '55%'},
+                {'title': _('用户全名'), 'dataIndex': 'user_full_name', 'width': '10%'},
+                {'title': _('用户状态'), 'dataIndex': 'user_status', 'renderOptions': {'renderType': 'tags'}, 'width': '10%'},
+                {'title': _('用户角色'), 'dataIndex': 'user_roles', 'renderOptions': {'renderType': 'select'}, 'width': '50%'},
             ],
             data=[
                 {
@@ -37,8 +38,8 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     'group_name': i['group_name'],
                     'group_remark': i['group_remark'],
                     'user_name': i['user_name'],
-                    'user_status': i['user_status'],
                     'user_full_name': i['user_full_name'],
+                    'user_status': {'tag': '启用' if i['user_status'] else '停用', 'color': 'cyan' if i['user_status'] else 'volcano'},
                     'user_roles': {
                         'options': [{'label': group_role, 'value': group_role} for group_role in i['group_roles']],
                         'mode': 'multiple',
