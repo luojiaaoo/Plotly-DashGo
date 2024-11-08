@@ -699,7 +699,7 @@ def create_group(group_name, group_status, group_remark, group_roles, group_admi
                 )
                 if len(list(cursor.fetchall())) != len(group_roles):
                     is_ok = False
-            user_names = set(*group_admin_users, *group_users)
+            user_names = set([*group_admin_users, *group_users])
             # 给用户表加锁，保证加入的成员和管理员都存在
             if is_ok and user_names:
                 cursor.execute(
@@ -708,7 +708,7 @@ def create_group(group_name, group_status, group_remark, group_roles, group_admi
                 )
                 if cursor.fetchall()[0][0] != len(user_names):
                     is_ok = False
-            else:
+            if is_ok:
                 cursor.execute(
                     """
                     INSERT INTO sys_group (group_name,group_status,update_datetime,update_by,create_datetime,create_by,group_remark) 
@@ -809,9 +809,12 @@ def update_group(group_name, group_status, group_remark, group_roles, group_admi
                         f'INSERT INTO sys_group_role (group_name,role_name) VALUES {",".join(["(%s,%s)"]*len(group_roles))}', list(chain(*zip(repeat(group_name), group_roles)))
                     )
                     # 插入团队用户表
-                    cursor.execute('delete from sys_group_user where group_name = %s', (group_name,))
+                cursor.execute('delete from sys_group_user where group_name = %s', (group_name,))
                 if user_names:
-                    cursor.execute(f'INSERT INTO sys_group_user (group_name,user_name) VALUES {",".join(["(%s,%s)"]*len(user_names))}', list(chain(*zip(repeat(group_name), user_names))))
+                    cursor.execute(
+                        f'INSERT INTO sys_group_user (group_name,user_name,is_admin) VALUES {",".join(["(%s,%s,%s)"]*len(user_names))}',
+                        list(chain(*zip(repeat(group_name), user_names, [(Status.ENABLE if i in group_admin_users else Status.DISABLE) for i in user_names]))),
+                    )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新团队{group_name}时，出现异常', exc_info=True)
             conn.rollback()

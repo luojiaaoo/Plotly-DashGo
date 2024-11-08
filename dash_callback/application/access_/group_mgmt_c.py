@@ -166,7 +166,7 @@ def show_add_group_modal(nClicks):
 def add_group(okCounts, group_name, group_status, group_remark, group_roles, group_admin_users, group_users):
     """新建团队"""
     if not group_name:
-        MessageManager.warning(content=_('角色名不能为空'))
+        MessageManager.warning(content=_('团队名不能为空'))
         return dash.no_update
     rt = dao_user.create_group(group_name, group_status, group_remark, group_roles, group_admin_users, group_users)
     if rt:
