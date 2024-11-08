@@ -11,7 +11,7 @@
  Target Server Version : 50744 (5.7.44)
  File Encoding         : 65001
 
- Date: 08/11/2024 15:05:18
+ Date: 08/11/2024 15:39:14
 */
 
 SET NAMES utf8mb4;
@@ -109,8 +109,6 @@ CREATE TABLE `sys_role_access_meta`  (
 -- ----------------------------
 -- Records of sys_role_access_meta
 -- ----------------------------
-INSERT INTO `sys_role_access_meta` VALUES ('admin', 'aa');
-INSERT INTO `sys_role_access_meta` VALUES ('admin', 'bb');
 
 -- ----------------------------
 -- Table structure for sys_user
@@ -155,7 +153,5 @@ CREATE TABLE `sys_user_role`  (
 -- Records of sys_user_role
 -- ----------------------------
 INSERT INTO `sys_user_role` VALUES ('admin', 'admin');
-INSERT INTO `sys_user_role` VALUES ('admin', 'admin2');
-INSERT INTO `sys_user_role` VALUES ('xiaoHong', '支付余额查看');
 
 SET FOREIGN_KEY_CHECKS = 1;

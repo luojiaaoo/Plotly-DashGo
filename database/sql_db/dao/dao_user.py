@@ -41,9 +41,9 @@ def user_password_verify(user_name: str, password_sha256: str) -> bool:
 def get_all_access_meta_for_setup_check() -> List[str]:
     """获取所有权限，对应用权限检查"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
-        cursor.execute("""SELECT access_metas FROM sys_role;""")
+        cursor.execute("""SELECT access_meta FROM sys_role_access_meta;""")
         result = cursor.fetchall()
-        return chain(*[json.loads(per_rt[0]) for per_rt in result])
+        return [per[0] for per in result]
 
 
 ########################### 用户
@@ -87,7 +87,7 @@ def get_user_info(user_names: Optional[List] = None, exclude_role_admin=False, e
         condition = []
         sql_place = []
         if user_names is not None:
-            condition.append(f"u.user_name in ({','.join(['%s']*len(user_names))})")
+            condition.append(f'u.user_name in ({",".join(["%s"]*len(user_names))})')
             sql_place.extend(user_names)
         if exclude_role_admin:
             condition.append("JSON_SEARCH(user_roles,'one',%s) IS NULL")
@@ -164,7 +164,7 @@ def update_user(user_name, user_full_name, password, user_status: bool, user_sex
             # 给sys_role表加锁，保证加入的角色和团队都存在
             if is_ok and user_roles:
                 cursor.execute(
-                    f'select r.role_name from sys_role r join sys_role_access_meta ram on r.role_name=ram.role_name group by r.role_name having r.role_name in ({','.join(['%s']*len(user_roles))}) for update;',
+                    f'select r.role_name from sys_role r join sys_role_access_meta ram on r.role_name=ram.role_name group by r.role_name having r.role_name in ({",".join(["%s"]*len(user_roles))}) for update;',
                     tuple(user_roles),
                 )
                 if len(list(cursor.fetchall())) != len(user_roles):
@@ -191,7 +191,7 @@ def update_user(user_name, user_full_name, password, user_status: bool, user_sex
                 )
                 cursor.execute('delete from sys_user_role where user_name = %s', (user_name,))
                 if user_roles:
-                    cursor.execute(f'INSERT INTO sys_user_role (user_name,role_name) VALUES {','.join(['(%s,%s)']*len(user_roles))}', chain(*zip(repeat(user_name), user_roles)))
+                    cursor.execute(f'INSERT INTO sys_user_role (user_name,role_name) VALUES {",".join(["(%s,%s)"]*len(user_roles))}', chain(*zip(repeat(user_name), user_roles)))
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新用户{user_name}时，出现异常', exc_info=True)
             conn.rollback()
@@ -225,7 +225,7 @@ def create_user(
             # 给sys_role表加锁，保证加入的角色存在
             if is_ok and user_roles:
                 cursor.execute(
-                    f'select r.role_name from sys_role r join sys_role_access_meta ram on r.role_name=ram.role_name group by r.role_name having r.role_name in ({','.join(['%s']*len(user_roles))}) for update;',
+                    f'select r.role_name from sys_role r join sys_role_access_meta ram on r.role_name=ram.role_name group by r.role_name having r.role_name in ({",".join(["%s"]*len(user_roles))}) for update;',
                     tuple(user_roles),
                 )
                 if len(list(cursor.fetchall())) != len(user_roles):
@@ -253,7 +253,7 @@ def create_user(
                     ),
                 )
                 if user_roles:
-                    cursor.execute(f'INSERT INTO sys_user_role (user_name,role_name) VALUES {','.join(['(%s,%s)']*len(user_roles))}', chain(*zip(repeat(user_name), user_roles)))
+                    cursor.execute(f'INSERT INTO sys_user_role (user_name,role_name) VALUES {",".join(["(%s,%s)"]*len(user_roles))}', chain(*zip(repeat(user_name), user_roles)))
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}添加用户{user_name}时，出现异常', exc_info=True)
             conn.rollback()
@@ -308,15 +308,17 @@ def get_roles_from_user_name(user_name: str, exclude_disabled=True) -> List[str]
 def get_user_access_meta(user_name: str, exclude_disabled=True) -> Set[str]:
     """根据用户名查询权限元"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
-        sql = 'SELECT JSON_ARRAYAGG(ram.access_meta) FROM sys_user u JOIN sys_user_role ur on u.user_name=ur.user_name join sys_role r on role_name = r.role_name join sys_role_access_meta ram on r.role_name = ram.role_name where u.user_name = %s'
+        sql = 'SELECT JSON_ARRAYAGG(ram.access_meta) FROM sys_user u JOIN sys_user_role ur on u.user_name=ur.user_name join sys_role r on ur.role_name = r.role_name join sys_role_access_meta ram on r.role_name = ram.role_name where u.user_name = %s'
         sql_place = [user_name]
         if exclude_disabled:
             sql += ' and u.user_status=%s and r.role_status=%s'
             sql_place.extend([Status.ENABLE, Status.ENABLE])
         cursor.execute(sql, sql_place)
         result = cursor.fetchone()
+        if result[0] is None:
+            return set()
         access_metas = json.loads(result[0])
-        return access_metas
+        return set(access_metas)
 
 
 @dataclass
@@ -351,7 +353,7 @@ def get_role_info(role_names: Optional[List] = None, exclude_role_admin=False, e
         sql_place = []
         condition = []
         if role_names is not None:
-            condition.append(f"r.role_name in ({','.join(['%s']*len(role_names))})")
+            condition.append(f'r.role_name in ({",".join(["%s"]*len(role_names))})')
             sql_place.extend(role_names)
         if exclude_role_admin:
             condition.append('r.role_name != %s')
@@ -430,7 +432,7 @@ def create_role(role_name, role_status: bool, role_remark, access_metas):
             )
             if access_metas:
                 cursor.execute(
-                    f'INSERT INTO sys_role_access_meta (role_name,access_meta) VALUES {','.join(['(%s,%s)']*len(access_metas))}', chain(*zip(repeat(role_name), access_metas))
+                    f'INSERT INTO sys_role_access_meta (role_name,access_meta) VALUES {",".join(["(%s,%s)"]*len(access_metas))}', chain(*zip(repeat(role_name), access_metas))
                 )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}创建角色{role_name}时，出现异常', exc_info=True)
@@ -463,7 +465,7 @@ def update_role(role_name, role_status: bool, role_remark, access_metas: List[st
             )
             cursor.execute('delete from sys_role_access_meta where role_name = %s', (role_name,))
             if access_metas:
-                cursor.execute(f'INSERT INTO role_name (role_name,access_meta) VALUES {','.join(['(%s,%s)']*len(access_metas))}', chain(*zip(repeat(role_name), access_metas)))
+                cursor.execute(f'INSERT INTO role_name (role_name,access_meta) VALUES {",".join(["(%s,%s)"]*len(access_metas))}', chain(*zip(repeat(role_name), access_metas)))
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新角色{role_name}时，出现异常', exc_info=True)
             conn.rollback()
@@ -509,7 +511,7 @@ def get_group_info(group_names: Optional[List] = None, exclude_disabled=True) ->
         sql_place = [Status.ENABLE, 'is_admin:']
         condition = []
         if group_names is not None:
-            condition.append(f'g.group_name in ({','.join(['%s']*len(group_names))})')
+            condition.append(f'g.group_name in ({",".join(["%s"]*len(group_names))})')
             sql_place.extend(group_names)
         if exclude_disabled:
             condition.append('group_status!=%s')
@@ -679,7 +681,7 @@ def create_group(group_name, group_status, group_remark, group_roles, group_admi
             # 给sys_role表加锁，保证加入的角色都存在
             if is_ok and group_roles:
                 cursor.execute(
-                    f'select r.role_name from sys_role r join sys_role_access_meta ram on r.role_name=ram.role_name group by r.role_name having r.role_name in ({','.join(['%s']*len(user_roles))}) for update;',
+                    f'select r.role_name from sys_role r join sys_role_access_meta ram on r.role_name=ram.role_name group by r.role_name having r.role_name in ({",".join(["%s"]*len(user_roles))}) for update;',
                     tuple(group_roles),
                 )
                 if len(list(cursor.fetchall())) != len(group_roles):
@@ -688,7 +690,7 @@ def create_group(group_name, group_status, group_remark, group_roles, group_admi
             # 给用户表加锁，保证加入的成员和管理员都存在
             if is_ok and user_names:
                 cursor.execute(
-                    f"""SELECT count(1) FROM sys_user WHERE user_name in ({','.join(['%s']*len(user_names))}) for update;""",
+                    f"""SELECT count(1) FROM sys_user WHERE user_name in ({",".join(["%s"]*len(user_names))}) for update;""",
                     tuple(user_names),
                 )
                 if cursor.fetchall()[0][0] != len(user_names):
@@ -713,11 +715,11 @@ def create_group(group_name, group_status, group_remark, group_roles, group_admi
                 # 插入团队角色表
                 if group_roles:
                     cursor.execute(
-                        f'INSERT INTO sys_group_role (group_name,role_name) VALUES {','.join(['(%s,%s)']*len(group_roles))}', chain(*zip(repeat(group_name), group_roles))
+                        f'INSERT INTO sys_group_role (group_name,role_name) VALUES {",".join(["(%s,%s)"]*len(group_roles))}', chain(*zip(repeat(group_name), group_roles))
                     )
                 # 插入团队用户表
                 if user_names:
-                    cursor.execute(f'INSERT INTO sys_group_user (group_name,user_name) VALUES {','.join(['(%s,%s)']*len(user_names))}', chain(*zip(repeat(group_name), user_names)))
+                    cursor.execute(f'INSERT INTO sys_group_user (group_name,user_name) VALUES {",".join(["(%s,%s)"]*len(user_names))}', chain(*zip(repeat(group_name), user_names)))
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}添加团队{group_name}时，出现异常', exc_info=True)
             conn.rollback()
@@ -761,7 +763,7 @@ def update_group(group_name, group_status, group_remark, group_roles, group_admi
             # 给sys_role表加锁，保证加入的角色都存在
             if is_ok and group_roles:
                 cursor.execute(
-                    f'select r.role_name from sys_role r join sys_role_access_meta ram on r.role_name=ram.role_name group by r.role_name having r.role_name in ({','.join(['%s']*len(user_roles))}) for update;',
+                    f'select r.role_name from sys_role r join sys_role_access_meta ram on r.role_name=ram.role_name group by r.role_name having r.role_name in ({",".join(["%s"]*len(user_roles))}) for update;',
                     tuple(group_roles),
                 )
                 if len(list(cursor.fetchall())) != len(group_roles):
@@ -770,7 +772,7 @@ def update_group(group_name, group_status, group_remark, group_roles, group_admi
             # 给用户表加锁，保证加入的成员和管理员都存在
             if is_ok and user_names:
                 cursor.execute(
-                    f"""SELECT count(1) FROM sys_user WHERE user_name in ({','.join(['%s']*len(user_names))}) for update;""",
+                    f"""SELECT count(1) FROM sys_user WHERE user_name in ({",".join(["%s"]*len(user_names))}) for update;""",
                     tuple(user_names),
                 )
                 if cursor.fetchall()[0][0] != len(user_names):
@@ -791,12 +793,12 @@ def update_group(group_name, group_status, group_remark, group_roles, group_admi
                 cursor.execute('delete from sys_group_role where group_name = %s', (group_roles,))
                 if group_roles:
                     cursor.execute(
-                        f'INSERT INTO sys_group_role (group_name,role_name) VALUES {','.join(['(%s,%s)']*len(group_roles))}', chain(*zip(repeat(group_name), group_roles))
+                        f'INSERT INTO sys_group_role (group_name,role_name) VALUES {",".join(["(%s,%s)"]*len(group_roles))}', chain(*zip(repeat(group_name), group_roles))
                     )
                     # 插入团队用户表
                     cursor.execute('delete from sys_group_user where group_name = %s', (group_roles,))
                 if user_names:
-                    cursor.execute(f'INSERT INTO sys_group_user (group_name,user_name) VALUES {','.join(['(%s,%s)']*len(user_names))}', chain(*zip(repeat(group_name), user_names)))
+                    cursor.execute(f'INSERT INTO sys_group_user (group_name,user_name) VALUES {",".join(["(%s,%s)"]*len(user_names))}', chain(*zip(repeat(group_name), user_names)))
         except Exception as e:
             conn.rollback()
             return False

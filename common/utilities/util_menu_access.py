@@ -1,4 +1,3 @@
-from database.sql_db.dao import dao_user
 from typing import Set
 from common.exception import NotFoundUsername
 from common.utilities.util_logger import Log
@@ -7,9 +6,11 @@ logger = Log.get_logger(__name__)
 
 
 class MenuAccess:
-    def get_user_all_access_metas(cls, user_info: dao_user.UserInfo) -> Set[str]:
+    def get_user_all_access_metas(cls, user_info) -> Set[str]:
+        from database.sql_db.dao import dao_user
         from config.access_factory import AccessFactory
 
+        user_info: dao_user.UserInfo = user_info
         user_name = user_info.user_name
         all_access_metas: Set[str] = dao_user.get_user_access_meta(user_name=user_name, exclude_disabled=True)
         # 所有用户添加默认权限
@@ -101,6 +102,7 @@ class MenuAccess:
 
     def __init__(self, user_name) -> None:
         from config.access_factory import AccessFactory
+        from database.sql_db.dao import dao_user
 
         # 获取应用全部的权限元和菜单的对应关系
         self.dict_access_meta2menu_item = AccessFactory.dict_access_meta2menu_item
