@@ -257,7 +257,9 @@ def create_user(
                     ),
                 )
                 if user_roles:
-                    cursor.execute(f'INSERT INTO sys_user_role (user_name,role_name) VALUES {",".join(["(%s,%s)"]*len(user_roles))}', chain(*zip(repeat(user_name), user_roles)))
+                    cursor.execute(
+                        f'INSERT INTO sys_user_role (user_name,role_name) VALUES {",".join(["(%s,%s)"]*len(user_roles))}', list(chain(*zip(repeat(user_name), user_roles)))
+                    )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}添加用户{user_name}时，出现异常', exc_info=True)
             conn.rollback()
@@ -298,7 +300,9 @@ def delete_user(user_name: str) -> bool:
 def get_roles_from_user_name(user_name: str, exclude_disabled=True) -> List[str]:
     """根据用户查询角色"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
-        sql = 'SELECT JSON_ARRAYAGG(r.role_name) FROM sys_user u JOIN sys_user_role ur on u.user_name=ur.user_name join sys_role r on ur.role_name = r.role_name where u.user_name=%s'
+        sql = (
+            'SELECT JSON_ARRAYAGG(r.role_name) FROM sys_user u JOIN sys_user_role ur on u.user_name=ur.user_name join sys_role r on ur.role_name = r.role_name where u.user_name=%s'
+        )
         sql_place = [user_name]
         if exclude_disabled:
             sql += ' and u.user_status=%s and r.role_status=%s'
@@ -730,11 +734,13 @@ def create_group(group_name, group_status, group_remark, group_roles, group_admi
                 # 插入团队角色表
                 if group_roles:
                     cursor.execute(
-                        f'INSERT INTO sys_group_role (group_name,role_name) VALUES {",".join(["(%s,%s)"]*len(group_roles))}', chain(*zip(repeat(group_name), group_roles))
+                        f'INSERT INTO sys_group_role (group_name,role_name) VALUES {",".join(["(%s,%s)"]*len(group_roles))}', list(chain(*zip(repeat(group_name), group_roles)))
                     )
                 # 插入团队用户表
                 if user_names:
-                    cursor.execute(f'INSERT INTO sys_group_user (group_name,user_name) VALUES {",".join(["(%s,%s)"]*len(user_names))}', chain(*zip(repeat(group_name), user_names)))
+                    cursor.execute(
+                        f'INSERT INTO sys_group_user (group_name,user_name) VALUES {",".join(["(%s,%s)"]*len(user_names))}', list(chain(*zip(repeat(group_name), user_names)))
+                    )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}添加团队{group_name}时，出现异常', exc_info=True)
             conn.rollback()
@@ -795,13 +801,13 @@ def update_group(group_name, group_status, group_remark, group_roles, group_admi
             if is_ok:
                 cursor.execute(
                     """
-                    update sys_group set group_name=%s,group_status=%s,update_datetime=%s,update_by=%s,group_remark=%s;""",
+                    update sys_group set group_status=%s,update_datetime=%s,update_by=%s,group_remark=%s where group_name=%s;""",
                     (
-                        group_name,
                         group_status,
                         datetime.now(),
                         user_name_op,
                         group_remark,
+                        group_name,
                     ),
                 )
                 # 插入团队角色表
