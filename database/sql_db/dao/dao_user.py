@@ -80,7 +80,7 @@ def get_user_info(user_names: Optional[List] = None, exclude_role_admin=False, e
     ]
     with pool.get_connection() as conn, conn.cursor() as cursor:
         sql = f"""
-            SELECT {','.join(['u.'+i for i in heads])},JSON_ARRAYAGG(ur.user_role) as user_roles
+            SELECT {','.join(['u.'+i for i in heads])},JSON_ARRAYAGG(role_name) as user_roles
             FROM sys_user u JOIN sys_user_role ur 
             on u.user_name = ur.user_name
         """
@@ -222,7 +222,7 @@ def create_user(
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
             is_ok = True
-            # 给sys_role表加锁，保证加入的角色和团队都存在
+            # 给sys_role表加锁，保证加入的角色存在
             if is_ok and user_roles:
                 cursor.execute(
                     f'select r.role_name from sys_role r join sys_role_access_meta ram on r.role_name=ram.role_name group by r.role_name having r.role_name in ({','.join(['%s']*len(user_roles))}) for update;',
@@ -294,9 +294,7 @@ def delete_user(user_name: str) -> bool:
 def get_roles_from_user_name(user_name: str, exclude_disabled=True) -> List[str]:
     """根据用户查询角色"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
-        sql = (
-            'SELECT JSON_ARRAYAGG(r.role_name) FROM sys_user u JOIN sys_user_role ur on u.user_name=ur.user_name join sys_role r on ur.user_role = r.role_name where u.user_name=%s'
-        )
+        sql = 'SELECT JSON_ARRAYAGG(r.role_name) FROM sys_user u JOIN sys_user_role ur on u.user_name=ur.user_name join sys_role r on role_name = r.role_name where u.user_name=%s'
         sql_place = [user_name]
         if exclude_disabled:
             sql += ' and u.user_status=%s and r.role_status=%s'
@@ -310,7 +308,7 @@ def get_roles_from_user_name(user_name: str, exclude_disabled=True) -> List[str]
 def get_user_access_meta(user_name: str, exclude_disabled=True) -> Set[str]:
     """根据用户名查询权限元"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
-        sql = 'SELECT JSON_ARRAYAGG(ram.access_meta) FROM sys_user u JOIN sys_user_role ur on u.user_name=ur.user_name join sys_role r on ur.user_role = r.role_name join sys_role_access_meta ram on r.role_name = ram.role_name where u.user_name = %s'
+        sql = 'SELECT JSON_ARRAYAGG(ram.access_meta) FROM sys_user u JOIN sys_user_role ur on u.user_name=ur.user_name join sys_role r on role_name = r.role_name join sys_role_access_meta ram on r.role_name = ram.role_name where u.user_name = %s'
         sql_place = [user_name]
         if exclude_disabled:
             sql += ' and u.user_status=%s and r.role_status=%s'
@@ -555,8 +553,8 @@ def is_group_admin(user_name) -> bool:
         return bool(result[0])
 
 
-def get_dict_group_name_users_roles(user_name, exclude_disabled=False) -> Dict[str, Union[str, Set]]:
-    """根据用户名获取可管理的团队、人员和可管理的角色"""
+def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
+    """根据用户名获取可管理的团队、人员和可管理的角色，排除禁用的管理员用户"""
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
             """        
@@ -566,13 +564,14 @@ def get_dict_group_name_users_roles(user_name, exclude_disabled=False) -> Dict[s
                 a.group_roles,
                 b.group_user_names,
                 b.group_full_names,
-                b.group_user_statuses
+                b.group_user_statuses,
+                b.group_user_role_lists
                 from
                 (
                     select
                     g.group_name,
                     g.group_remark,
-                    JSON_ARRAYAGG (gr.role_name) as group_roles
+                    JSON_ARRAYAGG(gr.role_name) as group_roles
                     from
                     sys_group g
                     join sys_group_role gr on g.group_name = gr.group_name
@@ -589,53 +588,75 @@ def get_dict_group_name_users_roles(user_name, exclude_disabled=False) -> Dict[s
                 join (
                     select
                     gu.group_name,
-                    JSON_ARRAYAGG (gu.user_name) as group_user_names,
-                    JSON_ARRAYAGG (u.user_status) as group_user_statuses,
-                    JSON_ARRAYAGG (u.user_full_name) as group_full_names
+                    JSON_ARRAYAGG(gu.user_name) as group_user_names,
+                    JSON_ARRAYAGG(u.user_status) as group_user_statuses,
+                    JSON_ARRAYAGG(u.user_full_name) as group_full_names,
+                    JSON_ARRAYAGG(u.user_roles) as group_user_role_lists
                     from
                     sys_group_user gu
-                    join sys_user u on gu.user_name = u.user_name
+                    join (
+                        select
+                        u.user_name,
+                        u.user_full_name,
+                        u.user_status,
+                        JSON_ARRAYAGG(ur.role_name) as user_roles
+                        from
+                        sys_user u
+                        left JOIN sys_user_role ur on u.user_name = ur.user_name
+                        left JOIN sys_role r on ur.role_name = r.role_name
+                        WHERE
+                        r.role_status = %s
+                        or r.role_status is Null
+                        group by
+                        u.user_name,
+                        u.user_full_name,
+                        u.user_status
+                    ) u on gu.user_name = u.user_name
                     group by
                     group_name
                 ) b on a.group_name = b.group_name
             """,
-            (user_name, Status.ENABLE, Status.ENABLE),
+            (user_name, Status.ENABLE, Status.ENABLE, Status.ENABLE),
         )
         result = cursor.fetchall()
         all_ = []
-        for group_name, group_remark, group_roles, group_user_names, group_user_full_names, group_user_status in result:
-            group_users = json.loads(group_users)
+        for group_name, group_remark, group_roles, group_user_names, group_user_full_names, group_user_statuses, group_user_role_lists in result:
             group_roles = json.loads(group_roles)
-            for user_name in group_users:
-                if exclude_disabled and (not group_status or not filter_users_enabled([user_name])):
-                    continue
+            group_user_names = json.loads(group_user_names)
+            group_user_full_names = json.loads(group_user_full_names)
+            group_user_statuses = json.loads(group_user_statuses)
+            group_user_role_lists = json.loads(group_user_role_lists)
+            for user_name, user_full_name, user_status, group_user_role_list in zip(group_user_names, group_user_full_names, group_user_statuses, group_user_role_lists):
                 all_.append(
                     {
                         'group_remark': group_remark,
                         'group_name': group_name,
                         'user_name': user_name,
                         'group_roles': group_roles,
-                        'user_roles': list(set(get_roles_from_user_name(user_name, exclude_disabled=True)) & set(group_roles)),
-                        'user_full_name': get_user_info(user_name)[0].user_full_name,
+                        'user_roles': list(set(group_user_role_list) & set(group_roles)),
+                        'user_full_name': user_full_name,
+                        'user_status': user_status,
                     }
                 )
         return all_
 
 
 def update_user_roles_from_group(user_name, group_name, roles_in_range):
+    '''再团队授权页，更新用户权限'''
     is_ok = True
     user_roles = set(get_roles_from_user_name(user_name, exclude_disabled=True))
     roles_in_range = set(roles_in_range)
     # 新增的权限
     for i in set(roles_in_range) - user_roles:
-        is_ok = is_ok and add_role2user(user_name, i)
+        is_ok = is_ok and add_role_for_user(user_name, i)
     # 需要删除的权限
-    for i in user_roles & (set(get_group_info(group_name)[0].group_roles) - roles_in_range):
-        is_ok = is_ok and del_role2user(user_name, i)
+    for i in user_roles & (set(get_group_info([group_name])[0].group_roles) - roles_in_range):
+        is_ok = is_ok and del_role_for_user(user_name, i)
     return is_ok
 
 
 def exists_group_name(group_name: str):
+    '''是否已经存在这个团队名'''
     with pool.get_connection() as conn, conn.cursor() as cursor:
         cursor.execute(
             """SELECT count(1) FROM sys_group WHERE group_name = %s;""",
@@ -645,7 +666,8 @@ def exists_group_name(group_name: str):
         return bool(result[0])
 
 
-def add_group(group_name, group_status, group_remark, group_roles, group_admin_users, group_users):
+def create_group(group_name, group_status, group_remark, group_roles, group_admin_users, group_users):
+    '''添加团队'''
     if exists_group_name(group_name):
         return False
     user_name_op = util_menu_access.get_menu_access().user_name
@@ -655,12 +677,12 @@ def add_group(group_name, group_status, group_remark, group_roles, group_admin_u
             # 给sys_role表加锁，保证加入的角色都存在
             if is_ok and group_roles:
                 cursor.execute(
-                    f"""SELECT count(1) FROM sys_role WHERE role_name in ({','.join(['%s']*len(group_roles))}) for update;""",
+                    f'select r.role_name from sys_role r join sys_role_access_meta ram on r.role_name=ram.role_name group by r.role_name having r.role_name in ({','.join(['%s']*len(user_roles))}) for update;',
                     tuple(group_roles),
                 )
-                if cursor.fetchall()[0][0] != len(group_roles):
+                if len(list(cursor.fetchall())) != len(group_roles):
                     is_ok = False
-            user_names = (*group_admin_users, *group_users)
+            user_names = set(*group_admin_users, *group_users)
             # 给用户表加锁，保证加入的成员和管理员都存在
             if is_ok and user_names:
                 cursor.execute(
@@ -672,16 +694,13 @@ def add_group(group_name, group_status, group_remark, group_roles, group_admin_u
             else:
                 cursor.execute(
                     """
-                    INSERT INTO sys_group (group_name,group_status,group_roles,group_users,group_admin_users,update_datetime,update_by,create_datetime,create_by,group_remark) 
+                    INSERT INTO sys_group (group_name,group_status,update_datetime,update_by,create_datetime,create_by,group_remark) 
                     VALUES 
-                    (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);
+                    (%s,%s,%s,%s,%s,%s,%s);
                     """,
                     (
                         group_name,
-                        get_status_str(group_status),
-                        json.dumps(group_roles, ensure_ascii=False),
-                        json.dumps(group_users, ensure_ascii=False),
-                        json.dumps(group_admin_users, ensure_ascii=False),
+                        group_status,
                         datetime.now(),
                         user_name_op,
                         datetime.now(),
@@ -689,7 +708,14 @@ def add_group(group_name, group_status, group_remark, group_roles, group_admin_u
                         group_remark,
                     ),
                 )
+                # 插入团队角色表
+                if group_roles:
+                    cursor.execute(f'INSERT INTO sys_group_role (group_name,role_name) VALUES {','.join(['(%s,%s)']*len(group_roles))}', chain(*zip(repeat(group_name), group_roles)))
+                # 插入团队用户表
+                if user_names:
+                    cursor.execute(f'INSERT INTO sys_group_user (group_name,user_name) VALUES {','.join(['(%s,%s)']*len(user_names))}', chain(*zip(repeat(group_name), user_names)))
         except Exception as e:
+            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}添加团队{group_name}时，出现异常', exc_info=True)
             conn.rollback()
             return False
         else:
@@ -698,13 +724,23 @@ def add_group(group_name, group_status, group_remark, group_roles, group_admin_u
 
 
 def delete_group(group_name: str) -> bool:
+    '''删除团队'''
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
             cursor.execute(
                 """delete FROM sys_group where group_name=%s;""",
                 (group_name,),
             )
+            cursor.execute(
+                """delete FROM sys_group_role where group_name=%s;""",
+                (group_name,),
+            )
+            cursor.execute(
+                """delete FROM sys_group_user where group_name=%s;""",
+                (group_name,),
+            )
         except Exception as e:
+            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}删除团队{group_name}时，出现异常', exc_info=True)
             conn.rollback()
             return False
         else:
@@ -713,6 +749,7 @@ def delete_group(group_name: str) -> bool:
 
 
 def update_group(group_name, group_status, group_remark, group_roles, group_admin_users, group_users):
+    '''更新团队'''
     user_name_op = util_menu_access.get_menu_access().user_name
     with pool.get_connection() as conn, conn.cursor() as cursor:
         try:
@@ -720,10 +757,10 @@ def update_group(group_name, group_status, group_remark, group_roles, group_admi
             # 给sys_role表加锁，保证加入的角色都存在
             if is_ok and group_roles:
                 cursor.execute(
-                    f"""SELECT count(1) FROM sys_role WHERE role_name in ({','.join(['%s']*len(group_roles))}) for update;""",
+                    f'select r.role_name from sys_role r join sys_role_access_meta ram on r.role_name=ram.role_name group by r.role_name having r.role_name in ({','.join(['%s']*len(user_roles))}) for update;',
                     tuple(group_roles),
                 )
-                if cursor.fetchall()[0][0] != len(group_roles):
+                if len(list(cursor.fetchall())) != len(group_roles):
                     is_ok = False
             user_names = set([*group_admin_users, *group_users])
             # 给用户表加锁，保证加入的成员和管理员都存在
@@ -737,18 +774,23 @@ def update_group(group_name, group_status, group_remark, group_roles, group_admi
             if is_ok:
                 cursor.execute(
                     """
-                    update sys_group set group_name=%s,group_status=%s,group_roles=%s,group_users=%s,group_admin_users=%s,update_datetime=%s,update_by=%s,group_remark=%s;""",
+                    update sys_group set group_name=%s,group_status=%s,update_datetime=%s,update_by=%s,group_remark=%s;""",
                     (
                         group_name,
-                        get_status_str(group_status),
-                        json.dumps(group_roles, ensure_ascii=False),
-                        json.dumps(group_users, ensure_ascii=False),
-                        json.dumps(group_admin_users, ensure_ascii=False),
+                        group_status,
                         datetime.now(),
                         user_name_op,
                         group_remark,
                     ),
                 )
+                # 插入团队角色表
+                cursor.execute('delete from sys_group_role where group_name = %s', (group_roles,))
+                if group_roles:
+                    cursor.execute(f'INSERT INTO sys_group_role (group_name,role_name) VALUES {','.join(['(%s,%s)']*len(group_roles))}', chain(*zip(repeat(group_name), group_roles)))
+                # 插入团队用户表
+                    cursor.execute('delete from sys_group_user where group_name = %s', (group_roles,))
+                if user_names:
+                    cursor.execute(f'INSERT INTO sys_group_user (group_name,user_name) VALUES {','.join(['(%s,%s)']*len(user_names))}', chain(*zip(repeat(group_name), user_names)))
         except Exception as e:
             conn.rollback()
             return False
