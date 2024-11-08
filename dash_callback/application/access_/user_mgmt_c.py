@@ -177,7 +177,7 @@ def open_add_role_modal(nClicks):
 )
 def add_user(okCounts, user_name, user_full_name, user_email, phone_number, user_status: bool, user_sex, password, user_remark, user_roles):
     """新建用户"""
-    if not user_name or not user_full_name or password:
+    if not user_name or not user_full_name or not password:
         MessageManager.warning(content=_('用户名/全名/密码不能为空'))
         return dash.no_update
     rt = dao_user.create_user(user_name, user_full_name, password, user_status, user_sex, user_roles, user_email, phone_number, user_remark)
