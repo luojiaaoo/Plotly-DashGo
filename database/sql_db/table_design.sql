@@ -1,7 +1,7 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : app
+ Source Server         : dashMelon
  Source Server Type    : MySQL
  Source Server Version : 50744 (5.7.44)
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 50744 (5.7.44)
  File Encoding         : 65001
 
- Date: 06/11/2024 23:55:13
+ Date: 08/11/2024 15:05:18
 */
 
 SET NAMES utf8mb4;
@@ -24,8 +24,6 @@ DROP TABLE IF EXISTS `sys_group`;
 CREATE TABLE `sys_group`  (
   `group_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '团队名称',
   `group_status` tinyint(4) NOT NULL COMMENT '团队状态（0：停用，1：启用）',
-  `group_users` json NOT NULL COMMENT '被授权人',
-  `group_admin_users` json NOT NULL COMMENT '授权人',
   `update_datetime` datetime NOT NULL COMMENT '更新时间',
   `update_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '被谁更新',
   `create_datetime` datetime NOT NULL COMMENT '创建时间',
@@ -38,6 +36,7 @@ CREATE TABLE `sys_group`  (
 -- ----------------------------
 -- Records of sys_group
 -- ----------------------------
+INSERT INTO `sys_group` VALUES ('团队1', 1, '2024-11-08 09:10:20', 'admin', '2024-11-08 09:10:31', 'admin', 'aa');
 
 -- ----------------------------
 -- Table structure for sys_group_role
@@ -47,11 +46,13 @@ CREATE TABLE `sys_group_role`  (
   `group_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `role_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   UNIQUE INDEX `uniq_group_name_role_name`(`group_name`, `role_name`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_group_role
 -- ----------------------------
+INSERT INTO `sys_group_role` VALUES ('团队1', 'admin');
+INSERT INTO `sys_group_role` VALUES ('团队1', '今年支付额查看');
 
 -- ----------------------------
 -- Table structure for sys_group_user
@@ -62,11 +63,14 @@ CREATE TABLE `sys_group_user`  (
   `user_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `is_admin` tinyint(4) NOT NULL,
   UNIQUE INDEX `uniq_group_name_user_name`(`group_name`, `user_name`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_group_user
 -- ----------------------------
+INSERT INTO `sys_group_user` VALUES ('团队1', 'xiaoHong', 1);
+INSERT INTO `sys_group_user` VALUES ('团队1', 'xiaoMing', 0);
+INSERT INTO `sys_group_user` VALUES ('团队2', 'admin', 1);
 
 -- ----------------------------
 -- Table structure for sys_role
@@ -100,7 +104,7 @@ CREATE TABLE `sys_role_access_meta`  (
   `role_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `access_meta` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   UNIQUE INDEX `uniq_role_name_access_meta`(`role_name`, `access_meta`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_role_access_meta
@@ -143,14 +147,15 @@ INSERT INTO `sys_user` VALUES ('xiaoMing', '小明', 1, 'e10582e36a7f03a6e84db0a
 DROP TABLE IF EXISTS `sys_user_role`;
 CREATE TABLE `sys_user_role`  (
   `user_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `user_role` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  UNIQUE INDEX `uniq_user_name_user_role`(`user_name`, `user_role`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = Dynamic;
+  `role_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  UNIQUE INDEX `uniq_user_name_user_role`(`user_name`, `role_name`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_user_role
 -- ----------------------------
 INSERT INTO `sys_user_role` VALUES ('admin', 'admin');
 INSERT INTO `sys_user_role` VALUES ('admin', 'admin2');
+INSERT INTO `sys_user_role` VALUES ('xiaoHong', '支付余额查看');
 
 SET FOREIGN_KEY_CHECKS = 1;
