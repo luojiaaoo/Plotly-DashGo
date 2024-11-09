@@ -598,7 +598,7 @@ def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
                     join sys_group_role gr on g.group_name = gr.group_name
                     JOIN sys_group_user gu on g.group_name = gu.group_name
                     JOIN sys_user u on gu.user_name = u.user_name
-                    left JOIN sys_role r on gr.role_name = r.role_name
+                    JOIN sys_role r on gr.role_name = r.role_name
                     where
                     r.role_status = %s
                     and gu.user_name = %s
