@@ -28,14 +28,11 @@ class AuthException(Exception):
 
 
 def global_exception_handler(error):
-    print(error)
-    print(str(error))
-    print(error.message)
-    if isinstance(error, NotFoundUserException) or isinstance(error, AuthException):
-        from dash import set_props
-        from common.utilities import util_jwt
-        import feffery_antd_components as fac
+    from dash import set_props
+    from common.utilities import util_jwt
+    import feffery_antd_components as fac
 
+    if isinstance(error, NotFoundUserException) or isinstance(error, AuthException):
         util_jwt.clear_access_token_from_session()
         set_props('global-message-container', {'children': fac.AntdMessage(content='AuthException: {}'.format(error.message), type='error')})
         set_props('global-token-err-modal', {'visible': True})
