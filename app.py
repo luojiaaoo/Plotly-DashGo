@@ -14,9 +14,7 @@ AccessFactory.check_access_meta()
 
 def valid_token():
     """if valid token, return True, else return False"""
-    rt_access = util_jwt.jwt_decode_from_session(
-        verify_exp=True, force_logout_if_exp=False, ignore_exp=False, force_logout_if_invalid=False
-    )  # can not force logout, because global-reload component do not exists
+    rt_access = util_jwt.jwt_decode_from_session(verify_exp=True)  # can not force logout, because global-reload component do not exists
     if isinstance(rt_access, util_jwt.AccessFailType):
         return login.render_content()
     else:
@@ -24,7 +22,7 @@ def valid_token():
             menu_access = MenuAccess(rt_access['user_name'])
         # 找不到该授权用户
         except NotFoundUserException as e:
-            logger.warning(e)
+            logger.warning(e.message)
             util_jwt.clear_access_token_from_session()
             return login.render_content()
         # 如果session是永久，也就是用户登录勾选了保存会话，刷新jwt令牌，继续延长令牌有效期

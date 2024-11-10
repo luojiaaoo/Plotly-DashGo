@@ -1,6 +1,7 @@
 from typing import Set
-from common.exception import NotFoundUserException
+from common.exception import NotFoundUserException,AuthException
 from common.utilities.util_logger import Log
+
 
 logger = Log.get_logger(__name__)
 
@@ -136,11 +137,14 @@ def get_menu_access(only_get_user_name=False) -> MenuAccess:
     from config.dash_melon_conf import LoginConf
 
     rt_access = util_jwt.jwt_decode_from_session(
-        verify_exp=True,
-        force_logout_if_exp=LoginConf.JWT_EXPIRED_FORCE_LOGOUT,
-        ignore_exp=not LoginConf.JWT_EXPIRED_FORCE_LOGOUT,
-        force_logout_if_invalid=True,
+        verify_exp=LoginConf.JWT_EXPIRED_FORCE_LOGOUT,
     )
+    if rt_access == util_jwt.AccessFailType.NO_ACCESS:
+        raise AuthException(message='没有找到您的授权令牌，请重新登录')
+    elif rt_access == util_jwt.AccessFailType.EXPIRED:
+        raise AuthException(message='您的授权令牌已过期，请重新登录')
+    elif rt_access == util_jwt.AccessFailType.INVALID:
+        raise AuthException(message='您的授权令牌无效，请重新登录')
     if only_get_user_name:
         return rt_access['user_name']
     else:

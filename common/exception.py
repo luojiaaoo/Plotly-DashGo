@@ -1,4 +1,3 @@
-from dash_components.feedback import MessageManager, NotificationManager
 from common.utilities.util_logger import Log
 from functools import partial
 from i18n import translator
@@ -13,12 +12,9 @@ class NotFoundUserException(Exception):
     找不到该用户
     """
 
-    def __init__(self, data: str = None, message: str = None):
-        self.data = data
+    def __init__(self, message: str = None, data: str = None):
         self.message = message
-
-    def __str__(self):
-        return self.message + f'; data: {self.data}' if self.data else ''
+        self.data = data
 
 
 class AuthException(Exception):
@@ -26,22 +22,23 @@ class AuthException(Exception):
     jwt令牌授权异常
     """
 
-    def __init__(self, data: str = None, message: str = None):
-        self.data = data
+    def __init__(self, message: str = None, data: str = None):
         self.message = message
-
-    def __str__(self):
-        return self.message + f'; data: {self.data}' if self.data else ''
+        self.data = data
 
 
 def global_exception_handler(error):
+    print(error)
+    print(str(error))
+    print(error.message)
     if isinstance(error, NotFoundUserException) or isinstance(error, AuthException):
         from dash import set_props
         from common.utilities import util_jwt
+        import feffery_antd_components as fac
 
         util_jwt.clear_access_token_from_session()
-        MessageManager.error(content=error)
+        set_props('global-message-container', {'children': fac.AntdMessage(content='AuthException: {}'.format(error.message), type='error')})
         set_props('global-token-err-modal', {'visible': True})
     else:
         logger.exception(f'[exception]{error}')
-        NotificationManager.error(description=str(error), message='系统异常')
+        set_props('global-notification-container', {'children': fac.AntdNotification(message=_('系统异常'), description=str(error), type='error')})

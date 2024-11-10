@@ -85,7 +85,7 @@ def jwt_encode_save_access_to_session(data: Dict, expires_delta: Optional[timede
     session['Authorization'] = f'Bearer {access_token}'
 
 
-def jwt_decode_from_session(verify_exp: bool, force_logout_if_exp, ignore_exp, force_logout_if_invalid) -> Union[Dict, AccessFailType]:
+def jwt_decode_from_session(verify_exp: bool) -> Union[Dict, AccessFailType]:
     """
     从会话中解码JWT（JSON Web Token）。
 
@@ -112,15 +112,8 @@ def jwt_decode_from_session(verify_exp: bool, force_logout_if_exp, ignore_exp, f
         try:
             access_data = jwt_decode(access_token, verify_exp=verify_exp)
         except ExpiredSignatureError:
-            if force_logout_if_exp:
-                raise AuthException(message='您的授权已过期，请重新登录')
-            if ignore_exp:
-                return jwt_decode(access_token, verify_exp=False)
-            else:
-                return AccessFailType.EXPIRED
+            return AccessFailType.EXPIRED
         except Exception:
-            if force_logout_if_invalid:
-                raise AuthException(message='您的授权令牌异常，请重新登录')
             return AccessFailType.INVALID
         return access_data
 
