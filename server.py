@@ -1,9 +1,9 @@
 from flask import request, session, redirect, send_from_directory, abort, Response
 from config.dash_melon_conf import ShowConf, FlaskConf, CommonConf
 from user_agents import parse
-from common.exception import AttackException
 from common.utilities.util_logger import Log
 from config.dash_melon_conf import PathProj
+from common.exception import global_exception_handler
 from common.utilities.util_dash import CustomDash
 from functools import partial
 from i18n import translator
@@ -20,6 +20,7 @@ app = CustomDash(
     update_title=None,
     serve_locally=CommonConf.DASH_SERVE_LOCALLY,
     extra_hot_reload_paths=[],
+    on_error=global_exception_handler,
 )
 app.server.config['COMPRESS_ALGORITHM'] = FlaskConf.COMPRESS_ALGORITHM
 app.server.config['COMPRESS_BR_LEVEL'] = FlaskConf.COMPRESS_BR_LEVEL
@@ -35,10 +36,7 @@ server = app.server
 def download_file(user_name):
     file_name = f'{user_name}.jpg'
     if '..' in user_name:
-        try:
-            raise AttackException(f'有人尝试通过头像文件接口攻击，URL:{request.url}，IP:{request.remote_addr}')
-        except AttackException as e:
-            logger.warning(e, exc_info=True)
+        logger.warning(f'有人尝试通过头像文件接口攻击，URL:{request.url}，IP:{request.remote_addr}')
         abort(403)
     else:
         return send_from_directory(PathProj.AVATAR_DIR_PATH, file_name)
@@ -55,10 +53,7 @@ def main_page_redirct():
 @server.before_request
 def ban_admin():
     if request.path.startswith('/admin'):
-        try:
-            raise AttackException(f'有人尝试访问不存在的管理页面，URL:{request.url}，IP:{request.remote_addr}')
-        except AttackException as e:
-            logger.warning(e, exc_info=True)
+        logger.warning(f'有人尝试访问不存在的管理页面，URL:{request.url}，IP:{request.remote_addr}')
         abort(403)
 
 

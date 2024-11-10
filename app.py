@@ -3,9 +3,11 @@ from common.utilities import util_jwt
 from dash_view.pages import main, login
 from common.utilities.util_menu_access import MenuAccess
 from flask import session
-from common.exception import NotFoundUsername
+from common.exception import NotFoundUserException
 from config.access_factory import AccessFactory
+from common.utilities.util_logger import Log
 
+logger = Log.get_logger(__name__)
 # 启动检查权限
 AccessFactory.check_access_meta()
 
@@ -21,7 +23,8 @@ def valid_token():
         try:
             menu_access = MenuAccess(rt_access['user_name'])
         # 找不到该授权用户
-        except NotFoundUsername:
+        except NotFoundUserException as e:
+            logger.warning(e)
             util_jwt.clear_access_token_from_session()
             return login.render_content()
         # 如果session是永久，也就是用户登录勾选了保存会话，刷新jwt令牌，继续延长令牌有效期

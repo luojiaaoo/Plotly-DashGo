@@ -3,6 +3,7 @@ from typing import Dict, Union, NoReturn, Optional
 from datetime import timedelta, datetime, timezone
 import jwt
 from flask import session
+from common.exception import AuthException
 from enum import Enum
 
 
@@ -64,9 +65,7 @@ def jwt_decode(token, verify_exp: bool = True):
     return payload
 
 
-def jwt_encode_save_access_to_session(
-    data: Dict, expires_delta: Optional[timedelta] = None, session_permanent: bool = False
-) -> NoReturn:
+def jwt_encode_save_access_to_session(data: Dict, expires_delta: Optional[timedelta] = None, session_permanent: bool = False) -> NoReturn:
     """
     生成JWT访问令牌并将其保存到会话中。
 
@@ -86,16 +85,7 @@ def jwt_encode_save_access_to_session(
     session['Authorization'] = f'Bearer {access_token}'
 
 
-def show_token_err_modal_for_logout(comp_id_modal='global-token-err-modal'):
-    from dash import set_props
-
-    clear_access_token_from_session()
-    set_props(comp_id_modal, {'visible': True})
-
-
-def jwt_decode_from_session(
-    verify_exp: bool, force_logout_if_exp, ignore_exp, force_logout_if_invalid
-) -> Union[Dict, AccessFailType]:
+def jwt_decode_from_session(verify_exp: bool, force_logout_if_exp, ignore_exp, force_logout_if_invalid) -> Union[Dict, AccessFailType]:
     """
     从会话中解码JWT（JSON Web Token）。
 
@@ -123,14 +113,14 @@ def jwt_decode_from_session(
             access_data = jwt_decode(access_token, verify_exp=verify_exp)
         except ExpiredSignatureError:
             if force_logout_if_exp:
-                show_token_err_modal_for_logout()
+                raise AuthException(message='您的授权已过期，请重新登录')
             if ignore_exp:
                 return jwt_decode(access_token, verify_exp=False)
             else:
                 return AccessFailType.EXPIRED
         except Exception:
             if force_logout_if_invalid:
-                show_token_err_modal_for_logout()
+                raise AuthException(message='您的授权令牌异常，请重新登录')
             return AccessFailType.INVALID
         return access_data
 

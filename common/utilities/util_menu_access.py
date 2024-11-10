@@ -1,5 +1,5 @@
 from typing import Set
-from common.exception import NotFoundUsername
+from common.exception import NotFoundUserException
 from common.utilities.util_logger import Log
 
 logger = Log.get_logger(__name__)
@@ -110,7 +110,7 @@ class MenuAccess:
         try:
             self.user_info: dao_user.UserInfo = dao_user.get_user_info([user_name], exclude_disabled=True, exclude_role_admin=False)[0]
         except IndexError:
-            raise NotFoundUsername(f'用户名不存在: {user_name}')
+            raise NotFoundUserException(message=f'用户{user_name}尝试登录，但该用户不存在，可能已被删除')
         # 用户所有的权限元
         self.all_access_metas: Set[str] = self.get_user_all_access_metas(user_info=self.user_info)
         # 生成用户的目录路径
