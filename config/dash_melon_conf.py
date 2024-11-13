@@ -10,7 +10,7 @@ class PathProj:
 
 
 conf = ConfigParser()
-conf.read(PathProj.CONF_FILE_PATH)
+conf.read(PathProj.CONF_FILE_PATH, encoding='utf-8')
 
 
 class BaseMetaConf(type):
