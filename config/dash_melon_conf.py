@@ -70,5 +70,4 @@ class SqlDbConf(metaclass=BaseMetaConf):
     USER: str
     PASSWORD: str
     DATABASE: str
-    CHARSET: str
     POOL_SIZE: int

@@ -3,7 +3,6 @@ dash==2.18.1
 feffery_antd_components==0.3.10
 feffery_utils_components==0.2.0rc24
 Flask==3.0.3
-mysql-connector-python==9.1.0
 pycryptodome==3.21.0
 PyJWT==2.9.0
 user_agents==2.2.0
@@ -12,3 +11,4 @@ feffery_dash_utils==0.1.4
 pillow==10.4.0
 py-cpuinfo==9.0.0
 cacheout==0.16.0
+peewee==3.17.8

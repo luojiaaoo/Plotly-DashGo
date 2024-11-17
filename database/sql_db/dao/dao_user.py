@@ -1,4 +1,4 @@
-from database.sql_db.conn import pool
+from database.sql_db.conn import db
 from typing import Dict, List, Set, Union, Optional
 from itertools import chain, repeat
 from dataclasses import dataclass
@@ -18,7 +18,7 @@ class Status:
 
 def exists_user_name(user_name: str) -> bool:
     """是否存在这个用户名"""
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         cursor.execute(
             """SELECT user_name FROM sys_user WHERE user_name = %s;""",
             (user_name,),
@@ -29,7 +29,7 @@ def exists_user_name(user_name: str) -> bool:
 
 def user_password_verify(user_name: str, password_sha256: str) -> bool:
     """密码校验，排除未启用账号"""
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         cursor.execute(
             """SELECT user_name FROM sys_user WHERE user_name = %s and password_sha256 = %s and user_status = %s;""",
             (user_name, password_sha256, Status.ENABLE),
@@ -40,7 +40,7 @@ def user_password_verify(user_name: str, password_sha256: str) -> bool:
 
 def get_all_access_meta_for_setup_check() -> List[str]:
     """获取所有权限，对应用权限检查"""
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         cursor.execute("""SELECT access_meta FROM sys_role_access_meta;""")
         result = cursor.fetchall()
         return [per[0] for per in result]
@@ -78,7 +78,7 @@ def get_user_info(user_names: Optional[List] = None, exclude_role_admin=False, e
         'create_by',
         'user_remark',
     ]
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         sql = f"""
             SELECT {','.join(['u.'+i for i in heads])},JSON_ARRAYAGG(role_name) as user_roles
             FROM sys_user u left JOIN sys_user_role ur 
@@ -113,7 +113,7 @@ def get_user_info(user_names: Optional[List] = None, exclude_role_admin=False, e
 
 def add_role_for_user(user_name: str, role_name: str):
     """添加用户角色"""
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         try:
             is_ok = True
             # 给sys_role表加锁，保证加入的角色都存在
@@ -131,16 +131,16 @@ def add_role_for_user(user_name: str, role_name: str):
                 )
         except Exception:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}给用户{user_name}添加角色{role_name}时，出现异常', exc_info=True)
-            conn.rollback()
+            txn.rollback()
             return False
         else:
-            conn.commit()
+            txn.commit()
             return is_ok
 
 
 def del_role_for_user(user_name, role_name):
     """删除用户角色"""
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         try:
             cursor.execute(
                 'delete from sys_user_role where role_name=%s and user_name=%s',
@@ -148,10 +148,10 @@ def del_role_for_user(user_name, role_name):
             )
         except Exception:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}给用户{user_name}删除角色{role_name}时，出现异常', exc_info=True)
-            conn.rollback()
+            txn.rollback()
             return False
         else:
-            conn.commit()
+            txn.commit()
             return True
 
 
@@ -160,7 +160,7 @@ def update_user(user_name, user_full_name, password, user_status: bool, user_sex
     from hashlib import sha256
 
     user_name_op = util_menu_access.get_menu_access(only_get_user_name=True)
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         try:
             is_ok = True
             # 给sys_role表加锁，保证加入的角色和团队都存在
@@ -198,10 +198,10 @@ def update_user(user_name, user_full_name, password, user_status: bool, user_sex
                     )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新用户{user_name}时，出现异常', exc_info=True)
-            conn.rollback()
+            txn.rollback()
             return False
         else:
-            conn.commit()
+            txn.commit()
             return is_ok
 
 
@@ -223,7 +223,7 @@ def create_user(
         return False
     password = password.strip()
     user_name_op = util_menu_access.get_menu_access().user_name
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         try:
             is_ok = True
             # 给sys_role表加锁，保证加入的角色存在
@@ -262,16 +262,16 @@ def create_user(
                     )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}添加用户{user_name}时，出现异常', exc_info=True)
-            conn.rollback()
+            txn.rollback()
             return False
         else:
-            conn.commit()
+            txn.commit()
             return is_ok
 
 
 def delete_user(user_name: str) -> bool:
     """删除用户"""
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         try:
             # 删除用户行
             cursor.execute(
@@ -290,16 +290,16 @@ def delete_user(user_name: str) -> bool:
             )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}删除用户{user_name}时，出现异常', exc_info=True)
-            conn.rollback()
+            txn.rollback()
             return False
         else:
-            conn.commit()
+            txn.commit()
             return True
 
 
 def get_roles_from_user_name(user_name: str, exclude_disabled=True) -> List[str]:
     """根据用户查询角色"""
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         sql = (
             'SELECT JSON_ARRAYAGG(r.role_name) FROM sys_user u JOIN sys_user_role ur on u.user_name=ur.user_name join sys_role r on ur.role_name = r.role_name where u.user_name=%s'
         )
@@ -317,7 +317,7 @@ def get_roles_from_user_name(user_name: str, exclude_disabled=True) -> List[str]
 
 def get_user_access_meta(user_name: str, exclude_disabled=True) -> Set[str]:
     """根据用户名查询权限元"""
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         sql = 'SELECT JSON_ARRAYAGG(ram.access_meta) FROM sys_user u JOIN sys_user_role ur on u.user_name=ur.user_name join sys_role r on ur.role_name = r.role_name join sys_role_access_meta ram on r.role_name = ram.role_name where u.user_name = %s'
         sql_place = [user_name]
         if exclude_disabled:
@@ -354,7 +354,7 @@ def get_role_info(role_names: Optional[List] = None, exclude_role_admin=False, e
         'create_by',
         'role_remark',
     ]
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         sql = f"""
             SELECT {','.join(['r.'+i for i in heads])},JSON_ARRAYAGG(ram.access_meta) as access_metas
             FROM sys_role r left JOIN sys_role_access_meta ram
@@ -388,7 +388,7 @@ def get_role_info(role_names: Optional[List] = None, exclude_role_admin=False, e
 
 def delete_role(role_name: str) -> bool:
     """删除角色"""
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         try:
             # 删除角色表
             cursor.execute(
@@ -412,10 +412,10 @@ def delete_role(role_name: str) -> bool:
             )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}删除角色{role_name}时，出现异常', exc_info=True)
-            conn.rollback()
+            txn.rollback()
             return False
         else:
-            conn.commit()
+            txn.commit()
             return True
 
 
@@ -424,7 +424,7 @@ def create_role(role_name, role_status: bool, role_remark, access_metas):
     if not role_name:
         return False
     user_name_op = util_menu_access.get_menu_access().user_name
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         try:
             cursor.execute(
                 """
@@ -447,16 +447,16 @@ def create_role(role_name, role_status: bool, role_remark, access_metas):
                 )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}创建角色{role_name}时，出现异常', exc_info=True)
-            conn.rollback()
+            txn.rollback()
             return False
         else:
-            conn.commit()
+            txn.commit()
             return True
 
 
 def exists_role_name(role_name):
     """是否存在角色名称"""
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         cursor.execute(
             """SELECT count(1) FROM sys_role WHERE role_name = %s;""",
             (role_name,),
@@ -468,7 +468,7 @@ def exists_role_name(role_name):
 def update_role(role_name, role_status: bool, role_remark, access_metas: List[str]):
     """更新角色"""
     user_name_op = util_menu_access.get_menu_access().user_name
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         try:
             cursor.execute(
                 'update sys_role set role_status=%s,update_datetime=%s,update_by=%s,role_remark=%s where role_name=%s;',
@@ -481,10 +481,10 @@ def update_role(role_name, role_status: bool, role_remark, access_metas: List[st
                 )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新角色{role_name}时，出现异常', exc_info=True)
-            conn.rollback()
+            txn.rollback()
             return False
         else:
-            conn.commit()
+            txn.commit()
             return True
 
 
@@ -515,7 +515,7 @@ def get_group_info(group_names: Optional[List] = None, exclude_disabled=True) ->
         'group_roles',
         'user_name_plus',
     ]
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         sql = """
             select g.group_name,group_status,update_datetime,update_by,create_datetime,create_by,group_remark,JSON_ARRAYAGG(role_name) as group_roles,JSON_ARRAYAGG(case gu.is_admin WHEN %s then CONCAT(%s,user_name) else user_name end) as user_name_plus 
             from sys_group g 
@@ -555,7 +555,7 @@ def get_group_info(group_names: Optional[List] = None, exclude_disabled=True) ->
 
 def is_group_admin(user_name) -> bool:
     """判断是不是团队管理员，排除禁用的团队"""
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         cursor.execute(
             """        
                 SELECT
@@ -576,7 +576,7 @@ def is_group_admin(user_name) -> bool:
 
 def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
     """根据用户名获取可管理的团队、人员和可管理的角色，排除禁用的管理员用户"""
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         cursor.execute(
             """        
                 select
@@ -687,7 +687,7 @@ def update_user_roles_from_group(user_name, group_name, roles_in_range):
 
 def exists_group_name(group_name: str):
     """是否已经存在这个团队名"""
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         cursor.execute(
             """SELECT count(1) FROM sys_group WHERE group_name = %s;""",
             (group_name,),
@@ -701,7 +701,7 @@ def create_group(group_name, group_status, group_remark, group_roles, group_admi
     if exists_group_name(group_name):
         return False
     user_name_op = util_menu_access.get_menu_access().user_name
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         try:
             is_ok = True
             # 给sys_role表加锁，保证加入的角色都存在
@@ -750,16 +750,16 @@ def create_group(group_name, group_status, group_remark, group_roles, group_admi
                     )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}添加团队{group_name}时，出现异常', exc_info=True)
-            conn.rollback()
+            txn.rollback()
             return False
         else:
-            conn.commit()
+            txn.commit()
             return is_ok
 
 
 def delete_group(group_name: str) -> bool:
     """删除团队"""
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         try:
             cursor.execute(
                 """delete FROM sys_group where group_name=%s;""",
@@ -775,17 +775,17 @@ def delete_group(group_name: str) -> bool:
             )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}删除团队{group_name}时，出现异常', exc_info=True)
-            conn.rollback()
+            txn.rollback()
             return False
         else:
-            conn.commit()
+            txn.commit()
             return True
 
 
 def update_group(group_name, group_status, group_remark, group_roles, group_admin_users, group_users):
     """更新团队"""
     user_name_op = util_menu_access.get_menu_access().user_name
-    with pool.get_connection() as conn, conn.cursor() as cursor:
+    with db.connection_context(), db.atomic(isolation_level='READ COMMITTED') as txn, db.cursor() as cursor:
         try:
             is_ok = True
             # 给sys_role表加锁，保证加入的角色都存在
@@ -832,8 +832,8 @@ def update_group(group_name, group_status, group_remark, group_roles, group_admi
                     )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新团队{group_name}时，出现异常', exc_info=True)
-            conn.rollback()
+            txn.rollback()
             return False
         else:
-            conn.commit()
+            txn.commit()
             return is_ok
