@@ -10,10 +10,7 @@ _ = partial(translator.t)
 
 
 # 二级菜单的标题、图标和显示顺序
-def get_title():
-    return _('团队授权')
-
-
+title = '团队授权'
 icon = None
 order = 4
 access_metas = ('团队授权-页面',)

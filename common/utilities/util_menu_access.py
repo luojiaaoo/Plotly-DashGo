@@ -39,7 +39,7 @@ class MenuAccess:
     def get_title(module_path):
         from dash_view import application  # noqa
 
-        return eval(f'application.{module_path}.get_title()')
+        return eval(f'application.{module_path}.title')
 
     @staticmethod
     def get_order(module_path):

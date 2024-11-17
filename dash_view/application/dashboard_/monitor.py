@@ -12,10 +12,7 @@ _ = partial(translator.t)
 
 
 # 二级菜单的标题、图标和显示顺序
-def get_title():
-    return _('监控页')
-
-
+title = '监控页'
 icon = None
 order = 2
 logger = Log.get_logger(__name__)
