@@ -87,43 +87,44 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('用户：'), className='user_info_name'),
+                            fac.AntdText(_('用户：')),
                             fac.AntdText(user_info.user_name, className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('全名：'), className='user_info_name'),
-                            fac.AntdText(user_info.user_full_name, className='user_info_value'),
+                            fac.AntdText(_('全名：')),
+                            fac.AntdInput(value=user_info.user_full_name, className='user_info_value', variant='borderless', readOnly=True),
+                            fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('状态：'), className='user_info_name'),
+                            fac.AntdText(_('状态：')),
                             fac.AntdText(_(user_info.user_status), className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('性别：'), className='user_info_name'),
+                            fac.AntdText(_('性别：')),
                             fac.AntdText(_(user_info.user_sex), className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('邮箱：'), className='user_info_name'),
+                            fac.AntdText(_('邮箱：')),
                             fac.AntdText(user_info.user_email, className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('电话：'), className='user_info_name'),
+                            fac.AntdText(_('电话：')),
                             fac.AntdText(user_info.phone_number, className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('描述：'), className='user_info_name'),
+                            fac.AntdText(_('描述：')),
                             fac.AntdText(user_info.user_remark),
                         ]
                     ),
@@ -135,11 +136,14 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         'display': 'flex',
                         'flexDirection': 'column',
                     },
-                    '& .user_info_name': {
+                    '& .ant-space > :nth-child(1) > :first-child': {
                         'word-break': 'keep-all',
                         'font-weight': 'bold',
                         'display': 'block',
                         'width': '6em',
+                    },
+                    '& .ant-space > :nth-child(2) > :first-child': {
+                        'padding': '3px 11px',
                     },
                     '& .user_info_value': {
                         'word-break': 'keep-all',
