@@ -101,31 +101,35 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     fac.AntdSpace(
                         [
                             fac.AntdText(_('状态：')),
-                            fac.AntdText(_(user_info.user_status), className='user_info_value'),
+                            fac.AntdText(_('启用' if user_info.user_status else '停用'), className='user_info_value'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
                             fac.AntdText(_('性别：')),
                             fac.AntdText(_(user_info.user_sex), className='user_info_value'),
+                            fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
                             fac.AntdText(_('邮箱：')),
                             fac.AntdText(user_info.user_email, className='user_info_value'),
+                            fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
                             fac.AntdText(_('电话：')),
                             fac.AntdText(user_info.phone_number, className='user_info_value'),
+                            fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
                             fac.AntdText(_('描述：')),
                             fac.AntdText(user_info.user_remark),
+                            fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link'),
                         ]
                     ),
                 ],
@@ -143,7 +147,9 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         'width': '6em',
                     },
                     '& .ant-space > :nth-child(2) > :first-child': {
+                        'display': 'block',
                         'padding': '3px 11px',
+                        'width': '13em',
                     },
                     '& .user_info_value': {
                         'word-break': 'keep-all',
