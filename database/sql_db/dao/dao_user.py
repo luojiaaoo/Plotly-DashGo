@@ -239,11 +239,6 @@ def delete_user(user_name: str) -> bool:
     """删除用户"""
     with db().atomic() as txn, db().cursor() as cursor:
         try:
-            # 删除用户行
-            cursor.execute(
-                """delete FROM sys_user where user_name=%s;""",
-                (user_name,),
-            )
             # 删除用户角色表
             cursor.execute(
                 """delete FROM sys_user_role where user_name=%s;""",
@@ -252,6 +247,11 @@ def delete_user(user_name: str) -> bool:
             # 删除团队的用户
             cursor.execute(
                 """delete FROM sys_group_user where user_name=%s;""",
+                (user_name,),
+            )
+             # 删除用户行
+            cursor.execute(
+                """delete FROM sys_user where user_name=%s;""",
                 (user_name,),
             )
         except Exception as e:
@@ -356,11 +356,6 @@ def delete_role(role_name: str) -> bool:
     """删除角色"""
     with db().atomic() as txn, db().cursor() as cursor:
         try:
-            # 删除角色表
-            cursor.execute(
-                'delete FROM sys_role where role_name=%s;',
-                (role_name,),
-            )
             # 删除角色权限表
             cursor.execute(
                 'delete FROM sys_role_access_meta where role_name=%s;',
@@ -374,6 +369,11 @@ def delete_role(role_name: str) -> bool:
             # 删除团队角色表
             cursor.execute(
                 'delete FROM sys_group_role where role_name=%s;',
+                (role_name,),
+            )
+            # 删除角色表
+            cursor.execute(
+                'delete FROM sys_role where role_name=%s;',
                 (role_name,),
             )
         except Exception as e:
@@ -710,15 +710,15 @@ def delete_group(group_name: str) -> bool:
     with db().atomic() as txn, db().cursor() as cursor:
         try:
             cursor.execute(
-                """delete FROM sys_group where group_name=%s;""",
-                (group_name,),
-            )
-            cursor.execute(
                 """delete FROM sys_group_role where group_name=%s;""",
                 (group_name,),
             )
             cursor.execute(
                 """delete FROM sys_group_user where group_name=%s;""",
+                (group_name,),
+            )
+            cursor.execute(
+                """delete FROM sys_group where group_name=%s;""",
                 (group_name,),
             )
         except Exception as e:
