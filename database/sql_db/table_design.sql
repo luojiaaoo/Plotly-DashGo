@@ -45,9 +45,9 @@ CREATE TABLE `sys_group_role`  (
   `group_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `role_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   UNIQUE INDEX `uniq_group_name_role_name`(`group_name`, `role_name`) USING BTREE,
-  INDEX `fk_role_name_table_group_role`(`role_name`) USING BTREE,
-  CONSTRAINT `fk_group_name_table_group_role` FOREIGN KEY (`group_name`) REFERENCES `sys_group` (`group_name`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_role_name_table_group_role` FOREIGN KEY (`role_name`) REFERENCES `sys_role` (`role_name`) ON DELETE RESTRICT ON UPDATE CASCADE
+  INDEX `fk_role_name_tb_group_role`(`role_name`) USING BTREE,
+  CONSTRAINT `fk_group_name_tb_group_role` FOREIGN KEY (`group_name`) REFERENCES `sys_group` (`group_name`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_role_name_tb_group_role` FOREIGN KEY (`role_name`) REFERENCES `sys_role` (`role_name`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -63,9 +63,9 @@ CREATE TABLE `sys_group_user`  (
   `user_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `is_admin` tinyint(4) NOT NULL,
   UNIQUE INDEX `uniq_group_name_user_name`(`group_name`, `user_name`) USING BTREE,
-  INDEX `fk_user_name_table_group_user`(`user_name`) USING BTREE,
-  CONSTRAINT `fk_group_name_table_group_user` FOREIGN KEY (`group_name`) REFERENCES `sys_group` (`group_name`) ON DELETE RESTRICT ON UPDATE CASCADE,
-  CONSTRAINT `fk_user_name_table_group_user` FOREIGN KEY (`user_name`) REFERENCES `sys_user` (`user_name`) ON DELETE RESTRICT ON UPDATE CASCADE
+  INDEX `fk_user_name_tb_group_user`(`user_name`) USING BTREE,
+  CONSTRAINT `fk_group_name_tb_group_user` FOREIGN KEY (`group_name`) REFERENCES `sys_group` (`group_name`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_user_name_tb_group_user` FOREIGN KEY (`user_name`) REFERENCES `sys_user` (`user_name`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -101,7 +101,7 @@ CREATE TABLE `sys_role_access_meta`  (
   `role_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `access_meta` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   UNIQUE INDEX `uniq_role_name_access_meta`(`role_name`, `access_meta`) USING BTREE,
-  CONSTRAINT `fk_role_name_table_role_access_meta` FOREIGN KEY (`role_name`) REFERENCES `sys_role` (`role_name`) ON DELETE RESTRICT ON UPDATE CASCADE
+  CONSTRAINT `fk_role_name_tb_role_access_meta` FOREIGN KEY (`role_name`) REFERENCES `sys_role` (`role_name`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -143,8 +143,8 @@ CREATE TABLE `sys_user_role`  (
   `user_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `role_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   UNIQUE INDEX `uniq_user_name_user_role`(`user_name`, `role_name`) USING BTREE,
-  INDEX `fk_role_name_table_user_role`(`role_name`) USING BTREE,
-  CONSTRAINT `fk_role_name_table_user_role` FOREIGN KEY (`role_name`) REFERENCES `sys_role` (`role_name`) ON DELETE RESTRICT ON UPDATE CASCADE
+  INDEX `fk_role_name_tb_user_role`(`role_name`) USING BTREE,
+  CONSTRAINT `fk_role_name_tb_user_role` FOREIGN KEY (`role_name`) REFERENCES `sys_role` (`role_name`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
