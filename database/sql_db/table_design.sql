@@ -1,7 +1,7 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : dashMelon
+ Source Server         : app
  Source Server Type    : MySQL
  Source Server Version : 50744 (5.7.44)
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 50744 (5.7.44)
  File Encoding         : 65001
 
- Date: 08/11/2024 15:39:14
+ Date: 24/11/2024 22:22:35
 */
 
 SET NAMES utf8mb4;
@@ -36,7 +36,6 @@ CREATE TABLE `sys_group`  (
 -- ----------------------------
 -- Records of sys_group
 -- ----------------------------
-INSERT INTO `sys_group` VALUES ('团队1', 1, '2024-11-08 09:10:20', 'admin', '2024-11-08 09:10:31', 'admin', 'aa');
 
 -- ----------------------------
 -- Table structure for sys_group_role
@@ -45,14 +44,15 @@ DROP TABLE IF EXISTS `sys_group_role`;
 CREATE TABLE `sys_group_role`  (
   `group_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `role_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  UNIQUE INDEX `uniq_group_name_role_name`(`group_name`, `role_name`) USING BTREE
+  UNIQUE INDEX `uniq_group_name_role_name`(`group_name`, `role_name`) USING BTREE,
+  INDEX `fk_role_name_table_group_role`(`role_name`) USING BTREE,
+  CONSTRAINT `fk_group_name_table_group_role` FOREIGN KEY (`group_name`) REFERENCES `sys_group` (`group_name`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_role_name_table_group_role` FOREIGN KEY (`role_name`) REFERENCES `sys_role` (`role_name`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_group_role
 -- ----------------------------
-INSERT INTO `sys_group_role` VALUES ('团队1', 'admin');
-INSERT INTO `sys_group_role` VALUES ('团队1', '今年支付额查看');
 
 -- ----------------------------
 -- Table structure for sys_group_user
@@ -62,15 +62,15 @@ CREATE TABLE `sys_group_user`  (
   `group_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `user_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `is_admin` tinyint(4) NOT NULL,
-  UNIQUE INDEX `uniq_group_name_user_name`(`group_name`, `user_name`) USING BTREE
+  UNIQUE INDEX `uniq_group_name_user_name`(`group_name`, `user_name`) USING BTREE,
+  INDEX `fk_user_name_table_group_user`(`user_name`) USING BTREE,
+  CONSTRAINT `fk_group_name_table_group_user` FOREIGN KEY (`group_name`) REFERENCES `sys_group` (`group_name`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `fk_user_name_table_group_user` FOREIGN KEY (`user_name`) REFERENCES `sys_user` (`user_name`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_group_user
 -- ----------------------------
-INSERT INTO `sys_group_user` VALUES ('团队1', 'xiaoHong', 1);
-INSERT INTO `sys_group_user` VALUES ('团队1', 'xiaoMing', 0);
-INSERT INTO `sys_group_user` VALUES ('团队2', 'admin', 1);
 
 -- ----------------------------
 -- Table structure for sys_role
@@ -91,10 +91,7 @@ CREATE TABLE `sys_role`  (
 -- ----------------------------
 -- Records of sys_role
 -- ----------------------------
-INSERT INTO `sys_role` VALUES ('admin', 1, '2024-11-04 22:07:05', 'admin', '2024-11-03 14:19:44', 'admin', '超级管理员角色');
-INSERT INTO `sys_role` VALUES ('今年支付额查看', 1, '2024-11-06 13:58:32', 'admin', '2024-11-06 13:58:32', 'admin', '今年支付额查看');
-INSERT INTO `sys_role` VALUES ('支付余额查看', 1, '2024-11-06 13:58:11', 'admin', '2024-11-06 13:58:11', 'admin', '支付余额查看');
-INSERT INTO `sys_role` VALUES ('购买权限', 1, '2024-11-06 13:58:54', 'admin', '2024-11-06 13:58:49', 'admin', '\n购买权限');
+INSERT INTO `sys_role` VALUES ('admin', 1, '2024-11-24 22:21:35', 'admin', '2024-11-24 22:21:56', 'admin', '超级管理员');
 
 -- ----------------------------
 -- Table structure for sys_role_access_meta
@@ -103,7 +100,8 @@ DROP TABLE IF EXISTS `sys_role_access_meta`;
 CREATE TABLE `sys_role_access_meta`  (
   `role_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `access_meta` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  UNIQUE INDEX `uniq_role_name_access_meta`(`role_name`, `access_meta`) USING BTREE
+  UNIQUE INDEX `uniq_role_name_access_meta`(`role_name`, `access_meta`) USING BTREE,
+  CONSTRAINT `fk_role_name_table_role_access_meta` FOREIGN KEY (`role_name`) REFERENCES `sys_role` (`role_name`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -135,9 +133,7 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES ('admin', '超级管理员', 1, '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', '未知', '666666@163.com', '13333333333', 'admin', '2024-11-02 23:36:37', 'admin', '2024-11-02 23:36:53', '初始超级管理员');
-INSERT INTO `sys_user` VALUES ('xiaoHong', '小红', 1, '278c5625a81c83ffcb888a63c907b8559543f3c1f2666bcccb1ce285f692be57', '男', '', '', 'admin', '2024-11-06 14:01:40', 'admin', '2024-11-06 14:01:40', '消费者');
-INSERT INTO `sys_user` VALUES ('xiaoMing', '小明', 1, 'e10582e36a7f03a6e84db0aea05276e34a4ef26f4ac77a320c78d3a13f110482', '男', 'xiaoMing@163.com', '13929721112', 'admin', '2024-11-06 14:00:44', 'admin', '2024-11-06 14:00:44', '查看余额');
+INSERT INTO `sys_user` VALUES ('admin', '超级管理员', 1, '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', '未知', '66666677@163.com', '1333333333', 'admin', now(), 'admin', now(), '初始超级管理员');
 
 -- ----------------------------
 -- Table structure for sys_user_role
@@ -146,7 +142,9 @@ DROP TABLE IF EXISTS `sys_user_role`;
 CREATE TABLE `sys_user_role`  (
   `user_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `role_name` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  UNIQUE INDEX `uniq_user_name_user_role`(`user_name`, `role_name`) USING BTREE
+  UNIQUE INDEX `uniq_user_name_user_role`(`user_name`, `role_name`) USING BTREE,
+  INDEX `fk_role_name_table_user_role`(`role_name`) USING BTREE,
+  CONSTRAINT `fk_role_name_table_user_role` FOREIGN KEY (`role_name`) REFERENCES `sys_role` (`role_name`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
