@@ -244,6 +244,27 @@
         },
         "更新团队": {
             "en-us": "Update Group"
+        },
+        "添加角色": {
+            "en-us": "Add Role"
+        },
+        "角色名称": {
+            "en-us": "Role name"
+        },
+        "角色状态": {
+            "en-us": "Role status"
+        },
+        "角色描述": {
+            "en-us": "Role remark"
+        },
+        "菜单权限": {
+            "en-us": "Menu Access"
+        },
+        "角色编辑": {
+            "en-us": "Role Edit"
+        },
+        "您确定要删除角色 ": {
+            "en-us": "Are you sure to delete role "
         }
     }
 }

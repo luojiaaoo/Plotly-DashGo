@@ -18,6 +18,12 @@
         },
         "确认要删除？": {
             "en-us": "Are you sure to delete?"
+        },
+        "启用": {
+            "en-us": "Enable"
+        },
+        "停用": {
+            "en-us": "Disable"
         }
     }
 }

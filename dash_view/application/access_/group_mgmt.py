@@ -146,7 +146,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                     ),
                                     fac.AntdFormItem(
                                         fac.AntdInput(id='group-mgmt-update-group-remark', mode='text-area', autoSize={'minRows': 1, 'maxRows': 3}),
-                                        label=__('团队描述'),
+                                        label=t__access('团队描述'),
                                         labelCol={'flex': '1'},
                                         wrapperCol={'flex': '5'},
                                     ),
