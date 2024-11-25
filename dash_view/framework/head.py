@@ -1,6 +1,7 @@
 import feffery_antd_components as fac
 from dash_view.framework.lang import render_lang_content
 from common.utilities.util_menu_access import MenuAccess
+from dash import html
 from server import app
 from dash.dependencies import Input, Output, State
 import dash
@@ -52,6 +53,15 @@ def render_head_content(menu_access: MenuAccess):
         fac.AntdCol(
             fac.AntdSpace(
                 [
+                    html.A(
+                        html.Img(src='https://img.shields.io/github/stars/luojiaaoo/DashGo.svg?style=social&label=Stars'),
+                        href='https://github.com/luojiaaoo/DashGo',
+                        target='_blank',
+                        style={
+                            'height': '100%',
+                            'alignItems': 'center',
+                        },
+                    ),
                     fac.AntdBadge(
                         fac.AntdAvatar(
                             id='global-head-avatar',
@@ -60,7 +70,7 @@ def render_head_content(menu_access: MenuAccess):
                             alt=menu_access.user_info.user_full_name,
                             size=36,
                         ),
-                        # count=6, # todo: 消息通知
+                        # count=6, # TODO: 消息通知
                         size='small',
                     ),
                     fac.AntdDropdown(
