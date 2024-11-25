@@ -2,7 +2,7 @@ from common.utilities.util_logger import Log
 from functools import partial
 from i18n import translator
 
-_ = partial(translator.t)
+__ = partial(translator.t)
 
 logger = Log.get_logger(__name__)
 
@@ -38,4 +38,4 @@ def global_exception_handler(error):
         set_props('global-token-err-modal', {'visible': True})
     else:
         logger.exception(f'[exception]{error}')
-        set_props('global-notification-container', {'children': fac.AntdNotification(message=_('系统异常'), description=str(error), type='error')})
+        set_props('global-notification-container', {'children': fac.AntdNotification(message=__('系统异常'), description=str(error), type='error')})

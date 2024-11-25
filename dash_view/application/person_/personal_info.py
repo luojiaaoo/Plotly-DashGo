@@ -12,7 +12,7 @@ import dash_callback.application.person_.personal_info_c  # noqa
 from functools import partial
 from i18n import translator
 
-_ = partial(translator.t)
+__ = partial(translator.t)
 
 
 # 二级菜单的标题、图标和显示顺序
@@ -81,35 +81,35 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         ),
                     ),
                     fac.AntdDivider(
-                        _('个人信息'),
+                        __('个人信息'),
                         innerTextOrientation='center',
                         fontStyle='oblique',
                         lineColor='#808080',
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('用户：')),
+                            fac.AntdText(__('用户：')),
                             fac.AntdText(user_info.user_name),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('全名：')),
+                            fac.AntdText(__('全名：')),
                             fac.AntdInput(defaultValue=user_info.user_full_name, variant='borderless', readOnly=True, id='personal-info-user-full-name'),
                             fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link', id='personal-info-user-full-name-edit'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('状态：')),
-                            fac.AntdText(_('启用' if user_info.user_status else '停用')),
+                            fac.AntdText(__('状态：')),
+                            fac.AntdText(__('启用' if user_info.user_status else '停用')),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('性别：')),
+                            fac.AntdText(__('性别：')),
                             fac.AntdSelect(
-                                options=[{'label': _(i.value), 'value': i.value} for i in Sex],
+                                options=[{'label': __(i.value), 'value': i.value} for i in Sex],
                                 defaultValue=user_info.user_sex,
                                 value=user_info.user_sex,
                                 variant='borderless',
@@ -120,29 +120,29 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('邮箱：')),
+                            fac.AntdText(__('邮箱：')),
                             fac.AntdInput(defaultValue=user_info.user_email, variant='borderless', readOnly=True, id='personal-info-user-email'),
                             fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link', id='personal-info-user-email-edit'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('电话：')),
+                            fac.AntdText(__('电话：')),
                             fac.AntdInput(defaultValue=user_info.phone_number, variant='borderless', readOnly=True, id='personal-info-phone-number'),
                             fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link', id='personal-info-phone-number-edit'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('描述：')),
+                            fac.AntdText(__('描述：')),
                             fac.AntdInput(defaultValue=user_info.user_remark, variant='borderless', readOnly=True, id='personal-info-user-remark'),
                             fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link', id='personal-info-user-remark-edit'),
                         ]
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdText(_('密码：')),
-                            fac.AntdButton(_('修改密码'), type='link', id='personal-info-password-edit'),
+                            fac.AntdText(__('密码：')),
+                            fac.AntdButton(__('修改密码'), type='link', id='personal-info-password-edit'),
                         ]
                     ),
                 ],
@@ -176,17 +176,17 @@ def render_content(menu_access: MenuAccess, **kwargs):
                 children=[
                     fac.AntdForm(
                         [
-                            fac.AntdFormItem(fac.AntdInput(id='personal-info-change-password-old', mode='password'), label=_('旧密码'), required=True),
-                            fac.AntdFormItem(fac.AntdInput(id='personal-info-change-password-new', mode='password'), label=_('新密码'), required=True),
+                            fac.AntdFormItem(fac.AntdInput(id='personal-info-change-password-old', mode='password'), label=__('旧密码'), required=True),
+                            fac.AntdFormItem(fac.AntdInput(id='personal-info-change-password-new', mode='password'), label=__('新密码'), required=True),
                         ],
                         className={'.ant-form-item': {'marginBottom': '12px', 'marginRight': '8px'}},
                     )
                 ],
                 destroyOnClose=False,
                 renderFooter=True,
-                okText=_('确定'),
-                cancelText=_('取消'),
-                title=_('修改密码'),
+                okText=__('确定'),
+                cancelText=__('取消'),
+                title=__('修改密码'),
                 id='personal-info-change-password-modal',
             ),
         ],

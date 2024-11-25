@@ -12,7 +12,7 @@ from dash_view.pages import page_404, page_401
 from functools import partial
 from i18n import translator
 
-_ = partial(translator.t)
+__ = partial(translator.t)
 
 # 折叠侧边栏按钮回调
 app.clientside_callback(
@@ -123,7 +123,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
     # 构建面包屑格式
     from common.utilities.util_menu_access import MenuAccess
 
-    breadcrumb_items = [{'title': _('首页'), 'href': '/dashboard_/workbench'}]
+    breadcrumb_items = [{'title': __('首页'), 'href': '/dashboard_/workbench'}]
     _modules: List = url_menu_item.split('.')
     for i in range(len(_modules)):
         breadcrumb_items = breadcrumb_items + [{'title': MenuAccess.get_title('.'.join(_modules[: i + 1]))}]
@@ -154,7 +154,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
         p.insert(
             old_idx,
             {
-                'label': _(module_page.title),
+                'label': __(module_page.title),
                 'key': key_url_path,
                 'closable': True,
                 'children': module_page.render_content(menu_access, **param),
@@ -171,7 +171,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
         # 未打开，通过Patch组件，将新的tab添加到tabs组件中
         p.append(
             {
-                'label': _(module_page.title),
+                'label': __(module_page.title),
                 'key': key_url_path,
                 # 工作台不能关闭
                 'closable': False if key_url_path == '/dashboard_/workbench' else True,

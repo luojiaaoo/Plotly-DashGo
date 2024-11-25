@@ -5,7 +5,7 @@ from i18n import translator
 from functools import partial
 
 
-_ = partial(translator.t)
+__ = partial(translator.t)
 
 
 logger = Log.get_logger(__name__)
@@ -62,7 +62,7 @@ class MenuAccess:
                     {
                         'title': MenuAccess.get_title(f'{level1_name}.{level2_name}'),
                         'key': 'ignore:' + MenuAccess.get_title(f'{level1_name}.{level2_name}'),
-                        'children': [{'title': _(access_meta), 'key': access_meta} for access_meta in access_metas],
+                        'children': [{'title': __(access_meta), 'key': access_meta} for access_meta in access_metas],
                     },
                 )
             antd_tree_data.append(

@@ -5,7 +5,7 @@ from dash import html
 from functools import partial
 from i18n import translator
 
-_ = partial(translator.t)
+__ = partial(translator.t)
 
 
 # 二级菜单的标题、图标和显示顺序

@@ -8,7 +8,7 @@ import dash
 from functools import partial
 from i18n import translator
 
-_ = partial(translator.t)
+__ = partial(translator.t)
 
 # 定义一个客户端回调函数，用于处理登录验证代码的显示逻辑，总是显示login的路径
 app.clientside_callback(
@@ -123,14 +123,14 @@ def login(
         return (
             dash.no_update,
             dash.no_update,
-            fuc.FefferyFancyMessage(_('请输入账号和密码'), type='error'),
+            fuc.FefferyFancyMessage(__('请输入账号和密码'), type='error'),
             True,
         )
     if need_vc and vc_input != pic_vc_value:
         return (
             dash.no_update,
             dash.no_update,
-            fuc.FefferyFancyMessage(_('验证码错误，请重新输入'), type='error'),
+            fuc.FefferyFancyMessage(__('验证码错误，请重新输入'), type='error'),
             True,
         )
     def user_login(user_name: str, password_sha256: str, is_keep_login_status: bool) -> bool:
@@ -153,6 +153,6 @@ def login(
         return (
             dash.no_update,
             (fc or 0) + 1,
-            fuc.FefferyFancyMessage(_('用户名或密码错误'), type='error'),
+            fuc.FefferyFancyMessage(__('用户名或密码错误'), type='error'),
             True,
         )

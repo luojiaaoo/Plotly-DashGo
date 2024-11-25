@@ -6,7 +6,7 @@ from dash_components import Card
 from functools import partial
 from i18n import translator
 
-_ = partial(translator.t)
+__ = partial(translator.t)
 
 
 # 二级菜单的标题、图标和显示顺序
@@ -30,7 +30,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                 [
                     Card(
                         fac.AntdStatistic(
-                            title=_('您的余额'),
+                            title=__('您的余额'),
                             value=fuc.FefferyCountUp(end=112893, duration=3),
                         ),
                         title='您的余额',
@@ -43,7 +43,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                 [
                     Card(
                         fac.AntdStatistic(
-                            title=_('您今年支付额'),
+                            title=__('您今年支付额'),
                             value=fuc.FefferyCountUp(end=2873, duration=3),
                         ),
                     )

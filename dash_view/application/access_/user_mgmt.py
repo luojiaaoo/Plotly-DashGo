@@ -8,7 +8,7 @@ import dash_callback.application.access_.user_mgmt_c  # noqa
 from functools import partial
 from i18n import translator
 
-_ = partial(translator.t)
+__ = partial(translator.t)
 
 
 # 二级菜单的标题、图标和显示顺序
@@ -26,7 +26,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
             fac.AntdRow(
                 fac.AntdButton(
                     id='user-mgmt-button-add',
-                    children=_('添加用户'),
+                    children=__('添加用户'),
                     type='primary',
                     icon=fac.AntdIcon(icon='antd-plus'),
                     style={'marginBottom': '10px'},
@@ -38,18 +38,18 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         Table(
                             id='user-mgmt-table',
                             columns=[
-                                {'title': _('用户名'), 'dataIndex': 'user_name'},
-                                {'title': _('全名'), 'dataIndex': 'user_full_name'},
-                                {'title': _('用户状态'), 'dataIndex': 'user_status', 'renderOptions': {'renderType': 'tags'}},
-                                {'title': _('用户描述'), 'dataIndex': 'user_remark'},
-                                {'title': _('性别'), 'dataIndex': 'user_sex'},
-                                {'title': _('邮箱'), 'dataIndex': 'user_email'},
-                                {'title': _('电话号码'), 'dataIndex': 'phone_number'},
-                                {'title': _('更新时间'), 'dataIndex': 'update_datetime'},
-                                {'title': _('更新人'), 'dataIndex': 'update_by'},
-                                {'title': _('创建时间'), 'dataIndex': 'create_datetime'},
-                                {'title': _('创建人'), 'dataIndex': 'create_by'},
-                                {'title': _('操作'), 'dataIndex': 'operation', 'renderOptions': {'renderType': 'button'}},
+                                {'title': __('用户名'), 'dataIndex': 'user_name'},
+                                {'title': __('全名'), 'dataIndex': 'user_full_name'},
+                                {'title': __('用户状态'), 'dataIndex': 'user_status', 'renderOptions': {'renderType': 'tags'}},
+                                {'title': __('用户描述'), 'dataIndex': 'user_remark'},
+                                {'title': __('性别'), 'dataIndex': 'user_sex'},
+                                {'title': __('邮箱'), 'dataIndex': 'user_email'},
+                                {'title': __('电话号码'), 'dataIndex': 'phone_number'},
+                                {'title': __('更新时间'), 'dataIndex': 'update_datetime'},
+                                {'title': __('更新人'), 'dataIndex': 'update_by'},
+                                {'title': __('创建时间'), 'dataIndex': 'create_datetime'},
+                                {'title': __('创建人'), 'dataIndex': 'create_by'},
+                                {'title': __('操作'), 'dataIndex': 'operation', 'renderOptions': {'renderType': 'button'}},
                             ],
                             data=[
                                 {
@@ -58,14 +58,14 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                     'user_status': {'tag': '启用' if i.user_status else '停用', 'color': 'cyan' if i.user_status else 'volcano'},
                                     'operation': [
                                         {
-                                            'content': _('编辑'),
+                                            'content': __('编辑'),
                                             'type': 'primary',
                                             'custom': 'update:' + i.user_name,
                                         },
                                         *(
                                             [
                                                 {
-                                                    'content': _('删除'),
+                                                    'content': __('删除'),
                                                     'type': 'primary',
                                                     'custom': 'delete:' + i.user_name,
                                                     'danger': True,
@@ -90,43 +90,43 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                         [
                                             fac.AntdFormItem(
                                                 fac.AntdInput(id='user-mgmt-add-user-name', debounceWait=500),
-                                                label=_('用户名'),
+                                                label=__('用户名'),
                                                 required=True,
                                                 id='user-mgmt-add-user-name-form',
                                                 hasFeedback=True,
                                             ),
-                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-full-name'), label=_('全名'), required=True),
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-full-name'), label=__('全名'), required=True),
                                         ]
                                     ),
                                     fac.AntdFlex(
                                         [
-                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-email'), label=_('邮箱')),
-                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-phone-number'), label=_('电话号码')),
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-user-email'), label=__('邮箱')),
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-phone-number'), label=__('电话号码')),
                                         ]
                                     ),
                                     fac.AntdFlex(
                                         [
-                                            fac.AntdFormItem(fac.AntdSwitch(id='user-mgmt-add-user-status'), label=_('用户状态'), required=True, style={'flex': 1}),
+                                            fac.AntdFormItem(fac.AntdSwitch(id='user-mgmt-add-user-status'), label=__('用户状态'), required=True, style={'flex': 1}),
                                             fac.AntdFormItem(
                                                 fac.AntdSelect(
                                                     id='user-mgmt-add-user-sex',
-                                                    options=[{'label': _(i.value), 'value': i.value} for i in Sex],
+                                                    options=[{'label': __(i.value), 'value': i.value} for i in Sex],
                                                     defaultValue='男',
                                                     allowClear=False,
                                                 ),
-                                                label=_('性别'),
+                                                label=__('性别'),
                                                 style={'flex': 1},
                                             ),
-                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-password'), label=_('密码'), required=True, style={'flex': 1.5}),
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-add-password'), label=__('密码'), required=True, style={'flex': 1.5}),
                                         ]
                                     ),
                                     fac.AntdFormItem(
                                         fac.AntdInput(id='user-mgmt-add-user-remark', mode='text-area', autoSize={'minRows': 1, 'maxRows': 3}),
-                                        label=_('用户描述'),
+                                        label=__('用户描述'),
                                         labelCol={'flex': '1'},
                                         wrapperCol={'flex': '5'},
                                     ),
-                                    fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-roles', mode='multiple'), label=_('角色'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}),
+                                    fac.AntdFormItem(fac.AntdSelect(id='user-mgmt-add-roles', mode='multiple'), label=__('角色'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}),
                                 ],
                                 labelAlign='left',
                                 className={'.ant-form-item': {'marginBottom': '12px', 'marginRight': '8px'}},
@@ -134,9 +134,9 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         ],
                         destroyOnClose=False,
                         renderFooter=True,
-                        okText=_('确定'),
-                        cancelText=_('取消'),
-                        title=_('添加用户'),
+                        okText=__('确定'),
+                        cancelText=__('取消'),
+                        title=__('添加用户'),
                         mask=False,
                         maskClosable=False,
                         id='user-mgmt-add-modal',
@@ -144,7 +144,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     ),
                     fac.AntdModal(
                         children=[
-                            fac.AntdText(_('您确定要删除用户')),
+                            fac.AntdText(__('您确定要删除用户')),
                             fac.AntdText(
                                 'xxxx',
                                 id='user-mgmt-delete-user-name',
@@ -155,10 +155,10 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         ],
                         destroyOnClose=False,
                         renderFooter=True,
-                        okText=_('确定'),
-                        cancelText=_('取消'),
+                        okText=__('确定'),
+                        cancelText=__('取消'),
                         okButtonProps={'danger': True},
-                        title=_('确认要删除？'),
+                        title=__('确认要删除？'),
                         mask=False,
                         maskClosable=False,
                         id='user-mgmt-delete-affirm-modal',
@@ -169,40 +169,40 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                 [
                                     fac.AntdFlex(
                                         [
-                                            fac.AntdFormItem(fac.AntdText(id='user-mgmt-update-user-name'), label=_('用户名')),
-                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-update-user-full-name'), label=_('全名'), required=True),
+                                            fac.AntdFormItem(fac.AntdText(id='user-mgmt-update-user-name'), label=__('用户名')),
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-update-user-full-name'), label=__('全名'), required=True),
                                         ]
                                     ),
                                     fac.AntdFlex(
                                         [
-                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-update-user-email'), label=_('邮箱')),
-                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-update-phone-number'), label=_('电话号码')),
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-update-user-email'), label=__('邮箱')),
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-update-phone-number'), label=__('电话号码')),
                                         ]
                                     ),
                                     fac.AntdFlex(
                                         [
-                                            fac.AntdFormItem(fac.AntdSwitch(id='user-mgmt-update-user-status'), label=_('用户状态'), required=True, style={'flex': 1}),
+                                            fac.AntdFormItem(fac.AntdSwitch(id='user-mgmt-update-user-status'), label=__('用户状态'), required=True, style={'flex': 1}),
                                             fac.AntdFormItem(
                                                 fac.AntdSelect(
                                                     id='user-mgmt-update-user-sex',
-                                                    options=[{'label': _(i.value), 'value': i.value} for i in Sex],
+                                                    options=[{'label': __(i.value), 'value': i.value} for i in Sex],
                                                     defaultValue='男',
                                                     allowClear=False,
                                                 ),
-                                                label=_('性别'),
+                                                label=__('性别'),
                                                 style={'flex': 1},
                                             ),
-                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-update-password'), label=_('密码'), style={'flex': 1.5}),
+                                            fac.AntdFormItem(fac.AntdInput(id='user-mgmt-update-password'), label=__('密码'), style={'flex': 1.5}),
                                         ]
                                     ),
                                     fac.AntdFormItem(
                                         fac.AntdInput(id='user-mgmt-update-user-remark', mode='text-area', autoSize={'minRows': 1, 'maxRows': 3}),
-                                        label=_('用户描述'),
+                                        label=__('用户描述'),
                                         labelCol={'flex': '1'},
                                         wrapperCol={'flex': '5'},
                                     ),
                                     fac.AntdFormItem(
-                                        fac.AntdSelect(id='user-mgmt-update-roles', mode='multiple'), label=_('角色'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
+                                        fac.AntdSelect(id='user-mgmt-update-roles', mode='multiple'), label=__('角色'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
                                     ),
                                 ],
                                 labelAlign='left',
@@ -211,9 +211,9 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         ],
                         destroyOnClose=False,
                         renderFooter=True,
-                        okText=_('确定'),
-                        cancelText=_('取消'),
-                        title=_('更新用户'),
+                        okText=__('确定'),
+                        cancelText=__('取消'),
+                        title=__('更新用户'),
                         mask=False,
                         maskClosable=False,
                         id='user-mgmt-update-modal',

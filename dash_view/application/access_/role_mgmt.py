@@ -7,7 +7,7 @@ from dash_callback.application.access_ import role_mgmt_c  # noqa
 from functools import partial
 from i18n import translator
 
-_ = partial(translator.t)
+__ = partial(translator.t)
 
 
 # 二级菜单的标题、图标和显示顺序
@@ -26,7 +26,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
             fac.AntdRow(
                 fac.AntdButton(
                     id='role-mgmt-button-add',
-                    children=_('添加角色'),
+                    children=__('添加角色'),
                     type='primary',
                     icon=fac.AntdIcon(icon='antd-plus'),
                     style={'marginBottom': '10px'},
@@ -38,14 +38,14 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         Table(
                             id='role-mgmt-table',
                             columns=[
-                                {'title': _('角色名称'), 'dataIndex': 'role_name'},
-                                {'title': _('角色状态'), 'dataIndex': 'role_status', 'renderOptions': {'renderType': 'tags'}},
-                                {'title': _('角色描述'), 'dataIndex': 'role_remark'},
-                                {'title': _('更新时间'), 'dataIndex': 'update_datetime'},
-                                {'title': _('更新人'), 'dataIndex': 'update_by'},
-                                {'title': _('创建时间'), 'dataIndex': 'create_datetime'},
-                                {'title': _('创建人'), 'dataIndex': 'create_by'},
-                                {'title': _('操作'), 'dataIndex': 'operation', 'renderOptions': {'renderType': 'button'}},
+                                {'title': __('角色名称'), 'dataIndex': 'role_name'},
+                                {'title': __('角色状态'), 'dataIndex': 'role_status', 'renderOptions': {'renderType': 'tags'}},
+                                {'title': __('角色描述'), 'dataIndex': 'role_remark'},
+                                {'title': __('更新时间'), 'dataIndex': 'update_datetime'},
+                                {'title': __('更新人'), 'dataIndex': 'update_by'},
+                                {'title': __('创建时间'), 'dataIndex': 'create_datetime'},
+                                {'title': __('创建人'), 'dataIndex': 'create_by'},
+                                {'title': __('操作'), 'dataIndex': 'operation', 'renderOptions': {'renderType': 'button'}},
                             ],
                             data=[
                                 {
@@ -54,14 +54,14 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                     'role_status': {'tag': '启用' if i.role_status else '停用', 'color': 'cyan' if i.role_status else 'volcano'},
                                     'operation': [
                                         {
-                                            'content': _('编辑'),
+                                            'content': __('编辑'),
                                             'type': 'primary',
                                             'custom': 'update:' + i.role_name,
                                         },
                                         *(
                                             [
                                                 {
-                                                    'content': _('删除'),
+                                                    'content': __('删除'),
                                                     'type': 'primary',
                                                     'custom': 'delete:' + i.role_name,
                                                     'danger': True,
@@ -82,9 +82,9 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         children=[
                             fac.AntdForm(
                                 [
-                                    fac.AntdFormItem(fac.AntdText(id='role-mgmt-update-role-name'), label=_('角色名')),
-                                    fac.AntdFormItem(fac.AntdSwitch(id='role-mgmt-update-role-status'), label=_('角色状态')),
-                                    fac.AntdFormItem(fac.AntdInput(id='role-mgmt-update-role-remark', mode='text-area'), label=_('角色描述')),
+                                    fac.AntdFormItem(fac.AntdText(id='role-mgmt-update-role-name'), label=__('角色名')),
+                                    fac.AntdFormItem(fac.AntdSwitch(id='role-mgmt-update-role-status'), label=__('角色状态')),
+                                    fac.AntdFormItem(fac.AntdInput(id='role-mgmt-update-role-remark', mode='text-area'), label=__('角色描述')),
                                     fac.AntdFormItem(
                                         fac.AntdTree(
                                             id='role-menu-access-tree-select-update',
@@ -93,7 +93,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                             checkable=True,
                                             showLine=True,
                                         ),
-                                        label=_('菜单权限'),
+                                        label=__('菜单权限'),
                                     ),
                                 ],
                                 labelCol={'span': 5},
@@ -102,9 +102,9 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         ],
                         destroyOnClose=False,
                         renderFooter=True,
-                        okText=_('确定'),
-                        cancelText=_('取消'),
-                        title=_('角色编辑'),
+                        okText=__('确定'),
+                        cancelText=__('取消'),
+                        title=__('角色编辑'),
                         mask=False,
                         maskClosable=False,
                         id='role-mgmt-update-modal',
@@ -115,13 +115,13 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                 [
                                     fac.AntdFormItem(
                                         fac.AntdInput(id='role-mgmt-add-role-name', debounceWait=500),
-                                        label=_('角色名'),
+                                        label=__('角色名'),
                                         required=True,
                                         id='role-mgmt-add-role-name-form',
                                         hasFeedback=True,
                                     ),
-                                    fac.AntdFormItem(fac.AntdSwitch(id='role-mgmt-add-role-status', checked=True), label=_('角色状态'), required=True),
-                                    fac.AntdFormItem(fac.AntdInput(id='role-mgmt-add-role-remark', mode='text-area', autoSize={'minRows': 1, 'maxRows': 3}), label=_('角色描述')),
+                                    fac.AntdFormItem(fac.AntdSwitch(id='role-mgmt-add-role-status', checked=True), label=__('角色状态'), required=True),
+                                    fac.AntdFormItem(fac.AntdInput(id='role-mgmt-add-role-remark', mode='text-area', autoSize={'minRows': 1, 'maxRows': 3}), label=__('角色描述')),
                                     fac.AntdFormItem(
                                         fac.AntdTree(
                                             id='role-menu-access-tree-select-add',
@@ -130,7 +130,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                             checkable=True,
                                             showLine=True,
                                         ),
-                                        label=_('菜单权限'),
+                                        label=__('菜单权限'),
                                     ),
                                 ],
                                 labelCol={'span': 5},
@@ -139,16 +139,16 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         ],
                         destroyOnClose=False,
                         renderFooter=True,
-                        okText=_('确定'),
-                        cancelText=_('取消'),
-                        title=_('添加角色'),
+                        okText=__('确定'),
+                        cancelText=__('取消'),
+                        title=__('添加角色'),
                         mask=False,
                         maskClosable=False,
                         id='role-mgmt-add-modal',
                     ),
                     fac.AntdModal(
                         children=[
-                            fac.AntdText(_('您确定要删除角色')),
+                            fac.AntdText(__('您确定要删除角色')),
                             fac.AntdText(
                                 id='role-mgmt-delete-role-name',
                                 type='danger',
@@ -158,10 +158,10 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         ],
                         destroyOnClose=False,
                         renderFooter=True,
-                        okText=_('确定'),
-                        cancelText=_('取消'),
+                        okText=__('确定'),
+                        cancelText=__('取消'),
                         okButtonProps={'danger': True},
-                        title=_('确认要删除？'),
+                        title=__('确认要删除？'),
                         mask=False,
                         maskClosable=False,
                         id='role-mgmt-delete-affirm-modal',

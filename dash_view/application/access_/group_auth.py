@@ -6,7 +6,7 @@ from dash_callback.application.access_ import group_auth_c  # noqa
 from functools import partial
 from i18n import translator
 
-_ = partial(translator.t)
+__ = partial(translator.t)
 
 
 # 二级菜单的标题、图标和显示顺序
@@ -22,12 +22,12 @@ def render_content(menu_access: MenuAccess, **kwargs):
         Table(
             id='group-auth-table',
             columns=[
-                {'title': _('团队名称'), 'dataIndex': 'group_name', 'width': '10%'},
-                {'title': _('团队描述'), 'dataIndex': 'group_remark', 'width': '10%'},
-                {'title': _('用户名'), 'dataIndex': 'user_name', 'width': '10%'},
-                {'title': _('用户全名'), 'dataIndex': 'user_full_name', 'width': '10%'},
-                {'title': _('用户状态'), 'dataIndex': 'user_status', 'renderOptions': {'renderType': 'tags'}, 'width': '10%'},
-                {'title': _('用户角色'), 'dataIndex': 'user_roles', 'renderOptions': {'renderType': 'select'}, 'width': '50%'},
+                {'title': __('团队名称'), 'dataIndex': 'group_name', 'width': '10%'},
+                {'title': __('团队描述'), 'dataIndex': 'group_remark', 'width': '10%'},
+                {'title': __('用户名'), 'dataIndex': 'user_name', 'width': '10%'},
+                {'title': __('用户全名'), 'dataIndex': 'user_full_name', 'width': '10%'},
+                {'title': __('用户状态'), 'dataIndex': 'user_status', 'renderOptions': {'renderType': 'tags'}, 'width': '10%'},
+                {'title': __('用户角色'), 'dataIndex': 'user_roles', 'renderOptions': {'renderType': 'select'}, 'width': '50%'},
             ],
             data=[
                 {

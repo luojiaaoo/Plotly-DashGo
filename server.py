@@ -8,7 +8,7 @@ from common.utilities.util_dash import CustomDash
 from functools import partial
 from i18n import translator
 
-_ = partial(translator.t)
+__ = partial(translator.t)
 
 logger = Log.get_logger(__name__)
 
@@ -67,12 +67,12 @@ def get_user_agent_info():
     if user_agent.browser.version != ():
         bw_version = user_agent.browser.version[0]
         if bw == 'IE':
-            return "<h1 style='color: red'>IP:{}, {}</h1>".format(request_addr, _('请不要使用IE浏览器或360浏览器兼容模式'))
+            return "<h1 style='color: red'>IP:{}, {}</h1>".format(request_addr, __('请不要使用IE浏览器或360浏览器兼容模式'))
         elif bw == 'Chrome' and bw_version < 71:
             return "<h1 style='color: red'>IP:{}, {}</h1>".format(
                 request_addr,
-                _('Chrome内核版本号太低，请升级浏览器'),
+                __('Chrome内核版本号太低，请升级浏览器'),
             ) + "<h1 style='color: red'><a href='https://www.google.cn/chrome/'>{}</a>{}</h1>".format(
-                _('点击此处'),
-                _('可下载最新版Chrome浏览器'),
+                __('点击此处'),
+                __('可下载最新版Chrome浏览器'),
             )

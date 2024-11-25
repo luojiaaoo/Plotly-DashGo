@@ -6,7 +6,7 @@ from common.utilities.util_logger import Log
 from functools import partial
 from i18n import translator
 
-_ = partial(translator.t)
+__ = partial(translator.t)
 
 
 # 二级菜单的标题、图标和显示顺序
@@ -30,7 +30,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     size=70,
                     style={'marginRight': '20px'}
                 ),
-                fac.AntdText(_('你好，')),
+                fac.AntdText(__('你好，')),
                 fac.AntdText(menu_access.user_info.user_full_name,id='workbench-user-full-name'),
             ]
         )
