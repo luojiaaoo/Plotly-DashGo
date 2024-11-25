@@ -3,10 +3,7 @@ from dash.dependencies import Input, Output, State
 import dash
 from database.sql_db.dao import dao_user
 from dash_components import MessageManager
-from functools import partial
-from i18n import translator
-
-__ = partial(translator.t)
+from i18n import t__access_mgmt,t__default
 
 
 @app.callback(
@@ -72,7 +69,7 @@ def update_delete_group(nClicksButton, clickedCustom: str):
 def update_group_c(okCounts, group_name, group_status, group_remark, group_roles, group_admin_users, group_users):
     rt = dao_user.update_group(group_name, group_status, group_remark, group_roles, group_admin_users, group_users)
     if rt:
-        MessageManager.success(content=__('团队更新成功'))
+        MessageManager.success(content=t__access_mgmt('团队更新成功'))
         return [
             {
                 'key': i.group_name,
@@ -80,12 +77,12 @@ def update_group_c(okCounts, group_name, group_status, group_remark, group_roles
                 'group_status': {'tag': '启用' if i.group_status else '停用', 'color': 'cyan' if i.group_status else 'volcano'},
                 'operation': [
                     {
-                        'content': __('编辑'),
+                        'content': t__default('编辑'),
                         'type': 'primary',
                         'custom': 'update:' + i.group_name,
                     },
                     {
-                        'content': __('删除'),
+                        'content': t__default('删除'),
                         'type': 'primary',
                         'custom': 'delete:' + i.group_name,
                         'danger': True,
@@ -95,7 +92,7 @@ def update_group_c(okCounts, group_name, group_status, group_remark, group_roles
             for i in dao_user.get_group_info(exclude_disabled=False)
         ]
     else:
-        MessageManager.warning(content=__('团队更新失败'))
+        MessageManager.warning(content=t__access_mgmt('团队更新失败'))
         return dash.no_update
 
 
@@ -111,11 +108,11 @@ def update_group_c(okCounts, group_name, group_status, group_remark, group_roles
 def check_role_name(group_name):
     """校验新建团队名的有效性"""
     if not group_name:
-        return 'error', __('请填写团队名')
+        return 'error', t__access_mgmt('请填写团队名')
     if not dao_user.exists_group_name(group_name):
-        return 'success', __('该团队名可用')
+        return 'success', t__access_mgmt('该团队名可用')
     else:
-        return 'error', __('该团队名已存在')
+        return 'error', t__access_mgmt('该团队名已存在')
 
 
 @app.callback(
@@ -166,11 +163,11 @@ def show_add_group_modal(nClicks):
 def add_group(okCounts, group_name, group_status, group_remark, group_roles, group_admin_users, group_users):
     """新建团队"""
     if not group_name:
-        MessageManager.warning(content=__('团队名不能为空'))
+        MessageManager.warning(content=t__access_mgmt('团队名不能为空'))
         return dash.no_update
     rt = dao_user.create_group(group_name, group_status, group_remark, group_roles, group_admin_users, group_users)
     if rt:
-        MessageManager.success(content=__('团队添加成功'))
+        MessageManager.success(content=t__access_mgmt('团队添加成功'))
         return [
             {
                 'key': i.group_name,
@@ -178,12 +175,12 @@ def add_group(okCounts, group_name, group_status, group_remark, group_roles, gro
                 'group_status': {'tag': '启用' if i.group_status else '停用', 'color': 'cyan' if i.group_status else 'volcano'},
                 'operation': [
                     {
-                        'content': __('编辑'),
+                        'content': t__default('编辑'),
                         'type': 'primary',
                         'custom': 'update:' + i.group_name,
                     },
                     {
-                        'content': __('删除'),
+                        'content': t__default('删除'),
                         'type': 'primary',
                         'custom': 'delete:' + i.group_name,
                         'danger': True,
@@ -193,7 +190,7 @@ def add_group(okCounts, group_name, group_status, group_remark, group_roles, gro
             for i in dao_user.get_group_info(exclude_disabled=False)
         ]
     else:
-        MessageManager.warning(content=__('团队添加失败'))
+        MessageManager.warning(content=t__access_mgmt('团队添加失败'))
         return dash.no_update
 
 
@@ -208,7 +205,7 @@ def delete_role_modal(okCounts, group_name):
     """删除角色"""
     rt = dao_user.delete_group(group_name)
     if rt:
-        MessageManager.success(content=__('团队删除成功'))
+        MessageManager.success(content=t__access_mgmt('团队删除成功'))
         return [
             {
                 'key': i.group_name,
@@ -216,12 +213,12 @@ def delete_role_modal(okCounts, group_name):
                 'group_status': {'tag': '启用' if i.group_status else '停用', 'color': 'cyan' if i.group_status else 'volcano'},
                 'operation': [
                     {
-                        'content': __('编辑'),
+                        'content': t__default('编辑'),
                         'type': 'primary',
                         'custom': 'update:' + i.group_name,
                     },
                     {
-                        'content': __('删除'),
+                        'content': t__default('删除'),
                         'type': 'primary',
                         'custom': 'delete:' + i.group_name,
                         'danger': True,
@@ -231,5 +228,5 @@ def delete_role_modal(okCounts, group_name):
             for i in dao_user.get_group_info(exclude_disabled=False)
         ]
     else:
-        MessageManager.warning(content=__('团队删除失败'))
+        MessageManager.warning(content=t__access_mgmt('团队删除失败'))
         return dash.no_update

@@ -139,6 +139,72 @@
         },
         "更新用户": {
             "en-us": "Update User"
-        }
+        },
+        "权限更新成功": {
+            "en-us": "Access updated successfully"
+        },
+        "权限更新失败": {
+            "en-us": "Access update failed"
+        },
+        "团队更新成功": {
+            "en-us": "Group updated successfully"
+        },
+        "团队更新失败": {
+            "en-us": "Group updated failed"
+        },
+        "请填写团队名": {
+            "en-us": "Please fill in the group name"
+        },
+        "该团队名可用": {
+            "en-us": "The group name is available"
+        },
+        "该团队名已存在": {
+            "en-us": "The group name already exists"
+        },
+        "团队名不能为空": {
+            "en-us": "group name can not be empty"
+        },
+        "团队添加成功": {
+            "en-us": "Group added successfully"
+        },
+        "团队添加失败": {
+            "en-us": "Group added failed"
+        },
+        "团队删除成功": {
+            "en-us": "Group deleted successfully"
+        },
+        "团队删除失败": {
+            "en-us": "Group deleted failed"
+        },
+        "角色更新成功": {
+            "en-us": "Role updated successfully"
+        },
+        "角色更新失败": {
+            "en-us": "Role update failed"
+        },
+        "角色删除成功": {
+            "en-us": "Role deleted successfully"
+        },
+        "角色删除失败": {
+            "en-us": "Role delete failed"
+        },
+        "请填写角色名": {
+            "en-us": "Please fill in the role name"
+        },
+        "该角色名可用": {
+            "en-us": "The role name is available"
+        },
+        "该角色名已存在": {
+            "en-us": "The role name already exists"
+        },
+        "角色名不能为空": {
+            "en-us": "role name can not be empty"
+        },
+        "角色添加成功": {
+            "en-us": "Role added successfully"
+        },
+        "角色添加失败": {
+            "en-us": "Role added failed"
+        },
     }
 }

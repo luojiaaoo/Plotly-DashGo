@@ -4,10 +4,7 @@ import dash
 from database.sql_db.dao import dao_user
 from dash_components import MessageManager
 from typing import List
-from functools import partial
-from i18n import translator
-
-__ = partial(translator.t)
+from i18n import t__access_mgmt, t__default
 
 
 @app.callback(
@@ -73,7 +70,7 @@ def callback_func(okCounts, role_name: str, role_status: bool, role_remark: str,
     access_metas = [i for i in access_metas if not i.startswith('ignore:')]
     rt = dao_user.update_role(role_name, role_status, role_remark, access_metas)
     if rt:
-        MessageManager.success(content=__('角色更新成功'))
+        MessageManager.success(content=t__access_mgmt('角色更新成功'))
         return [
             {
                 'key': i.role_name,
@@ -81,14 +78,14 @@ def callback_func(okCounts, role_name: str, role_status: bool, role_remark: str,
                 'role_status': {'tag': '启用' if i.role_status else '停用', 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
                     {
-                        'content': __('编辑'),
+                        'content': t__default('编辑'),
                         'type': 'primary',
                         'custom': 'update:' + i.role_name,
                     },
                     *(
                         [
                             {
-                                'content': __('删除'),
+                                'content': t__default('删除'),
                                 'type': 'primary',
                                 'custom': 'delete:' + i.role_name,
                                 'danger': True,
@@ -102,7 +99,7 @@ def callback_func(okCounts, role_name: str, role_status: bool, role_remark: str,
             for i in dao_user.get_role_info(exclude_disabled=False)
         ]
     else:
-        MessageManager.warning(content=__('角色更新失败'))
+        MessageManager.warning(content=t__access_mgmt('角色更新失败'))
         return dash.no_update
 
 
@@ -117,7 +114,7 @@ def delete_role_modal(okCounts, role_name):
     """删除角色"""
     rt = dao_user.delete_role(role_name)
     if rt:
-        MessageManager.success(content=__('角色删除成功'))
+        MessageManager.success(content=t__access_mgmt('角色删除成功'))
         return [
             {
                 'key': i.role_name,
@@ -125,14 +122,14 @@ def delete_role_modal(okCounts, role_name):
                 'role_status': {'tag': '启用' if i.role_status else '停用', 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
                     {
-                        'content': __('编辑'),
+                        'content': t__default('编辑'),
                         'type': 'primary',
                         'custom': 'update:' + i.role_name,
                     },
                     *(
                         [
                             {
-                                'content': __('删除'),
+                                'content': t__default('删除'),
                                 'type': 'primary',
                                 'custom': 'delete:' + i.role_name,
                                 'danger': True,
@@ -146,7 +143,7 @@ def delete_role_modal(okCounts, role_name):
             for i in dao_user.get_role_info(exclude_disabled=False)
         ]
     else:
-        MessageManager.warning(content=__('角色删除失败'))
+        MessageManager.warning(content=t__access_mgmt('角色删除失败'))
         return dash.no_update
 
 
@@ -162,11 +159,11 @@ def delete_role_modal(okCounts, role_name):
 def check_role_name(role_name):
     """校验新建角色名的有效性"""
     if not role_name:
-        return 'error', __('请填写角色名')
+        return 'error', t__access_mgmt('请填写角色名')
     if not dao_user.exists_role_name(role_name):
-        return 'success', __('该角色名可用')
+        return 'success', t__access_mgmt('该角色名可用')
     else:
-        return 'error', __('该角色名已存在')
+        return 'error', t__access_mgmt('该角色名已存在')
 
 
 @app.callback(
@@ -201,12 +198,12 @@ def open_add_role_modal(nClicks):
 def add_role_c(okCounts, name, role_status, role_remark, access_metas: List[str]):
     """新建角色"""
     if not name:
-        MessageManager.warning(content=__('角色名不能为空'))
+        MessageManager.warning(content=t__access_mgmt('角色名不能为空'))
         return dash.no_update
     access_metas = [i for i in access_metas if not i.startswith('ignore:')]
     rt = dao_user.create_role(name, role_status, role_remark, access_metas)
     if rt:
-        MessageManager.success(content=__('角色添加成功'))
+        MessageManager.success(content=t__access_mgmt('角色添加成功'))
         return [
             {
                 'key': i.role_name,
@@ -214,14 +211,14 @@ def add_role_c(okCounts, name, role_status, role_remark, access_metas: List[str]
                 'role_status': {'tag': '启用' if i.role_status else '停用', 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
                     {
-                        'content': __('编辑'),
+                        'content': t__default('编辑'),
                         'type': 'primary',
                         'custom': 'update:' + i.role_name,
                     },
                     *(
                         [
                             {
-                                'content': __('删除'),
+                                'content': t__default('删除'),
                                 'type': 'primary',
                                 'custom': 'delete:' + i.role_name,
                                 'danger': True,
@@ -235,5 +232,5 @@ def add_role_c(okCounts, name, role_status, role_remark, access_metas: List[str]
             for i in dao_user.get_role_info(exclude_disabled=False)
         ]
     else:
-        MessageManager.warning(content=__('角色添加失败'))
+        MessageManager.warning(content=t__access_mgmt('角色添加失败'))
         return dash.no_update
