@@ -5,11 +5,17 @@
         "首页": {
             "en-us": "Home"
         },
+        "仪表盘": {
+            "en-us": "DashBoard"
+        },
+        "工作台": {
+            "en-us": "Workbench"
+        },
+        "监控页": {
+            "en-us": "Monitor"
+        },
         "权限管理": {
             "en-us": "Access Mgmt"
-        },
-        "权限列表": {
-            "en-us": "Access List"
         },
         "团队管理": {
             "en-us": "Group Mgmt"
@@ -17,14 +23,17 @@
         "角色管理": {
             "en-us": "Role Mgmt"
         },
-        "用户权限": {
-            "en-us": "User Auth"
+        "用户管理": {
+            "en-us": "User Mgmt"
         },
-        "仪表盘": {
-            "en-us": "DashBoard"
+        "个人页": {
+            "en-us": "Person Page"
         },
-        "监控页": {
-            "en-us": "Monitor"
+        "个人信息": {
+            "en-us": "Person Info"
+        },
+        "个人设置": {
+            "en-us": "Person Setting"
         },
         "应用案例": {
             "en-us": "App Case"

@@ -1,13 +1,7 @@
 from typing import Set
 from common.exception import NotFoundUserException, AuthException
 from common.utilities.util_logger import Log
-from i18n import translator
-from functools import partial
-
-
-t__access_meta = partial(translator.t, locale_topic='access_meta')
-t__menu_item = partial(translator.t, locale_topic='menu_item')
-
+from i18n import t__access_meta, t__menu_item
 
 logger = Log.get_logger(__name__)
 
