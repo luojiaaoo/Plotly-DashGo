@@ -6,6 +6,18 @@
         },
         "删除": {
             "en-us": "Delete"
+        },
+        "操作": {
+            "en-us": "Action"
+        },
+        "确定": {
+            "en-us": "Ok"
+        },
+        "取消": {
+            "en-us": "Cancel"
+        },
+        "确认要删除？": {
+            "en-us": "Are you sure to delete?"
         }
     }
 }

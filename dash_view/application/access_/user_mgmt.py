@@ -5,7 +5,7 @@ from dash_components import Card, Table
 from database.sql_db.dao import dao_user
 from config.enums import Sex
 import dash_callback.application.access_.user_mgmt_c  # noqa
-from i18n import t__access
+from i18n import t__access, t__default
 
 
 # 二级菜单的标题、图标和显示顺序
@@ -46,7 +46,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                 {'title': t__access('更新人'), 'dataIndex': 'update_by'},
                                 {'title': t__access('创建时间'), 'dataIndex': 'create_datetime'},
                                 {'title': t__access('创建人'), 'dataIndex': 'create_by'},
-                                {'title': t__access('操作'), 'dataIndex': 'operation', 'renderOptions': {'renderType': 'button'}},
+                                {'title': t__default('操作'), 'dataIndex': 'operation', 'renderOptions': {'renderType': 'button'}},
                             ],
                             data=[
                                 {
@@ -133,8 +133,8 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         ],
                         destroyOnClose=False,
                         renderFooter=True,
-                        okText=t__access('确定'),
-                        cancelText=t__access('取消'),
+                        okText=t__default('确定'),
+                        cancelText=t__default('取消'),
                         title=t__access('添加用户'),
                         mask=False,
                         maskClosable=False,
@@ -143,7 +143,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     ),
                     fac.AntdModal(
                         children=[
-                            fac.AntdText(t__access('您确定要删除用户')),
+                            fac.AntdText(t__access('您确定要删除用户 ')),
                             fac.AntdText(
                                 'xxxx',
                                 id='user-mgmt-delete-user-name',
@@ -154,10 +154,10 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         ],
                         destroyOnClose=False,
                         renderFooter=True,
-                        okText=t__access('确定'),
-                        cancelText=t__access('取消'),
+                        okText=t__default('确定'),
+                        cancelText=t__default('取消'),
                         okButtonProps={'danger': True},
-                        title=t__access('确认要删除？'),
+                        title=t__default('确认要删除？'),
                         mask=False,
                         maskClosable=False,
                         id='user-mgmt-delete-affirm-modal',
@@ -210,8 +210,8 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         ],
                         destroyOnClose=False,
                         renderFooter=True,
-                        okText=t__access('确定'),
-                        cancelText=t__access('取消'),
+                        okText=t__default('确定'),
+                        cancelText=t__default('取消'),
                         title=t__access('更新用户'),
                         mask=False,
                         maskClosable=False,

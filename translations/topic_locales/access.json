@@ -128,15 +128,6 @@
         "角色": {
             "en-us": "role"
         },
-        "确定": {
-            "en-us": "Ok"
-        },
-        "取消": {
-            "en-us": "Cancel"
-        },
-        "确认要删除？": {
-            "en-us": "Are you sure to delete?"
-        },
         "更新用户": {
             "en-us": "Update User"
         },
@@ -218,6 +209,9 @@
         "团队名称": {
             "en-us": "group name"
         },
+        "团队状态": {
+            "en-us": "group status"
+        },
         "团队描述": {
             "en-us": "group remark"
         },
@@ -226,6 +220,30 @@
         },
         "用户角色": {
             "en-us": "role"
+        },
+        "绑定角色": {
+            "en-us": "bind role"
+        },
+        "密码": {
+            "en-us": "password"
+        },
+        "您确定要删除用户 ": {
+            "en-us": "Are you sure to delete user "
+        },
+        "添加团队": {
+            "en-us": "Add Group"
+        },
+        "管理员": {
+            "en-us": "Admin"
+        },
+        "成员": {
+            "en-us": "Member"
+        },
+        "您确定要删除团队 ": {
+            "en-us": "Are you sure to delete group "
+        },
+        "更新团队": {
+            "en-us": "Update Group"
         }
     }
 }
