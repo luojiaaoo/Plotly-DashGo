@@ -49,17 +49,17 @@ def render_content(menu_access: MenuAccess):
                                 type='editable-card',
                                 className={
                                     'width': '100%',
-                                    'maxHeight': 'calc(100vh - 50px)',
+                                    'height': 'calc(100vh - 50px)',
                                     'paddingLeft': '8px',
                                     'paddingRight': '8px',
                                 },
                             ),
                             className={
                                 'width': '100%',
-                                'maxHeight': 'calc(100vh - 50px)',
+                                'height': 'calc(100vh - 50px)',
                                 # 美化滚动条
                                 '& .ant-tabs-content-holder': {
-                                    'maxHeight': '100%',
+                                    'height': '100%',
                                     'overflow': 'auto',
                                     '&::-webkit-scrollbar': {'width': '8px'},
                                     '&::-webkit-scrollbar-track': {'background': '#fff', 'border-radius': '10px'},
@@ -78,7 +78,7 @@ def render_content(menu_access: MenuAccess):
                                 },
                             },
                         ),
-                        className={'maxHeight': 'calc(100vh - 50px)'},
+                        className={'height': 'calc(100vh - 50px)'},
                         gutter=0,
                     ),
                 ],
