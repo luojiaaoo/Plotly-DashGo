@@ -14,6 +14,5 @@ translator = Translator(
 )
 
 t__default = partial(translator.t)
-t__access_meta = partial(translator.t, locale_topic='access_meta')
-t__menu_item = partial(translator.t, locale_topic='menu_item')
-t__user_mgmt = partial(translator.t, locale_topic='user_mgmt')
+t__access_mgmt = partial(translator.t, locale_topic='access_mgmt')
+t__other = partial(translator.t, locale_topic='other')

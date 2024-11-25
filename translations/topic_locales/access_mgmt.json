@@ -1,7 +1,52 @@
 {
     "root_locale": "zh-cn",
-    "topic": "user_mgmt",
+    "topic": "access_mgmt",
     "contents": {
+        "支付页-页面": {
+            "en-us": "Pay Page Show"
+        }
+        "首页": {
+            "en-us": "Home"
+        },
+        "仪表盘": {
+            "en-us": "DashBoard"
+        },
+        "工作台": {
+            "en-us": "Workbench"
+        },
+        "监控页": {
+            "en-us": "Monitor"
+        },
+        "权限管理": {
+            "en-us": "Access Mgmt"
+        },
+        "团队管理": {
+            "en-us": "Group Mgmt"
+        },
+        "角色管理": {
+            "en-us": "Role Mgmt"
+        },
+        "用户管理": {
+            "en-us": "User Mgmt"
+        },
+        "个人页": {
+            "en-us": "Person Page"
+        },
+        "个人信息": {
+            "en-us": "Person Info"
+        },
+        "个人设置": {
+            "en-us": "Person Setting"
+        },
+        "应用案例": {
+            "en-us": "App Case"
+        },
+        "支付页": {
+            "en-us": "Pay Page"
+        },
+        "购买页": {
+            "en-us": "Buy Page"
+        },
         "用户名/全名不能为空": {
             "en-us": "username/fullname can not be empty"
         },

@@ -1,7 +1,7 @@
 from typing import Set
 from common.exception import NotFoundUserException, AuthException
 from common.utilities.util_logger import Log
-from i18n import t__access_meta, t__menu_item
+from i18n import t__access_mgmt
 
 logger = Log.get_logger(__name__)
 
@@ -55,14 +55,14 @@ class MenuAccess:
             for level2_name, access_metas in dict_level2_access_metas.items():
                 format_level2.append(
                     {
-                        'title': t__menu_item(MenuAccess.get_title(f'{level1_name}.{level2_name}')),
+                        'title': t__access_mgmt(MenuAccess.get_title(f'{level1_name}.{level2_name}')),
                         'key': 'ignore:' + MenuAccess.get_title(f'{level1_name}.{level2_name}'),
-                        'children': [{'title': t__access_meta(access_meta), 'key': access_meta} for access_meta in access_metas],
+                        'children': [{'title': t__access_mgmt(access_meta), 'key': access_meta} for access_meta in access_metas],
                     },
                 )
             antd_tree_data.append(
                 {
-                    'title': t__menu_item(MenuAccess.get_title(f'{level1_name}')),
+                    'title': t__access_mgmt(MenuAccess.get_title(f'{level1_name}')),
                     'key': 'ignore:' + MenuAccess.get_title(f'{level1_name}'),
                     'children': format_level2,
                 }
@@ -126,7 +126,7 @@ class MenuAccess:
                 'component': 'SubMenu',
                 'props': {
                     'key': f'/{level1_name}',
-                    'title': t__menu_item(cls.get_title(f'{level1_name}')),
+                    'title': t__access_mgmt(cls.get_title(f'{level1_name}')),
                     'icon': cls.get_icon(f'{level1_name}'),
                 },
                 'children': [
@@ -134,7 +134,7 @@ class MenuAccess:
                         'component': 'Item',
                         'props': {
                             'key': f'/{level1_name}/{level2_name}',
-                            'title': t__menu_item(cls.get_title(f'{level1_name}.{level2_name}')),
+                            'title': t__access_mgmt(cls.get_title(f'{level1_name}.{level2_name}')),
                             'icon': cls.get_icon(f'{level1_name}.{level2_name}'),
                             'href': f'/{level1_name}/{level2_name}',
                         },

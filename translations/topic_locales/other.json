@@ -1,0 +1,15 @@
+{
+    "root_locale": "zh-cn",
+    "topic": "other",
+    "contents": {
+        "请不要使用IE浏览器或360浏览器兼容模式": {
+            "en-us": "Please do not use Internet Explorer"
+        },
+        "Chrome内核版本号太低，请升级浏览器": {
+            "en-us": "The Chrome kernel version is too low. Please upgrade the browser"
+        },
+        "系统异常": {
+            "en-us": "System exception"
+        }
+    }
+}

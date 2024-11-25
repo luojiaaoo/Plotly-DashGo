@@ -3,9 +3,7 @@ from dash.dependencies import Input, Output, State
 import dash
 from database.sql_db.dao import dao_user
 from dash_components import MessageManager
-from i18n import t__user_mgmt,t__default
-
-
+from i18n import t__access_mgmt, t__default
 
 
 @app.callback(
@@ -77,11 +75,11 @@ def update_delete_role(nClicksButton, clickedCustom: str):
 )
 def update_user(okCounts, user_name, user_full_name, user_email, phone_number, user_status, user_sex, password, user_remark, user_roles):
     if not user_name or not user_full_name:
-        MessageManager.warning(content=t__user_mgmt('用户名/全名不能为空'))
+        MessageManager.warning(content=t__access_mgmt('用户名/全名不能为空'))
         return dash.no_update
     rt = dao_user.update_user(user_name, user_full_name, password, user_status, user_sex, user_roles, user_email, phone_number, user_remark)
     if rt:
-        MessageManager.success(content=t__user_mgmt('用户更新成功'))
+        MessageManager.success(content=t__access_mgmt('用户更新成功'))
         return [
             {
                 'key': i.user_name,
@@ -110,7 +108,7 @@ def update_user(okCounts, user_name, user_full_name, user_email, phone_number, u
             for i in dao_user.get_user_info(exclude_disabled=False)
         ]
     else:
-        MessageManager.warning(content=t__user_mgmt('用户更新失败'))
+        MessageManager.warning(content=t__access_mgmt('用户更新失败'))
         return dash.no_update
 
 
@@ -126,11 +124,11 @@ def update_user(okCounts, user_name, user_full_name, user_email, phone_number, u
 def check_user_name(user_name):
     """校验新建用户名的有效性"""
     if not user_name:
-        return 'error', t__user_mgmt('请填写名用户名')
+        return 'error', t__access_mgmt('请填写名用户名')
     if not dao_user.exists_user_name(user_name):
-        return 'success', t__user_mgmt('该用户名名可用')
+        return 'success', t__access_mgmt('该用户名名可用')
     else:
-        return 'error', t__user_mgmt('该用户名已存在')
+        return 'error', t__access_mgmt('该用户名已存在')
 
 
 @app.callback(
@@ -177,11 +175,11 @@ def open_add_role_modal(nClicks):
 def add_user(okCounts, user_name, user_full_name, user_email, phone_number, user_status: bool, user_sex, password, user_remark, user_roles):
     """新建用户"""
     if not user_name or not user_full_name or not password:
-        MessageManager.warning(content=t__user_mgmt('用户名/全名/密码不能为空'))
+        MessageManager.warning(content=t__access_mgmt('用户名/全名/密码不能为空'))
         return dash.no_update
     rt = dao_user.create_user(user_name, user_full_name, password, user_status, user_sex, user_roles, user_email, phone_number, user_remark)
     if rt:
-        MessageManager.success(content=t__user_mgmt('用户添加成功'))
+        MessageManager.success(content=t__access_mgmt('用户添加成功'))
         return [
             {
                 'key': i.user_name,
@@ -210,7 +208,7 @@ def add_user(okCounts, user_name, user_full_name, user_email, phone_number, user
             for i in dao_user.get_user_info(exclude_disabled=False)
         ]
     else:
-        MessageManager.warning(content=t__user_mgmt('用户添加失败'))
+        MessageManager.warning(content=t__access_mgmt('用户添加失败'))
         return dash.no_update
 
 
@@ -225,7 +223,7 @@ def delete_role_modal(okCounts, user_name):
     """删除角色"""
     rt = dao_user.delete_user(user_name)
     if rt:
-        MessageManager.success(content=t__user_mgmt('用户删除成功'))
+        MessageManager.success(content=t__access_mgmt('用户删除成功'))
         return [
             {
                 'key': i.user_name,
@@ -254,5 +252,5 @@ def delete_role_modal(okCounts, user_name):
             for i in dao_user.get_user_info(exclude_disabled=False)
         ]
     else:
-        MessageManager.warning(content=t__user_mgmt('用户删除失败'))
+        MessageManager.warning(content=t__access_mgmt('用户删除失败'))
         return dash.no_update
