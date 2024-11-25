@@ -128,8 +128,8 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     fac.AntdSpace(
                         [
                             fac.AntdText(_('电话：')),
-                            fac.AntdText(user_info.phone_number),
-                            fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link'),
+                            fac.AntdInput(defaultValue=user_info.phone_number, variant='borderless', readOnly=True, id='personal-info-phone-number'),
+                            fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link', id='personal-info-phone-number-edit'),
                         ]
                     ),
                     fac.AntdSpace(

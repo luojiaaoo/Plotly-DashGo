@@ -256,6 +256,31 @@ def update_user_email(user_name: str, user_email: str) -> bool:
         else:
             txn.commit()
             return True
+        
+def update_phone_number(user_name: str, phone_number: str) -> bool:
+    """更新用户邮箱"""
+    user_name_op = util_menu_access.get_menu_access(only_get_user_name=True)
+    with db().atomic() as txn, db().cursor() as cursor:
+        try:
+            cursor.execute(
+                """
+                    update sys_user 
+                    set 
+                    phone_number=%s,update_by=%s,update_datetime=%s where user_name=%s;""",
+                (
+                    phone_number,
+                    user_name_op,
+                    datetime.now(),
+                    user_name,
+                ),
+            )
+        except Exception as e:
+            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新电话为{phone_number}时，出现异常', exc_info=True)
+            txn.rollback()
+            return False
+        else:
+            txn.commit()
+            return True
 def create_user(
     user_name: str,
     user_full_name: str,
