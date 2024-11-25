@@ -140,3 +140,32 @@ def update_phone_number(_, value, defaultValue):
         set_props('personal-info-phone-number', {'Value': defaultValue})
         MessageManager.warning(content=__('用户电话更新失败'))
     set_props('personal-info-phone-number', {'variant': 'borderless', 'readOnly': True})
+
+# 编辑描述开关
+app.clientside_callback(
+    """(_) => {
+        return [false, 'outlined']
+    }""",
+    [
+        Output('personal-info-user-remark', 'readOnly'),
+        Output('personal-info-user-remark', 'variant'),
+    ],
+    Input('personal-info-user-remark-edit', 'nClicks'),
+)
+
+
+# 编辑描述
+@app.callback(
+    Input('personal-info-user-remark', 'nSubmit'),
+    [
+        State('personal-info-user-remark', 'value'),
+        State('personal-info-user-remark', 'defaultValue'),
+    ],
+)
+def update_user_remark(_, value, defaultValue):
+    if dao_user.update_user_remark(user_name=get_menu_access(only_get_user_name=True), user_remark=value):
+        MessageManager.success(content=__('用户描述更新成功'))
+    else:
+        set_props('personal-info-user-remark', {'Value': defaultValue})
+        MessageManager.warning(content=__('用户描述更新失败'))
+    set_props('personal-info-user-remark', {'variant': 'borderless', 'readOnly': True})

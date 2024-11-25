@@ -135,8 +135,8 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     fac.AntdSpace(
                         [
                             fac.AntdText(_('描述：')),
-                            fac.AntdText(user_info.user_remark),
-                            fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link'),
+                            fac.AntdInput(defaultValue=user_info.user_remark, variant='borderless', readOnly=True, id='personal-info-user-remark'),
+                            fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link', id='personal-info-user-remark-edit'),
                         ]
                     ),
                 ],
