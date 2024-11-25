@@ -5,10 +5,7 @@ from common.utilities.util_logger import Log
 from dash import html, dcc
 from dash_components import Card
 import dash_callback.application.dashboard_.monitor_c  # noqa
-from functools import partial
-from i18n import translator
-
-__ = partial(translator.t)
+from i18n import t__dashboard
 
 
 # 二级菜单的标题、图标和显示顺序
@@ -36,7 +33,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             layout='vertical',
                             column=2,
                         ),
-                        title=__('系统信息'),
+                        title=t__dashboard('系统信息'),
                     ),
                     Card(
                         fac.AntdDescriptions(
@@ -47,25 +44,25 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             layout='vertical',
                             column=2,
                         ),
-                        title=__('进程运行状态'),
+                        title=t__dashboard('进程运行状态'),
                     ),
                     Card(
                         fac.AntdTable(
                             id='monitor-disk-desc',
                             columns=[
-                                {'title': __('设备名'), 'dataIndex': 'dir_name'},
-                                {'title': __('文件系统类型'), 'dataIndex': 'sys_type_name'},
-                                {'title': __('总容量'), 'dataIndex': 'total'},
-                                {'title': __('已用'), 'dataIndex': 'used'},
-                                {'title': __('可用'), 'dataIndex': 'free'},
-                                {'title': __('使用率'), 'dataIndex': 'usage'},
-                                {'title': __('挂载点'), 'dataIndex': 'type_name'},
+                                {'title': t__dashboard('设备名'), 'dataIndex': 'dir_name'},
+                                {'title': t__dashboard('文件系统类型'), 'dataIndex': 'sys_type_name'},
+                                {'title': t__dashboard('总容量'), 'dataIndex': 'total'},
+                                {'title': t__dashboard('已用'), 'dataIndex': 'used'},
+                                {'title': t__dashboard('可用'), 'dataIndex': 'free'},
+                                {'title': t__dashboard('使用率'), 'dataIndex': 'usage'},
+                                {'title': t__dashboard('挂载点'), 'dataIndex': 'type_name'},
                             ],
                             data=[],
                             bordered=True,
                             pagination=False,
                         ),
-                        title=__('磁盘状态'),
+                        title=t__dashboard('磁盘状态'),
                     ),
                     Card(
                         fac.AntdDescriptions(
@@ -87,7 +84,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             layout='vertical',
                             column=2,
                         ),
-                        title=__('内存'),
+                        title=t__dashboard('内存'),
                     ),
                 ],
                 gap='small',

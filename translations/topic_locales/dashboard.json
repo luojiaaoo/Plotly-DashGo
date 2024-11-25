@@ -58,6 +58,33 @@
         },
         "你好，": {
             "en-us": "Hello, "
+        },
+        "系统信息": {
+            "en-us": "System Info"
+        },
+        "进程运行状态": {
+            "en-us": "Process Status"
+        },
+        "设备名": {
+            "en-us": "device name"
+        },
+        "文件系统类型": {
+            "en-us": "filesystem name"
+        },
+        "总容量": {
+            "en-us": "total"
+        },
+        "可用": {
+            "en-us": "free"
+        },
+        "挂载点": {
+            "en-us": "mountpoint"
+        },
+        "磁盘状态": {
+            "en-us": "Disk Status"
+        },
+        "内存": {
+            "en-us": "Mem"
         }
     }
 }
