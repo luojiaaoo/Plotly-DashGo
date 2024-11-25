@@ -30,7 +30,8 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     size=70,
                     style={'marginRight': '20px'}
                 ),
-                fac.AntdText(_('你好，') + menu_access.user_info.user_full_name),
+                fac.AntdText(_('你好，')),
+                fac.AntdText(menu_access.user_info.user_full_name,id='workbench-user-full-name'),
             ]
         )
     )

@@ -38,6 +38,7 @@ def callback_func(contents, src, _):
     set_props('workbench-avatar', {'src': url})
 
 
+# 编辑全名开关
 app.clientside_callback(
     """(_) => {
         return [false, 'outlined']
@@ -49,7 +50,7 @@ app.clientside_callback(
     Input('personal-info-user-full-name-edit', 'nClicks'),
 )
 
-
+# 编辑全名
 @app.callback(
     Input('personal-info-user-full-name', 'nSubmit'),
     [
@@ -59,8 +60,11 @@ app.clientside_callback(
 )
 def update_user_full_name(_, value, defaultValue):
     if dao_user.update_user_full_name(user_name=get_menu_access(only_get_user_name=True), user_full_name=value):
+        set_props('workbench-user-full-name', {'children': value})
         MessageManager.success(content=__('用户全名更新成功'))
     else:
         set_props('personal-info-user-full-name', {'defaultValue': defaultValue})
         MessageManager.warning(content=__('用户全名更新失败'))
     set_props('personal-info-user-full-name', {'variant': 'borderless', 'readOnly': True})
+
+# 编辑性别
