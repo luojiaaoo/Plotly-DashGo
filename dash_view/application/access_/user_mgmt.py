@@ -3,6 +3,7 @@ import feffery_antd_components as fac
 from common.utilities.util_logger import Log
 from dash_components import Card, Table
 from database.sql_db.dao import dao_user
+from config.enums import Sex
 import dash_callback.application.access_.user_mgmt_c  # noqa
 from functools import partial
 from i18n import translator
@@ -109,11 +110,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                             fac.AntdFormItem(
                                                 fac.AntdSelect(
                                                     id='user-mgmt-add-user-sex',
-                                                    options=[
-                                                        {'label': _('男'), 'value': '男'},
-                                                        {'label': _('女'), 'value': '女'},
-                                                        {'label': _('未知'), 'value': '未知'},
-                                                    ],
+                                                    options=[{'label': _(i.value), 'value': i.value} for i in Sex],
                                                     defaultValue='男',
                                                     allowClear=False,
                                                 ),
@@ -188,11 +185,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                             fac.AntdFormItem(
                                                 fac.AntdSelect(
                                                     id='user-mgmt-update-user-sex',
-                                                    options=[
-                                                        {'label': _('男'), 'value': '男'},
-                                                        {'label': _('女'), 'value': '女'},
-                                                        {'label': _('未知'), 'value': '未知'},
-                                                    ],
+                                                    options=[{'label': _(i.value), 'value': i.value} for i in Sex],
                                                     defaultValue='男',
                                                     allowClear=False,
                                                 ),
