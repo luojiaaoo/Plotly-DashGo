@@ -43,6 +43,51 @@
         },
         "用户密码验证错误": {
             "en-us": "Password verification error"
+        },
+        "个人信息": {
+            "en-us": "Personal Info"
+        },
+        "用户：": {
+            "en-us": "User Name:"
+        },
+        "全名：": {
+            "en-us": "Full Name:"
+        },
+        "状态：": {
+            "en-us": "Status:"
+        },
+        "性别：": {
+            "en-us": "Sex:"
+        },
+        "团队：": {
+            "en-us": "Group:"
+        },
+        "类型：": {
+            "en-us": "Type:"
+        },
+        "邮箱：": {
+            "en-us": "Email:"
+        },
+        "电话：": {
+            "en-us": "Phone:"
+        },
+        "描述：": {
+            "en-us": "Remark:"
+        },
+        "密码：": {
+            "en-us": "Password:"
+        },
+        "旧密码": {
+            "en-us": "Old Password"
+        },
+        "新密码": {
+            "en-us": "New Password"
+        },
+        "确认密码": {
+            "en-us": "Confirm Password"
+        },
+        "修改密码": {
+            "en-us": "Change Password"
         }
     }
 }

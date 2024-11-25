@@ -75,7 +75,7 @@ def callback_func(okCounts, role_name: str, role_status: bool, role_remark: str,
             {
                 'key': i.role_name,
                 **i.__dict__,
-                'role_status': {'tag': '启用' if i.role_status else '停用', 'color': 'cyan' if i.role_status else 'volcano'},
+                'role_status': {'tag': t__default('启用' if i['user_status'] else '停用'), 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
                     {
                         'content': t__default('编辑'),
@@ -119,7 +119,7 @@ def delete_role_modal(okCounts, role_name):
             {
                 'key': i.role_name,
                 **i.__dict__,
-                'role_status': {'tag': '启用' if i.role_status else '停用', 'color': 'cyan' if i.role_status else 'volcano'},
+                'role_status': {'tag': t__default('启用' if i['user_status'] else '停用'), 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
                     {
                         'content': t__default('编辑'),
@@ -208,7 +208,7 @@ def add_role_c(okCounts, name, role_status, role_remark, access_metas: List[str]
             {
                 'key': i.role_name,
                 **i.__dict__,
-                'role_status': {'tag': '启用' if i.role_status else '停用', 'color': 'cyan' if i.role_status else 'volcano'},
+                'role_status': {'tag': t__default('启用' if i['user_status'] else '停用'), 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
                     {
                         'content': t__default('编辑'),

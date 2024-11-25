@@ -3,7 +3,7 @@ from common.utilities.util_logger import Log
 from dash_components import Card, Table
 from database.sql_db.dao import dao_user
 from dash_callback.application.access_ import group_auth_c  # noqa
-from i18n import t__access
+from i18n import t__access, t__default
 
 
 # 二级菜单的标题、图标和显示顺序
@@ -33,7 +33,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     'group_remark': i['group_remark'],
                     'user_name': i['user_name'],
                     'user_full_name': i['user_full_name'],
-                    'user_status': {'tag': '启用' if i['user_status'] else '停用', 'color': 'cyan' if i['user_status'] else 'volcano'},
+                    'user_status': {'tag': t__default('启用' if i['user_status'] else '停用'), 'color': 'cyan' if i['user_status'] else 'volcano'},
                     'user_roles': {
                         'options': [{'label': group_role, 'value': group_role} for group_role in i['group_roles']],
                         'mode': 'multiple',

@@ -48,7 +48,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                 {
                                     'key': i.role_name,
                                     **i.__dict__,
-                                    'role_status': {'tag': t__default('启用') if i.role_status else t__default('停用'), 'color': 'cyan' if i.role_status else 'volcano'},
+                                    'role_status': {'tag': t__default('启用' if i['user_status'] else '停用'), 'color': 'cyan' if i.role_status else 'volcano'},
                                     'operation': [
                                         {
                                             'content': t__default('编辑'),

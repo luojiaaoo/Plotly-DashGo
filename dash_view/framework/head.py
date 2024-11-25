@@ -6,10 +6,9 @@ from server import app
 from dash.dependencies import Input, Output, State
 import dash
 from dash.exceptions import PreventUpdate
-from functools import partial
-from i18n import translator
+from i18n import t__access, t__other
 
-__ = partial(translator.t)
+
 
 
 def render_head_content(menu_access: MenuAccess):
@@ -38,7 +37,7 @@ def render_head_content(menu_access: MenuAccess):
         # 页首面包屑区域
         fac.AntdCol(
             fac.AntdBreadcrumb(
-                items=[{'title': __('首页'), 'href': '/dashboard_/workbench'}],
+                items=[{'title': t__access('首页'), 'href': '/dashboard_/workbench'}],
                 id='header-breadcrumb',
                 style={
                     'height': '100%',
@@ -80,13 +79,13 @@ def render_head_content(menu_access: MenuAccess):
                         arrow=True,
                         menuItems=[
                             {
-                                'title': __('个人信息'),
+                                'title': t__access('个人信息'),
                                 'key': '个人信息',
                                 'icon': 'antd-idcard',
                             },
                             {'isDivider': True},
                             {
-                                'title': __('退出登录'),
+                                'title': t__other('退出登录'),
                                 'key': '退出登录',
                                 'icon': 'antd-logout',
                             },

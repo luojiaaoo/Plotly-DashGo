@@ -3,10 +3,6 @@ import feffery_utils_components as fuc
 import feffery_antd_components as fac
 from common.utilities.util_logger import Log
 from dash_components import Card
-from functools import partial
-from i18n import translator
-
-__ = partial(translator.t)
 
 
 # 二级菜单的标题、图标和显示顺序
@@ -30,7 +26,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                 [
                     Card(
                         fac.AntdStatistic(
-                            title=__('您的余额'),
+                            title='您的余额',
                             value=fuc.FefferyCountUp(end=112893, duration=3),
                         ),
                         title='您的余额',
@@ -43,7 +39,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                 [
                     Card(
                         fac.AntdStatistic(
-                            title=__('您今年支付额'),
+                            title='您今年支付额',
                             value=fuc.FefferyCountUp(end=2873, duration=3),
                         ),
                     )

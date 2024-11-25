@@ -84,7 +84,7 @@ def update_user(okCounts, user_name, user_full_name, user_email, phone_number, u
             {
                 'key': i.user_name,
                 **i.__dict__,
-                'user_status': {'tag': '启用' if i.user_status else '停用', 'color': 'cyan' if i.user_status else 'volcano'},
+                'user_status': {'tag': t__default('启用' if i['user_status'] else '停用'), 'color': 'cyan' if i.user_status else 'volcano'},
                 'operation': [
                     {
                         'content': t__default('编辑'),
@@ -184,7 +184,7 @@ def add_user(okCounts, user_name, user_full_name, user_email, phone_number, user
             {
                 'key': i.user_name,
                 **i.__dict__,
-                'user_status': {'tag': '启用' if i.user_status else '停用', 'color': 'cyan' if i.user_status else 'volcano'},
+                'user_status': {'tag': t__default('启用' if i['user_status'] else '停用'), 'color': 'cyan' if i.user_status else 'volcano'},
                 'operation': [
                     {
                         'content': t__default('编辑'),
@@ -228,7 +228,7 @@ def delete_role_modal(okCounts, user_name):
             {
                 'key': i.user_name,
                 **i.__dict__,
-                'user_status': {'tag': '启用' if i.user_status else '停用', 'color': 'cyan' if i.user_status else 'volcano'},
+                'user_status': {'tag': t__default('启用' if i['user_status'] else '停用'), 'color': 'cyan' if i.user_status else 'volcano'},
                 'operation': [
                     {
                         'content': t__default('编辑'),

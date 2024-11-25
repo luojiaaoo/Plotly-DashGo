@@ -48,7 +48,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                 {
                                     'key': i.group_name,
                                     **i.__dict__,
-                                    'group_status': {'tag': '启用' if i.group_status else '停用', 'color': 'cyan' if i.group_status else 'volcano'},
+                                    'group_status': {'tag': t__default('启用' if i['user_status'] else '停用'), 'color': 'cyan' if i.group_status else 'volcano'},
                                     'operation': [
                                         {
                                             'content': t__default('编辑'),
