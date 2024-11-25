@@ -121,8 +121,8 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     fac.AntdSpace(
                         [
                             fac.AntdText(_('邮箱：')),
-                            fac.AntdText(user_info.user_email),
-                            fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link'),
+                            fac.AntdInput(defaultValue=user_info.user_email, variant='borderless', readOnly=True, id='personal-info-user-email'),
+                            fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link', id='personal-info-user-email-edit'),
                         ]
                     ),
                     fac.AntdSpace(

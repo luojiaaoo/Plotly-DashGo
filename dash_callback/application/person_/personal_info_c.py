@@ -81,3 +81,33 @@ def update_user_sex(value, defaultValue):
     else:
         set_props('personal-info-user-sex', {'value': defaultValue})
         MessageManager.warning(content=__('用户性别更新失败'))
+
+
+# 编辑邮箱开关
+app.clientside_callback(
+    """(_) => {
+        return [false, 'outlined']
+    }""",
+    [
+        Output('personal-info-user-email', 'readOnly'),
+        Output('personal-info-user-email', 'variant'),
+    ],
+    Input('personal-info-user-email-edit', 'nClicks'),
+)
+
+
+# 编辑邮箱
+@app.callback(
+    Input('personal-info-user-email', 'nSubmit'),
+    [
+        State('personal-info-user-email', 'value'),
+        State('personal-info-user-email', 'defaultValue'),
+    ],
+)
+def update_user_email(_, value, defaultValue):
+    if dao_user.update_user_email(user_name=get_menu_access(only_get_user_name=True), user_email=value):
+        MessageManager.success(content=__('用户邮箱更新成功'))
+    else:
+        set_props('personal-info-user-email', {'defaultValue': defaultValue})
+        MessageManager.warning(content=__('用户邮箱更新失败'))
+    set_props('personal-info-user-email', {'variant': 'borderless', 'readOnly': True})
