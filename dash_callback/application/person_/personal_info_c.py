@@ -189,11 +189,15 @@ app.clientside_callback(
     [
         State('personal-info-change-password-old', 'value'),
         State('personal-info-change-password-new', 'value'),
+        State('personal-info-change-password-new-again', 'value'),
     ],
 )
-def update_password(okCounts, old_password, new_password):
+def update_password(okCounts, old_password, new_password, new_password_again):
     if not old_password:
         MessageManager.warning(content=__('请填写旧密码'))
+        return
+    if new_password != new_password_again:
+        MessageManager.warning(content=__('密码不一致，请重新填写'))
         return
     if dao_user.update_user_password(user_name=get_menu_access(only_get_user_name=True), new_password=new_password, old_password=old_password):
         MessageManager.success(content=__('用户密码更新成功'))

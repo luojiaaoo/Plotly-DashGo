@@ -178,6 +178,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         [
                             fac.AntdFormItem(fac.AntdInput(id='personal-info-change-password-old', mode='password'), label=__('旧密码'), required=True),
                             fac.AntdFormItem(fac.AntdInput(id='personal-info-change-password-new', mode='password'), label=__('新密码'), required=True),
+                            fac.AntdFormItem(fac.AntdInput(id='personal-info-change-password-new-again', mode='password'), label=__('确认密码'), required=True),
                         ],
                         className={'.ant-form-item': {'marginBottom': '12px', 'marginRight': '8px'}},
                     )
