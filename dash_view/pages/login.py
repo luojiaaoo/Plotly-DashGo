@@ -4,10 +4,7 @@ from config.dash_melon_conf import ShowConf, JwtConf, LoginConf
 from dash import dcc
 from dash_view.framework.lang import render_lang_content
 import dash_callback.pages.login_c  # noqa
-from functools import partial
-from i18n import translator
-
-__ = partial(translator.t)
+from i18n import t__other
 
 
 def render_content():
@@ -36,7 +33,7 @@ def render_content():
                             {
                                 'key': '账号密码登录',
                                 'label': fac.AntdText(
-                                    __('账号密码登录'),
+                                    t__other('账号密码登录'),
                                     className={
                                         'color': 'rgb(22,119,255)',
                                     },
@@ -50,7 +47,7 @@ def render_content():
                                                         fac.AntdInput(
                                                             id='login-username',
                                                             prefix=fac.AntdIcon(icon='antd-user'),
-                                                            placeholder=__('请输入用户名'),
+                                                            placeholder=t__other('请输入用户名'),
                                                             className={
                                                                 'marginTop': '20px',
                                                             },
@@ -63,7 +60,7 @@ def render_content():
                                                             prefix=fac.AntdIcon(icon='antd-lock'),
                                                             mode='password',
                                                             passwordUseMd5=True,
-                                                            placeholder=__('请输入密码'),
+                                                            placeholder=t__other('请输入密码'),
                                                             className={
                                                                 'marginTop': '25px',
                                                             },
@@ -77,7 +74,7 @@ def render_content():
                                                     fac.AntdInput(
                                                         id='login-verify-code-input',
                                                         prefix=fac.AntdIcon(icon='antd-right'),
-                                                        placeholder=__('请输入验证码'),
+                                                        placeholder=t__other('请输入验证码'),
                                                         allowClear=True,
                                                         className={
                                                             'marginRight': '20px',
@@ -99,7 +96,7 @@ def render_content():
                                             ),
                                             fac.AntdCheckbox(
                                                 id='login-keep-login-status',
-                                                label=__('保持{}小时免登录').format(JwtConf.JWT_EXPIRE_MINUTES // 60),
+                                                label=t__other('保持{}小时免登录').format(JwtConf.JWT_EXPIRE_MINUTES // 60),
                                                 checked=False,
                                                 className={
                                                     'marginTop': '10px',
@@ -111,7 +108,7 @@ def render_content():
                                                 },
                                             ),
                                             fac.AntdButton(
-                                                __('登录'),
+                                                t__other('登录'),
                                                 id='login-submit',
                                                 type='primary',
                                                 block=True,

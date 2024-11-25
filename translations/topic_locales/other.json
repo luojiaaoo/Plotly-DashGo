@@ -10,6 +10,33 @@
         },
         "系统异常": {
             "en-us": "System exception"
+        },
+        "请输入账号和密码": {
+            "en-us": "Please enter the account and password"
+        },
+        "验证码错误，请重新输入": {
+            "en-us": "Verification code error, please re-enter"
+        },
+        "用户名或密码错误": {
+            "en-us": "Username or password error"
+        },
+        "账号密码登录": {
+            "en-us": "Account password login"
+        },
+        "请输入用户名": {
+            "en-us": "Please enter the username"
+        },
+        "请输入密码": {
+            "en-us": "Please enter the password"
+        },
+        "请输入验证码": {
+            "en-us": "Please enter the verification code"
+        },
+        "保持{}小时免登录": {
+            "en-us": "Keep login for {} hours"
+        },
+        "登录": {
+            "en-us": "Login"
         }
     }
 }
