@@ -1,0 +1,39 @@
+{
+    "root_locale": "zh-cn",
+    "topic": "menu_item",
+    "contents": {
+        "首页": {
+            "en-us": "Home"
+        },
+        "权限管理": {
+            "en-us": "Access Mgmt"
+        },
+        "权限列表": {
+            "en-us": "Access List"
+        },
+        "团队管理": {
+            "en-us": "Group Mgmt"
+        },
+        "角色管理": {
+            "en-us": "Role Mgmt"
+        },
+        "用户权限": {
+            "en-us": "User Auth"
+        },
+        "仪表盘": {
+            "en-us": "DashBoard"
+        },
+        "监控页": {
+            "en-us": "Monitor"
+        },
+        "应用案例": {
+            "en-us": "App Case"
+        },
+        "支付页": {
+            "en-us": "Pay Page"
+        },
+        "购买页": {
+            "en-us": "Buy Page"
+        }
+    }
+}

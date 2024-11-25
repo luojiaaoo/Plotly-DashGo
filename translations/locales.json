@@ -82,30 +82,6 @@
         "用户名或密码错误": {
             "en-us": "The user name or password is incorrect"
         },
-        "首页": {
-            "en-us": "Home"
-        },
-        "权限管理": {
-            "en-us": "Access Mgmt"
-        },
-        "权限列表": {
-            "en-us": "Access List"
-        },
-        "团队管理": {
-            "en-us": "Group Mgmt"
-        },
-        "角色管理": {
-            "en-us": "Role Mgmt"
-        },
-        "用户权限": {
-            "en-us": "User Auth"
-        },
-        "仪表盘": {
-            "en-us": "DashBoard"
-        },
-        "监控页": {
-            "en-us": "Monitor"
-        },
         "系统信息": {
             "en-us": "System Info"
         },

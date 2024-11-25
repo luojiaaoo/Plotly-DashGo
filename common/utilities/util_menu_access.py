@@ -5,7 +5,8 @@ from i18n import translator
 from functools import partial
 
 
-__ = partial(translator.t)
+t__access_meta = partial(translator.t, locale_topic='access_meta')
+t__menu_item = partial(translator.t, locale_topic='menu_item')
 
 
 logger = Log.get_logger(__name__)
@@ -60,14 +61,14 @@ class MenuAccess:
             for level2_name, access_metas in dict_level2_access_metas.items():
                 format_level2.append(
                     {
-                        'title': MenuAccess.get_title(f'{level1_name}.{level2_name}'),
+                        'title': t__menu_item(MenuAccess.get_title(f'{level1_name}.{level2_name}')),
                         'key': 'ignore:' + MenuAccess.get_title(f'{level1_name}.{level2_name}'),
-                        'children': [{'title': __(access_meta), 'key': access_meta} for access_meta in access_metas],
+                        'children': [{'title': t__access_meta(access_meta), 'key': access_meta} for access_meta in access_metas],
                     },
                 )
             antd_tree_data.append(
                 {
-                    'title': MenuAccess.get_title(f'{level1_name}'),
+                    'title': t__menu_item(MenuAccess.get_title(f'{level1_name}')),
                     'key': 'ignore:' + MenuAccess.get_title(f'{level1_name}'),
                     'children': format_level2,
                 }
@@ -131,7 +132,7 @@ class MenuAccess:
                 'component': 'SubMenu',
                 'props': {
                     'key': f'/{level1_name}',
-                    'title': cls.get_title(f'{level1_name}'),
+                    'title': t__menu_item(cls.get_title(f'{level1_name}')),
                     'icon': cls.get_icon(f'{level1_name}'),
                 },
                 'children': [
@@ -139,7 +140,7 @@ class MenuAccess:
                         'component': 'Item',
                         'props': {
                             'key': f'/{level1_name}/{level2_name}',
-                            'title': cls.get_title(f'{level1_name}.{level2_name}'),
+                            'title': t__menu_item(cls.get_title(f'{level1_name}.{level2_name}')),
                             'icon': cls.get_icon(f'{level1_name}.{level2_name}'),
                             'href': f'/{level1_name}/{level2_name}',
                         },
