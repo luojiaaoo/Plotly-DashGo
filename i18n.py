@@ -2,6 +2,7 @@ import os
 from flask import request
 from feffery_dash_utils.i18n_utils import Translator
 
+
 translator = Translator(
     translations=[
         # 全局无主题文案
@@ -9,12 +10,5 @@ translator = Translator(
         # 各组件文档主题文案
         *[os.path.join('./translations/topic_locales', path) for path in os.listdir('./translations/topic_locales')],
     ],
+    force_check_content_translator=False,
 )
-
-
-def get_current_locale() -> str:
-    """获取当前国际化语种"""
-    return request.cookies.get(translator.cookie_name, 'zh-cn')
-
-
-translator.get_current_locale = get_current_locale

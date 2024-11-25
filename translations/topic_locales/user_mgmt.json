@@ -1,0 +1,99 @@
+{
+    "root_locale": "zh-cn",
+    "topic": "user_mgmt",
+    "contents": {
+        "用户名/全名不能为空": {
+            "en-us": "username/fullname can not be empty"
+        },
+        "用户更新成功": {
+            "en-us": "User updated successfully"
+        },
+        "编辑": {
+            "en-us": "Edit"
+        },
+        "删除": {
+            "en-us": "Delete"
+        },
+        "用户更新失败": {
+            "en-us": "User update failed"
+        },
+        "请填写名用户名": {
+            "en-us": "Please fill in the username"
+        },
+        "该用户名名可用": {
+            "en-us": "The username is available"
+        },
+        "该用户名已存在": {
+            "en-us": "The username already exists"
+        },
+        "用户名/全名/密码不能为空": {
+            "en-us": "username/fullname/password can not be empty"
+        },
+        "用户添加成功": {
+            "en-us": "User added successfully"
+        },
+        "用户添加失败": {
+            "en-us": "User add failed"
+        },
+        "用户删除成功": {
+            "en-us": "User deleted successfully"
+        },
+        "用户删除失败": {
+            "en-us": "User delete failed"
+        },
+        "添加用户": {
+            "en-us": "Add User"
+        },
+        "用户名": {
+            "en-us": "username"
+        },
+        "全名": {
+            "en-us": "fullname"
+        },
+        "用户状态": {
+            "en-us": "status"
+        },
+        "用户描述": {
+            "en-us": "remark"
+        },
+        "性别": {
+            "en-us": "sex"
+        },
+        "邮箱": {
+            "en-us": "email"
+        },
+        "电话号码": {
+            "en-us": "phone"
+        },
+        "更新时间": {
+            "en-us": "update time"
+        },
+        "更新人": {
+            "en-us": "updater"
+        },
+        "创建时间": {
+            "en-us": "create time"
+        },
+        "创建人": {
+            "en-us": "creater"
+        },
+        "操作": {
+            "en-us": "action"
+        },
+        "角色": {
+            "en-us": "role"
+        },
+        "确定": {
+            "en-us": "Ok"
+        },
+        "取消": {
+            "en-us": "Cancel"
+        },
+        "确认要删除？": {
+            "en-us": "Are you sure to delete?"
+        },
+        "更新用户": {
+            "en-us": "Update User"
+        }
+    }
+}

@@ -6,7 +6,7 @@ from dash_components import MessageManager
 from functools import partial
 from i18n import translator
 
-__ = partial(translator.t)
+__ = partial(translator.t, locale_topic='user_mgmt')
 
 
 @app.callback(

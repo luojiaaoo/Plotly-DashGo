@@ -1,6 +1,12 @@
 {
     "root_locale": "zh-cn",
     "contents": {
+        "用户管理": {
+            "en-us": "User Mgmt"
+        },
+        "你好，": {
+            "en-us": "Hello,"
+        },
         "请不要使用IE浏览器或360浏览器兼容模式": {
             "en-us": "Please do not use Internet Explorer"
         },

@@ -8,7 +8,7 @@ import dash_callback.application.access_.user_mgmt_c  # noqa
 from functools import partial
 from i18n import translator
 
-__ = partial(translator.t)
+__ = partial(translator.t, locale_topic='user_mgmt')
 
 
 # 二级菜单的标题、图标和显示顺序
