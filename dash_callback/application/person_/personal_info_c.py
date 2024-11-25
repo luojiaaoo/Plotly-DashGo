@@ -50,6 +50,7 @@ app.clientside_callback(
     Input('personal-info-user-full-name-edit', 'nClicks'),
 )
 
+
 # 编辑全名
 @app.callback(
     Input('personal-info-user-full-name', 'nSubmit'),
@@ -67,4 +68,16 @@ def update_user_full_name(_, value, defaultValue):
         MessageManager.warning(content=__('用户全名更新失败'))
     set_props('personal-info-user-full-name', {'variant': 'borderless', 'readOnly': True})
 
+
 # 编辑性别
+@app.callback(
+    Input('personal-info-user-sex', 'value'),
+    State('personal-info-user-sex', 'defaultValue'),
+    prevent_initial_call=True,
+)
+def update_user_sex(value, defaultValue):
+    if dao_user.update_user_sex(user_name=get_menu_access(only_get_user_name=True), user_sex=value):
+        MessageManager.success(content=__('用户性别更新成功'))
+    else:
+        set_props('personal-info-user-sex', {'value': defaultValue})
+        MessageManager.warning(content=__('用户性别更新失败'))

@@ -110,10 +110,11 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             fac.AntdText(_('性别：')),
                             fac.AntdSelect(
                                 options=[{'label': _(i.value), 'value': i.value} for i in Sex],
+                                defaultValue=user_info.user_sex,
                                 value=user_info.user_sex,
                                 variant='borderless',
                                 id='personal-info-user-sex',
-                                allowClear=False
+                                allowClear=False,
                             ),
                         ]
                     ),
