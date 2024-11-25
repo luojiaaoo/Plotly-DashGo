@@ -90,7 +90,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                     fac.AntdFormItem(
                                         fac.AntdTree(
                                             id='role-menu-access-tree-select-update',
-                                            treeData=AccessFactory.get_antd_tree_data_menu_item_access_meta(),
+                                            treeData=MenuAccess.gen_antd_tree_data_menu_item_access_meta(AccessFactory.dict_access_meta2menu_item),
                                             multiple=True,
                                             checkable=True,
                                             showLine=True,
@@ -127,7 +127,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                     fac.AntdFormItem(
                                         fac.AntdTree(
                                             id='role-menu-access-tree-select-add',
-                                            treeData=AccessFactory.get_antd_tree_data_menu_item_access_meta(),
+                                            treeData=MenuAccess.gen_antd_tree_data_menu_item_access_meta(AccessFactory.dict_access_meta2menu_item),
                                             multiple=True,
                                             checkable=True,
                                             showLine=True,

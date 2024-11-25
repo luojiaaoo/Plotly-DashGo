@@ -18,63 +18,13 @@ def trim_module_path2menu_item(module_path):
 
 
 class AccessFactory:
+    from common.utilities.util_menu_access import MenuAccess
+
     views = [role_mgmt, user_mgmt, group_auth, group_mgmt, workbench, monitor, personal_info, personal_setting, *apps]
-
-    @classmethod
-    def gen_antd_tree_data_menu_item_access_meta(cls, dict_access_meta2menu_item):
-        from i18n import translator
-        from functools import partial
-
-        _ = partial(translator.t)
-        from common.utilities.util_menu_access import MenuAccess
-
-        json_menu_item_access_meta = {}
-        for access_meta, menu_item in dict_access_meta2menu_item.items():
-            # 此权限无需分配
-            if access_meta in (*cls.default_access_meta, *cls.admin_access_meta, *cls.group_access_meta):
-                continue
-            level1_name, level2_name = menu_item.split('.')
-            if json_menu_item_access_meta.get(level1_name, None) is None:
-                json_menu_item_access_meta[level1_name] = {level2_name: [access_meta]}
-            else:
-                if json_menu_item_access_meta[level1_name].get(level2_name, None) is None:
-                    json_menu_item_access_meta[level1_name][level2_name] = [access_meta]
-                else:
-                    json_menu_item_access_meta[level1_name][level2_name].append(access_meta)
-
-        # 根据order属性排序目录
-        json_menu_item_access_meta = dict(sorted(json_menu_item_access_meta.items(), key=lambda x: MenuAccess.get_order(f'{x[0]}')))
-        for level1_name, dict_level2_access_metas in json_menu_item_access_meta.items():
-            json_menu_item_access_meta[level1_name] = dict(sorted(dict_level2_access_metas.items(), key=lambda x: MenuAccess.get_order(f'{level1_name}.{x[0]}')))
-
-        # 生成antd_tree的格式
-        antd_tree_data = []
-        for level1_name, dict_level2_access_metas in json_menu_item_access_meta.items():
-            format_level2 = []
-            for level2_name, access_metas in dict_level2_access_metas.items():
-                format_level2.append(
-                    {
-                        'title': MenuAccess.get_title(f'{level1_name}.{level2_name}'),
-                        'key': 'ignore:' + MenuAccess.get_title(f'{level1_name}.{level2_name}'),
-                        'children': [{'title': _(access_meta), 'key': access_meta} for access_meta in access_metas],
-                    },
-                )
-            antd_tree_data.append(
-                {
-                    'title': MenuAccess.get_title(f'{level1_name}'),
-                    'key': 'ignore:' + MenuAccess.get_title(f'{level1_name}'),
-                    'children': format_level2,
-                }
-            )
-        return antd_tree_data
 
     # 读取每个VIEW中配置的所有权限
     dict_access_meta2module_path = {access_meta: view.__name__ for view in views for access_meta in view.access_metas}
     dict_access_meta2menu_item = {access_meta: trim_module_path2menu_item(module_path) for access_meta, module_path in dict_access_meta2module_path.items()}
-
-    @classmethod
-    def get_antd_tree_data_menu_item_access_meta(cls):
-        return cls.gen_antd_tree_data_menu_item_access_meta(cls.dict_access_meta2menu_item)
 
     # 基础默认权限，主页和个人中心，每人都有，无需分配
     default_access_meta = (
