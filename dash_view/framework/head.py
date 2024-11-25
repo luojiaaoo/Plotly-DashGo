@@ -60,6 +60,7 @@ def render_head_content(menu_access: MenuAccess):
                         style={
                             'height': '100%',
                             'alignItems': 'center',
+                            'marginRight': '40px',
                         },
                     ),
                     fac.AntdBadge(
