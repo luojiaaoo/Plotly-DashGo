@@ -151,6 +151,9 @@ class MenuAccess:
         ]
         return menu
 
+    def has_access(self, access_meta) -> bool:
+        return access_meta in self.all_access_metas
+
     def __init__(self, user_name) -> None:
         from config.access_factory import AccessFactory
         from database.sql_db.dao import dao_user

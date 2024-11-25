@@ -1,5 +1,7 @@
 from common.utilities.util_menu_access import MenuAccess
 from typing import List
+from dash_components import Card
+import feffery_antd_components as fac
 from common.utilities.util_logger import Log
 from functools import partial
 from i18n import translator
@@ -17,6 +19,18 @@ access_metas = ('工作台-页面',)
 
 
 def render_content(menu_access: MenuAccess, **kwargs):
-    access_metas: List[str] = menu_access.all_access_metas
-    logger.debug(f'用户：{menu_access.user_name}，访问：{__name__}，参数列表：{kwargs}，权限元：{menu_access.all_access_metas}')
-    return str(kwargs)
+    return Card(
+        fac.AntdSpace(
+            [
+                fac.AntdAvatar(
+                    id='workbench-avatar',
+                    mode='image',
+                    src=f'/avatar/{menu_access.user_info.user_name}',
+                    alt=menu_access.user_info.user_full_name,
+                    size=70,
+                    style={'marginRight': '20px'}
+                ),
+                fac.AntdText(_('你好，') + menu_access.user_info.user_full_name),
+            ]
+        )
+    )
