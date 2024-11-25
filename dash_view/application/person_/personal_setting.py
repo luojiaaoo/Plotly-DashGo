@@ -18,12 +18,4 @@ access_metas = ('个人设置-页面',)
 
 
 def render_content(menu_access: MenuAccess, **kwargs):
-    access_metas: List[str] = menu_access.all_access_metas
-    return html.Iframe(
-        style={
-            'width': '100%',
-            'height': '100%',
-            'borderStyle': 'none',
-        },
-        src='https://fac.feffery.tech/',
-    )
+    return 'TODO: 快捷导航，用户动态'
