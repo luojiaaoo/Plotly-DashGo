@@ -6,10 +6,7 @@ from dash import set_props
 from database.sql_db.dao import dao_user
 from common.utilities.util_menu_access import get_menu_access
 from uuid import uuid4
-from functools import partial
-from i18n import translator
-
-__ = partial(translator.t)
+from i18n import t__person
 
 
 # 头像上传模块
@@ -62,10 +59,10 @@ app.clientside_callback(
 def update_user_full_name(_, value, defaultValue):
     if dao_user.update_user_full_name(user_name=get_menu_access(only_get_user_name=True), user_full_name=value):
         set_props('workbench-user-full-name', {'children': value})
-        MessageManager.success(content=__('用户全名更新成功'))
+        MessageManager.success(content=t__person('用户全名更新成功'))
     else:
         set_props('personal-info-user-full-name', {'Value': defaultValue})
-        MessageManager.warning(content=__('用户全名更新失败'))
+        MessageManager.warning(content=t__person('用户全名更新失败'))
     set_props('personal-info-user-full-name', {'variant': 'borderless', 'readOnly': True})
 
 
@@ -77,10 +74,10 @@ def update_user_full_name(_, value, defaultValue):
 )
 def update_user_sex(value, defaultValue):
     if dao_user.update_user_sex(user_name=get_menu_access(only_get_user_name=True), user_sex=value):
-        MessageManager.success(content=__('用户性别更新成功'))
+        MessageManager.success(content=t__person('用户性别更新成功'))
     else:
         set_props('personal-info-user-sex', {'value': defaultValue})
-        MessageManager.warning(content=__('用户性别更新失败'))
+        MessageManager.warning(content=t__person('用户性别更新失败'))
 
 
 # 编辑邮箱开关
@@ -106,10 +103,10 @@ app.clientside_callback(
 )
 def update_user_email(_, value, defaultValue):
     if dao_user.update_user_email(user_name=get_menu_access(only_get_user_name=True), user_email=value):
-        MessageManager.success(content=__('用户邮箱更新成功'))
+        MessageManager.success(content=t__person('用户邮箱更新成功'))
     else:
         set_props('personal-info-user-email', {'Value': defaultValue})
-        MessageManager.warning(content=__('用户邮箱更新失败'))
+        MessageManager.warning(content=t__person('用户邮箱更新失败'))
     set_props('personal-info-user-email', {'variant': 'borderless', 'readOnly': True})
 
 
@@ -136,10 +133,10 @@ app.clientside_callback(
 )
 def update_phone_number(_, value, defaultValue):
     if dao_user.update_phone_number(user_name=get_menu_access(only_get_user_name=True), phone_number=value):
-        MessageManager.success(content=__('用户电话更新成功'))
+        MessageManager.success(content=t__person('用户电话更新成功'))
     else:
         set_props('personal-info-phone-number', {'Value': defaultValue})
-        MessageManager.warning(content=__('用户电话更新失败'))
+        MessageManager.warning(content=t__person('用户电话更新失败'))
     set_props('personal-info-phone-number', {'variant': 'borderless', 'readOnly': True})
 
 
@@ -166,10 +163,10 @@ app.clientside_callback(
 )
 def update_user_remark(_, value, defaultValue):
     if dao_user.update_user_remark(user_name=get_menu_access(only_get_user_name=True), user_remark=value):
-        MessageManager.success(content=__('用户描述更新成功'))
+        MessageManager.success(content=t__person('用户描述更新成功'))
     else:
         set_props('personal-info-user-remark', {'Value': defaultValue})
-        MessageManager.warning(content=__('用户描述更新失败'))
+        MessageManager.warning(content=t__person('用户描述更新失败'))
     set_props('personal-info-user-remark', {'variant': 'borderless', 'readOnly': True})
 
 
@@ -194,12 +191,12 @@ app.clientside_callback(
 )
 def update_password(okCounts, old_password, new_password, new_password_again):
     if not old_password:
-        MessageManager.warning(content=__('请填写旧密码'))
+        MessageManager.warning(content=t__person('请填写旧密码'))
         return
     if new_password != new_password_again:
-        MessageManager.warning(content=__('密码不一致，请重新填写'))
+        MessageManager.warning(content=t__person('密码不一致，请重新填写'))
         return
     if dao_user.update_user_password(user_name=get_menu_access(only_get_user_name=True), new_password=new_password, old_password=old_password):
-        MessageManager.success(content=__('用户密码更新成功'))
+        MessageManager.success(content=t__person('用户密码更新成功'))
     else:
-        MessageManager.warning(content=__('用户密码验证错误'))
+        MessageManager.warning(content=t__person('用户密码验证错误'))

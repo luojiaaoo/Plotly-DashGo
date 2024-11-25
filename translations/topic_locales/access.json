@@ -1,6 +1,6 @@
 {
     "root_locale": "zh-cn",
-    "topic": "access_mgmt",
+    "topic": "access",
     "contents": {
         "支付页-页面": {
             "en-us": "Pay Page Show"
@@ -206,5 +206,47 @@
         "角色添加失败": {
             "en-us": "Role added failed"
         },
+        "用户全名更新成功": {
+            "en-us": "Fullname updated successfully"
+        },
+        "用户全名更新失败": {
+            "en-us": "Fullname update failed"
+        },
+        "用户性别更新成功": {
+            "en-us": "Sex updated successfully"
+        },
+        "用户性别更新失败": {
+            "en-us": "Sex update failed"
+        },
+        "用户邮箱更新成功": {
+            "en-us": "Email updated successfully"
+        },
+        "用户邮箱更新失败": {
+            "en-us": "Email update failed"
+        },
+        "用户电话更新成功": {
+            "en-us": "Phone updated successfully"
+        },
+        "用户电话更新失败": {
+            "en-us": "Phone update failed"
+        },
+        "用户描述更新成功": {
+            "en-us": "Remark updated successfully"
+        },
+        "用户描述更新失败": {
+            "en-us": "Remark update failed"
+        },
+        "请填写旧密码": {
+            "en-us": "Please fill in the old password"
+        },
+        "密码不一致，请重新填写": {
+            "en-us": "Password does not match, please re-enter"
+        },
+        "用户密码更新成功": {
+            "en-us": "Password updated successfully"
+        },
+        "用户密码验证错误": {
+            "en-us": "Password verification error"
+        }
     }
 }

@@ -5,7 +5,7 @@ from common.utilities.util_menu_access import get_menu_access
 from database.sql_db.dao import dao_user
 from dash_components import MessageManager
 
-from i18n import t__access_mgmt
+from i18n import t__access
 
 
 
@@ -27,7 +27,7 @@ def change_role(recentlySelectRow, recentlySelectDataIndex, recentlySelectValue)
         return dash.no_update
     rt = dao_user.update_user_roles_from_group(user_name, group_name, recentlySelectValue)
     if rt:
-        MessageManager.success(content=t__access_mgmt('权限更新成功'))
+        MessageManager.success(content=t__access('权限更新成功'))
         return [
             {
                 'key': f"{i['group_name']}:::{i['user_name']}+{uuid4()}",  # 强制刷新多选数据
@@ -45,5 +45,5 @@ def change_role(recentlySelectRow, recentlySelectDataIndex, recentlySelectValue)
             for i in dao_user.get_dict_group_name_users_roles(get_menu_access().user_name)
         ]
     else:
-        MessageManager.warning(content=t__access_mgmt('权限更新失败'))
+        MessageManager.warning(content=t__access('权限更新失败'))
         return dash.no_update

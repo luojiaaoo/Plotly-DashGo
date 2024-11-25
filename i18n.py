@@ -14,5 +14,7 @@ translator = Translator(
 )
 
 t__default = partial(translator.t)
-t__access_mgmt = partial(translator.t, locale_topic='access_mgmt')
+t__access = partial(translator.t, locale_topic='person')
+t__dashboard = partial(translator.t, locale_topic='dashboard')
+t__person = partial(translator.t, locale_topic='person')
 t__other = partial(translator.t, locale_topic='other')
