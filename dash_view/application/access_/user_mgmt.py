@@ -107,7 +107,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                             fac.AntdFormItem(
                                                 fac.AntdSelect(
                                                     id='user-mgmt-add-user-sex',
-                                                    options=[{'label': __(i.value), 'value': i.value} for i in Sex],
+                                                    options=[{'label': t__access(i.value), 'value': i.value} for i in Sex],
                                                     defaultValue='男',
                                                     allowClear=False,
                                                 ),
@@ -184,7 +184,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                             fac.AntdFormItem(
                                                 fac.AntdSelect(
                                                     id='user-mgmt-update-user-sex',
-                                                    options=[{'label': __(i.value), 'value': i.value} for i in Sex],
+                                                    options=[{'label': t__access(i.value), 'value': i.value} for i in Sex],
                                                     defaultValue='男',
                                                     allowClear=False,
                                                 ),

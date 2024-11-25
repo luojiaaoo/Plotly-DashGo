@@ -206,47 +206,26 @@
         "角色添加失败": {
             "en-us": "Role added failed"
         },
-        "用户全名更新成功": {
-            "en-us": "Fullname updated successfully"
+        "男": {
+            "en-us": "Male"
         },
-        "用户全名更新失败": {
-            "en-us": "Fullname update failed"
+        "女": {
+            "en-us": "Female"
         },
-        "用户性别更新成功": {
-            "en-us": "Sex updated successfully"
+        "未知": {
+            "en-us": "Unkonwn"
         },
-        "用户性别更新失败": {
-            "en-us": "Sex update failed"
+        "团队名称": {
+            "en-us": "group name"
         },
-        "用户邮箱更新成功": {
-            "en-us": "Email updated successfully"
+        "团队描述": {
+            "en-us": "group remark"
         },
-        "用户邮箱更新失败": {
-            "en-us": "Email update failed"
+        "用户全名": {
+            "en-us": "fullname"
         },
-        "用户电话更新成功": {
-            "en-us": "Phone updated successfully"
-        },
-        "用户电话更新失败": {
-            "en-us": "Phone update failed"
-        },
-        "用户描述更新成功": {
-            "en-us": "Remark updated successfully"
-        },
-        "用户描述更新失败": {
-            "en-us": "Remark update failed"
-        },
-        "请填写旧密码": {
-            "en-us": "Please fill in the old password"
-        },
-        "密码不一致，请重新填写": {
-            "en-us": "Password does not match, please re-enter"
-        },
-        "用户密码更新成功": {
-            "en-us": "Password updated successfully"
-        },
-        "用户密码验证错误": {
-            "en-us": "Password verification error"
+        "用户角色": {
+            "en-us": "role"
         }
     }
 }

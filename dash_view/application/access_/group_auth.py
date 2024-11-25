@@ -3,10 +3,7 @@ from common.utilities.util_logger import Log
 from dash_components import Card, Table
 from database.sql_db.dao import dao_user
 from dash_callback.application.access_ import group_auth_c  # noqa
-from functools import partial
-from i18n import translator
-
-__ = partial(translator.t)
+from i18n import t__access
 
 
 # 二级菜单的标题、图标和显示顺序
@@ -22,12 +19,12 @@ def render_content(menu_access: MenuAccess, **kwargs):
         Table(
             id='group-auth-table',
             columns=[
-                {'title': __('团队名称'), 'dataIndex': 'group_name', 'width': '10%'},
-                {'title': __('团队描述'), 'dataIndex': 'group_remark', 'width': '10%'},
-                {'title': __('用户名'), 'dataIndex': 'user_name', 'width': '10%'},
-                {'title': __('用户全名'), 'dataIndex': 'user_full_name', 'width': '10%'},
-                {'title': __('用户状态'), 'dataIndex': 'user_status', 'renderOptions': {'renderType': 'tags'}, 'width': '10%'},
-                {'title': __('用户角色'), 'dataIndex': 'user_roles', 'renderOptions': {'renderType': 'select'}, 'width': '50%'},
+                {'title': t__access('团队名称'), 'dataIndex': 'group_name', 'width': '10%'},
+                {'title': t__access('团队描述'), 'dataIndex': 'group_remark', 'width': '10%'},
+                {'title': t__access('用户名'), 'dataIndex': 'user_name', 'width': '10%'},
+                {'title': t__access('用户全名'), 'dataIndex': 'user_full_name', 'width': '10%'},
+                {'title': t__access('用户状态'), 'dataIndex': 'user_status', 'renderOptions': {'renderType': 'tags'}, 'width': '10%'},
+                {'title': t__access('用户角色'), 'dataIndex': 'user_roles', 'renderOptions': {'renderType': 'select'}, 'width': '50%'},
             ],
             data=[
                 {
