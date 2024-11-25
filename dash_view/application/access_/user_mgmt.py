@@ -52,7 +52,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                 {
                                     'key': i.user_name,
                                     **i.__dict__,
-                                    'user_status': {'tag': t__default('启用' if i['user_status'] else '停用'), 'color': 'cyan' if i.user_status else 'volcano'},
+                                    'user_status': {'tag': t__default('启用' if i.user_status else '停用'), 'color': 'cyan' if i.user_status else 'volcano'},
                                     'operation': [
                                         {
                                             'content': t__access('编辑'),

@@ -74,7 +74,7 @@ def update_group_c(okCounts, group_name, group_status, group_remark, group_roles
             {
                 'key': i.group_name,
                 **i.__dict__,
-                'group_status': {'tag': t__default('启用' if i['user_status'] else '停用'), 'color': 'cyan' if i.group_status else 'volcano'},
+                'group_status': {'tag': t__default('启用' if i.group_status else '停用'), 'color': 'cyan' if i.group_status else 'volcano'},
                 'operation': [
                     {
                         'content': t__default('编辑'),
@@ -172,7 +172,7 @@ def add_group(okCounts, group_name, group_status, group_remark, group_roles, gro
             {
                 'key': i.group_name,
                 **i.__dict__,
-                'group_status': {'tag': t__default('启用' if i['user_status'] else '停用'), 'color': 'cyan' if i.group_status else 'volcano'},
+                'group_status': {'tag': t__default('启用' if i.group_status else '停用'), 'color': 'cyan' if i.group_status else 'volcano'},
                 'operation': [
                     {
                         'content': t__default('编辑'),
@@ -210,7 +210,7 @@ def delete_role_modal(okCounts, group_name):
             {
                 'key': i.group_name,
                 **i.__dict__,
-                'group_status': {'tag': t__default('启用' if i['user_status'] else '停用'), 'color': 'cyan' if i.group_status else 'volcano'},
+                'group_status': {'tag': t__default('启用' if i.group_status else '停用'), 'color': 'cyan' if i.group_status else 'volcano'},
                 'operation': [
                     {
                         'content': t__default('编辑'),
