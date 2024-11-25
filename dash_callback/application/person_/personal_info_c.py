@@ -112,6 +112,7 @@ def update_user_email(_, value, defaultValue):
         MessageManager.warning(content=__('用户邮箱更新失败'))
     set_props('personal-info-user-email', {'variant': 'borderless', 'readOnly': True})
 
+
 # 编辑电话开关
 app.clientside_callback(
     """(_) => {
@@ -141,6 +142,7 @@ def update_phone_number(_, value, defaultValue):
         MessageManager.warning(content=__('用户电话更新失败'))
     set_props('personal-info-phone-number', {'variant': 'borderless', 'readOnly': True})
 
+
 # 编辑描述开关
 app.clientside_callback(
     """(_) => {
@@ -169,3 +171,31 @@ def update_user_remark(_, value, defaultValue):
         set_props('personal-info-user-remark', {'Value': defaultValue})
         MessageManager.warning(content=__('用户描述更新失败'))
     set_props('personal-info-user-remark', {'variant': 'borderless', 'readOnly': True})
+
+
+# 修改密码开关
+app.clientside_callback(
+    """(_) => {
+        return true
+    }""",
+    Output('personal-info-change-password-modal', 'visible'),
+    Input('personal-info-password-edit', 'nClicks'),
+)
+
+
+# 修改密码
+@app.callback(
+    Input('personal-info-change-password-modal', 'okCounts'),
+    [
+        State('personal-info-change-password-old', 'value'),
+        State('personal-info-change-password-new', 'value'),
+    ],
+)
+def update_password(okCounts, old_password, new_password):
+    if not old_password:
+        MessageManager.warning(content=__('请填写旧密码'))
+        return
+    if dao_user.update_user_password(user_name=get_menu_access(only_get_user_name=True), new_password=new_password, old_password=old_password):
+        MessageManager.success(content=__('用户密码更新成功'))
+    else:
+        MessageManager.warning(content=__('用户密码验证错误'))

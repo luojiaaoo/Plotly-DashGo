@@ -139,6 +139,12 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             fac.AntdButton(fac.AntdIcon(icon='antd-edit'), type='link', id='personal-info-user-remark-edit'),
                         ]
                     ),
+                    fac.AntdSpace(
+                        [
+                            fac.AntdText(_('密码：')),
+                            fac.AntdButton(_('修改密码'), type='link', id='personal-info-password-edit'),
+                        ]
+                    ),
                 ],
                 className={
                     'flex': 'None',
@@ -166,12 +172,23 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     },
                 },
             ),
-            # Card(
-            #     className={
-            #         'flex': 'auto',
-            #         'marginLeft': '8px',
-            #     },
-            # ),
+            fac.AntdModal(
+                children=[
+                    fac.AntdForm(
+                        [
+                            fac.AntdFormItem(fac.AntdInput(id='personal-info-change-password-old', mode='password'), label=_('旧密码'), required=True),
+                            fac.AntdFormItem(fac.AntdInput(id='personal-info-change-password-new', mode='password'), label=_('新密码'), required=True),
+                        ],
+                        className={'.ant-form-item': {'marginBottom': '12px', 'marginRight': '8px'}},
+                    )
+                ],
+                destroyOnClose=False,
+                renderFooter=True,
+                okText=_('确定'),
+                cancelText=_('取消'),
+                title=_('修改密码'),
+                id='personal-info-change-password-modal',
+            ),
         ],
         style={'display': 'flex'},
     )

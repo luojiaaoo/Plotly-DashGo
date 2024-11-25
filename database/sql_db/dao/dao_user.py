@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from common.utilities import util_menu_access
 import json
+import hashlib
 from common.utilities.util_logger import Log
 from common.utilities.util_menu_access import get_menu_access
 
@@ -147,7 +148,6 @@ def del_role_for_user(user_name, role_name):
 
 def update_user(user_name, user_full_name, password, user_status: bool, user_sex, user_roles, user_email, phone_number, user_remark):
     """更新用户信息"""
-    from hashlib import sha256
 
     user_name_op = util_menu_access.get_menu_access(only_get_user_name=True)
     with db().atomic() as txn, db().cursor() as cursor:
@@ -160,7 +160,7 @@ def update_user(user_name, user_full_name, password, user_status: bool, user_sex
                     phone_number=%s,update_by=%s,update_datetime=%s,user_remark=%s where user_name=%s;""",
                 (
                     user_full_name,
-                    *([sha256(password.encode('utf-8')).hexdigest()] if password else []),
+                    *([hashlib.sha256(password.encode('utf-8')).hexdigest()] if password else []),
                     user_status,
                     user_sex,
                     user_email,
@@ -312,6 +312,32 @@ def update_user_remark(user_name: str, user_remark: str) -> bool:
             txn.commit()
             return True
 
+def update_user_password(user_name: str, new_password: str, old_password: Optional[str]=None):
+    if old_password and not user_password_verify(user_name, hashlib.sha256(old_password.encode('utf-8')).hexdigest()):
+        return False
+    user_name_op = util_menu_access.get_menu_access(only_get_user_name=True)
+    with db().atomic() as txn, db().cursor() as cursor:
+        try:
+            cursor.execute(
+                """
+                    update sys_user 
+                    set 
+                    password_sha256=%s,update_by=%s,update_datetime=%s where user_name=%s;""",
+                (
+                    hashlib.sha256(new_password.encode('utf-8')).hexdigest(),
+                    user_name_op,
+                    datetime.now(),
+                    user_name,
+                ),
+            )
+        except Exception as e:
+            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新密码时，出现异常', exc_info=True)
+            txn.rollback()
+            return False
+        else:
+            txn.commit()
+            return True
+        
 
 def create_user(
     user_name: str,
@@ -325,7 +351,7 @@ def create_user(
     user_remark: str,
 ) -> bool:
     """新建用户"""
-    import hashlib
+
 
     if not user_name or not user_full_name:
         return False
