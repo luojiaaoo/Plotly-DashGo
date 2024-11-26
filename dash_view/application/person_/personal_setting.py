@@ -2,11 +2,6 @@ from common.utilities.util_menu_access import MenuAccess
 from typing import List
 from common.utilities.util_logger import Log
 from dash import html
-from functools import partial
-from i18n import translator
-
-__ = partial(translator.t)
-
 
 # 二级菜单的标题、图标和显示顺序
 title = '个人设置'
