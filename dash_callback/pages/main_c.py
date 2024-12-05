@@ -178,7 +178,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
         if relocation:
             # 激活超时组件，马上动态更新到目标页
             set_props('global-url-last-when-load', {'data': last_herf})
-            set_props('global-url-timeout-last-when-load', {'delay': 0})
+            set_props('global-url-timeout-last-when-load', {'delay': 1.5})
         return [
             p,  # tab标签页
             dash.no_update if relocation else key_url_path,  # tab选中key
