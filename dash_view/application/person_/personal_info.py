@@ -12,7 +12,6 @@ import dash_callback.application.person_.personal_info_c  # noqa
 from i18n import t__person, t__default, t__access
 
 
-
 # 二级菜单的标题、图标和显示顺序
 title = '个人信息'
 icon = None
@@ -140,7 +139,15 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     fac.AntdSpace(
                         [
                             fac.AntdText(t__person('密码：')),
-                            fac.AntdButton(t__person('修改密码'), type='link', id='personal-info-password-edit'),
+                            fac.AntdButton(t__person('修改密码'), type='link', id='personal-info-password-edit', style={'width': '0px'}),
+                        ]
+                    ),
+                    fac.AntdSpace(
+                        [
+                            fac.AntdText(t__person('动态码：')),
+                            fac.AntdPopconfirm(
+                                fac.AntdButton(t__person('绑定动态码'), type='link'), title='如已绑定，再次绑定会导致之前的认证码失效，请确认', id='personal-info-show-otp-modal'
+                            ),
                         ]
                     ),
                 ],
@@ -187,6 +194,24 @@ def render_content(menu_access: MenuAccess, **kwargs):
                 cancelText=t__default('取消'),
                 title=t__person('修改密码'),
                 id='personal-info-change-password-modal',
+            ),
+            fac.AntdModal(
+                children=[
+                    fac.AntdSpace(
+                        [
+                            fac.AntdFormItem(fac.AntdInput(id='personal-info-verify-password-for-rqcode', mode='password'), label=t__person('旧密码'), required=True),
+                            fac.AntdButton(t__person('生成授权二维码'), type='primary', id='personal-info-otp-show-rqcode'),
+                            html.Div(id='personal-info-otp-rqcode-container'),
+                        ],
+                        direction='vertical',
+                    )
+                ],
+                visible=False,
+                renderFooter=False,
+                maskClosable=False,
+                destroyOnClose=False,
+                title=t__person('绑定动态码（生成后，之前的动态码失效）'),
+                id='personal-info-otp-modal',
             ),
         ],
         style={'display': 'flex'},

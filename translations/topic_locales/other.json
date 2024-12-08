@@ -2,7 +2,7 @@
     "root_locale": "zh-cn",
     "topic": "other",
     "contents": {
-        "请不要使用IE浏览器或360浏览器兼容模式": {
+        "请不要使用IE内核浏览器": {
             "en-us": "Please do not use Internet Explorer"
         },
         "Chrome内核版本号太低，请升级浏览器": {
@@ -21,7 +21,7 @@
             "en-us": "Username or password error"
         },
         "账号密码登录": {
-            "en-us": "Account password login"
+            "en-us": "password login"
         },
         "请输入用户名": {
             "en-us": "Please enter the username"

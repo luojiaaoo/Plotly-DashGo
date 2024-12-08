@@ -312,7 +312,8 @@ def update_user_remark(user_name: str, user_remark: str) -> bool:
             txn.commit()
             return True
 
-def update_user_password(user_name: str, new_password: str, old_password: Optional[str]=None):
+
+def update_user_password(user_name: str, new_password: str, old_password: Optional[str] = None):
     if old_password and not user_password_verify(user_name, hashlib.sha256(old_password.encode('utf-8')).hexdigest()):
         return False
     user_name_op = util_menu_access.get_menu_access(only_get_user_name=True)
@@ -337,7 +338,27 @@ def update_user_password(user_name: str, new_password: str, old_password: Option
         else:
             txn.commit()
             return True
-        
+
+
+def gen_otp_qrcode(user_name, password: str):
+    if not user_password_verify(user_name, password_sha256=hashlib.sha256(password.encode('utf-8')).hexdigest()):
+        return False
+    import uuid
+
+    otp_secret = str(uuid.uuid4()).replace('-', '')[:16]
+    with db().atomic(), db().cursor() as cursor:
+        cursor.execute(
+            """
+                update sys_user
+                set 
+                otp_secret=%s where user_name=%s;""",
+            (
+                otp_secret,
+                user_name,
+            ),
+        )
+    return otp_secret
+
 
 def create_user(
     user_name: str,
@@ -351,7 +372,6 @@ def create_user(
     user_remark: str,
 ) -> bool:
     """新建用户"""
-
 
     if not user_name or not user_full_name:
         return False
