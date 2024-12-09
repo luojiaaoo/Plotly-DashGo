@@ -31,9 +31,9 @@ def render_content():
                     fac.AntdTabs(
                         items=[
                             {
-                                'key': '账号密码登录',
+                                'key': '密码登录',
                                 'label': fac.AntdText(
-                                    t__other('账号密码登录'),
+                                    t__other('密码登录'),
                                     className={
                                         'color': 'rgb(22,119,255)',
                                     },
@@ -156,30 +156,6 @@ def render_content():
                                                 },
                                             ),
                                             fac.AntdOTP(id='login-otp'),
-                                            fac.AntdCheckbox(
-                                                id='login-keep-login-status-otp',
-                                                label=t__other('保持{}小时免登录').format(JwtConf.JWT_EXPIRE_MINUTES // 60),
-                                                checked=False,
-                                                className={
-                                                    'marginTop': '10px',
-                                                    'fontWeight': 'bold',
-                                                    'letterSpacing': '2px',
-                                                    'fontFamily': "'Microsoft YaHei', sans-serif",
-                                                    'fontSize': '12px',
-                                                    'color': 'rgb(245,245,245)',
-                                                },
-                                            ),
-                                            fac.AntdButton(
-                                                t__other('登录'),
-                                                id='login-submit-otp',
-                                                type='primary',
-                                                block=True,
-                                                className={
-                                                    'marginTop': '35px',
-                                                    'height': '3em',
-                                                    'borderRadius': '1.5em',
-                                                },
-                                            ),
                                         ],
                                         direction='vertical',
                                         className={

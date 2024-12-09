@@ -65,7 +65,7 @@ def jwt_decode(token, verify_exp: bool = True):
     return payload
 
 
-def jwt_encode_save_access_to_session(data: Dict, expires_delta: Optional[timedelta] = None, session_permanent: bool = False) -> NoReturn:
+def jwt_encode_save_access_to_session(data: Dict, expires_delta: Optional[timedelta] = None, session_permanent: bool = False) -> None:
     """
     生成JWT访问令牌并将其保存到会话中。
 

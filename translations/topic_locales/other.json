@@ -20,7 +20,7 @@
         "用户名或密码错误": {
             "en-us": "Username or password error"
         },
-        "账号密码登录": {
+        "密码登录": {
             "en-us": "password login"
         },
         "请输入用户名": {
@@ -40,6 +40,9 @@
         },
         "退出登录": {
             "en-us": "Logout"
+        },
+        "动态码验证错误": {
+            "en-us": "OTP verify error"
         }
     }
 }

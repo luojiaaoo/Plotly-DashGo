@@ -12,3 +12,4 @@ pillow==10.4.0
 py-cpuinfo==9.0.0
 cacheout==0.16.0
 peewee==3.17.8
+otpauth==2.1.1

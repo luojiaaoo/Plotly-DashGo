@@ -145,9 +145,10 @@ app.clientside_callback(
 )
 
 
+# 密码登录
 @app.callback(
     [
-        Output('login-location-refresh-container', 'children'),
+        Output('login-location-refresh-container', 'children', allow_duplicate=True),
         Output('login-store-fc', 'data'),
         Output('login-message-container', 'children'),
         Output('login-verify-code-pic', 'refresh'),
@@ -197,16 +198,10 @@ def login(
     #   更新登录页面内容、登录状态和登录消息等
     if not nClicks and not password_nSubmit and not vc_input_nSubmit:
         raise PreventUpdate
-    if vc_style['display'] == 'flex' and dash.ctx.triggered_prop_ids == {
-        'login-password.nSubmit': 'login-password'
-    }:
+    if vc_style['display'] == 'flex' and dash.ctx.triggered_prop_ids == {'login-password.nSubmit': 'login-password'}:
         raise PreventUpdate
     # e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 为空字符串的sha256加密结果
-    if (
-        not user_name
-        or password_sha256 == 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
-        or not password_sha256
-    ):
+    if not user_name or password_sha256 == 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' or not password_sha256:
         return (
             dash.no_update,
             dash.no_update,
@@ -220,6 +215,7 @@ def login(
             fuc.FefferyFancyMessage(t__other('验证码错误，请重新输入'), type='error'),
             True,
         )
+
     def user_login(user_name: str, password_sha256: str, is_keep_login_status: bool) -> bool:
         from database.sql_db.dao import dao_user
         from common.utilities.util_jwt import jwt_encode_save_access_to_session
@@ -242,4 +238,35 @@ def login(
             (fc or 0) + 1,
             fuc.FefferyFancyMessage(t__other('用户名或密码错误'), type='error'),
             True,
+        )
+
+
+# 动态码登录
+@app.callback(
+    [
+        Output('login-location-refresh-container', 'children', allow_duplicate=True),
+        Output('login-message-container', 'children'),
+        Output('login-otp', 'value'),
+    ],
+    Input('login-otp', 'value'),
+    State('login-username-otp', 'value'),
+)
+def otp_login(otp_value, user_name):
+    from otpauth import TOTP
+    from database.sql_db.dao import dao_user
+    from common.utilities.util_jwt import jwt_encode_save_access_to_session
+
+    otp_secret = dao_user.get_otp_secret(user_name)
+    if TOTP(otp_secret.encode()).verify(otp_value):
+        jwt_encode_save_access_to_session({'user_name': user_name}, session_permanent=False)
+        return (
+            dcc.Location(pathname='/dashboard_/workbench', refresh=True, id='index-redirect'),
+            dash.no_update,
+            dash.no_update,
+        )
+    else:
+        return (
+            dash.no_update,
+            fuc.FefferyFancyMessage(t__other('动态码验证错误'), type='error'),
+            None,
         )
