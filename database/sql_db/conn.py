@@ -30,7 +30,7 @@ def db():
 # 自动管理数据库上下文
 @server.before_request
 def _db_connect():
-    db().connect()
+    db().connect(reuse_if_open=True)
 
 
 @server.teardown_request
