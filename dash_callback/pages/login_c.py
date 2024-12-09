@@ -150,7 +150,7 @@ app.clientside_callback(
     [
         Output('login-location-refresh-container', 'children', allow_duplicate=True),
         Output('login-store-fc', 'data'),
-        Output('login-message-container', 'children'),
+        Output('login-message-container', 'children', allow_duplicate=True),
         Output('login-verify-code-pic', 'refresh'),
     ],
     [
@@ -245,11 +245,12 @@ def login(
 @app.callback(
     [
         Output('login-location-refresh-container', 'children', allow_duplicate=True),
-        Output('login-message-container', 'children'),
+        Output('login-message-container', 'children', allow_duplicate=True),
         Output('login-otp', 'value'),
     ],
     Input('login-otp', 'value'),
     State('login-username-otp', 'value'),
+    prevent_initial_call=True,
 )
 def otp_login(otp_value, user_name):
     from otpauth import TOTP
