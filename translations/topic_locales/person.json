@@ -88,6 +88,27 @@
         },
         "修改密码": {
             "en-us": "Change Password"
+        },
+        "请填写密码": {
+            "en-us": "Please fill in the password"
+        },
+        "密码校验错误": {
+            "en-us": "Password verification error"
+        },
+        "请打开微信，搜索“腾讯身份验证器”，点击“二维码激活”，扫描以下二维码（为防止清理缓存丢失，扫描完成后，请点击设置-备份令牌到云！！）": {
+            "en-us": "Please use Microsoft Authenticator"
+        },
+        "动态码：": {
+            "en-us": "OTP:"
+        },
+        "绑定动态码": {
+            "en-us": "Bind OTP"
+        },
+        "生成授权二维码": {
+            "en-us": "Generate QR Code"
+        },
+        "绑定动态码（生成后，之前的动态码失效）": {
+            "en-us": "Bind OTP (after generation, the previous OTP is invalid)"
         }
     }
 }

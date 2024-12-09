@@ -125,6 +125,7 @@ CREATE TABLE `sys_user`  (
   `create_by` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '被谁创建',
   `create_datetime` datetime NOT NULL COMMENT '创建时间',
   `user_remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户描述',
+  `otp_secret` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'OTP密钥',
   PRIMARY KEY (`user_name`) USING BTREE,
   UNIQUE INDEX `uniq_name`(`user_name`) USING BTREE,
   UNIQUE INDEX `uniq_full_name`(`user_full_name`) USING BTREE

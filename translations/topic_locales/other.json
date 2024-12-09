@@ -41,6 +41,9 @@
         "退出登录": {
             "en-us": "Logout"
         },
+        "动态码登录": {
+            "en-us": "OTP login"
+        },
         "动态码验证错误": {
             "en-us": "OTP verify error"
         }
