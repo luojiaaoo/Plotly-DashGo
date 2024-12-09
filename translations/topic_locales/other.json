@@ -21,7 +21,7 @@
             "en-us": "Username or password error"
         },
         "密码登录": {
-            "en-us": "password login"
+            "en-us": "password"
         },
         "请输入用户名": {
             "en-us": "Please enter the username"
@@ -42,7 +42,10 @@
             "en-us": "Logout"
         },
         "动态码登录": {
-            "en-us": "OTP login"
+            "en-us": "OTP"
+        },
+        "动态码：": {
+            "en-us": "OTP:"
         },
         "动态码验证错误": {
             "en-us": "OTP verify error"

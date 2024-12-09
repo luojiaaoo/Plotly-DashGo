@@ -258,7 +258,8 @@ def otp_login(otp_value, user_name):
     from common.utilities.util_jwt import jwt_encode_save_access_to_session
 
     otp_secret = dao_user.get_otp_secret(user_name)
-    if TOTP(otp_secret.encode()).verify(otp_value):
+    totp = TOTP(otp_secret.encode())
+    if totp.verify(int(otp_value)):
         jwt_encode_save_access_to_session({'user_name': user_name}, session_permanent=False)
         return (
             dcc.Location(pathname='/dashboard_/workbench', refresh=True, id='index-redirect'),
