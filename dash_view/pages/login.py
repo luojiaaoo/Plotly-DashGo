@@ -120,13 +120,7 @@ def render_content():
                                             ),
                                             dcc.Store(id='login-store-need-vc', storage_type='local'),
                                             dcc.Store(id='login-store-fc', storage_type='local'),
-                                            fuc.FefferyTimeout(id='timeout-trigger-verify-code', delay=0),
-                                            dcc.Location(id='login-location-no-refresh', refresh=False),
-                                            fac.Fragment(id='login-location-refresh-container'),
                                             dcc.Store(id='login-password-sha256'),
-                                            fac.Fragment(id='login-message-container'),
-                                            # 为了和主页main统一回调
-                                            fuc.FefferyReload(id='global-reload'),
                                         ],
                                         direction='vertical',
                                         className={
@@ -174,6 +168,11 @@ def render_content():
                         tabBarGutter=0,
                         tabBarRightExtraContent=render_lang_content(),
                     ),
+                    fuc.FefferyReload(id='global-reload'),  # 为了和主页main统一回调
+                    fac.Fragment(id='login-location-refresh-container'),
+                    fac.Fragment(id='login-message-container'),
+                    fuc.FefferyTimeout(id='timeout-trigger-verify-code', delay=0),
+                    dcc.Location(id='login-location-no-refresh', refresh=False),
                 ],
                 className={
                     'width': 'max(25%,300px)',

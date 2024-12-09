@@ -258,6 +258,12 @@ def otp_login(otp_value, user_name):
     from common.utilities.util_jwt import jwt_encode_save_access_to_session
 
     otp_secret = dao_user.get_otp_secret(user_name)
+    if not otp_secret:
+        return (
+            dash.no_update,
+            fuc.FefferyFancyMessage(t__other('用户未配置动态码'), type='error'),
+            None,
+        )
     totp = TOTP(otp_secret.encode())
     if totp.verify(int(otp_value)):
         jwt_encode_save_access_to_session({'user_name': user_name}, session_permanent=False)

@@ -362,11 +362,14 @@ def gen_otp_qrcode(user_name, password: str):
 
 def get_otp_secret(user_name):
     with db().atomic() as txn, db().cursor() as cursor:
-        cursor.execute(
-            """SELECT otp_secret FROM sys_user WHERE user_name = %s and user_status = %s;""",
-            (user_name, Status.ENABLE),
-        )
-        return cursor.fetchone()[0]
+        try:
+            cursor.execute(
+                """SELECT otp_secret FROM sys_user WHERE user_name = %s and user_status = %s;""",
+                (user_name, Status.ENABLE),
+            )
+            return cursor.fetchone()[0]
+        except:
+            return None
 
 
 def create_user(

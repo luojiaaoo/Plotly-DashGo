@@ -49,6 +49,9 @@
         },
         "动态码验证错误": {
             "en-us": "OTP verify error"
+        },
+        "用户未配置动态码": {
+            "en-us": "User does not configure OTP"
         }
     }
 }
