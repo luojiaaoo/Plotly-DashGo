@@ -161,6 +161,17 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
     for i in range(len(_modules)):
         breadcrumb_items = breadcrumb_items + [{'title': t__access(MenuAccess.get_title('.'.join(_modules[: i + 1])))}]
 
+    # 情况1： 如已经打开，并且不带强制刷新参数,直接切换页面即可
+    if key_url_path in has_open_tab_keys and param.get('flush', None) is None:
+        return [
+            dash.no_update,  # tab标签页
+            key_url_path,  # tab选中key
+            dash.no_update if is_collapsed_menu else [key_url_path_parent],  # 菜单展开
+            key_url_path,  # 菜单选中
+            breadcrumb_items,  # 面包屑
+            dash.no_update,
+        ]
+
     # 获取用户权限
     menu_access: MenuAccess = get_menu_access()
     # 没有权限，返回401
@@ -171,7 +182,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
     ################# 返回页面 #################
     p = Patch()
     if key_url_path in has_open_tab_keys and param.get('flush', None) is not None:
-        # 情况1： 如果已经打开，但是带有flush的query，就重新打开，通过Patch组件，删除老的，将新的tab添加到tabs组件中
+        # 情况2： 如果已经打开，但是带有flush的query，就重新打开，通过Patch组件，删除老的，将新的tab添加到tabs组件中
         old_idx = has_open_tab_keys.index(key_url_path)
         del p[old_idx]
         p.insert(
@@ -192,7 +203,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
             {**url_info_plus, key_url_path: [key_url_path_parent, key_url_path, breadcrumb_items]},  # 保存目标标题对应的展开key、选中key、面包屑
         ]
     else:
-        # 情况2： 未打开，通过Patch组件，将新的tab添加到tabs组件中
+        # 情况3： 未打开，通过Patch组件，将新的tab添加到tabs组件中
         p.append(
             {
                 'label': t__access(module_page.title),
