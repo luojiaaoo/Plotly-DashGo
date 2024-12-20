@@ -6,7 +6,7 @@ from common.utilities.util_menu_access import MenuAccess
 
 
 def render_aside_content(menu_access: MenuAccess):
-    return fac.AntdCol(
+    return fuc.FefferyDiv(
         [
             # logo 和 app名
             fac.AntdRow(
@@ -57,6 +57,7 @@ def render_aside_content(menu_access: MenuAccess):
                 )
             ),
         ],
+        id='menu-content-div',
         # 修改目录的样式
         className={
             '.ant-menu-submenu-title, .ant-menu': {'backgroundColor': 'rgb( 43, 47, 58)', 'overflow': 'hidden'},

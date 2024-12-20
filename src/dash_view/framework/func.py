@@ -53,6 +53,10 @@ def render_func_content():
             centered=True,
             cancelButtonProps={'style': {'display': 'none'}},
         ),
+        # 全局url传递store容器
+        dcc.Store(id='global-url-relay'),
+        # 保存url对应的面包屑、展开key、选中key
+        dcc.Store(id='global-url-info-plus', data={}),
         # 全局js执行
         fuc.FefferyExecuteJs(id='global-execute-js-output'),
         # 当标签页重载时，如访问页面不是首页，保存访问地址

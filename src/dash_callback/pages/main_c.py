@@ -49,31 +49,66 @@ app.clientside_callback(
     prevent_initial_call=True,
 )
 
+app.clientside_callback(
+    """
+        (href,isHovering,url_info_plus,trigger,timeoutCount) => {
+            if (isHovering || trigger==='load'|| timeoutCount===1){
+                if (timeoutCount===1){
+                    return [href, window.dash_clientside.no_update, window.dash_clientside.no_update, window.dash_clientside.no_update,999];
+                }else{
+                    return [href, window.dash_clientside.no_update, window.dash_clientside.no_update, window.dash_clientside.no_update,window.dash_clientside.no_update];
+                }
+                
+            }else{
+                console.log('yes');
+                const urlObj = new URL(href);
+                pathname = urlObj.pathname;
+                return [window.dash_clientside.no_update, [url_info_plus[pathname][0]], url_info_plus[pathname][1], url_info_plus[pathname][2],window.dash_clientside.no_update];
+            }
+        }
+    """,
+    [
+        Output('global-url-relay', 'data', allow_duplicate=True),
+        Output('global-menu', 'openKeys', allow_duplicate=True),
+        Output('global-menu', 'currentKey', allow_duplicate=True),
+        Output('header-breadcrumb', 'items', allow_duplicate=True),
+        Output('global-url-timeout-last-when-load', 'timeoutCount'),  # 触发一次就不要触发了
+    ],
+    Input('global-url-location', 'href'),
+    [
+        State('menu-content-div', 'isHovering'),  # 没有Hover菜单，默认为手动切换菜单，不触发路由
+        State('global-url-info-plus', 'data'),
+        State('global-url-location', 'trigger'),  # 除了第一次加载页面时
+        State('global-url-timeout-last-when-load', 'timeoutCount'),  # 除了在主页后，自动加载目标页
+    ],
+    prevent_initial_call=True,
+)
+
 
 # 主路由函数：地址栏 -》 Tab新增+Tab切换+菜单展开+菜单选中+面包屑
 @app.callback(
     [
         Output('tabs-container', 'items', allow_duplicate=True),
         Output('tabs-container', 'activeKey'),
-        Output('global-menu', 'openKeys'),
-        Output('global-menu', 'currentKey'),
-        Output('header-breadcrumb', 'items'),
+        Output('global-menu', 'openKeys', allow_duplicate=True),
+        Output('global-menu', 'currentKey', allow_duplicate=True),
+        Output('header-breadcrumb', 'items', allow_duplicate=True),
+        Output('global-url-info-plus', 'data'),
     ],
-    Input('global-url-location', 'href'),
+    Input('global-url-relay', 'data'),
     [
         State('tabs-container', 'itemKeys'),
         State('menu-collapse-sider', 'collapsed'),
         State('global-url-location', 'trigger'),
-        State('global-url-last-when-load', 'data'),
+        State('global-url-info-plus', 'data'),
     ],
     prevent_initial_call=True,
 )
-def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger, url_last_when_load):
+def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger, url_info_plus):
     # 过滤无效回调
     if href is None:
         raise PreventUpdate
     has_open_tab_keys = has_open_tab_keys or []
-
     url = URL(href)
     url_menu_item = '.'.join(url.parts[1:])  # 访问路径，第一个为/，去除
     url_query: Dict = url.query  # 查询参数
@@ -88,6 +123,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
     last_herf = ''
     if trigger == 'load' and url_menu_item != 'dashboard_.workbench':
         relocation = True
+        # 强制访问首页
         url_menu_item = 'dashboard_.workbench'
         param = {}
         # 保存目标页的url
@@ -123,9 +159,9 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
     breadcrumb_items = [{'title': t__access('首页'), 'href': '/dashboard_/workbench'}]
     _modules: List = url_menu_item.split('.')
     for i in range(len(_modules)):
-        breadcrumb_items = breadcrumb_items + [{'title':t__access(MenuAccess.get_title('.'.join(_modules[: i + 1])))}]
+        breadcrumb_items = breadcrumb_items + [{'title': t__access(MenuAccess.get_title('.'.join(_modules[: i + 1])))}]
 
-    # 如已经打开，并且不带强制刷新参数,直接切换页面即可
+    # 情况1： 如已经打开，并且不带强制刷新参数,直接切换页面即可
     if key_url_path in has_open_tab_keys and param.get('flush', None) is None:
         return [
             dash.no_update,  # tab标签页
@@ -133,6 +169,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
             dash.no_update if is_collapsed_menu else [key_url_path_parent],  # 菜单展开
             key_url_path,  # 菜单选中
             breadcrumb_items,  # 面包屑
+            dash.no_update,
         ]
 
     # 获取用户权限
@@ -145,7 +182,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
     ################# 返回页面 #################
     p = Patch()
     if key_url_path in has_open_tab_keys and param.get('flush', None) is not None:
-        # 如果已经打开，但是带有flush的query，就重新打开，通过Patch组件，删除老的，将新的tab添加到tabs组件中
+        # 情况2： 如果已经打开，但是带有flush的query，就重新打开，通过Patch组件，删除老的，将新的tab添加到tabs组件中
         old_idx = has_open_tab_keys.index(key_url_path)
         del p[old_idx]
         p.insert(
@@ -163,9 +200,10 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
             dash.no_update if is_collapsed_menu else [key_url_path_parent],  # 菜单展开
             key_url_path,  # 菜单选中
             breadcrumb_items,  # 面包屑
+            {**url_info_plus, key_url_path: [key_url_path_parent, key_url_path, breadcrumb_items]},  # 保存目标标题对应的展开key、选中key、面包屑
         ]
     else:
-        # 未打开，通过Patch组件，将新的tab添加到tabs组件中
+        # 情况3： 未打开，通过Patch组件，将新的tab添加到tabs组件中
         p.append(
             {
                 'label': t__access(module_page.title),
@@ -185,18 +223,23 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
             dash.no_update if is_collapsed_menu or relocation else [key_url_path_parent],  # 菜单展开
             dash.no_update if relocation else key_url_path,  # 菜单选中
             dash.no_update if relocation else breadcrumb_items,  # 面包屑
+            {**url_info_plus, key_url_path: [key_url_path_parent, key_url_path, breadcrumb_items]},  # 保存目标标题对应的展开key、选中key、面包屑
         ]
 
 
 app.clientside_callback(
     """
         (timeoutCount,data) => {
-            return data;
+            return [data, data];
         }
     """,
-    Output('global-dcc-url', 'href'),
+    [
+        Output('global-dcc-url', 'href'),
+        Output('global-url-relay', 'data', allow_duplicate=True),
+    ],
     Input('global-url-timeout-last-when-load', 'timeoutCount'),
     State('global-url-last-when-load', 'data'),
+    prevent_initial_call=True,
 )
 
 # 地址栏随tabs的activeKey变化
