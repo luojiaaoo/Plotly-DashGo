@@ -16,6 +16,7 @@ def render_content(menu_access: MenuAccess):
             fac.AntdCol(
                 fac.AntdSider(
                     render_aside_content(menu_access),
+                    collapsed=True,
                     collapsible=False,
                     collapsedWidth=60,
                     trigger=None,

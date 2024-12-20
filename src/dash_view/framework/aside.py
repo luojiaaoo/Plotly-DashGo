@@ -27,6 +27,7 @@ def render_aside_content(menu_access: MenuAccess):
                                 'fontWeight': 'bold',
                                 'color': 'rgb(245,245,245)',
                             },
+                            style={'display': 'None'},
                         ),
                     ]
                 ),
