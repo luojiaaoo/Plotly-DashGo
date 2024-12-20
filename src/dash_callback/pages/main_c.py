@@ -60,7 +60,6 @@ app.clientside_callback(
                 }
                 
             }else{
-                console.log('yes');
                 const urlObj = new URL(href);
                 pathname = urlObj.pathname;
                 return [window.dash_clientside.no_update, [url_info_plus[pathname][0]], url_info_plus[pathname][1], url_info_plus[pathname][2],window.dash_clientside.no_update];
