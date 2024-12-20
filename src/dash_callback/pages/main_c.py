@@ -52,7 +52,7 @@ app.clientside_callback(
 # 地址栏-》更新地址URL中继store 或者 直接切换页面不进行路由回调
 app.clientside_callback(
     """
-        (href,isHovering,url_info_plus,trigger,timeoutCount) => {
+        (href,isHovering,url_info_plus,trigger,timeoutCount,collapsed) => {
             if (isHovering || trigger==='load'|| timeoutCount===1){
                 if (timeoutCount===1){
                     return [href, window.dash_clientside.no_update, window.dash_clientside.no_update, window.dash_clientside.no_update,999];
@@ -63,7 +63,11 @@ app.clientside_callback(
             }else{
                 const urlObj = new URL(href);
                 pathname = urlObj.pathname;
-                return [window.dash_clientside.no_update, [url_info_plus[pathname][0]], url_info_plus[pathname][1], url_info_plus[pathname][2],window.dash_clientside.no_update];
+                if (collapsed){
+                    return [window.dash_clientside.no_update, window.dash_clientside.no_update, url_info_plus[pathname][1], url_info_plus[pathname][2],window.dash_clientside.no_update];
+                }else{
+                    return [window.dash_clientside.no_update, [url_info_plus[pathname][0]], url_info_plus[pathname][1], url_info_plus[pathname][2],window.dash_clientside.no_update];
+                }
             }
         }
     """,
@@ -80,6 +84,7 @@ app.clientside_callback(
         State('global-url-info-plus', 'data'),
         State('global-url-location', 'trigger'),  # 除了第一次加载页面时
         State('global-url-timeout-last-when-load', 'timeoutCount'),  # 除了在主页后，自动加载目标页
+        State('menu-collapse-sider', 'collapsed')
     ],
     prevent_initial_call=True,
 )
