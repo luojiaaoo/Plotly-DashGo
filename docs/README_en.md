@@ -4,7 +4,7 @@
 <h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">DashGo</h1>
 
 <p align="center">
-<a href="README.md">简体中文</a> | English
+<a href="../README.md">简体中文</a> | English
 </p>
 
 ## Introduction
