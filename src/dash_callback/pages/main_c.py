@@ -56,11 +56,9 @@ app.clientside_callback(
             if (has_open_tab_keys === undefined){
                 has_open_tab_keys = [];
             }
-            if (activeKey_tab in has_open_tab_keys){
-                const urlObj = new URL(href);
-                pathname = urlObj.pathname;
-                console.log('opened_tab_pathname_infos:',opened_tab_pathname_infos);
-                console.log('pathname:',pathname);
+            const urlObj = new URL(href);
+            pathname = urlObj.pathname;
+            if (has_open_tab_keys.includes(pathname)){
                 if (collapsed){
                     return [window.dash_clientside.no_update, window.dash_clientside.no_update, opened_tab_pathname_infos[pathname][1], opened_tab_pathname_infos[pathname][2],window.dash_clientside.no_update];
                 }else{
