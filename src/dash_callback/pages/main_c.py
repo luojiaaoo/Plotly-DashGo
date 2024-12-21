@@ -192,7 +192,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
             {
                 'label': t__access(module_page.title),
                 'key': key_url_path,
-                'closable': True,
+                'closable': False,
                 'children': module_page.render_content(menu_access, **param),
             },
         )
@@ -210,8 +210,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
             {
                 'label': t__access(module_page.title),
                 'key': key_url_path,
-                # 工作台不能关闭
-                'closable': False if key_url_path == '/dashboard_/workbench' else True,
+                'closable': False,
                 'children': module_page.render_content(menu_access, **param),
             }
         )
@@ -228,6 +227,26 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
             {**opened_tab_pathname_infos, key_url_path: [key_url_path_parent, key_url_path, breadcrumb_items]},  # 保存目标标题对应的展开key、选中key、面包屑
         ]
 
+
+# 只显示选中的那个Tab的关闭按钮
+app.clientside_callback(
+    """
+        (activeKey,items) => {
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].key === '/dashboard_/workbench'){ //除了主页以外
+                    items[i].closable = false;
+                } else {
+                    items[i].closable = items[i].key === activeKey;
+                }                
+            }
+            return items;
+        }
+    """,
+    Output('tabs-container', 'items', allow_duplicate=True),
+    Input('tabs-container', 'activeKey'),
+    State('tabs-container', 'items'),
+    prevent_initial_call=True,
+)
 
 # 在初始化非主页时，在访问主页后，自动通过超时组件切换值目标页
 app.clientside_callback(
