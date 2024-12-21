@@ -52,22 +52,22 @@ app.clientside_callback(
 # 地址栏-》更新地址URL中继store 或者 直接切换页面不进行路由回调
 app.clientside_callback(
     """
-        (href,isHovering,url_info_plus,trigger,timeoutCount,collapsed) => {
-            if (isHovering || trigger==='load'|| timeoutCount===1){
-                if (timeoutCount===1){
-                    return [href, window.dash_clientside.no_update, window.dash_clientside.no_update, window.dash_clientside.no_update,999];
-                }else{
-                    return [href, window.dash_clientside.no_update, window.dash_clientside.no_update, window.dash_clientside.no_update,window.dash_clientside.no_update];
-                }
-                
-            }else{
+        (href,activeKey_tab,has_open_tab_keys,opened_tab_pathname_infos,collapsed) => {
+            if (has_open_tab_keys === undefined){
+                has_open_tab_keys = [];
+            }
+            if (activeKey_tab in has_open_tab_keys){
                 const urlObj = new URL(href);
                 pathname = urlObj.pathname;
+                console.log('opened_tab_pathname_infos:',opened_tab_pathname_infos);
+                console.log('pathname:',pathname);
                 if (collapsed){
-                    return [window.dash_clientside.no_update, window.dash_clientside.no_update, url_info_plus[pathname][1], url_info_plus[pathname][2],window.dash_clientside.no_update];
+                    return [window.dash_clientside.no_update, window.dash_clientside.no_update, opened_tab_pathname_infos[pathname][1], opened_tab_pathname_infos[pathname][2],window.dash_clientside.no_update];
                 }else{
-                    return [window.dash_clientside.no_update, [url_info_plus[pathname][0]], url_info_plus[pathname][1], url_info_plus[pathname][2],window.dash_clientside.no_update];
+                    return [window.dash_clientside.no_update, [opened_tab_pathname_infos[pathname][0]], opened_tab_pathname_infos[pathname][1], opened_tab_pathname_infos[pathname][2],window.dash_clientside.no_update];
                 }
+            }else{
+                return [href, window.dash_clientside.no_update, window.dash_clientside.no_update, window.dash_clientside.no_update];
             }
         }
     """,
@@ -76,15 +76,13 @@ app.clientside_callback(
         Output('global-menu', 'openKeys', allow_duplicate=True),
         Output('global-menu', 'currentKey', allow_duplicate=True),
         Output('header-breadcrumb', 'items', allow_duplicate=True),
-        Output('global-url-timeout-last-when-load', 'timeoutCount'),  # 触发一次就不要触发了
     ],
     Input('global-url-location', 'href'),
     [
-        State('menu-content-div', 'isHovering'),  # 没有Hover菜单，默认为手动切换菜单，不触发路由
-        State('global-url-info-plus', 'data'),
-        State('global-url-location', 'trigger'),  # 除了第一次加载页面时
-        State('global-url-timeout-last-when-load', 'timeoutCount'),  # 除了在主页后，自动加载目标页
-        State('menu-collapse-sider', 'collapsed')
+        State('tabs-container', 'activeKey'),
+        State('tabs-container', 'itemKeys'),
+        State('global-opened-tab-pathname-infos', 'data'),
+        State('menu-collapse-sider', 'collapsed'),
     ],
     prevent_initial_call=True,
 )
@@ -98,18 +96,18 @@ app.clientside_callback(
         Output('global-menu', 'openKeys', allow_duplicate=True),
         Output('global-menu', 'currentKey', allow_duplicate=True),
         Output('header-breadcrumb', 'items', allow_duplicate=True),
-        Output('global-url-info-plus', 'data'),
+        Output('global-opened-tab-pathname-infos', 'data'),
     ],
     Input('global-url-relay', 'data'),
     [
         State('tabs-container', 'itemKeys'),
         State('menu-collapse-sider', 'collapsed'),
         State('global-url-location', 'trigger'),
-        State('global-url-info-plus', 'data'),
+        State('global-opened-tab-pathname-infos', 'data'),
     ],
     prevent_initial_call=True,
 )
-def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger, url_info_plus):
+def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger, opened_tab_pathname_infos):
     # 过滤无效回调
     if href is None:
         raise PreventUpdate
@@ -205,7 +203,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
             dash.no_update if is_collapsed_menu else [key_url_path_parent],  # 菜单展开
             key_url_path,  # 菜单选中
             breadcrumb_items,  # 面包屑
-            {**url_info_plus, key_url_path: [key_url_path_parent, key_url_path, breadcrumb_items]},  # 保存目标标题对应的展开key、选中key、面包屑
+            {**opened_tab_pathname_infos, key_url_path: [key_url_path_parent, key_url_path, breadcrumb_items]},  # 保存目标标题对应的展开key、选中key、面包屑
         ]
     else:
         # 情况3： 未打开，通过Patch组件，将新的tab添加到tabs组件中
@@ -228,20 +226,18 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
             dash.no_update if is_collapsed_menu or relocation else [key_url_path_parent],  # 菜单展开
             dash.no_update if relocation else key_url_path,  # 菜单选中
             dash.no_update if relocation else breadcrumb_items,  # 面包屑
-            {**url_info_plus, key_url_path: [key_url_path_parent, key_url_path, breadcrumb_items]},  # 保存目标标题对应的展开key、选中key、面包屑
+            {**opened_tab_pathname_infos, key_url_path: [key_url_path_parent, key_url_path, breadcrumb_items]},  # 保存目标标题对应的展开key、选中key、面包屑
         ]
 
 
+# 在初始化非主页时，在访问主页后，自动通过超时组件切换值目标页
 app.clientside_callback(
     """
         (timeoutCount,data) => {
-            return [data, data];
+            return data;
         }
     """,
-    [
-        Output('global-dcc-url', 'href'),
-        Output('global-url-relay', 'data', allow_duplicate=True),
-    ],
+    Output('global-dcc-url', 'href'),
     Input('global-url-timeout-last-when-load', 'timeoutCount'),
     State('global-url-last-when-load', 'data'),
     prevent_initial_call=True,
@@ -262,23 +258,29 @@ app.clientside_callback(
     prevent_initial_call=True,
 )
 
-
 # Tab关闭
-@app.callback(
-    Output('tabs-container', 'items', allow_duplicate=True),
+app.clientside_callback(
+    """
+    (tabCloseCounts, items, latestDeletePane, itemKeys,activeKey) => {
+        let del_index = itemKeys.findIndex(item => item === latestDeletePane);
+        delete items[del_index];
+        if (activeKey==latestDeletePane) {
+            return [items, itemKeys[del_index-1]];
+        }else{
+            return [items, activeKey];
+        }
+    }
+    """,
+    [
+        Output('tabs-container', 'items', allow_duplicate=True),
+        Output('tabs-container', 'activeKey', allow_duplicate=True),
+    ],
     Input('tabs-container', 'tabCloseCounts'),
     [
+        State('tabs-container', 'items'),
         State('tabs-container', 'latestDeletePane'),
         State('tabs-container', 'itemKeys'),
         State('tabs-container', 'activeKey'),
     ],
     prevent_initial_call=True,
 )
-def close_tab(tabCloseCounts, latestDeletePane_key, has_open_tab_keys: List, activeKey):
-    idx_close = has_open_tab_keys.index(latestDeletePane_key)
-    p = Patch()
-    del p[idx_close]
-    has_open_tab_keys.pop(idx_close)
-    if activeKey == latestDeletePane_key:
-        set_props('tabs-container', {'activeKey': has_open_tab_keys[-1]})
-    return p

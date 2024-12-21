@@ -58,7 +58,6 @@ def render_aside_content(menu_access: MenuAccess):
                 )
             ),
         ],
-        id='menu-content-div',
         # 修改目录的样式
         className={
             '.ant-menu-submenu-title, .ant-menu': {'backgroundColor': 'rgb( 43, 47, 58)', 'overflow': 'hidden'},
