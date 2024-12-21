@@ -60,12 +60,12 @@ app.clientside_callback(
             pathname = urlObj.pathname;
             if (has_open_tab_keys.includes(pathname)){
                 if (collapsed){
-                    return [window.dash_clientside.no_update, window.dash_clientside.no_update, opened_tab_pathname_infos[pathname][1], opened_tab_pathname_infos[pathname][2],window.dash_clientside.no_update];
+                    return [window.dash_clientside.no_update, window.dash_clientside.no_update, opened_tab_pathname_infos[pathname][1], opened_tab_pathname_infos[pathname][2],pathname];
                 }else{
-                    return [window.dash_clientside.no_update, [opened_tab_pathname_infos[pathname][0]], opened_tab_pathname_infos[pathname][1], opened_tab_pathname_infos[pathname][2],window.dash_clientside.no_update];
+                    return [window.dash_clientside.no_update, [opened_tab_pathname_infos[pathname][0]], opened_tab_pathname_infos[pathname][1], opened_tab_pathname_infos[pathname][2],pathname];
                 }
             }else{
-                return [href, window.dash_clientside.no_update, window.dash_clientside.no_update, window.dash_clientside.no_update];
+                return [href, window.dash_clientside.no_update, window.dash_clientside.no_update, window.dash_clientside.no_update, window.dash_clientside.no_update];
             }
         }
     """,
@@ -74,6 +74,7 @@ app.clientside_callback(
         Output('global-menu', 'openKeys', allow_duplicate=True),
         Output('global-menu', 'currentKey', allow_duplicate=True),
         Output('header-breadcrumb', 'items', allow_duplicate=True),
+        Output('tabs-container', 'activeKey', allow_duplicate=True),
     ],
     Input('global-url-location', 'href'),
     [
@@ -90,7 +91,7 @@ app.clientside_callback(
 @app.callback(
     [
         Output('tabs-container', 'items', allow_duplicate=True),
-        Output('tabs-container', 'activeKey'),
+        Output('tabs-container', 'activeKey', allow_duplicate=True),
         Output('global-menu', 'openKeys', allow_duplicate=True),
         Output('global-menu', 'currentKey', allow_duplicate=True),
         Output('header-breadcrumb', 'items', allow_duplicate=True),
