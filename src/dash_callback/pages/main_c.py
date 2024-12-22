@@ -210,7 +210,6 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
 app.clientside_callback(
     """
         (activeKey,items) => {
-            console.log(items);
             for (let i = 0; i < items.length; i++) {
                 if (items[i].key === '/dashboard_/workbench'){ //除了主页以外
                     items[i].closable = false;

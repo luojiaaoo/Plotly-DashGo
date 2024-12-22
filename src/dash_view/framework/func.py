@@ -3,7 +3,6 @@ import feffery_utils_components as fuc
 from dash import dcc, html
 from server import app
 from dash.dependencies import Input, Output
-from common.utilities.util_menu_access import MenuAccess
 
 app.clientside_callback(
     """

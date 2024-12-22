@@ -1,39 +1,35 @@
 import feffery_antd_components as fac
 import feffery_utils_components as fuc
+from flask import request
 from i18n import translator
 
 
-def render_lang_content():
-    return fac.AntdCompact(
-        [
-            fac.AntdButton(
-                [
-                    'ZH',
-                    fuc.FefferyCookie(
-                        id='global-locale',
-                        expires=3600 * 24 * 365,
-                        cookieKey=translator.cookie_name,
-                    ),
-                ],
-                id='global-language-zh',
-                clickExecuteJsString="""
-                    window.dash_clientside.set_props('global-locale', { value: 'zh-cn' })
-                    window.dash_clientside.set_props('global-reload', { reload: true })
-                """,
+def render_lang_content(color='#95afc0'):
+    locale = request.cookies.get(translator.cookie_name) or translator.root_locale
+    return fac.AntdTooltip(
+        fac.AntdButton(
+            fac.Fragment(
+                # 国际化cookie
+                fuc.FefferyCookie(id='global-locale', expires=3600 * 24 * 365, cookieKey=translator.cookie_name)
             ),
-            fac.AntdButton(
-                'EN',
-                id='global-language-en',
-                clickExecuteJsString="""
-                    window.dash_clientside.set_props('global-locale', { value: 'en-us' })
-                    window.dash_clientside.set_props('global-reload', { reload: true })
-                """,
+            id='global-locale-switch',
+            icon=fac.AntdIcon(
+                icon='md-translate',
+                style={
+                    'fontSize': '1.2em',
+                    'verticalAlign': '-0.4em',
+                    'color': color,
+                },
             ),
-        ],
-        className={
-            '& span': {'fontSize': '10px', 'fontWeight': 'bold'},
-            '& .ant-btn': {'height': '1.5em'},
-            '& #global-language-zh': {'backgroundColor': '#1C69D1', 'color': '#eee'} if translator.get_current_locale() == 'zh-cn' else {'color': '#999999'},
-            '& #global-language-en': {'backgroundColor': '#1C69D1', 'color': '#eee'} if translator.get_current_locale() == 'en-us' else {'color': '#999999'},
-        },
+            type='text',
+            clickExecuteJsString=(
+                """
+                    window.dash_clientside.set_props('global-locale', { value: '%s' })
+                    window.dash_clientside.set_props('global-reload', { reload: true })
+                """
+                % ('zh-cn' if locale == 'en-us' else 'en-us')
+            ),
+        ),
+        placement='bottom',
+        title='English / 中文',
     )
