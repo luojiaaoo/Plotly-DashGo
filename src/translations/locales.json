@@ -24,6 +24,12 @@
         },
         "停用": {
             "en-us": "Disable"
+        },
+        "刷新": {
+            "en-us": "Refresh"
+        },
+        "全屏": {
+            "en-us": "Full Screen"
         }
     }
 }

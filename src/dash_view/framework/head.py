@@ -6,9 +6,7 @@ from server import app
 from dash.dependencies import Input, Output, State
 import dash
 from dash.exceptions import PreventUpdate
-from i18n import t__access, t__other
-
-
+from i18n import t__access, t__other, t__default
 
 
 def render_head_content(menu_access: MenuAccess):
@@ -77,6 +75,7 @@ def render_head_content(menu_access: MenuAccess):
                         id='global-head-user-name-dropdown',
                         title=menu_access.user_name,
                         arrow=True,
+                        trigger='click',
                         menuItems=[
                             {
                                 'title': t__access('个人信息'),
@@ -103,6 +102,16 @@ def render_head_content(menu_access: MenuAccess):
             ),
             flex='None',
         ),
+        fac.AntdTooltip(
+            fac.AntdIcon(
+                id='global-full-screen',
+                icon='antd-full-screen',
+                debounceWait=300,
+                style={'cursor': 'pointer', 'marginRight': '12px', 'fontSize': '1.2em'},
+            ),
+            title=t__default('全屏'),
+            placement='left',
+        ),
         render_lang_content(),
     ]
 
@@ -126,3 +135,21 @@ def callback_func(nClicks, clickedKey):
     elif clickedKey == '个人信息':
         return '/person_/personal_info', dash.no_update
     return PreventUpdate
+
+
+# 全屏
+app.clientside_callback(
+    """
+    (nClicks) => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) {
+            document.exitFullscreen();
+            }
+        }
+    }
+    """,
+    Input('global-full-screen', 'nClicks'),
+    prevent_initial_call=True,
+)

@@ -4,6 +4,7 @@ from dash_view.framework.head import render_head_content
 from dash_view.framework.func import render_func_content
 from common.utilities.util_menu_access import MenuAccess
 import feffery_utils_components as fuc
+from i18n import t__default
 import dash_callback.pages.main_c  # noqa
 
 
@@ -35,6 +36,7 @@ def render_content(menu_access: MenuAccess):
                         render_head_content(menu_access),
                         align='middle',
                         className={
+                            'marginRight': '8px',
                             'height': '50px',
                             'boxShadow': '0 1px 4px rgba(0,21,41,.08)',
                         },
@@ -44,7 +46,21 @@ def render_content(menu_access: MenuAccess):
                         fuc.FefferyDiv(
                             fac.AntdTabs(
                                 id='tabs-container',
-                                tabPaneAnimated=True,
+                                tabPaneAnimated=False,
+                                tabBarRightExtraContent=fac.AntdSpace(
+                                    [
+                                        fac.AntdTooltip(
+                                            fac.AntdIcon(
+                                                id='tabs-refresh',
+                                                icon='fc-synchronize',
+                                                debounceWait=300,
+                                                style={'cursor': 'pointer', 'marginRight': '10px', 'fontSize': '1.2em'},
+                                            ),
+                                            title=t__default('刷新'),
+                                            placement='left',
+                                        ),
+                                    ]
+                                ),
                                 size='small',
                                 items=[],
                                 type='editable-card',

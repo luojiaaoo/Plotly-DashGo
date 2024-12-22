@@ -1,4 +1,5 @@
 from dash.dependencies import Input, Output, State
+from uuid import uuid4
 from server import app
 from dash import Patch
 import importlib
@@ -128,8 +129,6 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
         url_menu_item = 'dashboard_.workbench'
         param = {}
         # 保存目标页的url
-        from uuid import uuid4
-
         last_herf = str(
             URL()
             .with_path(url.path)
@@ -218,7 +217,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
         if relocation:
             # 激活超时组件，马上动态更新到目标页
             set_props('global-url-last-when-load', {'data': last_herf})
-            set_props('global-url-timeout-last-when-load', {'delay': 1.5})
+            set_props('global-url-timeout-last-when-load', {'delay': 100})
         return [
             p_items,  # tab标签页
             dash.no_update if relocation else key_url_path,  # tab选中key
@@ -302,5 +301,17 @@ app.clientside_callback(
         State('tabs-container', 'itemKeys'),
         State('tabs-container', 'activeKey'),
     ],
+    prevent_initial_call=True,
+)
+
+# 页面刷新
+app.clientside_callback(
+    """
+    (nClicks) => {
+        return true;
+    }
+    """,
+    Output('global-reload', 'reload', allow_duplicate=True),
+    Input('tabs-refresh', 'nClicks'),
     prevent_initial_call=True,
 )
