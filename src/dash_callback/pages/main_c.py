@@ -260,8 +260,13 @@ app.clientside_callback(
     (tabCloseCounts, items, latestDeletePane, itemKeys,activeKey) => {
         let del_index = itemKeys.findIndex(item => item === latestDeletePane);
         items.splice(del_index, 1);
+        itemKeys.splice(del_index, 1);
         if (activeKey==latestDeletePane) {
-            return [items, itemKeys[del_index-1]];
+             if (itemKeys[del_index] !== undefined){
+                 return [items, itemKeys[del_index]];
+            }else{
+                return [items, itemKeys[del_index-1]];
+            }
         }else{
             return [items, activeKey];
         }
