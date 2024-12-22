@@ -102,11 +102,10 @@ app.clientside_callback(
         State('tabs-container', 'itemKeys'),
         State('menu-collapse-sider', 'collapsed'),
         State('global-url-location', 'trigger'),
-        State('global-opened-tab-pathname-infos', 'data'),
     ],
     prevent_initial_call=True,
 )
-def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger, opened_tab_pathname_infos):
+def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger):
     # 过滤无效回调
     if href is None:
         raise PreventUpdate
@@ -182,12 +181,14 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
         return dash.no_update
 
     ################# 返回页面 #################
-    p = Patch()
+    p_items = Patch()
+    p_opened_tab_pathname_infos = Patch()
+    p_opened_tab_pathname_infos[key_url_path] = [key_url_path_parent, key_url_path, breadcrumb_items]
     if key_url_path in has_open_tab_keys and param.get('flush', None) is not None:
         # 情况2： 如果已经打开，但是带有flush的query，就重新打开，通过Patch组件，删除老的，将新的tab添加到tabs组件中
         old_idx = has_open_tab_keys.index(key_url_path)
-        del p[old_idx]
-        p.insert(
+        del p_items[old_idx]
+        p_items.insert(
             old_idx,
             {
                 'label': t__access(module_page.title),
@@ -197,16 +198,16 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
             },
         )
         return [
-            p,  # tab标签页
+            p_items,  # tab标签页
             key_url_path,  # tab选中key
             dash.no_update if is_collapsed_menu else [key_url_path_parent],  # 菜单展开
             key_url_path,  # 菜单选中
             breadcrumb_items,  # 面包屑
-            {**opened_tab_pathname_infos, key_url_path: [key_url_path_parent, key_url_path, breadcrumb_items]},  # 保存目标标题对应的展开key、选中key、面包屑
+            p_opened_tab_pathname_infos,  # 保存目标标题对应的展开key、选中key、面包屑
         ]
     else:
         # 情况3： 未打开，通过Patch组件，将新的tab添加到tabs组件中
-        p.append(
+        p_items.append(
             {
                 'label': t__access(module_page.title),
                 'key': key_url_path,
@@ -219,12 +220,12 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
             set_props('global-url-last-when-load', {'data': last_herf})
             set_props('global-url-timeout-last-when-load', {'delay': 1.5})
         return [
-            p,  # tab标签页
+            p_items,  # tab标签页
             dash.no_update if relocation else key_url_path,  # tab选中key
             dash.no_update if is_collapsed_menu or relocation else [key_url_path_parent],  # 菜单展开
             dash.no_update if relocation else key_url_path,  # 菜单选中
             dash.no_update if relocation else breadcrumb_items,  # 面包屑
-            {**opened_tab_pathname_infos, key_url_path: [key_url_path_parent, key_url_path, breadcrumb_items]},  # 保存目标标题对应的展开key、选中key、面包屑
+            p_opened_tab_pathname_infos,  # 保存目标标题对应的展开key、选中key、面包屑
         ]
 
 
@@ -232,6 +233,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger,
 app.clientside_callback(
     """
         (activeKey,items) => {
+            console.log(items);
             for (let i = 0; i < items.length; i++) {
                 if (items[i].key === '/dashboard_/workbench'){ //除了主页以外
                     items[i].closable = false;
@@ -281,7 +283,7 @@ app.clientside_callback(
     """
     (tabCloseCounts, items, latestDeletePane, itemKeys,activeKey) => {
         let del_index = itemKeys.findIndex(item => item === latestDeletePane);
-        delete items[del_index];
+        items.splice(del_index, 1);
         if (activeKey==latestDeletePane) {
             return [items, itemKeys[del_index-1]];
         }else{
