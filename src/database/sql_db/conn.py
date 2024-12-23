@@ -1,4 +1,4 @@
-from config.dash_melon_conf import SqlDbConf
+from config.dashgo_conf import SqlDbConf
 from playhouse.pool import PooledMySQLDatabase
 from server import server
 from playhouse.shortcuts import ReconnectMixin

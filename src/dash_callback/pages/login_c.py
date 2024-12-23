@@ -1,5 +1,5 @@
 import feffery_utils_components as fuc
-from config.dash_melon_conf import LoginConf
+from config.dashgo_conf import LoginConf
 from dash import dcc
 from dash.dependencies import Input, Output, State
 from server import app

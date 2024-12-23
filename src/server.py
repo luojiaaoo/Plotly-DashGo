@@ -1,8 +1,7 @@
-from flask import request, session, redirect, send_from_directory, abort, Response
-from config.dash_melon_conf import ShowConf, FlaskConf, CommonConf
+from flask import request, redirect, send_from_directory, abort
+from config.dashgo_conf import ShowConf, FlaskConf, CommonConf, PathProj
 from user_agents import parse
 from common.utilities.util_logger import Log
-from config.dash_melon_conf import PathProj
 from common.exception import global_exception_handler
 from common.utilities.util_dash import CustomDash
 from i18n import t__other

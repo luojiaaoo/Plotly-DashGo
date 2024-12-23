@@ -1,7 +1,7 @@
 import feffery_antd_components as fac
 import feffery_utils_components as fuc
 from dash import get_asset_url
-from config.dash_melon_conf import ShowConf
+from config.dashgo_conf import ShowConf
 from common.utilities.util_menu_access import MenuAccess
 
 

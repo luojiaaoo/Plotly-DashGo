@@ -237,7 +237,7 @@ def gen_otp_rqcode(_, password):
     from otpauth import TOTP
     import feffery_antd_components as fac
     import feffery_utils_components as fuc
-    from config.dash_melon_conf import ShowConf
+    from config.dashgo_conf import ShowConf
 
     user_name = get_menu_access(only_get_user_name=True)
 

@@ -1,6 +1,6 @@
 import feffery_utils_components as fuc
 import feffery_antd_components as fac
-from config.dash_melon_conf import ShowConf, JwtConf, LoginConf
+from config.dashgo_conf import ShowConf, JwtConf, LoginConf
 from dash import dcc
 from dash_view.framework.lang import render_lang_content
 import dash_callback.pages.login_c  # noqa
