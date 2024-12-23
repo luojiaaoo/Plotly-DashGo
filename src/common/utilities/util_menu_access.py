@@ -182,15 +182,15 @@ def get_menu_access(only_get_user_name=False) -> MenuAccess:
     MenuAccess: 包含用户访问权限信息的MenuAccess对象。
     """
     from common.utilities import util_jwt
-    from config.dash_melon_conf import LoginConf
+    from config.dashgo_conf import LoginConf
 
     rt_access = util_jwt.jwt_decode_from_session(
-        verify_exp=LoginConf.JWT_EXPIRED_FORCE_LOGOUT,
+        verify_exp=LoginConf.JWT_EXPIRED_FORCE_LOGOUT, # 查看权限的时候是否检测过期
     )
-    if rt_access == util_jwt.AccessFailType.NO_ACCESS:
-        raise AuthException(message='没有找到您的授权令牌，请重新登录')
-    elif rt_access == util_jwt.AccessFailType.EXPIRED:
+    if rt_access == util_jwt.AccessFailType.EXPIRED:
         raise AuthException(message='您的授权令牌已过期，请重新登录')
+    elif rt_access == util_jwt.AccessFailType.NO_ACCESS:
+        raise AuthException(message='没有找到您的授权令牌，请重新登录')
     elif rt_access == util_jwt.AccessFailType.INVALID:
         raise AuthException(message='您的授权令牌无效，请重新登录')
     if only_get_user_name:

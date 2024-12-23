@@ -1,4 +1,4 @@
-from config.dash_melon_conf import JwtConf
+from config.dashgo_conf import JwtConf
 from typing import Dict, Union, NoReturn, Optional
 from datetime import timedelta, datetime, timezone
 import jwt
@@ -85,7 +85,7 @@ def jwt_encode_save_access_to_session(data: Dict, expires_delta: Optional[timede
     session['Authorization'] = f'Bearer {access_token}'
 
 
-def jwt_decode_from_session(verify_exp: bool) -> Union[Dict, AccessFailType]:
+def jwt_decode_from_session(verify_exp: bool = True) -> Union[Dict, AccessFailType]:
     """
     从会话中解码JWT（JSON Web Token）。
 
