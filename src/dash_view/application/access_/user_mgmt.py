@@ -1,4 +1,4 @@
-from common import MenuAccess
+from common.utilities.util_menu_access import MenuAccess
 import feffery_antd_components as fac
 from common.utilities.util_logger import Log
 from dash_components import Card, Table

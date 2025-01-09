@@ -1,4 +1,4 @@
-from common import MenuAccess
+from common.utilities.util_menu_access import MenuAccess
 import feffery_antd_components as fac
 from common.utilities.util_logger import Log
 from dash_components import Card, Table
@@ -22,6 +22,7 @@ access_metas = (
 
 
 def render_content(menu_access: MenuAccess, **kwargs):
+    all_access_metas = menu_access.all_access_metas
     return fac.AntdFlex(
         [
             *(
@@ -42,7 +43,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         )
                     )
                 ]
-                if menu_access.has_access('购买页-已买商品')
+                if '购买页-已买商品' in all_access_metas
                 else []
             ),
             *(
@@ -63,7 +64,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         )
                     )
                 ]
-                if menu_access.has_access('购买页-购物车')
+                if '购买页-购物车' in all_access_metas
                 else []
             ),
         ],

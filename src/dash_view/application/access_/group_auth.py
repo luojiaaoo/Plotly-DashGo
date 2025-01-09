@@ -1,4 +1,4 @@
-from common import MenuAccess
+from common.utilities.util_menu_access import MenuAccess
 from common.utilities.util_logger import Log
 from dash_components import Card, Table
 from database.sql_db.dao import dao_user

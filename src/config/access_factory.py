@@ -18,7 +18,7 @@ def trim_module_path2menu_item(module_path):
 
 
 class AccessFactory:
-    from common import MenuAccess
+    from common.utilities.util_menu_access import MenuAccess
 
     views = [role_mgmt, user_mgmt, group_auth, group_mgmt, workbench, monitor, personal_info, personal_setting, *apps]
 

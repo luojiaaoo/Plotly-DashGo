@@ -1,6 +1,6 @@
 import feffery_antd_components as fac
 from dash_view.framework.lang import render_lang_content
-from common import MenuAccess
+from common.utilities.util_menu_access import MenuAccess
 from dash import html
 from server import app
 from dash.dependencies import Input, Output, State

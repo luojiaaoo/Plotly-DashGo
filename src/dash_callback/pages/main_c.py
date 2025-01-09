@@ -8,7 +8,7 @@ from typing import Dict, List
 from dash.exceptions import PreventUpdate
 from dash import set_props
 from yarl import URL
-from common import get_menu_access
+from common.utilities.util_menu_access import get_menu_access
 from dash_view.pages import page_404, page_401
 from i18n import t__access
 
@@ -154,7 +154,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     key_url_path_parent = menu_item2url_path(url_menu_item, 1)
 
     # 构建面包屑格式
-    from common import MenuAccess
+    from common.utilities.util_menu_access import MenuAccess
 
     breadcrumb_items = [{'title': t__access('首页'), 'href': '/dashboard_/workbench'}]
     _modules: List = url_menu_item.split('.')

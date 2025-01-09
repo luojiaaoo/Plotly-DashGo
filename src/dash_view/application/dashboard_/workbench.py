@@ -1,4 +1,4 @@
-from common import MenuAccess
+from common.utilities.util_menu_access import MenuAccess
 from typing import List
 from dash_components import Card
 import feffery_antd_components as fac

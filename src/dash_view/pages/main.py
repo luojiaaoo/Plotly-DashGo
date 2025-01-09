@@ -2,7 +2,7 @@ import feffery_antd_components as fac
 from dash_view.framework.aside import render_aside_content
 from dash_view.framework.head import render_head_content
 from dash_view.framework.func import render_func_content
-from common import MenuAccess
+from common.utilities.util_menu_access import MenuAccess
 import feffery_utils_components as fuc
 from i18n import t__default
 import dash_callback.pages.main_c  # noqa

@@ -1,4 +1,4 @@
-from common import MenuAccess
+from common.utilities.util_menu_access import MenuAccess
 from typing import List
 from common.utilities.util_logger import Log
 from dash import html
