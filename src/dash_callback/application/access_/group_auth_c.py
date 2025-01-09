@@ -1,7 +1,7 @@
 from server import app
 from dash.dependencies import Input, Output
 import dash
-from common.utilities.util_menu_access import get_menu_access
+from common import get_menu_access
 from database.sql_db.dao import dao_user
 from dash_components import MessageManager
 from i18n import t__access, t__default

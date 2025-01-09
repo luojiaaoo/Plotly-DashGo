@@ -2,7 +2,7 @@ import feffery_antd_components as fac
 import feffery_utils_components as fuc
 from dash import get_asset_url
 from config.dashgo_conf import ShowConf
-from common.utilities.util_menu_access import MenuAccess
+from common import MenuAccess
 
 
 def render_aside_content(menu_access: MenuAccess):

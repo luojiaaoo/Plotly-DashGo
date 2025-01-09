@@ -1,8 +1,7 @@
-from server import app
+from server import app, server  # noqa: F401
 from common.utilities import util_jwt
 from dash_view.pages import main, login
-from common.utilities.util_menu_access import MenuAccess
-from flask import session
+from common import MenuAccess
 from common.exception import NotFoundUserException
 from config.access_factory import AccessFactory
 from common.utilities.util_logger import Log
@@ -38,4 +37,4 @@ def valid_token():
 app.layout = valid_token
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=80, debug=True)
+    app.run(host='127.0.0.1', port=8080, debug=True)

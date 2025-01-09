@@ -7,7 +7,7 @@ from common.utilities import util_menu_access
 import json
 import hashlib
 from common.utilities.util_logger import Log
-from common.utilities.util_menu_access import get_menu_access
+from common import get_menu_access
 
 logger = Log.get_logger(__name__)
 

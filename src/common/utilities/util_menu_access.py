@@ -26,7 +26,7 @@ class MenuAccess:
 
     @staticmethod
     def gen_antd_tree_data_menu_item_access_meta(dict_access_meta2menu_item):
-        from common.utilities.util_menu_access import MenuAccess
+        from common import MenuAccess
         from config.access_factory import AccessFactory
 
         json_menu_item_access_meta = {}

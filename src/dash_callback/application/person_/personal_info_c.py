@@ -5,7 +5,7 @@ from dash_components import MessageManager
 from dash import set_props
 from database.sql_db.dao import dao_user
 import dash
-from common.utilities.util_menu_access import get_menu_access
+from common import get_menu_access
 from uuid import uuid4
 from dash.exceptions import PreventUpdate
 from i18n import t__person

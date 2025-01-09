@@ -1,4 +1,4 @@
-from common.utilities.util_menu_access import MenuAccess
+from common import MenuAccess
 import feffery_utils_components as fuc
 import feffery_antd_components as fac
 from common.utilities.util_logger import Log
@@ -19,7 +19,6 @@ access_metas = (
 
 
 def render_content(menu_access: MenuAccess, **kwargs):
-    all_access_metas = menu_access.all_access_metas
     return fac.AntdFlex(
         [
             *(
@@ -32,7 +31,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         title='您的余额',
                     )
                 ]
-                if '支付页-可用余额' in all_access_metas
+                if menu_access.has_access('支付页-可用余额')
                 else []
             ),
             *(
@@ -44,7 +43,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         ),
                     )
                 ]
-                if '支付页-今年支付额' in all_access_metas
+                if menu_access.has_access('支付页-今年支付额')
                 else []
             ),
         ],

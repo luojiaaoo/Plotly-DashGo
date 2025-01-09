@@ -1,4 +1,4 @@
-from common.utilities.util_menu_access import MenuAccess
+from common import MenuAccess
 from typing import List
 import feffery_antd_components as fac
 import feffery_utils_components as fuc
@@ -21,7 +21,6 @@ access_metas = ('个人信息-页面',)
 
 
 def render_content(menu_access: MenuAccess, **kwargs):
-    access_metas: List[str] = menu_access.all_access_metas
     user_info = dao_user.get_user_info([menu_access.user_name], exclude_disabled=True)[0]
     return html.Div(
         [
