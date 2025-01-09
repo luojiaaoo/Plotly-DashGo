@@ -22,7 +22,6 @@ access_metas = (
 
 
 def render_content(menu_access: MenuAccess, **kwargs):
-    all_access_metas = menu_access.all_access_metas
     return fac.AntdFlex(
         [
             *(
@@ -43,7 +42,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         )
                     )
                 ]
-                if '购买页-已买商品' in all_access_metas
+                if menu_access.has_access('购买页-已买商品')
                 else []
             ),
             *(
@@ -64,7 +63,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         )
                     )
                 ]
-                if '购买页-购物车' in all_access_metas
+                if menu_access.has_access('购买页-购物车')
                 else []
             ),
         ],
