@@ -1,13 +1,15 @@
 from database.sql_db.conn import db
-from typing import Dict, List, Set, Union, Optional
+from typing import Dict, List, Set, Union, Optional, Iterator
 from itertools import chain, repeat
 from dataclasses import dataclass
 from datetime import datetime
 from common.utilities import util_menu_access
 import json
 import hashlib
+from peewee import DoesNotExist, fn, MySQLDatabase, SqliteDatabase
 from common.utilities.util_logger import Log
 from common.utilities.util_menu_access import get_menu_access
+from ..entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole
 
 logger = Log.get_logger(__name__)
 
@@ -19,32 +21,26 @@ class Status:
 
 def exists_user_name(user_name: str) -> bool:
     """是否存在这个用户名"""
-    with db().atomic() as txn, db().cursor() as cursor:
-        cursor.execute(
-            """SELECT user_name FROM sys_user WHERE user_name = %s;""",
-            (user_name,),
-        )
-        result = cursor.fetchone()
-        return result is not None
+    try:
+        SysUser.get(SysUser.user_name == user_name)
+        return True
+    except DoesNotExist:
+        return False
 
 
 def user_password_verify(user_name: str, password_sha256: str) -> bool:
     """密码校验，排除未启用账号"""
-    with db().atomic() as txn, db().cursor() as cursor:
-        cursor.execute(
-            """SELECT user_name FROM sys_user WHERE user_name = %s and password_sha256 = %s and user_status = %s;""",
-            (user_name, password_sha256, Status.ENABLE),
-        )
-        result = cursor.fetchone()
-        return result is not None
+    try:
+        SysUser.get((SysUser.user_name == user_name) & (SysUser.password_sha256 == password_sha256) & (SysUser.user_status == Status.ENABLE))
+        return True
+    except DoesNotExist:
+        return False
 
 
 def get_all_access_meta_for_setup_check() -> List[str]:
     """获取所有权限，对应用权限检查"""
-    with db().atomic() as txn, db().cursor() as cursor:
-        cursor.execute("""SELECT access_meta FROM sys_role_access_meta;""")
-        result = cursor.fetchall()
-        return [per[0] for per in result]
+    query: Iterator[SysRoleAccessMeta] = SysRoleAccessMeta.select(SysRoleAccessMeta.access_meta)
+    return [role.access_meta for role in query]
 
 
 ########################### 用户
@@ -64,52 +60,63 @@ class UserInfo:
     user_remark: str
 
 
-def get_user_info(user_names: Optional[List] = None, exclude_role_admin=False, exclude_disabled=True) -> List[UserInfo]:
+def get_user_info(user_names: Optional[List[str]] = None, exclude_role_admin=False, exclude_disabled=True) -> List[UserInfo]:
     """获取用户信息对象"""
-    heads = [
-        'user_name',
-        'user_full_name',
-        'user_status',
-        'user_sex',
-        'user_email',
-        'phone_number',
-        'update_datetime',
-        'update_by',
-        'create_datetime',
-        'create_by',
-        'user_remark',
-    ]
-    with db().atomic() as txn, db().cursor() as cursor:
-        sql = f"""
-            SELECT {','.join(['u.'+i for i in heads])},JSON_ARRAYAGG(role_name) as user_roles
-            FROM sys_user u left JOIN sys_user_role ur 
-            on u.user_name = ur.user_name
-        """
-        condition = []
-        sql_place = []
-        having = []
-        group_by = f"group by {','.join(['u.'+i for i in heads])}"
-        if user_names is not None:
-            condition.append(f'u.user_name in ({",".join(["%s"]*len(user_names))})')
-            sql_place.extend(user_names)
-        if exclude_disabled:
-            condition.append('u.user_status=%s')
-            sql_place.append(Status.ENABLE)
-        if exclude_role_admin:
-            having.append("JSON_SEARCH(user_roles,'one',%s) IS NULL")
-            sql_place.append('admin')
-        cursor.execute(f'{sql} {"where" if condition else ""} {" and ".join(condition)} {group_by} {"having" if having else ""} {" and ".join(having)}', sql_place)
-        user_infos = []
-        result = cursor.fetchall()
-        for per in result:
-            user_dict = dict(zip(heads + ['user_roles'], per))
-            user_dict.update(
-                {
-                    'user_roles': [i for i in json.loads(user_dict['user_roles']) if i],
-                },
-            )
-            user_infos.append(UserInfo(**user_dict))
-        return user_infos
+    database = db()
+    if isinstance(database, MySQLDatabase):
+        user_roles_agg = (fn.JSON_ARRAYAGG(SysUserRole.role_name).alias('user_roles'),)
+        having_exclude_role_admin = fn.JSON_SEARCH(fn.JSON_ARRAYAGG(SysUserRole.role_name), 'one', 'admin').is_null() if exclude_role_admin else (1 == 1)
+    elif isinstance(database, SqliteDatabase):
+        user_roles_agg = fn.GROUP_CONCAT(SysUserRole.role_name).alias('user_roles')
+        having_exclude_role_admin = fn.INSTR(fn.GROUP_CONCAT(SysUserRole.role_name), 'admin') == 0 if exclude_role_admin else (1 == 1)
+    else:
+        raise NotImplementedError
+    query = (
+        SysUser.select(
+            SysUser.user_name,
+            SysUser.user_full_name,
+            SysUser.user_status,
+            SysUser.user_sex,
+            SysUser.user_email,
+            SysUser.phone_number,
+            SysUser.update_datetime,
+            SysUser.update_by,
+            SysUser.create_datetime,
+            SysUser.create_by,
+            SysUser.user_remark,
+            user_roles_agg,
+        )
+        .join(SysUserRole, join_type='LEFT OUTER', on=(SysUser.user_name == SysUserRole.user_name))
+        .where(SysUser.user_name.in_(user_names) if user_names is not None else (1 == 1))
+        .where(SysUser.user_status == Status.ENABLE if exclude_disabled is not None else (1 == 1))
+        .group_by(
+            SysUser.user_name,
+            SysUser.user_full_name,
+            SysUser.user_status,
+            SysUser.user_sex,
+            SysUser.user_email,
+            SysUser.phone_number,
+            SysUser.update_datetime,
+            SysUser.update_by,
+            SysUser.create_datetime,
+            SysUser.create_by,
+            SysUser.user_remark,
+        )
+        .having(having_exclude_role_admin)
+    )
+
+    user_infos = []
+    for user in query.dicts():
+        user['user_roles'] = [role for role in json.loads(user['user_roles']) if role]
+        if isinstance(database, MySQLDatabase):
+            user['user_roles'] = json.loads(user['user_roles'])
+        elif isinstance(database, SqliteDatabase):
+            user['user_roles'] = user['user_roles'].split(',') if user['user_roles'] else []
+        else:
+            raise NotImplementedError
+        user_infos.append(UserInfo(**user))
+
+    return user_infos
 
 
 def add_role_for_user(user_name: str, role_name: str):
