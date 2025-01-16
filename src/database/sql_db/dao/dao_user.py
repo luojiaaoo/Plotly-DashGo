@@ -6,10 +6,10 @@ from datetime import datetime
 from common.utilities import util_menu_access
 import json
 import hashlib
-from peewee import DoesNotExist, fn, MySQLDatabase, SqliteDatabase
+from peewee import DoesNotExist, fn, MySQLDatabase, SqliteDatabase, IntegrityError
 from common.utilities.util_logger import Log
 from common.utilities.util_menu_access import get_menu_access
-from ..entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole
+from ..entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole, SysGroupUser, SysRole
 
 logger = Log.get_logger(__name__)
 
@@ -70,7 +70,7 @@ def get_user_info(user_names: Optional[List[str]] = None, exclude_role_admin=Fal
         user_roles_agg = fn.GROUP_CONCAT(SysUserRole.role_name).alias('user_roles')
         having_exclude_role_admin = fn.INSTR(fn.GROUP_CONCAT(SysUserRole.role_name), 'admin') == 0 if exclude_role_admin else (1 == 1)
     else:
-        raise NotImplementedError
+        raise NotImplementedError('Unsupported database type')
     query = (
         SysUser.select(
             SysUser.user_name,
@@ -113,21 +113,19 @@ def get_user_info(user_names: Optional[List[str]] = None, exclude_role_admin=Fal
         elif isinstance(database, SqliteDatabase):
             user['user_roles'] = user['user_roles'].split(',') if user['user_roles'] else []
         else:
-            raise NotImplementedError
+            raise NotImplementedError('Unsupported database type')
         user_infos.append(UserInfo(**user))
 
     return user_infos
 
 
-def add_role_for_user(user_name: str, role_name: str):
+def add_role_for_user(user_name: str, role_name: str) -> bool:
     """添加用户角色"""
-    with db().atomic() as txn, db().cursor() as cursor:
+    database = db()
+    with database.atomic() as txn:
         try:
-            cursor.execute(
-                'insert into sys_user_role(user_name,role_name) values(%s,%s);',
-                (user_name, role_name),
-            )
-        except Exception:
+            SysUserRole.create(user_name=user_name, role_name=role_name)
+        except IntegrityError:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}给用户{user_name}添加角色{role_name}时，出现异常', exc_info=True)
             txn.rollback()
             return False
@@ -136,16 +134,14 @@ def add_role_for_user(user_name: str, role_name: str):
             return True
 
 
-def del_role_for_user(user_name, role_name):
+def del_role_for_user(user_name: str, role_name: str) -> bool:
     """删除用户角色"""
-    with db().atomic() as txn, db().cursor() as cursor:
+    database = db()
+    with database.atomic() as txn:
         try:
-            cursor.execute(
-                'delete from sys_user_role where role_name=%s and user_name=%s',
-                (role_name, user_name),
-            )
-        except Exception:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}给用户{user_name}删除角色{role_name}时，出现异常', exc_info=True)
+            SysUserRole.delete().where((SysUserRole.user_name == user_name) & (SysUserRole.role_name == role_name)).execute()
+        except Exception as e:
+            logger.warning(f'用户{user_name}删除角色{role_name}时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
@@ -156,33 +152,32 @@ def del_role_for_user(user_name, role_name):
 def update_user(user_name, user_full_name, password, user_status: bool, user_sex, user_roles, user_email, phone_number, user_remark):
     """更新用户信息"""
 
-    user_name_op = util_menu_access.get_menu_access(only_get_user_name=True)
-    with db().atomic() as txn, db().cursor() as cursor:
+    user_name_op = get_menu_access(only_get_user_name=True)
+    database = db()  # 假设你有一个函数 db() 返回当前的数据库连接
+    with database.atomic() as txn:
         try:
-            cursor.execute(
-                f"""
-                    update sys_user 
-                    set 
-                    user_full_name=%s,{'password_sha256=%s,' if password else ''} user_status=%s,user_sex=%s,user_email=%s,
-                    phone_number=%s,update_by=%s,update_datetime=%s,user_remark=%s where user_name=%s;""",
-                (
-                    user_full_name,
-                    *([hashlib.sha256(password.encode('utf-8')).hexdigest()] if password else []),
-                    user_status,
-                    user_sex,
-                    user_email,
-                    phone_number,
-                    user_name_op,
-                    datetime.now(),
-                    user_remark,
-                    user_name,
-                ),
-            )
-            cursor.execute('delete from sys_user_role where user_name = %s', (user_name,))
+            user: SysUser = SysUser.get(SysUser.user_name == user_name)
+            user.user_full_name = user_full_name
+            if password:
+                user.password_sha256 = hashlib.sha256(password.encode('utf-8')).hexdigest()
+            user.user_status = user_status
+            user.user_sex = user_sex
+            user.user_email = user_email
+            user.phone_number = phone_number
+            user.update_by = user_name_op
+            user.update_datetime = datetime.now()
+            user.user_remark = user_remark
+            user.save()
+
+            SysUserRole.delete().where(SysUserRole.user_name == user_name).execute()
             if user_roles:
-                cursor.execute(f'INSERT INTO sys_user_role (user_name,role_name) VALUES {",".join(["(%s,%s)"]*len(user_roles))}', list(chain(*zip(repeat(user_name), user_roles))))
+                SysUserRole.insert_many([{'user_name': user_name, 'role_name': role} for role in user_roles]).execute()
+        except DoesNotExist:
+            logger.warning(f'用户{user_name}不存在，无法更新')
+            txn.rollback()
+            return False
         except Exception as e:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新用户{user_name}时，出现异常', exc_info=True)
+            logger.warning(f'用户{user_name_op}更新用户{user_name}时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
@@ -192,23 +187,21 @@ def update_user(user_name, user_full_name, password, user_status: bool, user_sex
 
 def update_user_full_name(user_name: str, user_full_name: str) -> bool:
     """更新用户全名"""
-    user_name_op = util_menu_access.get_menu_access(only_get_user_name=True)
-    with db().atomic() as txn, db().cursor() as cursor:
+    user_name_op = get_menu_access(only_get_user_name=True)
+    database = db()
+    with database.atomic() as txn:
         try:
-            cursor.execute(
-                """
-                    update sys_user 
-                    set 
-                    user_full_name=%s,update_by=%s,update_datetime=%s where user_name=%s;""",
-                (
-                    user_full_name,
-                    user_name_op,
-                    datetime.now(),
-                    user_name,
-                ),
-            )
+            user: SysUser = SysUser.get(SysUser.user_name == user_name)
+            user.user_full_name = user_full_name
+            user.update_by = user_name_op
+            user.update_datetime = datetime.now()
+            user.save()
+        except DoesNotExist:
+            logger.warning(f'用户{user_name}不存在，无法更新')
+            txn.rollback()
+            return False
         except Exception as e:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新用户全名为{user_full_name}时，出现异常', exc_info=True)
+            logger.warning(f'用户{user_name_op}更新用户全名为{user_full_name}时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
@@ -218,23 +211,21 @@ def update_user_full_name(user_name: str, user_full_name: str) -> bool:
 
 def update_user_sex(user_name: str, user_sex: str) -> bool:
     """更新用户性别"""
-    user_name_op = util_menu_access.get_menu_access(only_get_user_name=True)
-    with db().atomic() as txn, db().cursor() as cursor:
+    user_name_op = get_menu_access(only_get_user_name=True)
+    database = db()
+    with database.atomic() as txn:
         try:
-            cursor.execute(
-                """
-                    update sys_user 
-                    set 
-                    user_sex=%s,update_by=%s,update_datetime=%s where user_name=%s;""",
-                (
-                    user_sex,
-                    user_name_op,
-                    datetime.now(),
-                    user_name,
-                ),
-            )
+            user: SysUser = SysUser.get(SysUser.user_name == user_name)
+            user.user_sex = user_sex
+            user.update_by = user_name_op
+            user.update_datetime = datetime.now()
+            user.save()
+        except DoesNotExist:
+            logger.warning(f'用户{user_name}不存在，无法更新')
+            txn.rollback()
+            return False
         except Exception as e:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新用户性别为{user_sex}时，出现异常', exc_info=True)
+            logger.warning(f'用户{user_name_op}更新用户性别为{user_sex}时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
@@ -244,23 +235,21 @@ def update_user_sex(user_name: str, user_sex: str) -> bool:
 
 def update_user_email(user_name: str, user_email: str) -> bool:
     """更新用户邮箱"""
-    user_name_op = util_menu_access.get_menu_access(only_get_user_name=True)
-    with db().atomic() as txn, db().cursor() as cursor:
+    user_name_op = get_menu_access(only_get_user_name=True)
+    database = db()
+    with database.atomic() as txn:
         try:
-            cursor.execute(
-                """
-                    update sys_user 
-                    set 
-                    user_email=%s,update_by=%s,update_datetime=%s where user_name=%s;""",
-                (
-                    user_email,
-                    user_name_op,
-                    datetime.now(),
-                    user_name,
-                ),
-            )
+            user: SysUser = SysUser.get(SysUser.user_name == user_name)
+            user.user_email = user_email
+            user.update_by = user_name_op
+            user.update_datetime = datetime.now()
+            user.save()
+        except DoesNotExist:
+            logger.warning(f'用户{user_name}不存在，无法更新')
+            txn.rollback()
+            return False
         except Exception as e:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新邮箱为{user_email}时，出现异常', exc_info=True)
+            logger.warning(f'用户{user_name_op}更新用户邮箱为{user_email}时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
@@ -269,24 +258,22 @@ def update_user_email(user_name: str, user_email: str) -> bool:
 
 
 def update_phone_number(user_name: str, phone_number: str) -> bool:
-    """更新用户邮箱"""
-    user_name_op = util_menu_access.get_menu_access(only_get_user_name=True)
-    with db().atomic() as txn, db().cursor() as cursor:
+    """更新用户电话"""
+    user_name_op = get_menu_access(only_get_user_name=True)
+    database = db()
+    with database.atomic() as txn:
         try:
-            cursor.execute(
-                """
-                    update sys_user 
-                    set 
-                    phone_number=%s,update_by=%s,update_datetime=%s where user_name=%s;""",
-                (
-                    phone_number,
-                    user_name_op,
-                    datetime.now(),
-                    user_name,
-                ),
-            )
+            user: SysUser = SysUser.get(SysUser.user_name == user_name)
+            user.phone_number = phone_number
+            user.update_by = user_name_op
+            user.update_datetime = datetime.now()
+            user.save()
+        except DoesNotExist:
+            logger.warning(f'用户{user_name}不存在，无法更新')
+            txn.rollback()
+            return False
         except Exception as e:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新电话为{phone_number}时，出现异常', exc_info=True)
+            logger.warning(f'用户{user_name_op}更新用户电话为{phone_number}时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
@@ -296,23 +283,21 @@ def update_phone_number(user_name: str, phone_number: str) -> bool:
 
 def update_user_remark(user_name: str, user_remark: str) -> bool:
     """更新用户描述"""
-    user_name_op = util_menu_access.get_menu_access(only_get_user_name=True)
-    with db().atomic() as txn, db().cursor() as cursor:
+    user_name_op = get_menu_access(only_get_user_name=True)
+    database = db()
+    with database.atomic() as txn:
         try:
-            cursor.execute(
-                """
-                    update sys_user 
-                    set 
-                    user_remark=%s,update_by=%s,update_datetime=%s where user_name=%s;""",
-                (
-                    user_remark,
-                    user_name_op,
-                    datetime.now(),
-                    user_name,
-                ),
-            )
+            user: SysUser = SysUser.get(SysUser.user_name == user_name)
+            user.user_remark = user_remark
+            user.update_by = user_name_op
+            user.update_datetime = datetime.now()
+            user.save()
+        except DoesNotExist:
+            logger.warning(f'用户{user_name}不存在，无法更新')
+            txn.rollback()
+            return False
         except Exception as e:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新描述为{user_remark}时，出现异常', exc_info=True)
+            logger.warning(f'用户{user_name_op}更新用户描述为{user_remark}时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
@@ -320,26 +305,25 @@ def update_user_remark(user_name: str, user_remark: str) -> bool:
             return True
 
 
-def update_user_password(user_name: str, new_password: str, old_password: Optional[str] = None):
+def update_user_password(user_name: str, new_password: str, old_password: Optional[str] = None) -> bool:
+    """更新用户密码"""
     if old_password and not user_password_verify(user_name, hashlib.sha256(old_password.encode('utf-8')).hexdigest()):
         return False
-    user_name_op = util_menu_access.get_menu_access(only_get_user_name=True)
-    with db().atomic() as txn, db().cursor() as cursor:
+    user_name_op = get_menu_access(only_get_user_name=True)
+    database = db()
+    with database.atomic() as txn:
         try:
-            cursor.execute(
-                """
-                    update sys_user 
-                    set 
-                    password_sha256=%s,update_by=%s,update_datetime=%s where user_name=%s;""",
-                (
-                    hashlib.sha256(new_password.encode('utf-8')).hexdigest(),
-                    user_name_op,
-                    datetime.now(),
-                    user_name,
-                ),
-            )
+            user: SysUser = SysUser.get(SysUser.user_name == user_name)
+            user.password_sha256 = hashlib.sha256(new_password.encode('utf-8')).hexdigest()
+            user.update_by = user_name_op
+            user.update_datetime = datetime.now()
+            user.save()
+        except DoesNotExist:
+            logger.warning(f'用户{user_name}不存在，无法更新密码')
+            txn.rollback()
+            return False
         except Exception as e:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新密码时，出现异常', exc_info=True)
+            logger.warning(f'用户{user_name_op}更新用户{user_name}密码时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
@@ -347,35 +331,33 @@ def update_user_password(user_name: str, new_password: str, old_password: Option
             return True
 
 
-def gen_otp_qrcode(user_name, password: str):
-    if not user_password_verify(user_name, password_sha256=hashlib.sha256(password.encode('utf-8')).hexdigest()):
+def gen_otp_qrcode(user_name: str, password: str) -> Optional[str]:
+    """生成 OTP 二维码"""
+    if not user_password_verify(user_name, hashlib.sha256(password.encode('utf-8')).hexdigest()):
         return False
     import uuid
 
     otp_secret = str(uuid.uuid4()).replace('-', '')[:16]
-    with db().atomic(), db().cursor() as cursor:
-        cursor.execute(
-            """
-                update sys_user
-                set 
-                otp_secret=%s where user_name=%s;""",
-            (
-                otp_secret,
-                user_name,
-            ),
-        )
+    database = db()
+    with database.atomic():
+        try:
+            user: SysUser = SysUser.get(SysUser.user_name == user_name)
+            user.otp_secret = otp_secret
+            user.save()
+        except DoesNotExist:
+            return False
+
     return otp_secret
 
 
-def get_otp_secret(user_name):
-    with db().atomic() as txn, db().cursor() as cursor:
+def get_otp_secret(user_name: str) -> Optional[str]:
+    """获取用户的 OTP 密钥"""
+    database = db()
+    with database.atomic():
         try:
-            cursor.execute(
-                """SELECT otp_secret FROM sys_user WHERE user_name = %s and user_status = %s;""",
-                (user_name, Status.ENABLE),
-            )
-            return cursor.fetchone()[0]
-        except:
+            user: SysUser = SysUser.get((SysUser.user_name == user_name) & (SysUser.user_status == Status.ENABLE))
+            return user.otp_secret
+        except DoesNotExist:
             return None
 
 
@@ -395,34 +377,28 @@ def create_user(
     if not user_name or not user_full_name:
         return False
     password = password.strip()
-    user_name_op = util_menu_access.get_menu_access().user_name
-    with db().atomic() as txn, db().cursor() as cursor:
+    user_name_op = get_menu_access(only_get_user_name=True)
+    database = db()
+    with database.atomic() as txn:
         try:
-            cursor.execute(
-                """
-                    INSERT INTO sys_user (user_name,user_full_name,password_sha256,user_status,user_sex,user_email,phone_number,create_by,create_datetime,update_by,update_datetime,user_remark) 
-                    VALUES
-                    (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);
-                    ;""",
-                (
-                    user_name,
-                    user_full_name,
-                    hashlib.sha256(password.encode('utf-8')).hexdigest(),
-                    user_status,
-                    user_sex,
-                    user_email,
-                    phone_number,
-                    user_name_op,
-                    datetime.now(),
-                    user_name_op,
-                    datetime.now(),
-                    user_remark,
-                ),
+            SysUser.create(
+                user_name=user_name,
+                user_full_name=user_full_name,
+                password_sha256=hashlib.sha256(password.encode('utf-8')).hexdigest(),
+                user_status=user_status,
+                user_sex=user_sex,
+                user_email=user_email,
+                phone_number=phone_number,
+                create_by=user_name_op,
+                create_datetime=datetime.now(),
+                update_by=user_name_op,
+                update_datetime=datetime.now(),
+                user_remark=user_remark,
             )
             if user_roles:
-                cursor.execute(f'INSERT INTO sys_user_role (user_name,role_name) VALUES {",".join(["(%s,%s)"]*len(user_roles))}', list(chain(*zip(repeat(user_name), user_roles))))
-        except Exception as e:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}添加用户{user_name}时，出现异常', exc_info=True)
+                SysUserRole.insert_many([{'user_name': user_name, 'role_name': role} for role in user_roles]).execute()
+        except IntegrityError as e:
+            logger.warning(f'用户{user_name_op}添加用户{user_name}时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
@@ -432,25 +408,17 @@ def create_user(
 
 def delete_user(user_name: str) -> bool:
     """删除用户"""
-    with db().atomic() as txn, db().cursor() as cursor:
+    database = db()
+    with database.atomic() as txn:
         try:
-            # 删除用户角色表
-            cursor.execute(
-                """delete FROM sys_user_role where user_name=%s;""",
-                (user_name,),
-            )
-            # 删除团队的用户
-            cursor.execute(
-                """delete FROM sys_group_user where user_name=%s;""",
-                (user_name,),
-            )
-            # 删除用户行
-            cursor.execute(
-                """delete FROM sys_user where user_name=%s;""",
-                (user_name,),
-            )
+            # 删除用户角色表中的记录
+            SysUserRole.delete().where(SysUserRole.user_name == user_name).execute()
+            # 删除团队的用户记录
+            SysGroupUser.delete().where(SysGroupUser.user_name == user_name).execute()
+            # 删除用户表中的记录
+            SysUser.delete().where(SysUser.user_name == user_name).execute()
         except Exception as e:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}删除用户{user_name}时，出现异常', exc_info=True)
+            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}删除用户{user_name}时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
@@ -460,36 +428,67 @@ def delete_user(user_name: str) -> bool:
 
 def get_roles_from_user_name(user_name: str, exclude_disabled=True) -> List[str]:
     """根据用户查询角色"""
-    with db().atomic() as txn, db().cursor() as cursor:
-        sql = (
-            'SELECT JSON_ARRAYAGG(r.role_name) FROM sys_user u JOIN sys_user_role ur on u.user_name=ur.user_name join sys_role r on ur.role_name = r.role_name where u.user_name=%s'
-        )
-        sql_place = [user_name]
-        if exclude_disabled:
-            sql += ' and u.user_status=%s and r.role_status=%s'
-            sql_place.extend([Status.ENABLE, Status.ENABLE])
-        cursor.execute(sql, sql_place)
-        result = cursor.fetchone()
-        if result[0] is None:
-            return []
-        role_names = json.loads(result[0])
-        return role_names
+    database = db()
+
+    if isinstance(database, MySQLDatabase):
+        roles_agg = fn.JSON_ARRAYAGG(SysRole.role_name).alias('role_names')
+    elif isinstance(database, SqliteDatabase):
+        roles_agg = fn.GROUP_CONCAT(SysRole.role_name).alias('role_names')
+    else:
+        raise NotImplementedError('Unsupported database type')
+
+    query = (
+        SysUser.select(roles_agg)
+        .join(SysUserRole, on=(SysUser.user_name == SysUserRole.user_name))
+        .join(SysRole, on=(SysUserRole.role_name == SysRole.role_name))
+        .where(SysUser.user_name == user_name)
+    )
+
+    if exclude_disabled:
+        query = query.where((SysUser.user_status == Status.ENABLE) & (SysRole.role_status == Status.ENABLE))
+
+    result = query.dicts().get()
+    if isinstance(database, MySQLDatabase):
+        role_names = json.loads(result['role_names']) if result['role_names'] else []
+    elif isinstance(database, SqliteDatabase):
+        role_names = result['role_names'].split(',') if result['role_names'] else []
+    else:
+        raise NotImplementedError('Unsupported database type')
+
+    return role_names
 
 
 def get_user_access_meta(user_name: str, exclude_disabled=True) -> Set[str]:
     """根据用户名查询权限元"""
-    with db().atomic() as txn, db().cursor() as cursor:
-        sql = 'SELECT JSON_ARRAYAGG(ram.access_meta) FROM sys_user u JOIN sys_user_role ur on u.user_name=ur.user_name join sys_role r on ur.role_name = r.role_name join sys_role_access_meta ram on r.role_name = ram.role_name where u.user_name = %s'
-        sql_place = [user_name]
-        if exclude_disabled:
-            sql += ' and u.user_status=%s and r.role_status=%s'
-            sql_place.extend([Status.ENABLE, Status.ENABLE])
-        cursor.execute(sql, sql_place)
-        result = cursor.fetchone()
-        if result[0] is None:
-            return set()
-        access_metas = json.loads(result[0])
-        return set(access_metas)
+    database = db()  # 假设你有一个函数 db() 返回当前的数据库连接
+
+    if isinstance(database, MySQLDatabase):
+        access_meta_agg = fn.JSON_ARRAYAGG(SysRoleAccessMeta.access_meta).alias('access_metas')
+    elif isinstance(database, SqliteDatabase):
+        access_meta_agg = fn.GROUP_CONCAT(SysRoleAccessMeta.access_meta).alias('access_metas')
+    else:
+        raise NotImplementedError('Unsupported database type')
+
+    query = (
+        SysUser.select(access_meta_agg)
+        .join(SysUserRole, on=(SysUser.user_name == SysUserRole.user_name))
+        .join(SysRole, on=(SysUserRole.role_name == SysRole.role_name))
+        .join(SysRoleAccessMeta, on=(SysRole.role_name == SysRoleAccessMeta.role_name))
+        .where(SysUser.user_name == user_name)
+    )
+
+    if exclude_disabled:
+        query = query.where((SysUser.user_status == Status.ENABLE) & (SysRole.role_status == Status.ENABLE))
+
+    result = query.dicts().get()
+    if isinstance(database, MySQLDatabase):
+        access_metas = json.loads(result['access_metas']) if result['access_metas'] else []
+    elif isinstance(database, SqliteDatabase):
+        access_metas = result['access_metas'].split(',') if result['access_metas'] else []
+    else:
+        raise NotImplementedError('Unsupported database type')
+
+    return set(access_metas)
 
 
 @dataclass
@@ -517,7 +516,7 @@ def get_role_info(role_names: Optional[List] = None, exclude_role_admin=False, e
     ]
     with db().atomic() as txn, db().cursor() as cursor:
         sql = f"""
-            SELECT {','.join(['r.'+i for i in heads])},JSON_ARRAYAGG(ram.access_meta) as access_metas
+            SELECT {','.join(['r.' + i for i in heads])},JSON_ARRAYAGG(ram.access_meta) as access_metas
             FROM sys_role r left JOIN sys_role_access_meta ram
             on r.role_name = ram.role_name
         """
@@ -525,7 +524,7 @@ def get_role_info(role_names: Optional[List] = None, exclude_role_admin=False, e
         sql_place = []
         condition = []
         if role_names is not None:
-            condition.append(f'r.role_name in ({",".join(["%s"]*len(role_names))})')
+            condition.append(f'r.role_name in ({",".join(["%s"] * len(role_names))})')
             sql_place.extend(role_names)
         if exclude_role_admin:
             condition.append('r.role_name != %s')
@@ -604,7 +603,8 @@ def create_role(role_name, role_status: bool, role_remark, access_metas):
             )
             if access_metas:
                 cursor.execute(
-                    f'INSERT INTO sys_role_access_meta (role_name,access_meta) VALUES {",".join(["(%s,%s)"]*len(access_metas))}', list(chain(*zip(repeat(role_name), access_metas)))
+                    f'INSERT INTO sys_role_access_meta (role_name,access_meta) VALUES {",".join(["(%s,%s)"] * len(access_metas))}',
+                    list(chain(*zip(repeat(role_name), access_metas))),
                 )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}创建角色{role_name}时，出现异常', exc_info=True)
@@ -638,7 +638,8 @@ def update_role(role_name, role_status: bool, role_remark, access_metas: List[st
             cursor.execute('delete from sys_role_access_meta where role_name = %s', (role_name,))
             if access_metas:
                 cursor.execute(
-                    f'INSERT INTO sys_role_access_meta (role_name,access_meta) VALUES {",".join(["(%s,%s)"]*len(access_metas))}', list(chain(*zip(repeat(role_name), access_metas)))
+                    f'INSERT INTO sys_role_access_meta (role_name,access_meta) VALUES {",".join(["(%s,%s)"] * len(access_metas))}',
+                    list(chain(*zip(repeat(role_name), access_metas))),
                 )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新角色{role_name}时，出现异常', exc_info=True)
@@ -687,7 +688,7 @@ def get_group_info(group_names: Optional[List] = None, exclude_disabled=True) ->
         sql_place = [Status.ENABLE, 'is_admin:']
         condition = []
         if group_names is not None:
-            condition.append(f'g.group_name in ({",".join(["%s"]*len(group_names))})')
+            condition.append(f'g.group_name in ({",".join(["%s"] * len(group_names))})')
             sql_place.extend(group_names)
         if exclude_disabled:
             condition.append('group_status=%s')
@@ -884,12 +885,12 @@ def create_group(group_name, group_status, group_remark, group_roles, group_admi
             # 插入团队角色表
             if group_roles:
                 cursor.execute(
-                    f'INSERT INTO sys_group_role (group_name,role_name) VALUES {",".join(["(%s,%s)"]*len(group_roles))}', list(chain(*zip(repeat(group_name), group_roles)))
+                    f'INSERT INTO sys_group_role (group_name,role_name) VALUES {",".join(["(%s,%s)"] * len(group_roles))}', list(chain(*zip(repeat(group_name), group_roles)))
                 )
             # 插入团队用户表
             if user_names:
                 cursor.execute(
-                    f'INSERT INTO sys_group_user (group_name,user_name) VALUES {",".join(["(%s,%s)"]*len(user_names))}', list(chain(*zip(repeat(group_name), user_names)))
+                    f'INSERT INTO sys_group_user (group_name,user_name) VALUES {",".join(["(%s,%s)"] * len(user_names))}', list(chain(*zip(repeat(group_name), user_names)))
                 )
         except Exception as e:
             logger.warning(f'用户{get_menu_access(only_get_user_name=True)}添加团队{group_name}时，出现异常', exc_info=True)
@@ -946,13 +947,13 @@ def update_group(group_name, group_status, group_remark, group_roles, group_admi
             cursor.execute('delete from sys_group_role where group_name = %s', (group_name,))
             if group_roles:
                 cursor.execute(
-                    f'INSERT INTO sys_group_role (group_name,role_name) VALUES {",".join(["(%s,%s)"]*len(group_roles))}', list(chain(*zip(repeat(group_name), group_roles)))
+                    f'INSERT INTO sys_group_role (group_name,role_name) VALUES {",".join(["(%s,%s)"] * len(group_roles))}', list(chain(*zip(repeat(group_name), group_roles)))
                 )
             # 插入团队用户表
             cursor.execute('delete from sys_group_user where group_name = %s', (group_name,))
             if user_names:
                 cursor.execute(
-                    f'INSERT INTO sys_group_user (group_name,user_name,is_admin) VALUES {",".join(["(%s,%s,%s)"]*len(user_names))}',
+                    f'INSERT INTO sys_group_user (group_name,user_name,is_admin) VALUES {",".join(["(%s,%s,%s)"] * len(user_names))}',
                     list(chain(*zip(repeat(group_name), user_names, [(Status.ENABLE if i in group_admin_users else Status.DISABLE) for i in user_names]))),
                 )
         except Exception as e:
