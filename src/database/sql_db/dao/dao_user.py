@@ -9,7 +9,7 @@ import hashlib
 from peewee import DoesNotExist, fn, MySQLDatabase, SqliteDatabase, IntegrityError
 from common.utilities.util_logger import Log
 from common.utilities.util_menu_access import get_menu_access
-from ..entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole, SysGroupUser, SysRole
+from ..entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole, SysGroupUser, SysRole, SysGroupRole, SysGroup
 
 logger = Log.get_logger(__name__)
 
@@ -503,75 +503,60 @@ class RoleInfo:
     role_remark: str
 
 
-def get_role_info(role_names: Optional[List] = None, exclude_role_admin=False, exclude_disabled=True) -> List[RoleInfo]:
+def get_role_info(role_names: Optional[List[str]] = None, exclude_role_admin=False, exclude_disabled=True) -> List[RoleInfo]:
     """获取角色信息"""
-    heads = [
-        'role_name',
-        'role_status',
-        'update_datetime',
-        'update_by',
-        'create_datetime',
-        'create_by',
-        'role_remark',
-    ]
-    with db().atomic() as txn, db().cursor() as cursor:
-        sql = f"""
-            SELECT {','.join(['r.' + i for i in heads])},JSON_ARRAYAGG(ram.access_meta) as access_metas
-            FROM sys_role r left JOIN sys_role_access_meta ram
-            on r.role_name = ram.role_name
-        """
-        group_by = 'GROUP BY r.role_name,r.role_status,r.update_datetime,r.update_by,r.create_datetime,r.create_by,r.role_remark'
-        sql_place = []
-        condition = []
-        if role_names is not None:
-            condition.append(f'r.role_name in ({",".join(["%s"] * len(role_names))})')
-            sql_place.extend(role_names)
-        if exclude_role_admin:
-            condition.append('r.role_name != %s')
-            sql_place.append('admin')
-        if exclude_disabled:
-            condition.append('r.role_status=%s')
-            sql_place.append(Status.ENABLE)
-        cursor.execute(f'{sql} {"where" if condition else ""} {" and ".join(condition)} {group_by}', sql_place)
-        role_infos = []
-        result = cursor.fetchall()
-        for per in result:
-            role_dict = dict(zip(heads + ['access_metas'], per))
-            role_dict.update(
-                {
-                    'access_metas': [i for i in json.loads(role_dict['access_metas']) if i],
-                },
-            )
-            role_infos.append(RoleInfo(**role_dict))
-        return role_infos
+    database = db()
+
+    if isinstance(database, MySQLDatabase):
+        access_meta_agg = fn.JSON_ARRAYAGG(SysRoleAccessMeta.access_meta).alias('access_metas')
+    elif isinstance(database, SqliteDatabase):
+        access_meta_agg = fn.GROUP_CONCAT(SysRoleAccessMeta.access_meta).alias('access_metas')
+    else:
+        raise NotImplementedError('Unsupported database type')
+
+    query = (
+        SysRole.select(
+            SysRole.role_name, SysRole.role_status, SysRole.update_datetime, SysRole.update_by, SysRole.create_datetime, SysRole.create_by, SysRole.role_remark, access_meta_agg
+        )
+        .join(SysRoleAccessMeta, join_type='LEFT OUTER', on=(SysRole.role_name == SysRoleAccessMeta.role_name))
+        .group_by(SysRole.role_name, SysRole.role_status, SysRole.update_datetime, SysRole.update_by, SysRole.create_datetime, SysRole.create_by, SysRole.role_remark)
+    )
+
+    if role_names is not None:
+        query = query.where(SysRole.role_name.in_(role_names))
+    if exclude_role_admin:
+        query = query.where(SysRole.role_name != 'admin')
+    if exclude_disabled:
+        query = query.where(SysRole.role_status == Status.ENABLE)
+
+    role_infos = []
+    for role in query.dicts():
+        if isinstance(database, MySQLDatabase):
+            role['access_metas'] = json.loads(role['access_metas']) if role['access_metas'] else []
+        elif isinstance(database, SqliteDatabase):
+            role['access_metas'] = role['access_metas'].split(',') if role['access_metas'] else []
+        else:
+            raise NotImplementedError('Unsupported database type')
+        role_infos.append(RoleInfo(**role))
+
+    return role_infos
 
 
 def delete_role(role_name: str) -> bool:
     """删除角色"""
-    with db().atomic() as txn, db().cursor() as cursor:
+    database = db()
+    with database.atomic() as txn:
         try:
             # 删除角色权限表
-            cursor.execute(
-                'delete FROM sys_role_access_meta where role_name=%s;',
-                (role_name,),
-            )
+            SysRoleAccessMeta.delete().where(SysRoleAccessMeta.role_name == role_name).execute()
             # 删除用户角色表
-            cursor.execute(
-                'delete FROM sys_user_role where role_name=%s;',
-                (role_name,),
-            )
+            SysUserRole.delete().where(SysUserRole.role_name == role_name).execute()
             # 删除团队角色表
-            cursor.execute(
-                'delete FROM sys_group_role where role_name=%s;',
-                (role_name,),
-            )
+            SysGroupRole.delete().where(SysGroupRole.role_name == role_name).execute()
             # 删除角色表
-            cursor.execute(
-                'delete FROM sys_role where role_name=%s;',
-                (role_name,),
-            )
-        except Exception as e:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}删除角色{role_name}时，出现异常', exc_info=True)
+            SysRole.delete().where(SysRole.role_name == role_name).execute()
+        except IntegrityError as e:
+            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}删除角色{role_name}时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
@@ -579,35 +564,27 @@ def delete_role(role_name: str) -> bool:
             return True
 
 
-def create_role(role_name, role_status: bool, role_remark, access_metas):
+def create_role(role_name: str, role_status: bool, role_remark: str, access_metas: List[str]) -> bool:
     """新建角色"""
     if not role_name:
         return False
-    user_name_op = util_menu_access.get_menu_access().user_name
-    with db().atomic() as txn, db().cursor() as cursor:
+    user_name_op = get_menu_access(only_get_user_name=True)
+    database = db()
+    with database.atomic() as txn:
         try:
-            cursor.execute(
-                """
-                INSERT INTO sys_role ( role_name,role_status,update_datetime,update_by,create_datetime,create_by,role_remark)
-                VALUES
-                (%s,%s,%s,%s,%s,%s,%s);""",
-                (
-                    role_name,
-                    role_status,
-                    datetime.now(),
-                    user_name_op,
-                    datetime.now(),
-                    user_name_op,
-                    role_remark,
-                ),
+            SysRole.create(
+                role_name=role_name,
+                role_status=role_status,
+                update_datetime=datetime.now(),
+                update_by=user_name_op,
+                create_datetime=datetime.now(),
+                create_by=user_name_op,
+                role_remark=role_remark,
             )
             if access_metas:
-                cursor.execute(
-                    f'INSERT INTO sys_role_access_meta (role_name,access_meta) VALUES {",".join(["(%s,%s)"] * len(access_metas))}',
-                    list(chain(*zip(repeat(role_name), access_metas))),
-                )
-        except Exception as e:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}创建角色{role_name}时，出现异常', exc_info=True)
+                SysRoleAccessMeta.insert_many([{'role_name': role_name, 'access_meta': access_meta} for access_meta in access_metas]).execute()
+        except IntegrityError as e:
+            logger.warning(f'用户{user_name_op}创建角色{role_name}时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
@@ -615,34 +592,37 @@ def create_role(role_name, role_status: bool, role_remark, access_metas):
             return True
 
 
-def exists_role_name(role_name):
+def exists_role_name(role_name: str) -> bool:
     """是否存在角色名称"""
-    with db().atomic() as txn, db().cursor() as cursor:
-        cursor.execute(
-            """SELECT count(1) FROM sys_role WHERE role_name = %s;""",
-            (role_name,),
-        )
-        result = cursor.fetchone()
-        return bool(result[0])
+    try:
+        SysRole.get(SysRole.role_name == role_name)
+        return True
+    except DoesNotExist:
+        return False
 
 
-def update_role(role_name, role_status: bool, role_remark, access_metas: List[str]):
+def update_role(role_name: str, role_status: bool, role_remark: str, access_metas: List[str]) -> bool:
     """更新角色"""
-    user_name_op = util_menu_access.get_menu_access().user_name
-    with db().atomic() as txn, db().cursor() as cursor:
+    user_name_op = get_menu_access(only_get_user_name=True)
+    database = db()
+    with database.atomic() as txn:
         try:
-            cursor.execute(
-                'update sys_role set role_status=%s,update_datetime=%s,update_by=%s,role_remark=%s where role_name=%s;',
-                (role_status, datetime.now(), user_name_op, role_remark, role_name),
-            )
-            cursor.execute('delete from sys_role_access_meta where role_name = %s', (role_name,))
+            # 更新角色信息
+            SysRole.update(
+                role_status=role_status,
+                update_datetime=datetime.now(),
+                update_by=user_name_op,
+                role_remark=role_remark,
+            ).where(SysRole.role_name == role_name).execute()
+
+            # 删除旧的角色权限
+            SysRoleAccessMeta.delete().where(SysRoleAccessMeta.role_name == role_name).execute()
+
+            # 插入新的角色权限
             if access_metas:
-                cursor.execute(
-                    f'INSERT INTO sys_role_access_meta (role_name,access_meta) VALUES {",".join(["(%s,%s)"] * len(access_metas))}',
-                    list(chain(*zip(repeat(role_name), access_metas))),
-                )
-        except Exception as e:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新角色{role_name}时，出现异常', exc_info=True)
+                SysRoleAccessMeta.insert_many([{'role_name': role_name, 'access_meta': access_meta} for access_meta in access_metas]).execute()
+        except IntegrityError as e:
+            logger.warning(f'用户{user_name_op}更新角色{role_name}时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
@@ -664,76 +644,75 @@ class GroupInfo:
     group_remark: str
 
 
-def get_group_info(group_names: Optional[List] = None, exclude_disabled=True) -> List[GroupInfo]:
+def get_group_info(group_names: Optional[List[str]] = None, exclude_disabled=True) -> List[GroupInfo]:
     """获取团队信息"""
-    heads = [
-        'group_name',
-        'group_status',
-        'update_datetime',
-        'update_by',
-        'create_datetime',
-        'create_by',
-        'group_remark',
-        'group_roles',
-        'user_name_plus',
-    ]
-    with db().atomic() as txn, db().cursor() as cursor:
-        sql = """
-            select g.group_name,group_status,update_datetime,update_by,create_datetime,create_by,group_remark,JSON_ARRAYAGG(role_name) as group_roles,JSON_ARRAYAGG(case gu.is_admin WHEN %s then CONCAT(%s,user_name) else user_name end) as user_name_plus 
-            from sys_group g 
-            left JOIN sys_group_role gr on g.group_name = gr.group_name 
-            left JOIN sys_group_user gu on g.group_name=gu.group_name 
-        """
-        group_by = 'group by g.group_name,group_status,update_datetime,update_by,create_datetime,create_by,group_remark'
-        sql_place = [Status.ENABLE, 'is_admin:']
-        condition = []
-        if group_names is not None:
-            condition.append(f'g.group_name in ({",".join(["%s"] * len(group_names))})')
-            sql_place.extend(group_names)
-        if exclude_disabled:
-            condition.append('group_status=%s')
-            sql_place.append(Status.ENABLE)
-        cursor.execute(f'{sql} {"where" if condition else ""} {" and ".join(condition)} {group_by}', sql_place)
-        group_infos = []
-        result = cursor.fetchall()
-        for per in result:
-            group_dict = dict(zip(heads, per))
-            group_dict.update(
-                {
-                    'group_roles': [i for i in set(json.loads(group_dict['group_roles'])) if i],
-                    'user_name_plus': [i for i in set(json.loads(group_dict['user_name_plus'])) if i],
-                },
-            )
-            group_dict.update(
-                {
-                    'group_users': [i for i in group_dict['user_name_plus'] if not str(i).startswith('is_admin:')],
-                    'group_admin_users': [str(i).replace('is_admin:', '') for i in group_dict['user_name_plus'] if str(i).startswith('is_admin:')],
-                }
-            )
-            group_dict.pop('user_name_plus')
-            group_infos.append(GroupInfo(**group_dict))
-        return group_infos
+    database = db()
 
-
-def is_group_admin(user_name) -> bool:
-    """判断是不是团队管理员，排除禁用的团队"""
-    with db().atomic() as txn, db().cursor() as cursor:
-        cursor.execute(
-            """        
-                SELECT
-                count(1)
-                FROM
-                sys_group g
-                join sys_group_user gu on g.group_name = gu.group_name
-                WHERE
-                gu.user_name = %s
-                and g.group_status = %s
-                and gu.is_admin = %s
-            """,
-            (user_name, Status.ENABLE, Status.ENABLE),
+    if isinstance(database, MySQLDatabase):
+        roles_agg = fn.JSON_ARRAYAGG(SysGroupRole.role_name).alias('group_roles')
+        users_agg = fn.JSON_ARRAYAGG(fn.IF(SysGroupUser.is_admin == Status.ENABLE, fn.CONCAT('is_admin:', SysGroupUser.user_name), SysGroupUser.user_name)).alias('user_name_plus')
+    elif isinstance(database, SqliteDatabase):
+        roles_agg = fn.GROUP_CONCAT(SysGroupRole.role_name).alias('group_roles')
+        users_agg = fn.GROUP_CONCAT(fn.CASE(None, [(SysGroupUser.is_admin == Status.ENABLE, fn.CONCAT('is_admin:', SysGroupUser.user_name))], SysGroupUser.user_name)).alias(
+            'user_name_plus'
         )
-        result = cursor.fetchone()
-        return bool(result[0])
+    else:
+        raise NotImplementedError('Unsupported database type')
+
+    query = (
+        SysGroup.select(
+            SysGroup.group_name,
+            SysGroup.group_status,
+            SysGroup.update_datetime,
+            SysGroup.update_by,
+            SysGroup.create_datetime,
+            SysGroup.create_by,
+            SysGroup.group_remark,
+            roles_agg,
+            users_agg,
+        )
+        .join(SysGroupRole, join_type='LEFT OUTER', on=(SysGroup.group_name == SysGroupRole.group_name))
+        .join(SysGroupUser, join_type='LEFT OUTER', on=(SysGroup.group_name == SysGroupUser.group_name))
+        .group_by(SysGroup.group_name, SysGroup.group_status, SysGroup.update_datetime, SysGroup.update_by, SysGroup.create_datetime, SysGroup.create_by, SysGroup.group_remark)
+    )
+
+    if group_names is not None:
+        query = query.where(SysGroup.group_name.in_(group_names))
+    if exclude_disabled:
+        query = query.where(SysGroup.group_status == Status.ENABLE)
+
+    group_infos = []
+    for group in query.dicts():
+        if isinstance(database, MySQLDatabase):
+            group['group_roles'] = [i for i in set(json.loads(group['group_roles'])) if i]
+            group['user_name_plus'] = [i for i in set(json.loads(group['user_name_plus'])) if i]
+        elif isinstance(database, SqliteDatabase):
+            group['group_roles'] = group['group_roles'].split(',') if group['group_roles'] else []
+            group['user_name_plus'] = group['user_name_plus'].split(',') if group['user_name_plus'] else []
+        else:
+            raise NotImplementedError('Unsupported database type')
+
+        group['group_users'] = [i for i in group['user_name_plus'] if not str(i).startswith('is_admin:')]
+        group['group_admin_users'] = [str(i).replace('is_admin:', '') for i in group['user_name_plus'] if str(i).startswith('is_admin:')]
+        group.pop('user_name_plus')
+        group_infos.append(GroupInfo(**group))
+
+    return group_infos
+
+
+def is_group_admin(user_name: str) -> bool:
+    """判断是不是团队管理员，排除禁用的团队"""
+    query = (SysGroup
+             .select(fn.COUNT(1))
+             .join(SysGroupUser, on=(SysGroup.group_name == SysGroupUser.group_name))
+             .where(
+                 (SysGroupUser.user_name == user_name) &
+                 (SysGroup.group_status == Status.ENABLE) &
+                 (SysGroupUser.is_admin == Status.ENABLE)
+             ))
+
+    result = query.scalar()
+    return bool(result)
 
 
 def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
