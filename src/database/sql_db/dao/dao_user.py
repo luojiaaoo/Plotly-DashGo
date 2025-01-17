@@ -6,7 +6,7 @@ from datetime import datetime
 from common.utilities import util_menu_access
 import json
 import hashlib
-from peewee import DoesNotExist, fn, MySQLDatabase, SqliteDatabase, IntegrityError
+from peewee import DoesNotExist, fn, MySQLDatabase, SqliteDatabase, IntegrityError, JOIN
 from common.utilities.util_logger import Log
 from common.utilities.util_menu_access import get_menu_access
 from ..entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole, SysGroupUser, SysRole, SysGroupRole, SysGroup
@@ -86,7 +86,7 @@ def get_user_info(user_names: Optional[List[str]] = None, exclude_role_admin=Fal
             SysUser.user_remark,
             user_roles_agg,
         )
-        .join(SysUserRole, join_type='LEFT OUTER', on=(SysUser.user_name == SysUserRole.user_name))
+        .join(SysUserRole, JOIN.LEFT_OUTER, on=(SysUser.user_name == SysUserRole.user_name))
         .where(SysUser.user_name.in_(user_names) if user_names is not None else (1 == 1))
         .where(SysUser.user_status == Status.ENABLE if exclude_disabled is not None else (1 == 1))
         .group_by(
@@ -104,7 +104,6 @@ def get_user_info(user_names: Optional[List[str]] = None, exclude_role_admin=Fal
         )
         .having(having_exclude_role_admin)
     )
-
     user_infos = []
     for user in query.dicts():
         if isinstance(database, MySQLDatabase):
@@ -517,7 +516,7 @@ def get_role_info(role_names: Optional[List[str]] = None, exclude_role_admin=Fal
         SysRole.select(
             SysRole.role_name, SysRole.role_status, SysRole.update_datetime, SysRole.update_by, SysRole.create_datetime, SysRole.create_by, SysRole.role_remark, access_meta_agg
         )
-        .join(SysRoleAccessMeta, join_type='LEFT OUTER', on=(SysRole.role_name == SysRoleAccessMeta.role_name))
+        .join(SysRoleAccessMeta, JOIN.LEFT_OUTER, on=(SysRole.role_name == SysRoleAccessMeta.role_name))
         .group_by(SysRole.role_name, SysRole.role_status, SysRole.update_datetime, SysRole.update_by, SysRole.create_datetime, SysRole.create_by, SysRole.role_remark)
     )
 
@@ -670,8 +669,8 @@ def get_group_info(group_names: Optional[List[str]] = None, exclude_disabled=Tru
             roles_agg,
             users_agg,
         )
-        .join(SysGroupRole, join_type='LEFT OUTER', on=(SysGroup.group_name == SysGroupRole.group_name))
-        .join(SysGroupUser, join_type='LEFT OUTER', on=(SysGroup.group_name == SysGroupUser.group_name))
+        .join(SysGroupRole, JOIN.LEFT_OUTER, on=(SysGroup.group_name == SysGroupRole.group_name))
+        .join(SysGroupUser, JOIN.LEFT_OUTER, on=(SysGroup.group_name == SysGroupUser.group_name))
         .group_by(SysGroup.group_name, SysGroup.group_status, SysGroup.update_datetime, SysGroup.update_by, SysGroup.create_datetime, SysGroup.create_by, SysGroup.group_remark)
     )
 
