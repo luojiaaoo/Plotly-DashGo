@@ -2,7 +2,6 @@ from config.dashgo_conf import SqlDbConf
 from playhouse.pool import PooledMySQLDatabase
 from server import server
 from playhouse.shortcuts import ReconnectMixin
-from .entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole, SysGroupUser, SysRole, SysGroupRole, SysGroup
 
 
 # 断线重连+连接池
@@ -32,6 +31,10 @@ def db():
 def initialize_database():
     db_instance = db()
     if not db_instance.table_exists('sys_user'):
+        from .entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole, SysGroupUser, SysRole, SysGroupRole, SysGroup
+        from datetime import datetime
+        import hashlib
+
         db_instance.create_tables(
             [
                 SysUser,
@@ -42,6 +45,29 @@ def initialize_database():
                 SysGroupRole,
                 SysGroup,
             ]
+        )
+        SysRole.create(
+            role_name='admin',
+            role_status=True,
+            update_datetime=datetime.now(),
+            update_by='admin',
+            create_datetime=datetime.now(),
+            create_by='admin',
+            role_remark='超级管理员角色',
+        )
+        SysUser.create(
+            user_name='admin',
+            user_full_name='超级管理员',
+            password_sha256=hashlib.sha256('admin123'.encode('utf-8')).hexdigest(),
+            user_status=True,
+            user_sex='未知',
+            user_email='',
+            phone_number='',
+            create_by='admin',
+            create_datetime=datetime.now(),
+            update_by='admin',
+            update_datetime=datetime.now(),
+            user_remark='',
         )
 
 
