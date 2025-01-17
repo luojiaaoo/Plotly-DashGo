@@ -702,17 +702,57 @@ def get_group_info(group_names: Optional[List[str]] = None, exclude_disabled=Tru
 
 def is_group_admin(user_name: str) -> bool:
     """判断是不是团队管理员，排除禁用的团队"""
-    query = (SysGroup
-             .select(fn.COUNT(1))
-             .join(SysGroupUser, on=(SysGroup.group_name == SysGroupUser.group_name))
-             .where(
-                 (SysGroupUser.user_name == user_name) &
-                 (SysGroup.group_status == Status.ENABLE) &
-                 (SysGroupUser.is_admin == Status.ENABLE)
-             ))
+    query = (
+        SysGroup.select(fn.COUNT(1))
+        .join(SysGroupUser, on=(SysGroup.group_name == SysGroupUser.group_name))
+        .where((SysGroupUser.user_name == user_name) & (SysGroup.group_status == Status.ENABLE) & (SysGroupUser.is_admin == Status.ENABLE))
+    )
 
     result = query.scalar()
     return bool(result)
+
+
+def get_admin_groups_for_user(user_name: str) -> List[str]:
+    """获取用户管理的团队名称"""
+    query = (
+        SysGroupUser.select(SysGroupUser.group_name)
+        .join(SysGroup, on=(SysGroup.group_name == SysGroupUser.group_name))
+        .where((SysGroupUser.user_name == user_name) & (SysGroupUser.is_admin == Status.ENABLE) & (SysGroup.group_status == Status.ENABLE))
+    )
+    return [row.group_name for row in query.dicts()]
+
+
+def get_user_and_role_for_group_name(group_name: str):
+    """根据团队名称获取成员和对应的角色"""
+    database = db()
+    if isinstance(database, MySQLDatabase):
+        users_agg = fn.JSON_ARRAYAGG(SysGroupUser.user_name).alias('users_agg')
+        roles_agg = fn.JSON_ARRAYAGG(SysGroupRole.role_name).alias('roles_agg')
+    elif isinstance(database, SqliteDatabase):
+        users_agg = fn.GROUP_CONCAT(SysGroupUser.user_name).alias('users_agg')
+        roles_agg = fn.GROUP_CONCAT(SysGroupRole.role_name).alias('roles_agg')
+    else:
+        raise NotImplementedError('Unsupported database type')
+    query = (
+        SysGroupUser.select(SysGroup.group_remark, users_agg, roles_agg)
+        .join(SysGroup, on=(SysGroup.group_name == SysGroupUser.group_name))
+        .join(SysUser, on=(SysUser.user_name == SysGroupUser.user_name))
+        .join(SysGroupRole, on=(SysGroup.group_name == SysGroupRole.group_name))
+        .join(SysRole, on=(SysRole.role_name == SysGroupRole.role_name))
+        .where((SysGroupUser.group_name == group_name) & (SysGroup.group_status == Status.ENABLE) & (SysRole.role_status == Status.ENABLE))
+    )
+    users = []
+    roles = []
+    for row in query.dicts():
+        if isinstance(database, MySQLDatabase):
+            users = json.loads(row['users_agg']) if row['users_agg'] else []
+            roles = json.loads(row['roles_agg']) if row['roles_agg'] else []
+        elif isinstance(database, SqliteDatabase):
+            users = row['users_agg'].split(',') if row['users_agg'] else []
+            roles = row['roles_agg'].split(',') if row['roles_agg'] else []
+        else:
+            raise NotImplementedError('Unsupported database type')
+    return users, roles
 
 
 def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
@@ -815,13 +855,13 @@ def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
 def update_user_roles_from_group(user_name, group_name, roles_in_range):
     """再团队授权页，更新用户权限"""
     is_ok = True
-    user_roles = set(get_roles_from_user_name(user_name, exclude_disabled=False))
+    user_roles = set(get_roles_from_user_name(user_name, exclude_disabled=True))
     roles_in_range = set(roles_in_range)
     # 新增的权限
     for i in set(roles_in_range) - user_roles:
         is_ok = True and add_role_for_user(user_name, i)
     # 需要删除的权限
-    for i in user_roles & (set(get_group_info([group_name])[0].group_roles) - roles_in_range):
+    for i in user_roles & (set(get_group_info([group_name], exclude_disabled=True)[0].group_roles) - roles_in_range):
         is_ok = True and del_role_for_user(user_name, i)
     return is_ok
 
