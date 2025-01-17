@@ -64,7 +64,7 @@ def get_user_info(user_names: Optional[List[str]] = None, exclude_role_admin=Fal
     """获取用户信息对象"""
     database = db()
     if isinstance(database, MySQLDatabase):
-        user_roles_agg = (fn.JSON_ARRAYAGG(SysUserRole.role_name).alias('user_roles'),)
+        user_roles_agg = fn.JSON_ARRAYAGG(SysUserRole.role_name).alias('user_roles')
         having_exclude_role_admin = fn.JSON_SEARCH(fn.JSON_ARRAYAGG(SysUserRole.role_name), 'one', 'admin').is_null() if exclude_role_admin else (1 == 1)
     elif isinstance(database, SqliteDatabase):
         user_roles_agg = fn.GROUP_CONCAT(SysUserRole.role_name).alias('user_roles')
@@ -107,9 +107,8 @@ def get_user_info(user_names: Optional[List[str]] = None, exclude_role_admin=Fal
 
     user_infos = []
     for user in query.dicts():
-        user['user_roles'] = [role for role in json.loads(user['user_roles']) if role]
         if isinstance(database, MySQLDatabase):
-            user['user_roles'] = json.loads(user['user_roles'])
+            user['user_roles'] = json.loads(user['user_roles']) if user['user_roles'] else []
         elif isinstance(database, SqliteDatabase):
             user['user_roles'] = user['user_roles'].split(',') if user['user_roles'] else []
         else:
@@ -752,104 +751,31 @@ def get_user_and_role_for_group_name(group_name: str):
             roles = row['roles_agg'].split(',') if row['roles_agg'] else []
         else:
             raise NotImplementedError('Unsupported database type')
-    return users, roles
+        group_remark = row['group_remark']
+    return group_remark, users, roles
 
 
 def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
     """根据用户名获取可管理的团队、人员和可管理的角色，排除禁用的管理员用户"""
-    with db().atomic() as txn, db().cursor() as cursor:
-        cursor.execute(
-            """        
-                select
-                a.group_name,
-                a.group_remark,
-                a.group_roles,
-                b.group_user_names,
-                b.group_full_names,
-                b.group_user_statuses,
-                b.group_user_roles
-                from
-                (
-                    select
-                    g.group_name,
-                    g.group_remark,
-                    JSON_ARRAYAGG(gr.role_name) as group_roles
-                    from
-                    sys_group g
-                    join sys_group_role gr on g.group_name = gr.group_name
-                    JOIN sys_group_user gu on g.group_name = gu.group_name
-                    JOIN sys_user u on gu.user_name = u.user_name
-                    JOIN sys_role r on gr.role_name = r.role_name
-                    where
-                    r.role_status = %s
-                    and gu.user_name = %s
-                    and g.group_status = %s
-                    and gu.is_admin = %s
-                    group by
-                    g.group_name,
-                    g.group_remark
-                ) as a
-                join (
-                    select
-                    gu.group_name,
-                    JSON_ARRAYAGG(gu.user_name) as group_user_names,
-                    JSON_ARRAYAGG(u.user_status) as group_user_statuses,
-                    JSON_ARRAYAGG(u.user_full_name) as group_full_names,
-                    JSON_ARRAYAGG(u.user_roles) as group_user_roles
-                    from
-                    sys_group_user gu
-                    join (
-                        select
-                        a.user_name,
-                        a.user_full_name,
-                        a.user_status,
-                        b.user_roles
-                        from
-                        sys_user a
-                        left JOIN (
-                            select
-                            u.user_name,
-                            u.user_status,
-                            JSON_ARRAYAGG(ur.role_name) as user_roles
-                            from
-                            sys_user u
-                            left JOIN sys_user_role ur on u.user_name = ur.user_name
-                            left JOIN sys_role r on ur.role_name = r.role_name
-                            WHERE
-                            r.role_status = %s
-                            or r.role_status is Null
-                            group by
-                            u.user_name,
-                            u.user_status
-                        ) b on a.user_name = b.user_name
-                    ) u on gu.user_name = u.user_name
-                    group by
-                    group_name
-                ) b on a.group_name = b.group_name
-            """,
-            (Status.ENABLE, user_name, Status.ENABLE, Status.ENABLE, Status.ENABLE),
-        )
-        result = cursor.fetchall()
-        all_ = []
-        for group_name, group_remark, group_roles, group_user_names, group_user_full_names, group_user_statuses, group_user_role_lists in result:
-            group_roles = json.loads(group_roles)
-            group_user_names = json.loads(group_user_names)
-            group_user_full_names = json.loads(group_user_full_names)
-            group_user_statuses = json.loads(group_user_statuses)
-            group_user_role_lists = json.loads(group_user_role_lists)
-            for user_name, user_full_name, user_status, group_user_role_list in zip(group_user_names, group_user_full_names, group_user_statuses, group_user_role_lists):
-                all_.append(
-                    {
-                        'group_remark': group_remark,
-                        'group_name': group_name,
-                        'user_name': user_name,
-                        'group_roles': group_roles,
-                        'user_roles': list(set(group_user_role_list) & set(group_roles)) if group_user_role_list is not None else [],
-                        'user_full_name': user_full_name,
-                        'user_status': user_status,
-                    }
-                )
-        return all_
+    all_ = []
+    group_names = get_admin_groups_for_user(user_name=user_name)
+
+    for group_name in group_names:
+        group_remark, user_names, group_roles = get_user_and_role_for_group_name(group_name=group_name)
+        user_infos = get_user_info(user_names=user_names)
+        dict_user_info = {i.user_name: i for i in user_infos}
+        for user_name_per, user_info in dict_user_info.items():
+            all_.append(
+                {
+                    'group_remark': group_remark,
+                    'group_name': group_name,
+                    'user_name': user_name_per,
+                    'group_roles': group_roles,
+                    'user_roles': list(set(user_info.user_roles) & set(group_roles)),
+                    'user_full_name': user_info.user_full_name,
+                    'user_status': user_info.user_status,
+                }
+            )
 
 
 def update_user_roles_from_group(user_name, group_name, roles_in_range):
@@ -866,53 +792,42 @@ def update_user_roles_from_group(user_name, group_name, roles_in_range):
     return is_ok
 
 
-def exists_group_name(group_name: str):
+def exists_group_name(group_name: str) -> bool:
     """是否已经存在这个团队名"""
-    with db().atomic() as txn, db().cursor() as cursor:
-        cursor.execute(
-            """SELECT count(1) FROM sys_group WHERE group_name = %s;""",
-            (group_name,),
-        )
-        result = cursor.fetchone()
-        return bool(result[0])
+    try:
+        SysGroup.get(SysGroup.group_name == group_name)
+        return True
+    except DoesNotExist:
+        return False
 
 
-def create_group(group_name, group_status, group_remark, group_roles, group_admin_users, group_users):
+def create_group(group_name: str, group_status: bool, group_remark: str, group_roles: List[str], group_admin_users: List[str], group_users: List[str]) -> bool:
     """添加团队"""
     if exists_group_name(group_name):
         return False
-    user_name_op = util_menu_access.get_menu_access().user_name
-    with db().atomic() as txn, db().cursor() as cursor:
+    user_name_op = get_menu_access(only_get_user_name=True)
+    database = db()
+    with database.atomic() as txn:
         try:
-            user_names = set([*group_admin_users, *group_users])
-            cursor.execute(
-                """
-                INSERT INTO sys_group (group_name,group_status,update_datetime,update_by,create_datetime,create_by,group_remark) 
-                VALUES 
-                (%s,%s,%s,%s,%s,%s,%s);
-                """,
-                (
-                    group_name,
-                    group_status,
-                    datetime.now(),
-                    user_name_op,
-                    datetime.now(),
-                    user_name_op,
-                    group_remark,
-                ),
+            # 插入团队表
+            SysGroup.create(
+                group_name=group_name,
+                group_status=group_status,
+                update_datetime=datetime.now(),
+                update_by=user_name_op,
+                create_datetime=datetime.now(),
+                create_by=user_name_op,
+                group_remark=group_remark,
             )
             # 插入团队角色表
             if group_roles:
-                cursor.execute(
-                    f'INSERT INTO sys_group_role (group_name,role_name) VALUES {",".join(["(%s,%s)"] * len(group_roles))}', list(chain(*zip(repeat(group_name), group_roles)))
-                )
+                SysGroupRole.insert_many([{'group_name': group_name, 'role_name': role} for role in group_roles]).execute()
             # 插入团队用户表
+            user_names = set(group_admin_users + group_users)
             if user_names:
-                cursor.execute(
-                    f'INSERT INTO sys_group_user (group_name,user_name) VALUES {",".join(["(%s,%s)"] * len(user_names))}', list(chain(*zip(repeat(group_name), user_names)))
-                )
-        except Exception as e:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}添加团队{group_name}时，出现异常', exc_info=True)
+                SysGroupUser.insert_many([{'group_name': group_name, 'user_name': user, 'is_admin': user in group_admin_users} for user in user_names]).execute()
+        except IntegrityError as e:
+            logger.warning(f'用户{user_name_op}添加团队{group_name}时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
@@ -922,22 +837,17 @@ def create_group(group_name, group_status, group_remark, group_roles, group_admi
 
 def delete_group(group_name: str) -> bool:
     """删除团队"""
-    with db().atomic() as txn, db().cursor() as cursor:
+    database = db()
+    with database.atomic() as txn:
         try:
-            cursor.execute(
-                """delete FROM sys_group_role where group_name=%s;""",
-                (group_name,),
-            )
-            cursor.execute(
-                """delete FROM sys_group_user where group_name=%s;""",
-                (group_name,),
-            )
-            cursor.execute(
-                """delete FROM sys_group where group_name=%s;""",
-                (group_name,),
-            )
-        except Exception as e:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}删除团队{group_name}时，出现异常', exc_info=True)
+            # 删除团队角色表中的记录
+            SysGroupRole.delete().where(SysGroupRole.group_name == group_name).execute()
+            # 删除团队用户表中的记录
+            SysGroupUser.delete().where(SysGroupUser.group_name == group_name).execute()
+            # 删除团队表中的记录
+            SysGroup.delete().where(SysGroup.group_name == group_name).execute()
+        except IntegrityError as e:
+            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}删除团队{group_name}时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
@@ -945,38 +855,33 @@ def delete_group(group_name: str) -> bool:
             return True
 
 
-def update_group(group_name, group_status, group_remark, group_roles, group_admin_users, group_users):
+def update_group(group_name: str, group_status: bool, group_remark: str, group_roles: List[str], group_admin_users: List[str], group_users: List[str]) -> bool:
     """更新团队"""
-    user_name_op = util_menu_access.get_menu_access().user_name
-    with db().atomic() as txn, db().cursor() as cursor:
+    user_name_op = get_menu_access(only_get_user_name=True)
+    database = db()  # 假设你有一个函数 db() 返回当前的数据库连接
+    with database.atomic() as txn:
         try:
-            user_names = set([*group_admin_users, *group_users])
-            cursor.execute(
-                """
-                update sys_group set group_status=%s,update_datetime=%s,update_by=%s,group_remark=%s where group_name=%s;""",
-                (
-                    group_status,
-                    datetime.now(),
-                    user_name_op,
-                    group_remark,
-                    group_name,
-                ),
-            )
-            # 插入团队角色表
-            cursor.execute('delete from sys_group_role where group_name = %s', (group_name,))
+            # 更新团队信息
+            SysGroup.update(group_status=group_status, update_datetime=datetime.now(), update_by=user_name_op, group_remark=group_remark).where(
+                SysGroup.group_name == group_name
+            ).execute()
+
+            # 删除旧的团队角色
+            SysGroupRole.delete().where(SysGroupRole.group_name == group_name).execute()
+
+            # 插入新的团队角色
             if group_roles:
-                cursor.execute(
-                    f'INSERT INTO sys_group_role (group_name,role_name) VALUES {",".join(["(%s,%s)"] * len(group_roles))}', list(chain(*zip(repeat(group_name), group_roles)))
-                )
-            # 插入团队用户表
-            cursor.execute('delete from sys_group_user where group_name = %s', (group_name,))
+                SysGroupRole.insert_many([{'group_name': group_name, 'role_name': role} for role in group_roles]).execute()
+
+            # 删除旧的团队用户
+            SysGroupUser.delete().where(SysGroupUser.group_name == group_name).execute()
+
+            # 插入新的团队用户
+            user_names = set(group_admin_users + group_users)
             if user_names:
-                cursor.execute(
-                    f'INSERT INTO sys_group_user (group_name,user_name,is_admin) VALUES {",".join(["(%s,%s,%s)"] * len(user_names))}',
-                    list(chain(*zip(repeat(group_name), user_names, [(Status.ENABLE if i in group_admin_users else Status.DISABLE) for i in user_names]))),
-                )
-        except Exception as e:
-            logger.warning(f'用户{get_menu_access(only_get_user_name=True)}更新团队{group_name}时，出现异常', exc_info=True)
+                SysGroupUser.insert_many([{'group_name': group_name, 'user_name': user, 'is_admin': user in group_admin_users} for user in user_names]).execute()
+        except IntegrityError as e:
+            logger.warning(f'用户{user_name_op}更新团队{group_name}时，出现异常: {e}', exc_info=True)
             txn.rollback()
             return False
         else:
