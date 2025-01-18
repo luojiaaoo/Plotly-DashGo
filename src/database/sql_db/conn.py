@@ -69,6 +69,7 @@ def initialize_database():
             update_datetime=datetime.now(),
             user_remark='',
         )
+        SysUserRole.create(user_name='admin', role_name='admin')
 
 
 initialize_database()

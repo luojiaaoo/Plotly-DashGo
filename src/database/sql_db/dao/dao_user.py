@@ -107,7 +107,7 @@ def get_user_info(user_names: Optional[List[str]] = None, exclude_role_admin=Fal
     user_infos = []
     for user in query.dicts():
         if isinstance(database, MySQLDatabase):
-            user['user_roles'] = json.loads(user['user_roles']) if user['user_roles'] else []
+            user['user_roles'] = [i for i in json.loads(user['user_roles']) if i] if user['user_roles'] else []
         elif isinstance(database, SqliteDatabase):
             user['user_roles'] = user['user_roles'].split(',') if user['user_roles'] else []
         else:
@@ -530,7 +530,7 @@ def get_role_info(role_names: Optional[List[str]] = None, exclude_role_admin=Fal
     role_infos = []
     for role in query.dicts():
         if isinstance(database, MySQLDatabase):
-            role['access_metas'] = json.loads(role['access_metas']) if role['access_metas'] else []
+            role['access_metas'] = [i for i in json.loads(role['access_metas']) if i] if role['access_metas'] else []
         elif isinstance(database, SqliteDatabase):
             role['access_metas'] = role['access_metas'].split(',') if role['access_metas'] else []
         else:
@@ -682,8 +682,8 @@ def get_group_info(group_names: Optional[List[str]] = None, exclude_disabled=Tru
     group_infos = []
     for group in query.dicts():
         if isinstance(database, MySQLDatabase):
-            group['group_roles'] = [i for i in set(json.loads(group['group_roles'])) if i]
-            group['user_name_plus'] = [i for i in set(json.loads(group['user_name_plus'])) if i]
+            group['group_roles'] = [i for i in set(json.loads(group['group_roles'])) if i] if group['group_roles'] else []
+            group['user_name_plus'] = [i for i in set(json.loads(group['user_name_plus'])) if i] if group['user_name_plus'] else []
         elif isinstance(database, SqliteDatabase):
             group['group_roles'] = group['group_roles'].split(',') if group['group_roles'] else []
             group['user_name_plus'] = group['user_name_plus'].split(',') if group['user_name_plus'] else []
@@ -717,7 +717,7 @@ def get_admin_groups_for_user(user_name: str) -> List[str]:
         .join(SysGroup, on=(SysGroup.group_name == SysGroupUser.group_name))
         .where((SysGroupUser.user_name == user_name) & (SysGroupUser.is_admin == Status.ENABLE) & (SysGroup.group_status == Status.ENABLE))
     )
-    return [row.group_name for row in query.dicts()]
+    return [row['group_name'] for row in query.dicts()]
 
 
 def get_user_and_role_for_group_name(group_name: str):
@@ -731,16 +731,25 @@ def get_user_and_role_for_group_name(group_name: str):
         roles_agg = fn.GROUP_CONCAT(SysGroupRole.role_name).alias('roles_agg')
     else:
         raise NotImplementedError('Unsupported database type')
+    SysGroupUser_query = (
+        SysGroupUser.select(SysGroupUser.group_name, users_agg).where(SysGroupUser.group_name == group_name).group_by(SysGroupUser.group_name).alias('SysGroupUser_agg')
+    )
+    SysGroupRole_query = (
+        SysGroupRole.select(SysGroupRole.group_name, roles_agg)
+        .join(SysRole, on=(SysGroupRole.role_name == SysRole.role_name))
+        .where((SysGroupRole.group_name == group_name) & (SysRole.role_status == Status.ENABLE))
+        .group_by(SysGroupRole.group_name)
+        .alias('SysGroupRole_agg')
+    )
     query = (
-        SysGroupUser.select(SysGroup.group_remark, users_agg, roles_agg)
-        .join(SysGroup, on=(SysGroup.group_name == SysGroupUser.group_name))
-        .join(SysUser, on=(SysUser.user_name == SysGroupUser.user_name))
-        .join(SysGroupRole, on=(SysGroup.group_name == SysGroupRole.group_name))
-        .join(SysRole, on=(SysRole.role_name == SysGroupRole.role_name))
-        .where((SysGroupUser.group_name == group_name) & (SysGroup.group_status == Status.ENABLE) & (SysRole.role_status == Status.ENABLE))
+        SysGroup.select(SysGroup.group_remark, SysGroupUser_query.c.users_agg, SysGroupRole_query.c.roles_agg)
+        .join(SysGroupUser_query, on=(SysGroup.group_name == SysGroupUser_query.c.group_name))
+        .join(SysGroupRole_query, on=(SysGroup.group_name == SysGroupRole_query.c.group_name))
+        .where((SysGroupUser_query.c.group_name == group_name) & (SysGroup.group_status == Status.ENABLE))
     )
     users = []
     roles = []
+    print(query.sql())
     for row in query.dicts():
         if isinstance(database, MySQLDatabase):
             users = json.loads(row['users_agg']) if row['users_agg'] else []
@@ -761,6 +770,7 @@ def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
 
     for group_name in group_names:
         group_remark, user_names, group_roles = get_user_and_role_for_group_name(group_name=group_name)
+        print(group_roles)
         user_infos = get_user_info(user_names=user_names)
         dict_user_info = {i.user_name: i for i in user_infos}
         for user_name_per, user_info in dict_user_info.items():
@@ -775,6 +785,7 @@ def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
                     'user_status': user_info.user_status,
                 }
             )
+    return all_
 
 
 def update_user_roles_from_group(user_name, group_name, roles_in_range):
