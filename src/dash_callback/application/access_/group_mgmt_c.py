@@ -3,7 +3,7 @@ from dash.dependencies import Input, Output, State
 import dash
 from database.sql_db.dao import dao_user
 from dash_components import MessageManager
-from i18n import t__access,t__default
+from i18n import t__access, t__default
 
 
 @app.callback(
@@ -73,7 +73,11 @@ def update_group_c(okCounts, group_name, group_status, group_remark, group_roles
         return [
             {
                 'key': i.group_name,
-                **i.__dict__,
+                **{
+                    **i.__dict__,
+                    'update_datetime': f'{i.__dict__["update_datetime"]:%Y-%m-%d %H:%M:%S}',
+                    'create_datetime': f'{i.__dict__["create_datetime"]:%Y-%m-%d %H:%M:%S}',
+                },
                 'group_status': {'tag': t__default('启用' if i.group_status else '停用'), 'color': 'cyan' if i.group_status else 'volcano'},
                 'operation': [
                     {
@@ -171,7 +175,11 @@ def add_group(okCounts, group_name, group_status, group_remark, group_roles, gro
         return [
             {
                 'key': i.group_name,
-                **i.__dict__,
+                **{
+                    **i.__dict__,
+                    'update_datetime': f'{i.__dict__["update_datetime"]:%Y-%m-%d %H:%M:%S}',
+                    'create_datetime': f'{i.__dict__["create_datetime"]:%Y-%m-%d %H:%M:%S}',
+                },
                 'group_status': {'tag': t__default('启用' if i.group_status else '停用'), 'color': 'cyan' if i.group_status else 'volcano'},
                 'operation': [
                     {
@@ -209,7 +217,11 @@ def delete_role_modal(okCounts, group_name):
         return [
             {
                 'key': i.group_name,
-                **i.__dict__,
+                **{
+                    **i.__dict__,
+                    'update_datetime': f'{i.__dict__["update_datetime"]:%Y-%m-%d %H:%M:%S}',
+                    'create_datetime': f'{i.__dict__["create_datetime"]:%Y-%m-%d %H:%M:%S}',
+                },
                 'group_status': {'tag': t__default('启用' if i.group_status else '停用'), 'color': 'cyan' if i.group_status else 'volcano'},
                 'operation': [
                     {

@@ -74,7 +74,11 @@ def callback_func(okCounts, role_name: str, role_status: bool, role_remark: str,
         return [
             {
                 'key': i.role_name,
-                **i.__dict__,
+                **{
+                    **i.__dict__,
+                    'update_datetime': f'{i.__dict__["update_datetime"]:%Y-%m-%d %H:%M:%S}',
+                    'create_datetime': f'{i.__dict__["create_datetime"]:%Y-%m-%d %H:%M:%S}',
+                },
                 'role_status': {'tag': t__default('启用' if i.role_status else '停用'), 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
                     {
@@ -118,7 +122,11 @@ def delete_role_modal(okCounts, role_name):
         return [
             {
                 'key': i.role_name,
-                **i.__dict__,
+                **{
+                    **i.__dict__,
+                    'update_datetime': f'{i.__dict__["update_datetime"]:%Y-%m-%d %H:%M:%S}',
+                    'create_datetime': f'{i.__dict__["create_datetime"]:%Y-%m-%d %H:%M:%S}',
+                },
                 'role_status': {'tag': t__default('启用' if i.role_status else '停用'), 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
                     {
@@ -207,7 +215,11 @@ def add_role_c(okCounts, name, role_status, role_remark, access_metas: List[str]
         return [
             {
                 'key': i.role_name,
-                **i.__dict__,
+                **{
+                    **i.__dict__,
+                    'update_datetime': f'{i.__dict__["update_datetime"]:%Y-%m-%d %H:%M:%S}',
+                    'create_datetime': f'{i.__dict__["create_datetime"]:%Y-%m-%d %H:%M:%S}',
+                },
                 'role_status': {'tag': t__default('启用' if i.role_status else '停用'), 'color': 'cyan' if i.role_status else 'volcano'},
                 'operation': [
                     {

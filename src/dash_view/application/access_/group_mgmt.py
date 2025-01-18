@@ -47,7 +47,11 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             data=[
                                 {
                                     'key': i.group_name,
-                                    **i.__dict__,
+                                    **{
+                                        **i.__dict__,
+                                        'update_datetime': f'{i.__dict__["update_datetime"]:%Y-%m-%d %H:%M:%S}',
+                                        'create_datetime': f'{i.__dict__["create_datetime"]:%Y-%m-%d %H:%M:%S}',
+                                    },
                                     'group_status': {'tag': t__default('启用' if i.group_status else '停用'), 'color': 'cyan' if i.group_status else 'volcano'},
                                     'operation': [
                                         {
@@ -91,10 +95,16 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                         wrapperCol={'flex': '5'},
                                     ),
                                     fac.AntdFormItem(
-                                        fac.AntdSelect(id='group-mgmt-add-group-roles', mode='multiple'), label=t__access('绑定角色'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
+                                        fac.AntdSelect(id='group-mgmt-add-group-roles', mode='multiple'),
+                                        label=t__access('绑定角色'),
+                                        labelCol={'flex': '1'},
+                                        wrapperCol={'flex': '5'},
                                     ),
                                     fac.AntdFormItem(
-                                        fac.AntdSelect(id='group-mgmt-add-group-admin-users', mode='multiple'), label=t__access('管理员'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
+                                        fac.AntdSelect(id='group-mgmt-add-group-admin-users', mode='multiple'),
+                                        label=t__access('管理员'),
+                                        labelCol={'flex': '1'},
+                                        wrapperCol={'flex': '5'},
                                     ),
                                     fac.AntdFormItem(
                                         fac.AntdSelect(id='group-mgmt-add-group-users', mode='multiple'), label=t__access('成员'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
@@ -151,7 +161,10 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                         wrapperCol={'flex': '5'},
                                     ),
                                     fac.AntdFormItem(
-                                        fac.AntdSelect(id='group-mgmt-update-group-roles', mode='multiple'), label=t__access('绑定角色'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
+                                        fac.AntdSelect(id='group-mgmt-update-group-roles', mode='multiple'),
+                                        label=t__access('绑定角色'),
+                                        labelCol={'flex': '1'},
+                                        wrapperCol={'flex': '5'},
                                     ),
                                     fac.AntdFormItem(
                                         fac.AntdSelect(id='group-mgmt-update-group-admin-users', mode='multiple'),
@@ -160,7 +173,10 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                         wrapperCol={'flex': '5'},
                                     ),
                                     fac.AntdFormItem(
-                                        fac.AntdSelect(id='group-mgmt-update-group-users', mode='multiple'), label=t__access('成员'), labelCol={'flex': '1'}, wrapperCol={'flex': '5'}
+                                        fac.AntdSelect(id='group-mgmt-update-group-users', mode='multiple'),
+                                        label=t__access('成员'),
+                                        labelCol={'flex': '1'},
+                                        wrapperCol={'flex': '5'},
                                     ),
                                 ],
                                 labelAlign='left',
