@@ -88,7 +88,7 @@ def get_user_info(user_names: Optional[List[str]] = None, exclude_role_admin=Fal
         )
         .join(SysUserRole, JOIN.LEFT_OUTER, on=(SysUser.user_name == SysUserRole.user_name))
         .where(SysUser.user_name.in_(user_names) if user_names is not None else (1 == 1))
-        .where(SysUser.user_status == Status.ENABLE if exclude_disabled is not None else (1 == 1))
+        .where((SysUser.user_status == Status.ENABLE) if exclude_disabled else (1 == 1))
         .group_by(
             SysUser.user_name,
             SysUser.user_full_name,
@@ -749,7 +749,6 @@ def get_user_and_role_for_group_name(group_name: str):
     )
     users = []
     roles = []
-    print(query.sql())
     for row in query.dicts():
         if isinstance(database, MySQLDatabase):
             users = json.loads(row['users_agg']) if row['users_agg'] else []
