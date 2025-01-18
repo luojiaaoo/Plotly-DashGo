@@ -1,30 +1,41 @@
 from config.dashgo_conf import SqlDbConf
 from playhouse.pool import PooledMySQLDatabase
+from peewee import SqliteDatabase
 from server import server
 from playhouse.shortcuts import ReconnectMixin
 
 
-# 断线重连+连接池
-class ReconnectPooledMySQLDatabase(ReconnectMixin, PooledMySQLDatabase):
-    _instance = None
+if SqlDbConf.RDB_TYPE == 'mysql':
+    # 断线重连+连接池
+    class ReconnectPooledMySQLDatabase(ReconnectMixin, PooledMySQLDatabase):
+        _instance = None
 
-    @classmethod
-    def get_db_instance(cls):
-        if not cls._instance:
-            cls._instance = cls(
-                database=SqlDbConf.DATABASE,
-                max_connections=SqlDbConf.POOL_SIZE,
-                user=SqlDbConf.USER,
-                password=SqlDbConf.PASSWORD,
-                host=SqlDbConf.HOST,
-                port=SqlDbConf.PORT,
-                stale_timeout=300,
-            )
-        return cls._instance
+        @classmethod
+        def get_db_instance(cls):
+            if not cls._instance:
+                cls._instance = cls(
+                    database=SqlDbConf.DATABASE,
+                    max_connections=SqlDbConf.POOL_SIZE,
+                    user=SqlDbConf.USER,
+                    password=SqlDbConf.PASSWORD,
+                    host=SqlDbConf.HOST,
+                    port=SqlDbConf.PORT,
+                    stale_timeout=300,
+                )
+            return cls._instance
+elif SqlDbConf.RDB_TYPE == 'sqlite':
+    sqlite_db = SqliteDatabase(SqlDbConf.SQLITE_DB_PATH)
+else:
+    raise NotImplementedError('Unsupported database type')
 
 
 def db():
-    return ReconnectPooledMySQLDatabase.get_db_instance()
+    if SqlDbConf.RDB_TYPE == 'mysql':
+        return ReconnectPooledMySQLDatabase.get_db_instance()
+    elif SqlDbConf.RDB_TYPE == 'sqlite':
+        return sqlite_db
+    else:
+        raise NotImplementedError('Unsupported database type')
 
 
 # 判断是否存在SysUser表，如不存在则初始化库
@@ -68,6 +79,7 @@ def initialize_database():
             update_by='admin',
             update_datetime=datetime.now(),
             user_remark='',
+            otp_secret='',
         )
         SysUserRole.create(user_name='admin', role_name='admin')
 

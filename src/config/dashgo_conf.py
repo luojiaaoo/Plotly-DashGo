@@ -66,6 +66,8 @@ class JwtConf(metaclass=BaseMetaConf):
 
 
 class SqlDbConf(metaclass=BaseMetaConf):
+    RDB_TYPE: str
+    SQLITE_DB_PATH: str
     HOST: str
     PORT: int
     USER: str

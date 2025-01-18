@@ -67,7 +67,7 @@ def get_user_info(user_names: Optional[List[str]] = None, exclude_role_admin=Fal
         user_roles_agg = fn.JSON_ARRAYAGG(SysUserRole.role_name).alias('user_roles')
         having_exclude_role_admin = fn.JSON_SEARCH(fn.JSON_ARRAYAGG(SysUserRole.role_name), 'one', 'admin').is_null() if exclude_role_admin else (1 == 1)
     elif isinstance(database, SqliteDatabase):
-        user_roles_agg = fn.GROUP_CONCAT(SysUserRole.role_name).alias('user_roles')
+        user_roles_agg = fn.GROUP_CONCAT(SysUserRole.role_name, '○').alias('user_roles')
         having_exclude_role_admin = fn.INSTR(fn.GROUP_CONCAT(SysUserRole.role_name), 'admin') == 0 if exclude_role_admin else (1 == 1)
     else:
         raise NotImplementedError('Unsupported database type')
@@ -109,7 +109,7 @@ def get_user_info(user_names: Optional[List[str]] = None, exclude_role_admin=Fal
         if isinstance(database, MySQLDatabase):
             user['user_roles'] = [i for i in json.loads(user['user_roles']) if i] if user['user_roles'] else []
         elif isinstance(database, SqliteDatabase):
-            user['user_roles'] = user['user_roles'].split(',') if user['user_roles'] else []
+            user['user_roles'] = user['user_roles'].split('○') if user['user_roles'] else []
         else:
             raise NotImplementedError('Unsupported database type')
         user_infos.append(UserInfo(**user))
@@ -151,7 +151,7 @@ def update_user(user_name, user_full_name, password, user_status: bool, user_sex
     """更新用户信息"""
 
     user_name_op = get_menu_access(only_get_user_name=True)
-    database = db()  # 假设你有一个函数 db() 返回当前的数据库连接
+    database = db()
     with database.atomic() as txn:
         try:
             user: SysUser = SysUser.get(SysUser.user_name == user_name)
@@ -392,6 +392,7 @@ def create_user(
                 update_by=user_name_op,
                 update_datetime=datetime.now(),
                 user_remark=user_remark,
+                otp_secret='',
             )
             if user_roles:
                 SysUserRole.insert_many([{'user_name': user_name, 'role_name': role} for role in user_roles]).execute()
@@ -431,7 +432,7 @@ def get_roles_from_user_name(user_name: str, exclude_disabled=True) -> List[str]
     if isinstance(database, MySQLDatabase):
         roles_agg = fn.JSON_ARRAYAGG(SysRole.role_name).alias('role_names')
     elif isinstance(database, SqliteDatabase):
-        roles_agg = fn.GROUP_CONCAT(SysRole.role_name).alias('role_names')
+        roles_agg = fn.GROUP_CONCAT(SysRole.role_name, '○').alias('role_names')
     else:
         raise NotImplementedError('Unsupported database type')
 
@@ -449,7 +450,7 @@ def get_roles_from_user_name(user_name: str, exclude_disabled=True) -> List[str]
     if isinstance(database, MySQLDatabase):
         role_names = json.loads(result['role_names']) if result['role_names'] else []
     elif isinstance(database, SqliteDatabase):
-        role_names = result['role_names'].split(',') if result['role_names'] else []
+        role_names = result['role_names'].split('○') if result['role_names'] else []
     else:
         raise NotImplementedError('Unsupported database type')
 
@@ -463,7 +464,7 @@ def get_user_access_meta(user_name: str, exclude_disabled=True) -> Set[str]:
     if isinstance(database, MySQLDatabase):
         access_meta_agg = fn.JSON_ARRAYAGG(SysRoleAccessMeta.access_meta).alias('access_metas')
     elif isinstance(database, SqliteDatabase):
-        access_meta_agg = fn.GROUP_CONCAT(SysRoleAccessMeta.access_meta).alias('access_metas')
+        access_meta_agg = fn.GROUP_CONCAT(SysRoleAccessMeta.access_meta, '○').alias('access_metas')
     else:
         raise NotImplementedError('Unsupported database type')
 
@@ -482,7 +483,7 @@ def get_user_access_meta(user_name: str, exclude_disabled=True) -> Set[str]:
     if isinstance(database, MySQLDatabase):
         access_metas = json.loads(result['access_metas']) if result['access_metas'] else []
     elif isinstance(database, SqliteDatabase):
-        access_metas = result['access_metas'].split(',') if result['access_metas'] else []
+        access_metas = result['access_metas'].split('○') if result['access_metas'] else []
     else:
         raise NotImplementedError('Unsupported database type')
 
@@ -508,7 +509,7 @@ def get_role_info(role_names: Optional[List[str]] = None, exclude_role_admin=Fal
     if isinstance(database, MySQLDatabase):
         access_meta_agg = fn.JSON_ARRAYAGG(SysRoleAccessMeta.access_meta).alias('access_metas')
     elif isinstance(database, SqliteDatabase):
-        access_meta_agg = fn.GROUP_CONCAT(SysRoleAccessMeta.access_meta).alias('access_metas')
+        access_meta_agg = fn.GROUP_CONCAT(SysRoleAccessMeta.access_meta, '○').alias('access_metas')
     else:
         raise NotImplementedError('Unsupported database type')
 
@@ -532,7 +533,7 @@ def get_role_info(role_names: Optional[List[str]] = None, exclude_role_admin=Fal
         if isinstance(database, MySQLDatabase):
             role['access_metas'] = [i for i in json.loads(role['access_metas']) if i] if role['access_metas'] else []
         elif isinstance(database, SqliteDatabase):
-            role['access_metas'] = role['access_metas'].split(',') if role['access_metas'] else []
+            role['access_metas'] = role['access_metas'].split('○') if role['access_metas'] else []
         else:
             raise NotImplementedError('Unsupported database type')
         role_infos.append(RoleInfo(**role))
@@ -650,8 +651,8 @@ def get_group_info(group_names: Optional[List[str]] = None, exclude_disabled=Tru
         roles_agg = fn.JSON_ARRAYAGG(SysGroupRole.role_name).alias('group_roles')
         users_agg = fn.JSON_ARRAYAGG(fn.IF(SysGroupUser.is_admin == Status.ENABLE, fn.CONCAT('is_admin:', SysGroupUser.user_name), SysGroupUser.user_name)).alias('user_name_plus')
     elif isinstance(database, SqliteDatabase):
-        roles_agg = fn.GROUP_CONCAT(SysGroupRole.role_name).alias('group_roles')
-        users_agg = fn.GROUP_CONCAT(fn.CASE(None, [(SysGroupUser.is_admin == Status.ENABLE, fn.CONCAT('is_admin:', SysGroupUser.user_name))], SysGroupUser.user_name)).alias(
+        roles_agg = fn.GROUP_CONCAT(SysGroupRole.role_name, '○').alias('group_roles')
+        users_agg = fn.GROUP_CONCAT(fn.CASE(None, [(SysGroupUser.is_admin == Status.ENABLE, fn.CONCAT('is_admin:', SysGroupUser.user_name))], SysGroupUser.user_name), '○').alias(
             'user_name_plus'
         )
     else:
@@ -685,8 +686,8 @@ def get_group_info(group_names: Optional[List[str]] = None, exclude_disabled=Tru
             group['group_roles'] = [i for i in set(json.loads(group['group_roles'])) if i] if group['group_roles'] else []
             group['user_name_plus'] = [i for i in set(json.loads(group['user_name_plus'])) if i] if group['user_name_plus'] else []
         elif isinstance(database, SqliteDatabase):
-            group['group_roles'] = group['group_roles'].split(',') if group['group_roles'] else []
-            group['user_name_plus'] = group['user_name_plus'].split(',') if group['user_name_plus'] else []
+            group['group_roles'] = group['group_roles'].split('○') if group['group_roles'] else []
+            group['user_name_plus'] = group['user_name_plus'].split('○') if group['user_name_plus'] else []
         else:
             raise NotImplementedError('Unsupported database type')
 
@@ -727,8 +728,8 @@ def get_user_and_role_for_group_name(group_name: str):
         users_agg = fn.JSON_ARRAYAGG(SysGroupUser.user_name).alias('users_agg')
         roles_agg = fn.JSON_ARRAYAGG(SysGroupRole.role_name).alias('roles_agg')
     elif isinstance(database, SqliteDatabase):
-        users_agg = fn.GROUP_CONCAT(SysGroupUser.user_name).alias('users_agg')
-        roles_agg = fn.GROUP_CONCAT(SysGroupRole.role_name).alias('roles_agg')
+        users_agg = fn.GROUP_CONCAT(SysGroupUser.user_name, '○').alias('users_agg')
+        roles_agg = fn.GROUP_CONCAT(SysGroupRole.role_name, '○').alias('roles_agg')
     else:
         raise NotImplementedError('Unsupported database type')
     SysGroupUser_query = (
@@ -754,8 +755,8 @@ def get_user_and_role_for_group_name(group_name: str):
             users = json.loads(row['users_agg']) if row['users_agg'] else []
             roles = json.loads(row['roles_agg']) if row['roles_agg'] else []
         elif isinstance(database, SqliteDatabase):
-            users = row['users_agg'].split(',') if row['users_agg'] else []
-            roles = row['roles_agg'].split(',') if row['roles_agg'] else []
+            users = row['users_agg'].split('○') if row['users_agg'] else []
+            roles = row['roles_agg'].split('○') if row['roles_agg'] else []
         else:
             raise NotImplementedError('Unsupported database type')
         group_remark = row['group_remark']
