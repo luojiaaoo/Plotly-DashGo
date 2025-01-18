@@ -1,4 +1,4 @@
-from peewee import CharField, Model, IntegerField, DateTimeField, ForeignKeyField
+from peewee import CharField, Model, IntegerField, DateTimeField, ForeignKeyField, BooleanField
 from ..conn import db
 
 
@@ -9,7 +9,7 @@ class BaseModel(Model):
 
 class SysGroup(BaseModel):
     group_name = CharField(primary_key=True, max_length=128, help_text='团队名称')
-    group_status = IntegerField(help_text='团队状态（0：停用，1：启用）')
+    group_status = BooleanField(help_text='团队状态（0：停用，1：启用）')
     update_datetime = DateTimeField(help_text='更新时间')
     update_by = CharField(max_length=32, help_text='被谁更新')
     create_datetime = DateTimeField(help_text='创建时间')
@@ -22,7 +22,7 @@ class SysGroup(BaseModel):
 
 class SysRole(BaseModel):
     role_name = CharField(primary_key=True, max_length=32, help_text='角色名')
-    role_status = IntegerField(help_text='角色状态（0：停用，1：启用）')
+    role_status = BooleanField(help_text='角色状态（0：停用，1：启用）')
     update_datetime = DateTimeField(help_text='更新时间')
     update_by = CharField(max_length=32, help_text='被谁更新')
     create_datetime = DateTimeField(help_text='创建时间')
@@ -55,7 +55,7 @@ class SysGroupUser(BaseModel):
 class SysUser(BaseModel):
     user_name = CharField(primary_key=True, max_length=32, help_text='用户名')
     user_full_name = CharField(max_length=32, help_text='全名')
-    user_status = IntegerField(help_text='用户状态（0：停用，1：启用）')
+    user_status = BooleanField(help_text='用户状态（0：停用，1：启用）')
     password_sha256 = CharField(max_length=64, help_text='密码SHA256值')
     user_sex = CharField(max_length=64, help_text='性别')
     user_email = CharField(max_length=128, help_text='电子邮箱')
