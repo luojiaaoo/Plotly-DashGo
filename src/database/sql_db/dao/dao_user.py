@@ -6,7 +6,7 @@ from datetime import datetime
 from common.utilities import util_menu_access
 import json
 import hashlib
-from peewee import DoesNotExist, fn, MySQLDatabase, SqliteDatabase, IntegrityError, JOIN
+from peewee import DoesNotExist, fn, MySQLDatabase, SqliteDatabase, IntegrityError, JOIN, Case
 from common.utilities.util_logger import Log
 from common.utilities.util_menu_access import get_menu_access
 from ..entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole, SysGroupUser, SysRole, SysGroupRole, SysGroup
@@ -652,7 +652,7 @@ def get_group_info(group_names: Optional[List[str]] = None, exclude_disabled=Tru
         users_agg = fn.JSON_ARRAYAGG(fn.IF(SysGroupUser.is_admin == Status.ENABLE, fn.CONCAT('is_admin:', SysGroupUser.user_name), SysGroupUser.user_name)).alias('user_name_plus')
     elif isinstance(database, SqliteDatabase):
         roles_agg = fn.GROUP_CONCAT(SysGroupRole.role_name, '○').alias('group_roles')
-        users_agg = fn.GROUP_CONCAT(fn.CASE(None, [(SysGroupUser.is_admin == Status.ENABLE, fn.CONCAT('is_admin:', SysGroupUser.user_name))], SysGroupUser.user_name), '○').alias(
+        users_agg = fn.GROUP_CONCAT(Case(SysGroupUser.is_admin, [(Status.ENABLE, fn.CONCAT('is_admin:', SysGroupUser.user_name))], SysGroupUser.user_name), '○').alias(
             'user_name_plus'
         )
     else:
