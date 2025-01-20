@@ -65,10 +65,8 @@ def get_user_info(user_names: Optional[List[str]] = None, exclude_role_admin=Fal
     database = db()
     if isinstance(database, MySQLDatabase):
         user_roles_agg = fn.JSON_ARRAYAGG(SysUserRole.role_name).alias('user_roles')
-        having_exclude_role_admin = fn.JSON_SEARCH(fn.JSON_ARRAYAGG(SysUserRole.role_name), 'one', 'admin').is_null() if exclude_role_admin else (1 == 1)
     elif isinstance(database, SqliteDatabase):
         user_roles_agg = fn.GROUP_CONCAT(SysUserRole.role_name, '○').alias('user_roles')
-        having_exclude_role_admin = fn.INSTR(fn.GROUP_CONCAT(SysUserRole.role_name), 'admin') == 0 if exclude_role_admin else (1 == 1)
     else:
         raise NotImplementedError('Unsupported database type')
     query = (
@@ -102,8 +100,10 @@ def get_user_info(user_names: Optional[List[str]] = None, exclude_role_admin=Fal
             SysUser.create_by,
             SysUser.user_remark,
         )
-        .having(having_exclude_role_admin)
     )
+    query_admin = SysUserRole.select(SysUserRole.user_name).where(SysUserRole.role_name == 'admin')
+    if exclude_role_admin:
+        query.having(query.c.user_name.not_in(query_admin))
     user_infos = []
     for user in query.dicts():
         if isinstance(database, MySQLDatabase):
