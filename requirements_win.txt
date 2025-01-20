@@ -1,8 +1,7 @@
 concurrent_log_handler==0.9.25
-dash==2.18.1
-feffery_antd_components==0.3.10
-feffery_utils_components==0.2.0rc24
-Flask==3.0.3
+dash==2.18.2
+feffery_antd_components==0.3.13
+feffery_utils_components==0.2.0rc27
 pycryptodome==3.21.0
 PyJWT==2.9.0
 user_agents==2.2.0
@@ -13,3 +12,7 @@ py-cpuinfo==9.0.0
 cacheout==0.16.0
 peewee==3.17.8
 otpauth==2.1.1
+Flask-Compress==1.15
+orjson==3.10.7
+psutil==6.0.0
+PyMySQL==1.1.1
