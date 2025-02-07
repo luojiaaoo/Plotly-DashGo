@@ -10,7 +10,7 @@ def render():
                     fac.AntdResult(
                         status='403',
                         title='您没有权限访问该页面',
-                        subTitle='如续访问，请联系系统管理员',
+                        subTitle='如需访问，请联系系统管理员',
                         style={'paddingBottom': 0, 'paddingTop': 0},
                     ),
                     fac.AntdButton(
