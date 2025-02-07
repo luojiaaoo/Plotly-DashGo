@@ -4,9 +4,9 @@ from dash_view.application.dashboard_ import workbench, monitor
 from dash_view.application.person_ import personal_info, personal_setting
 
 ################## 【开始】此处导入您的应用 ###################
-from dash_view.application.example_app import pay, buy
+from dash_view.application.example_app import subapp1, subapp2
 
-apps = [pay, buy]
+apps = [subapp2, subapp1]
 
 ################## 【结束】此处导入您的应用 ###################
 

@@ -1,20 +1,20 @@
 from common.utilities.util_menu_access import MenuAccess
-import feffery_utils_components as fuc
 import feffery_antd_components as fac
+import feffery_utils_components as fuc
 from common.utilities.util_logger import Log
 from dash_components import Card
 
 
 # 二级菜单的标题、图标和显示顺序
-title = '支付页'
+title = '应用2'
 icon = None
 order = 2
 logger = Log.get_logger(__name__)
 
 access_metas = (
-    '支付页-页面',
-    '支付页-今年支付额',
-    '支付页-可用余额',
+    '应用2-基础权限',
+    '应用2-权限1',
+    '应用2-权限2',
 )
 
 
@@ -25,25 +25,26 @@ def render_content(menu_access: MenuAccess, **kwargs):
                 [
                     Card(
                         fac.AntdStatistic(
-                            title='您的余额',
-                            value=fuc.FefferyCountUp(end=112893, duration=3),
+                            title='展示',
+                            value=fuc.FefferyCountUp(end=100, duration=3),
                         ),
-                        title='您的余额',
+                        title='应用2-权限1',
                     )
                 ]
-                if menu_access.has_access('支付页-可用余额')
+                if menu_access.has_access('应用2-权限1')
                 else []
             ),
             *(
                 [
                     Card(
                         fac.AntdStatistic(
-                            title='您今年支付额',
-                            value=fuc.FefferyCountUp(end=2873, duration=3),
+                            title='展示',
+                            value=fuc.FefferyCountUp(end=200, duration=3),
                         ),
+                        title='应用2-权限2',
                     )
                 ]
-                if menu_access.has_access('支付页-今年支付额')
+                if menu_access.has_access('应用2-权限2')
                 else []
             ),
         ],

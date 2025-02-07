@@ -38,15 +38,6 @@
         "个人设置": {
             "en-us": "Person Setting"
         },
-        "应用案例": {
-            "en-us": "App Case"
-        },
-        "支付页": {
-            "en-us": "Pay Page"
-        },
-        "购买页": {
-            "en-us": "Buy Page"
-        },
         "用户名/全名不能为空": {
             "en-us": "username/fullname can not be empty"
         },
@@ -265,6 +256,33 @@
         },
         "您确定要删除角色 ": {
             "en-us": "Are you sure to delete role "
+        },
+        "应用案例": {
+            "en-us": "App Example"
+        },
+        "应用1": {
+            "en-us": "Application1"
+        },
+        "应用1-基础权限": {
+            "en-us": "Application1-BaseAccess"
+        },
+        "应用1-权限1": {
+            "en-us": "Application1-Access1"
+        },
+        "应用1-权限2": {
+            "en-us": "Application1-Access2"
+        },
+        "应用2": {
+            "en-us": "Application2"
+        },
+        "应用2-基础权限": {
+            "en-us": "Application2-BaseAccess"
+        },
+        "应用2-权限1": {
+            "en-us": "Application2-Access1"
+        },
+        "应用2-权限2": {
+            "en-us": "Application2-Access2"
         }
     }
 }
