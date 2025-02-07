@@ -7,8 +7,8 @@
 简体中文 | <a href="docs/README_en.md">English</a>
 </p>
 
-## 简介
-DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架，基于Plotly Dash框架和[Fac](https://fac.feffery.tech/getting-started)开源组件库开发，只需要Python语句实现全栈的后台管理系统开发
+## 一、简介
+DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架，基于Plotly Dash框架和[Fac](https://fac.feffery.tech/getting-started)开源组件库开发，只需要Python语言实现全栈的后台管理系统开发
 
 
 ### 功能:
@@ -26,7 +26,7 @@ DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架
 
 ------
 
-## 项目结构
+## 二、项目结构
 
 ```
 ├─assets                # 静态资源目录
@@ -51,16 +51,105 @@ DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架
 │  ├─framework
 │  └─pages
 ├─database              # 数据库
-│  └─sql_db             # 关系型数据库配置
-│      ├─dao               # 数据库orm抽象
-│      └─entity            # 数据库表实体
+│  └─sql_db               # 关系型数据库配置
+│      ├─dao                # 数据库orm抽象
+│      └─entity             # 数据库表实体
 └─translations          # 国际化
     └─topic_locales
 ```
 
+------
+
+## 三、用法
+
+- ### 添加新应用
+
+> 以example_app为例，存在2个应用页面 —— subapp1   subapp2
+>
+> 在config/access_factory.py中注册以上2个页面，系统会自动识别页面中的配置信息
+
+以应用subapp1为例：
+
+```python
+from common.utilities.util_menu_access import MenuAccess
+import feffery_antd_components as fac
+import feffery_utils_components as fuc
+from common.utilities.util_logger import Log
+from dash_components import Card
 
 
-## 截图
+# 二级菜单的标题、图标和显示顺序
+title = '应用1'
+icon = None
+order = 2
+logger = Log.get_logger(__name__)
+
+############# 注册权限，固定全局变量名access_metas ################
+access_metas = (
+    '应用1-基础权限',
+    '应用1-权限1',
+    '应用1-权限2',
+)
+
+############# 返回视图页面的方法，方法名固定为render_content，menu_access为用户权限对象，kwargs为url内的query参数信息 #########
+def render_content(menu_access: MenuAccess, **kwargs):
+    return fac.AntdFlex(
+        [
+            *(
+                [
+                    Card(
+                        fac.AntdStatistic(
+                            title='展示',
+                            value=fuc.FefferyCountUp(end=100, duration=3),
+                        ),
+                        title='应用1-权限1',
+                    )
+                ]
+                if menu_access.has_access('应用1-权限1')  ############# 判断是否拥有“应用1-权限1”的权限
+                else []
+            ),
+            *(
+                [
+                    Card(
+                        fac.AntdStatistic(
+                            title='展示',
+                            value=fuc.FefferyCountUp(end=200, duration=3),
+                        ),
+                        title='应用1-权限2',
+                    )
+                ]
+                if menu_access.has_access('应用1-权限2') ############# 判断是否拥有“应用1-权限2”的权限
+                else []
+            ),
+        ],
+        wrap='wrap',
+    )
+```
+
+- ### 相关功能对象
+
+  1. 在render_content中有参数menu_access可以进行权限的校验，回调中如何实现？
+
+     答：通过get_menu_access，根据cookie中的jwt的用户名字段，查询数据库，获取权限对象
+
+     ```python
+     from common.utilities.util_menu_access import get_menu_access
+     menu_access = get_menu_access()
+     menu_access.has_access('xxx')
+     ```
+
+     如果只需要获取cookie中的jwt的用户名字段，减少数据库IO
+
+     ```
+     from common.utilities.util_menu_access import get_menu_access
+     op_name = get_menu_access(only_get_user_name=True)
+     ```
+
+     
+
+------
+
+## 四、截图
 
 |![](screenshots/login.png)|![](screenshots/workbench.png)|
 | ---- | ---- |
