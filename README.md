@@ -140,16 +140,26 @@ def render_content(menu_access: MenuAccess, **kwargs):
 
      如果只需要获取cookie中的jwt的用户名字段，减少数据库IO
 
-     ```
+     ```python
      from common.utilities.util_menu_access import get_menu_access
      op_name = get_menu_access(only_get_user_name=True)
      ```
 
-     
+## 四、启动平台
+
+1. windows用户根据requirements_win.txt，linux用户根据requirements_linux.txt 安装Python依赖
+
+   安装依赖命令： python -m pip install -r requirements_xxx.txt
+
+2. 进入到src目录，执行python app.py，即可启动成功，根据日志提示中的URL进行访问
+
+3. 请在Dash的世界畅游吧！！！
+
+> 默认启动为sqlite数据库，如需用于生产，请根据config/dashgo.ini调整相关Mysql数据库配置
 
 ------
 
-## 四、截图
+## 五、截图
 
 |![](screenshots/login.png)|![](screenshots/workbench.png)|
 | ---- | ---- |
