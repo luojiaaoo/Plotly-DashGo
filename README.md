@@ -22,7 +22,7 @@ DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架
 
 1. 极易使用
 2. 只需要一个Python文件，就可以将应用嵌入系统，无需额外操作
-3. 基于Ant的现代UI设计
+3. 符合主流数据平台风格
 
 ------
 
@@ -144,6 +144,25 @@ def render_content(menu_access: MenuAccess, **kwargs):
      from common.utilities.util_menu_access import get_menu_access
      op_name = get_menu_access(only_get_user_name=True)
      ```
+
+- ### 国际化
+
+  1. 在translations\topic_locales中新建json文件（内容格式参考已存在的文件，推荐一级目录的名字来新建文件，下级的应用共用一个国际化json文件，json中的topic字段为主题字段，也推荐和一级目录的名字保持一致）
+
+  2. 在i18n.py中添加，xxxx替换为一级目录的名字
+
+     ```python
+     t__xxxx = partial(translator.t, locale_topic='xxxx')
+     ```
+
+  3. 在需要翻译的视图或者回调函数中，按以下格式替换字符串，即可完成国际化
+  
+     ```python
+     from i18n import t__xxxx
+     t__xxxx('Chrome内核版本号太低，请升级浏览器')
+     ```
+
+------
 
 ## 四、启动平台
 
