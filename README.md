@@ -24,16 +24,49 @@ DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架
 2. 只需要一个Python文件，就可以将应用嵌入系统，无需额外操作
 3. 基于Ant的现代UI设计
 
+------
+
+## 项目结构
+
+```
+├─assets                # 静态资源目录
+│  ├─imgs                  # 图片资源
+│  └─js                    # js文件资源（dash框架预加载js文件、浏览器回调js等）
+├─common                # Python共享功能库
+│  └─utilities          # Python工具类
+├─config                # 项目配置目录
+├─dash_callback         # Dash回调库
+│  ├─application
+│  │  ├─access_
+│  │  ├─dashboard_
+│  │  └─person_
+│  └─pages
+├─dash_components       # Dash自定义组件
+├─dash_view             # Dash视图
+│  ├─application           # 应用视图，以“_”结尾的为内置应用
+│  │  ├─access_
+│  │  ├─dashboard_
+│  │  ├─example_app        # 应用例子
+│  │  └─person_
+│  ├─framework
+│  └─pages
+├─database              # 数据库
+│  └─sql_db             # 关系型数据库配置
+│      ├─dao               # 数据库orm抽象
+│      └─entity            # 数据库表实体
+└─translations          # 国际化
+    └─topic_locales
+```
+
+
+
 ## 截图
-### 工作台
-![](screenshots/workbench.png)
-### 系统资源监控
-![](screenshots/moniter.png)
-### 个人信息
-![](screenshots/person.png)
-### 用户管理
-![](screenshots/user.png)
-### 角色管理
-![](screenshots/role.png)
-### 团队管理
-![](screenshots/group.png)
+
+|![](screenshots/login.png)|![](screenshots/workbench.png)|
+| ---- | ---- |
+|![](screenshots/moniter.png)|![](screenshots/moniter-en.png)|
+|![](screenshots/role.png)|![](screenshots/person.png)|
+|![](screenshots/user.png)|![](screenshots/group.png)|
+
+
+
