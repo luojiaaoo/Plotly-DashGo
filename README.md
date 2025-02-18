@@ -170,7 +170,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
 
    安装依赖命令： python -m pip install -r requirements_xxx.txt
 
-2. 进入到src目录，执行python app.py，即可启动成功，根据日志提示中的URL进行访问
+2. 进入到src目录，执行python app.py，即可启动成功，根据日志提示中的URL进行访问，默认账号：admin、密码：admin123
 
 3. 请在Dash的世界畅游吧！！！
 
