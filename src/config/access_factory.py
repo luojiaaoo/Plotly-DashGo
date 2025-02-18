@@ -1,7 +1,7 @@
 # 本应用的权限工厂，此处手动导入应用模块 - 内置应用，请勿修改
 from dash_view.application.access_ import role_mgmt, user_mgmt, group_auth, group_mgmt
 from dash_view.application.dashboard_ import workbench, monitor
-from dash_view.application.person_ import personal_info, personal_setting
+from dash_view.application.person_ import personal_info
 
 ################## 【开始】此处导入您的应用 ###################
 from dash_view.application.example_app import subapp1, subapp2
@@ -20,7 +20,7 @@ def trim_module_path2menu_item(module_path):
 class AccessFactory:
     from common.utilities.util_menu_access import MenuAccess
 
-    views = [role_mgmt, user_mgmt, group_auth, group_mgmt, workbench, monitor, personal_info, personal_setting, *apps]
+    views = [role_mgmt, user_mgmt, group_auth, group_mgmt, workbench, monitor, personal_info, *apps]
 
     # 读取每个VIEW中配置的所有权限
     dict_access_meta2module_path = {access_meta: view.__name__ for view in views for access_meta in view.access_metas}
@@ -29,7 +29,6 @@ class AccessFactory:
     # 基础默认权限，主页和个人中心，每人都有，无需分配
     default_access_meta = (
         '个人信息-页面',
-        '个人设置-页面',
         '工作台-页面',
         '监控页-页面',
     )
