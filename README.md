@@ -2,6 +2,14 @@
 	<img alt="logo" src="https://github.com/luojiaaoo/DashGo/blob/main/logo.png">
 </p>
 <h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">DashGo</h1>
+<p align="center">
+    <a href="https://gitee.com/luojiaaoo/DashGo"><img src="https://gitee.com/luojiaaoo/DashGo/badge/star.svg?theme=dark"></a>
+    <a href="https://github.com/luojiaaoo/Plotly-DashGo"><img src="https://img.shields.io/github/stars/luojiaaoo/Plotly-DashGo?style=social"></a>
+    <a href="https://gitee.com/luojiaaoo/DashGo"><img src="https://img.shields.io/badge/DashGo-v1.0.0-brightgreen.svg"></a>
+    <img src="https://img.shields.io/github/license/mashape/apistatus.svg">
+    <img src="https://img.shields.io/badge/python-≥3.8-blue">
+    <img src="https://img.shields.io/badge/MySQL-≥5.7-blue">
+</p>
 
 <p align="center">
 简体中文 | <a href="docs/README_en.md">English</a>
