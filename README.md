@@ -1,5 +1,5 @@
 <p align="center">
-	<img alt="logo" src="https://github.com/luojiaaoo/DashGo/blob/main/logo.png">
+	<img alt="logo" src="logo.png" style="width: 128px; height: 128px;">
 </p>
 <h1 align="center" style="margin: 30px 0 30px; font-weight: bold;">DashGo</h1>
 <p align="center">
