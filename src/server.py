@@ -1,6 +1,5 @@
 from flask import request, redirect, send_from_directory, abort
 from config.dashgo_conf import ShowConf, FlaskConf, CommonConf, PathProj
-from user_agents import parse
 from common.utilities.util_logger import Log
 from common.exception import global_exception_handler
 from common.utilities.util_dash import CustomDash
@@ -57,16 +56,13 @@ def ban_admin():
 # 获取用户浏览器信息
 @server.before_request
 def get_user_agent_info():
-    request_addr = request.remote_addr
-    user_string = str(request.user_agent)
-    user_agent = parse(user_string)
-    bw = user_agent.browser.family
-    if user_agent.browser.version != ():
-        bw_version = user_agent.browser.version[0]
-        if bw == 'IE':
-            return "<h1 style='color: red'>IP:{}, {}</h1>".format(request_addr, t__other('请不要使用IE内核浏览器'))
-        elif bw == 'Chrome' and bw_version < 88:
-            return "<h1 style='color: red'>IP:{}, {}</h1>".format(
-                request_addr,
-                t__other('Chrome内核版本号太低，请升级浏览器'),
-            )
+    from common.utilities.util_browser import get_browser_info
+
+    browser_info = get_browser_info()
+    if browser_info.type == 'ie':
+        return "<h1 style='color: red'>IP:{}, {}</h1>".format(browser_info.ip, t__other('请不要使用IE内核浏览器'))
+    elif browser_info.type == 'chrome' and browser_info.version < 88:
+        return "<h1 style='color: red'>IP:{}, {}</h1>".format(
+            browser_info.ip,
+            t__other('Chrome内核版本号太低，请升级浏览器'),
+        )

@@ -2,10 +2,14 @@ from server import app
 from common.utilities import util_jwt
 from dash_view.pages import main, login
 from common.utilities.util_menu_access import MenuAccess
-from flask import session
 from common.exception import NotFoundUserException
 from config.access_factory import AccessFactory
 from common.utilities.util_logger import Log
+import sys
+
+# 检查Python运行版本
+if sys.version_info < (3, 9):
+    raise Exception("Python version must above 3.9 !!")
 
 logger = Log.get_logger(__name__)
 # 启动检查权限

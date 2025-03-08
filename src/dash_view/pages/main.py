@@ -2,6 +2,7 @@ import feffery_antd_components as fac
 from dash_view.framework.aside import render_aside_content
 from dash_view.framework.head import render_head_content
 from dash_view.framework.func import render_func_content
+from common.utilities.util_browser import get_browser_info
 from common.utilities.util_menu_access import MenuAccess
 import feffery_utils_components as fuc
 from i18n import t__default
@@ -74,25 +75,26 @@ def render_content(menu_access: MenuAccess):
                             className={
                                 'width': '100%',
                                 'height': 'calc(100vh - 50px)',
-                                # 美化滚动条
+                                ### 美化滚动条
                                 '& .ant-tabs-content-holder': {
                                     'height': '100%',
                                     'overflow': 'auto',
-                                    '&::-webkit-scrollbar': {'width': '8px'},
-                                    '&::-webkit-scrollbar-track': {'background': '#fff', 'border-radius': '10px'},
-                                    '&::-webkit-scrollbar-thumb': {'background': 'rgba(144,147,153,.2)', 'border-radius': '10px'},
-                                    '&::-webkit-scrollbar-thumb:hover': {'background': 'rgba(144,147,153,.4)'},
+                                    'scrollbar-width': 'thin',
+                                    'scrollbar-color': 'rgba(144,147,153,.2) #fff',
                                 },
-                                '& .ant-tabs-content-holder > .ant-tabs-content': {
-                                    'height': '100%',
-                                },
-                                '& .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane': {
-                                    'height': '100%',
-                                    'paddingBottom': '8px',
-                                },
-                                '& .ant-tabs-nav': {
-                                    'margin': '8px 0 8px 0',
-                                },
+                                **(
+                                    {
+                                        '& .ant-tabs-content-holder::-webkit-scrollbar': {'width': '8px'},
+                                        '& .ant-tabs-content-holder::-webkit-scrollbar-track': {'background': '#fff', 'border-radius': '10px'},
+                                        '& .ant-tabs-content-holder::-webkit-scrollbar-thumb': {'background': 'rgba(144,147,153,.2)', 'border-radius': '10px'},
+                                        '& .ant-tabs-content-holder::-webkit-scrollbar-thumb:hover': {'background': 'rgba(144,147,153,.4)'},
+                                    }
+                                    if get_browser_info().type != 'firefox'
+                                    else {}
+                                ), ## 火狐浏览器不支持通过伪类自定义滚动条样式
+                                '& .ant-tabs-content-holder > .ant-tabs-content': {'height': '100%'},
+                                '& .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane': {'height': '100%', 'paddingBottom': '8px'},
+                                '& .ant-tabs-nav': {'margin': '8px 0 8px 0'},
                             },
                         ),
                         className={'height': 'calc(100vh - 50px)'},

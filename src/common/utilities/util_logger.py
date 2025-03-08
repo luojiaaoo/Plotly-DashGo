@@ -1,10 +1,5 @@
 import logging
-import os
-
-if os.name == 'nt':
-    from concurrent_log_handler import ConcurrentRotatingFileHandler
-else:
-    from cloghandler import ConcurrentRotatingFileHandler
+from concurrent_log_handler import ConcurrentRotatingFileHandler
 from config.dashgo_conf import LogConf
 # logging.error("An error occurred: %s", e, exc_info=True)
 
