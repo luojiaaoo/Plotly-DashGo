@@ -6,6 +6,7 @@ from server import app
 from dash.dependencies import Input, Output, State
 import dash
 from dash.exceptions import PreventUpdate
+from database.sql_db.dao import dao_announcement
 from i18n import t__access, t__other, t__default
 
 
@@ -34,12 +35,20 @@ def render_head_content(menu_access: MenuAccess):
         ),
         # 页首面包屑区域
         fac.AntdCol(
-            fac.AntdBreadcrumb(
-                items=[{'title': t__access('首页'), 'href': '/dashboard_/workbench'}],
-                id='header-breadcrumb',
+            fac.AntdSpace(
+                [
+                    fac.AntdBreadcrumb(
+                        items=[{'title': t__access('首页'), 'href': '/dashboard_/workbench'}],
+                        id='header-breadcrumb',
+                        style={
+                            'height': '100%',
+                            'display': 'flex',
+                            'alignItems': 'center',
+                        },
+                    ),
+                ],
                 style={
                     'height': '100%',
-                    'display': 'flex',
                     'alignItems': 'center',
                 },
             ),
@@ -50,9 +59,38 @@ def render_head_content(menu_access: MenuAccess):
         fac.AntdCol(
             fac.AntdSpace(
                 [
+                    *(
+                        [
+                            fac.AntdAlert(
+                                message=dao_announcement.get_announcement(),
+                                type='info',
+                                banner=True,
+                                showIcon=True,
+                                messageRenderMode='marquee',
+                                className={
+                                    'backgroundColor': 'rgba(0,0,0,0)',
+                                    'minWidth': '30em',
+                                    'maxWidth': '50em',
+                                    'marginRight': '40px',
+                                    '& div ': {'textDecoration': 'underline'},
+                                },
+                            )
+                        ]
+                        if dao_announcement.get_announcement()
+                        else []
+                    ),
                     html.A(
                         html.Img(src='https://img.shields.io/github/stars/luojiaaoo/DashGo.svg?style=social&label=Stars'),
                         href='https://github.com/luojiaaoo/DashGo',
+                        target='_blank',
+                        style={
+                            'height': '100%',
+                            'alignItems': 'center',
+                        },
+                    ),
+                    html.A(
+                        html.Img(src='https://gitee.com/luojiaaoo/DashGo/badge/star.svg?theme=dark'),
+                        href='https://gitee.com/luojiaaoo/DashGo',
                         target='_blank',
                         style={
                             'height': '100%',
@@ -94,7 +132,6 @@ def render_head_content(menu_access: MenuAccess):
                 ],
                 style={
                     'height': '100%',
-                    'float': 'right',
                     'display': 'flex',
                     'alignItems': 'center',
                     'paddingRight': '20px',

@@ -43,6 +43,7 @@ def initialize_database():
     db_instance = db()
     if not db_instance.table_exists('sys_user'):
         from .entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole, SysGroupUser, SysRole, SysGroupRole, SysGroup
+        from .entity.table_announcement import SysAnnouncement
         from datetime import datetime
         import hashlib
 
@@ -55,6 +56,7 @@ def initialize_database():
                 SysRole,
                 SysGroupRole,
                 SysGroup,
+                SysAnnouncement,
             ]
         )
         SysRole.create(
