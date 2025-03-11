@@ -46,11 +46,32 @@ def render_head_content(menu_access: MenuAccess):
                             'alignItems': 'center',
                         },
                     ),
+                    *(
+                        [
+                            fac.AntdAlert(
+                                message=dao_announcement.get_announcement(),
+                                type='info',
+                                banner=True,
+                                showIcon=True,
+                                icon='📢',
+                                messageRenderMode='loop-text',
+                                className={
+                                    'backgroundColor': 'rgba(0,0,0,0)',
+                                    'maxWidth': '20em',
+                                    'marginLeft': '50px',
+                                    'border': '1px',
+                                },
+                            )
+                        ]
+                        if dao_announcement.get_announcement()
+                        else []
+                    ),
                 ],
                 style={
                     'height': '100%',
                     'alignItems': 'center',
                 },
+                wrap=False,
             ),
             id='header-breadcrumb-col',
             flex='1',
@@ -59,26 +80,6 @@ def render_head_content(menu_access: MenuAccess):
         fac.AntdCol(
             fac.AntdSpace(
                 [
-                    *(
-                        [
-                            fac.AntdAlert(
-                                message=dao_announcement.get_announcement(),
-                                type='info',
-                                banner=True,
-                                showIcon=True,
-                                messageRenderMode='marquee',
-                                className={
-                                    'backgroundColor': 'rgba(0,0,0,0)',
-                                    'minWidth': '30em',
-                                    'maxWidth': '50em',
-                                    'marginRight': '40px',
-                                    '& div ': {'textDecoration': 'underline'},
-                                },
-                            )
-                        ]
-                        if dao_announcement.get_announcement()
-                        else []
-                    ),
                     html.A(
                         html.Img(src='https://img.shields.io/github/stars/luojiaaoo/DashGo.svg?style=social&label=Stars'),
                         href='https://github.com/luojiaaoo/DashGo',
@@ -129,27 +130,28 @@ def render_head_content(menu_access: MenuAccess):
                         ],
                         placement='bottomRight',
                     ),
+                    fac.AntdTooltip(
+                        fac.AntdIcon(
+                            id='global-full-screen',
+                            icon='antd-full-screen',
+                            debounceWait=300,
+                            style={'cursor': 'pointer', 'marginLeft': '12px', 'fontSize': '1.2em'},
+                        ),
+                        title=t__default('全屏'),
+                        placement='left',
+                    ),
+                    render_lang_content(),
                 ],
                 style={
                     'height': '100%',
                     'display': 'flex',
                     'alignItems': 'center',
-                    'paddingRight': '20px',
+                    'paddingRight': '10px',
                 },
+                wrap=False,
             ),
             flex='None',
         ),
-        fac.AntdTooltip(
-            fac.AntdIcon(
-                id='global-full-screen',
-                icon='antd-full-screen',
-                debounceWait=300,
-                style={'cursor': 'pointer', 'marginRight': '12px', 'fontSize': '1.2em'},
-            ),
-            title=t__default('全屏'),
-            placement='left',
-        ),
-        render_lang_content(),
     ]
 
 

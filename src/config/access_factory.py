@@ -2,6 +2,7 @@
 from dash_view.application.access_ import role_mgmt, user_mgmt, group_auth, group_mgmt
 from dash_view.application.dashboard_ import workbench, monitor
 from dash_view.application.person_ import personal_info
+from dash_view.application.notification_ import announcement
 
 ################## 【开始】此处导入您的应用 ###################
 from dash_view.application.example_app import subapp1, subapp2
@@ -20,7 +21,7 @@ def trim_module_path2menu_item(module_path):
 class AccessFactory:
     from common.utilities.util_menu_access import MenuAccess
 
-    views = [role_mgmt, user_mgmt, group_auth, group_mgmt, workbench, monitor, personal_info, *apps]
+    views = [role_mgmt, user_mgmt, group_auth, group_mgmt, workbench, monitor, personal_info, announcement, *apps]
 
     # 读取每个VIEW中配置的所有权限
     dict_access_meta2module_path = {access_meta: view.__name__ for view in views for access_meta in view.access_metas}
@@ -37,7 +38,7 @@ class AccessFactory:
     group_access_meta = ('团队授权-页面',)
 
     # 系统管理员默认权限
-    admin_access_meta = ('用户管理-页面', '角色管理-页面', '团队管理-页面')
+    admin_access_meta = ('用户管理-页面', '角色管理-页面', '团队管理-页面', '公告管理-页面')
 
     # 检查数据库和应用权限
     @classmethod
