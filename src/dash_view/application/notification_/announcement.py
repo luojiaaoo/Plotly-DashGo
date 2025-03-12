@@ -7,6 +7,7 @@ from dash import html
 from dash_components import Card
 from dash import dcc
 from database.sql_db.dao import dao_user
+import dash_callback.application.notification_.announcement_c  # noqa: F401
 from i18n import t__person, t__default, t__access
 
 
@@ -19,4 +20,44 @@ access_metas = ('公告管理-页面',)
 
 
 def render_content(menu_access: MenuAccess, **kwargs):
-    ...
+    return fac.AntdCol(
+        [
+            fac.Fragment(
+                [
+                    dcc.Store(id='announcement-flush-table-data'),
+                ]
+            ),
+            fac.AntdSpace(
+                [
+                    fac.AntdSpace(
+                        [
+                            fac.AntdButton(
+                                id='announcement-button-add',
+                                children='新增公告',
+                                type='primary',
+                                icon=fac.AntdIcon(icon='antd-plus'),
+                            ),
+                            fac.AntdPopconfirm(
+                                fac.AntdButton(
+                                    '删除选中',
+                                    type='primary',
+                                    danger=True,
+                                    icon=fac.AntdIcon(icon='antd-close'),
+                                ),
+                                id='announcement-button-delete',
+                                title='确认删除选中行吗？',
+                            ),
+                        ]
+                    ),
+                    html.Div(id='announcement-table-container'),
+                ],
+                direction='vertical',
+                style={
+                    'textAlign': 'center',
+                    'marginBottom': '10px',
+                },
+            )
+        ]
+    )
+
+
