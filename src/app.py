@@ -6,10 +6,14 @@ from common.exception import NotFoundUserException
 from config.access_factory import AccessFactory
 from common.utilities.util_logger import Log
 import sys
+from database.sql_db.conn import initialize_database
 
 # 检查Python运行版本
 if sys.version_info < (3, 9):
     raise Exception("Python version must above 3.9 !!")
+
+# 初始化数据库
+initialize_database()
 
 logger = Log.get_logger(__name__)
 # 启动检查权限

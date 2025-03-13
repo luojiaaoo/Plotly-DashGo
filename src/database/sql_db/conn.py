@@ -86,9 +86,6 @@ def initialize_database():
         SysUserRole.create(user_name='admin', role_name='admin')
 
 
-initialize_database()
-
-
 # 自动管理数据库上下文
 @server.before_request
 def _db_connect():
