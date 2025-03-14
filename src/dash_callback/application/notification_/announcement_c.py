@@ -1,8 +1,9 @@
 from server import app
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import feffery_antd_components as fac
 from dash_components import Card, Table
 from uuid import uuid4
+from dash_components import MessageManager
 
 
 @app.callback(
@@ -11,6 +12,7 @@ from uuid import uuid4
         Output('announcement-flush-table-trigger-store', 'data'),
     ],
     Input('announcement-init-timeout', 'timeoutCount'),
+    prevent_initial_call=True,
 )
 def init_table(_):
     """页面加载时初始化渲染表格"""
@@ -31,6 +33,7 @@ def init_table(_):
 @app.callback(
     Output('announcement-table', 'data'),
     Input('announcement-flush-table-trigger-store', 'data'),
+    prevent_initial_call=True,
 )
 def flush_table_data(_):
     from database.sql_db.dao import dao_announcement
@@ -49,3 +52,26 @@ def flush_table_data(_):
         }
         for announcement in dao_announcement.get_all_announcements()
     ]
+
+
+@app.callback(
+    Output('announcement-flush-table-trigger-store', 'data', allow_duplicate=True),
+    Input('announcement-button-delete', 'confirmCounts'),
+    State('announcement-table', 'selectedRows'),
+    prevent_initial_call=True,
+)
+def handle_delete(confirmCounts, selectedRows):
+    """处理表格数据行删除逻辑"""
+
+    # 若当前无已选中行
+    if not selectedRows:
+        MessageManager.warning(content='请先选择要删除的行')
+
+    # 删除选中行
+    from database.sql_db.dao import dao_announcement
+
+    dao_announcement.delete_announcement([row['content'] for row in selectedRows])
+    MessageManager.success(content='选中行删除成功')
+
+    # 重置选中行
+    return uuid4().hex

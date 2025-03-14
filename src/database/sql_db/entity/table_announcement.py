@@ -1,4 +1,4 @@
-from peewee import CharField, Model, DateTimeField, BooleanField
+from peewee import CharField, Model, DateTimeField, BooleanField, IntegerField
 from ..conn import db
 
 
@@ -15,4 +15,4 @@ class SysAnnouncement(BaseModel):
 
     class Meta:
         table_name = 'sys_announcement'
-        indexes = ((('datetime',), True),)
+        indexes = ((('announcement',), True),)

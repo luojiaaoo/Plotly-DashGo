@@ -60,11 +60,11 @@ def add_announcement(announcement: str, user_name: str) -> bool:
     return SysAnnouncement.create(announcement=announcement, user_name=user_name, datetime=datetime.now(), status=True)
 
 
-def delete_announcement(datetimes: List[datetime]) -> bool:
+def delete_announcement(announcements: List[str]) -> bool:
     """删除公告"""
-    return SysAnnouncement.delete().where(SysAnnouncement.datetime.in_(datetimes)).execute()
+    return SysAnnouncement.delete().where(SysAnnouncement.announcement.in_(announcements)).execute()
 
 
-def update_announcement_status(datetime: datetime, status: bool) -> bool:
+def update_announcement_status(announcement: str, status: bool) -> bool:
     """更新公告状态"""
-    return SysAnnouncement.update(status=status).where(SysAnnouncement.datetime == datetime).execute()
+    return SysAnnouncement.update(status=status).where(SysAnnouncement.announcement == announcement).execute()
