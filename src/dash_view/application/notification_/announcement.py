@@ -20,44 +20,44 @@ access_metas = ('公告管理-页面',)
 
 
 def render_content(menu_access: MenuAccess, **kwargs):
-    return fac.AntdCol(
-        [
-            fac.Fragment(
-                [
-                    dcc.Store(id='announcement-flush-table-data'),
-                ]
-            ),
-            fac.AntdSpace(
-                [
-                    fac.AntdSpace(
-                        [
+    return [
+        fac.Fragment(
+            [
+                dcc.Store(id='announcement-flush-table-trigger-store'),
+                fuc.FefferyTimeout(id='announcement-init-timeout', delay=1),
+            ]
+        ),
+        fac.AntdSpace(
+            [
+                fac.AntdSpace(
+                    [
+                        fac.AntdButton(
+                            id='announcement-button-add',
+                            children='新增公告',
+                            type='primary',
+                            icon=fac.AntdIcon(icon='antd-plus'),
+                        ),
+                        fac.AntdPopconfirm(
                             fac.AntdButton(
-                                id='announcement-button-add',
-                                children='新增公告',
+                                '删除选中',
                                 type='primary',
-                                icon=fac.AntdIcon(icon='antd-plus'),
+                                danger=True,
+                                icon=fac.AntdIcon(icon='antd-close'),
                             ),
-                            fac.AntdPopconfirm(
-                                fac.AntdButton(
-                                    '删除选中',
-                                    type='primary',
-                                    danger=True,
-                                    icon=fac.AntdIcon(icon='antd-close'),
-                                ),
-                                id='announcement-button-delete',
-                                title='确认删除选中行吗？',
-                            ),
-                        ]
-                    ),
-                    html.Div(id='announcement-table-container'),
-                ],
-                direction='vertical',
-                style={
-                    'textAlign': 'center',
-                    'marginBottom': '10px',
-                },
-            )
-        ]
-    )
-
-
+                            id='announcement-button-delete',
+                            title='确认删除选中行吗？',
+                        ),
+                    ]
+                ),
+                Card(
+                    html.Div(id='announcement-table-container', style={'width': '100%'}),
+                    style={'width': '100%'},
+                ),
+            ],
+            direction='vertical',
+            style={
+                'marginBottom': '10px',
+                'width': '100%',
+            },
+        ),
+    ]
