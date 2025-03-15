@@ -50,7 +50,10 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     ]
                 ),
                 Card(
-                    html.Div(id='announcement-table-container', style={'width': '100%'}),
+                    html.Div(
+                        id='announcement-table-container',
+                        style={'width': '100%'},
+                    ),
                     style={'width': '100%'},
                 ),
             ],
