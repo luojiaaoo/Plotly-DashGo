@@ -10,11 +10,27 @@ import time
 from feffery_dash_utils.style_utils import style
 
 
+def get_table_data():
+    from database.sql_db.dao import dao_announcement
+
+    return [
+        {
+            'content': announcement.announcement,
+            'create_datetime': announcement.datetime,
+            'create_by': announcement.name,
+            'enable': {
+                'checked': announcement.status,
+                'checkedChildren': '开',
+                'unCheckedChildren': '关',
+                'custom': announcement.announcement,
+            },
+        }
+        for announcement in dao_announcement.get_all_announcements()
+    ]
+
+
 @app.callback(
-    [
-        Output('announcement-table-container', 'children'),
-        Output('announcement-flush-table-trigger-store', 'data'),
-    ],
+    Output('announcement-table-container', 'children'),
     Input('announcement-init-timeout', 'timeoutCount'),
     prevent_initial_call=True,
 )
@@ -36,39 +52,14 @@ def init_table(timeoutCount):
                 {'title': '启用', 'dataIndex': 'enable', 'renderOptions': {'renderType': 'switch'}, 'width': 'calc(100% / 5)'},
             ],
             rowSelectionType='checkbox',
-            data=[],
+            data=get_table_data(),
             pageSize=10,
         ),
-    ], uuid4().hex
-
-
-@app.callback(
-    Output('announcement-table', 'data'),
-    Input('announcement-flush-table-trigger-store', 'data'),
-    prevent_initial_call=True,
-)
-def flush_table_data(data):
-    """触发数据更新，从数据库中获取所有公告数据到表中"""
-    from database.sql_db.dao import dao_announcement
-
-    return [
-        {
-            'content': announcement.announcement,
-            'create_datetime': announcement.datetime,
-            'create_by': announcement.name,
-            'enable': {
-                'checked': announcement.status,
-                'checkedChildren': '开',
-                'unCheckedChildren': '关',
-                'custom': f'enable: {announcement.datetime}',
-            },
-        }
-        for announcement in dao_announcement.get_all_announcements()
     ]
 
 
 @app.callback(
-    Output('announcement-flush-table-trigger-store', 'data', allow_duplicate=True),
+    Output('announcement-table', 'data'),
     Input('announcement-button-delete', 'confirmCounts'),
     State('announcement-table', 'selectedRows'),
     prevent_initial_call=True,
@@ -91,7 +82,7 @@ def handle_delete(confirmCounts, selectedRows):
     set_props('announcement-table', {'selectedRows': []})
     set_props('announcement-table', {'selectedRowKeys': []})
 
-    return uuid4().hex
+    return get_table_data()
 
 
 @app.callback(
@@ -128,7 +119,7 @@ def refresh_add_modal(visible):
 
 
 @app.callback(
-    Output('announcement-flush-table-trigger-store', 'data', allow_duplicate=True),
+    Output('announcement-table', 'data', allow_duplicate=True),
     Input('announcement-table-add-modal', 'okCounts'),
     State('announcement-content', 'value'),
     prevent_initial_call=True,
@@ -144,7 +135,30 @@ def handle_add_data(okCounts, value):
 
         MessageManager.success(content='数据新增成功')
         dao_announcement.add_announcement(user_name=op_user_name, announcement=value)
-        return uuid4().hex
+        return get_table_data()
 
     MessageManager.success(content='数据填写不完整')
+    return dash.no_update
+
+
+@app.callback(
+    Output('announcement-table', 'data', allow_duplicate=True),
+    [
+        Input('announcement-table', 'recentlySwitchDataIndex'),
+        Input('announcement-table', 'recentlySwitchStatus'),
+        Input('announcement-table', 'recentlySwitchRow'),
+    ],
+    prevent_initial_call=True,
+)
+def handle_enable_eow(recentlySwitchDataIndex, recentlySwitchStatus, recentlySwitchRow):
+    """处理新增数据逻辑"""
+    from database.sql_db.dao import dao_announcement
+
+    status = recentlySwitchRow['enable']['checked']
+    content = recentlySwitchRow['enable']['custom']
+    dao_announcement.update_announcement_status(content, status)
+    if status:
+        MessageManager.success(content='公告打开成功')
+    else:
+        MessageManager.success(content='公告关闭成功')
     return dash.no_update

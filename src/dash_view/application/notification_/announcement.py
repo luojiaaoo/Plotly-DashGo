@@ -23,7 +23,6 @@ def render_content(menu_access: MenuAccess, **kwargs):
     return [
         fac.Fragment(
             [
-                dcc.Store(id='announcement-flush-table-trigger-store'),
                 fuc.FefferyTimeout(id='announcement-init-timeout', delay=1),
             ]
         ),
