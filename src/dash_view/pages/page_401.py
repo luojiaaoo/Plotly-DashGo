@@ -1,5 +1,6 @@
 import feffery_antd_components as fac
 from dash import html
+from common.constant import HttpStatusConstant
 
 
 def render():
@@ -8,7 +9,7 @@ def render():
             html.Div(
                 [
                     fac.AntdResult(
-                        status='403',
+                        status=str(HttpStatusConstant.UNAUTHORIZED),
                         title='您没有权限访问该页面',
                         subTitle='如需访问，请联系系统管理员',
                         style={'paddingBottom': 0, 'paddingTop': 0},

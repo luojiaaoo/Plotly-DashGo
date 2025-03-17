@@ -3,6 +3,7 @@ from config.dashgo_conf import ShowConf, FlaskConf, CommonConf, PathProj
 from common.utilities.util_logger import Log
 from common.exception import global_exception_handler
 from common.utilities.util_dash import CustomDash
+from common.constant import HttpStatusConstant
 from i18n import t__other
 
 
@@ -32,13 +33,23 @@ server = app.server
 def download_file(user_name):
     file_name = f'{user_name}.jpg'
     if '..' in user_name:
+        
         logger.warning(f'有人尝试通过头像文件接口攻击，URL:{request.url}，IP:{request.remote_addr}')
-        abort(403)
+        abort(HttpStatusConstant.FORBIDDEN)
     else:
         return send_from_directory(PathProj.AVATAR_DIR_PATH, file_name)
 
 
-# 首页拦截器
+# nginx代理后，拦截直接访问
+@server.before_request
+def ban_bypass_proxy():
+    from config.dashgo_conf import ProxyConf
+
+    if ProxyConf.NGINX_PROXY and request.headers.get('X-Forwarded-For') is None:
+        abort(HttpStatusConstant.FORBIDDEN)
+
+
+# 首页重定向
 @server.before_request
 def main_page_redirct():
     if request.path == '/':
@@ -49,8 +60,10 @@ def main_page_redirct():
 @server.before_request
 def ban_admin():
     if request.path.startswith('/admin'):
-        logger.warning(f'有人尝试访问不存在的管理页面，URL:{request.url}，IP:{request.remote_addr}')
-        abort(403)
+        from common.utilities.util_browser import get_browser_info
+        browser_info = get_browser_info()
+        logger.warning(f'有人尝试访问不存在的管理页面，URL:{browser_info.url}，IP:{browser_info.request_addr}')
+        abort(HttpStatusConstant.NOT_FOUND)
 
 
 # 获取用户浏览器信息
@@ -60,9 +73,9 @@ def get_user_agent_info():
 
     browser_info = get_browser_info()
     if browser_info.type == 'ie':
-        return "<h1 style='color: red'>IP:{}, {}</h1>".format(browser_info.ip, t__other('请不要使用IE内核浏览器'))
-    elif browser_info.type == 'chrome' and browser_info.version < 88:
+        return "<h1 style='color: red'>IP:{}, {}</h1>".format(browser_info.request_addr, t__other('请不要使用IE内核浏览器'))
+    elif browser_info.type == 'chrome' and browser_info.version is not None and browser_info.version < 88:
         return "<h1 style='color: red'>IP:{}, {}</h1>".format(
-            browser_info.ip,
+            browser_info.request_addr,
             t__other('Chrome内核版本号太低，请升级浏览器'),
         )

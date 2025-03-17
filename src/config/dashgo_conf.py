@@ -64,6 +64,8 @@ class JwtConf(metaclass=BaseMetaConf):
     JWT_ALGORITHM: str = 'HS256'
     JWT_EXPIRE_MINUTES: int = 1440
 
+class ProxyConf(metaclass=BaseMetaConf):
+    NGINX_PROXY: bool = False
 
 class SqlDbConf(metaclass=BaseMetaConf):
     RDB_TYPE: str
