@@ -27,7 +27,7 @@ def render_aside_content(menu_access: MenuAccess):
                                 'fontWeight': 'bold',
                                 'color': 'rgb(245,245,245)',
                             },
-                            style={'display': 'None'},
+                            # style={'display': 'None'},
                         ),
                     ]
                 ),
@@ -64,8 +64,9 @@ def render_aside_content(menu_access: MenuAccess):
             '.ant-menu-submenu-title:hover': {'color': '#fff'},
             '.ant-menu-item-selected': {
                 'backgroundColor': 'rgba(0,0,0,0)',
-                'borderRight': '2px solid rgb(64,143,201)',
-                'borderRadius': '0.8em',
+                # 'border': '1px solid rgba(64,143,201,0.4)',
+                'borderRight': '4px solid rgb(64,143,201)',
+                'borderRadius': '0em',
                 'color': 'rgb(64,143,201)',
             },
         },

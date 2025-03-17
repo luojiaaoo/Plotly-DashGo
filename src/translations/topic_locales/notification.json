@@ -1,0 +1,48 @@
+{
+    "root_locale": "zh-cn",
+    "topic": "notification",
+    "contents": {
+        "新增公告": {
+            "en-us": "Add Notification"
+        },
+        "删除选中": {
+            "en-us": "Delete Selected"
+        },
+        "确认删除选中行吗？": {
+            "en-us": "Are you sure to delete the selected rows?"
+        },
+        "创建人": {
+            "en-us": "Creator"
+        },
+        "内容": {
+            "en-us": "Content"
+        },
+        "发布时间": {
+            "en-us": "Publish Time"
+        },
+        "启用": {
+            "en-us": "Enable"
+        },
+        "请先选择要删除的行": {
+            "en-us": "Please select the rows to delete first"
+        },
+        "选中行删除成功": {
+            "en-us": "Selected rows deleted successfully"
+        },
+        "发布内容": {
+            "en-us": "Publish Content"
+        },
+        "数据新增成功": {
+            "en-us": "Data added successfully"
+        },
+        "数据填写不完整": {
+            "en-us": "Incomplete data"
+        },
+        "公告打开成功": {
+            "en-us": "Notification opened successfully"
+        },
+        "公告关闭成功": {
+            "en-us": "Notification closed successfully"
+        }
+    }
+}

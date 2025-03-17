@@ -15,7 +15,7 @@ def render_head_content(menu_access: MenuAccess):
         # 页首左侧折叠按钮区域
         fac.AntdCol(
             fac.AntdButton(
-                fac.AntdIcon(id='btn-menu-collapse-sider-menu-icon', icon='antd-menu-unfold'),
+                fac.AntdIcon(id='btn-menu-collapse-sider-menu-icon', icon='antd-menu-fold'),
                 id='btn-menu-collapse-sider-menu',
                 type='text',
                 shape='circle',

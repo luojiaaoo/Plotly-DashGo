@@ -260,6 +260,15 @@
         "您确定要删除角色 ": {
             "en-us": "Are you sure to delete role "
         },
+        "通知管理": {
+            "en-us": "Notification Mgmt"
+        },
+        "公告管理": {
+            "en-us": "Announcement"
+        },
+        "公告管理-页面": {
+            "en-us": "Notification Mgmt"
+        },
         "应用案例": {
             "en-us": "App Example"
         },

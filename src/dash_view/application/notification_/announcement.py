@@ -1,14 +1,11 @@
 from common.utilities.util_menu_access import MenuAccess
-from typing import List
 import feffery_antd_components as fac
 import feffery_utils_components as fuc
 from common.utilities.util_logger import Log
 from dash import html
 from dash_components import Card
-from dash import dcc
-from database.sql_db.dao import dao_user
 import dash_callback.application.notification_.announcement_c  # noqa: F401
-from i18n import t__person, t__default, t__access
+from i18n import t__notification, translator
 
 
 # 二级菜单的标题、图标和显示顺序
@@ -32,19 +29,20 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     [
                         fac.AntdButton(
                             id='announcement-button-add',
-                            children='新增公告',
+                            children=t__notification('新增公告'),
                             type='primary',
                             icon=fac.AntdIcon(icon='antd-plus'),
                         ),
                         fac.AntdPopconfirm(
                             fac.AntdButton(
-                                '删除选中',
+                                t__notification('删除选中'),
                                 type='primary',
                                 danger=True,
                                 icon=fac.AntdIcon(icon='antd-close'),
                             ),
                             id='announcement-button-delete',
-                            title='确认删除选中行吗？',
+                            title=t__notification('确认删除选中行吗？'),
+                            locale=translator.get_current_locale(),
                         ),
                     ]
                 ),

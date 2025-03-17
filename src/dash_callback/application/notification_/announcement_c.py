@@ -2,12 +2,12 @@ from server import app
 from dash.dependencies import Input, Output, State
 import feffery_antd_components as fac
 from dash_components import Table
-from uuid import uuid4
 import dash
 from dash import set_props
 from dash_components import MessageManager
 import time
 from feffery_dash_utils.style_utils import style
+from i18n import t__notification
 
 
 def get_table_data():
@@ -20,8 +20,8 @@ def get_table_data():
             'create_by': announcement.name,
             'enable': {
                 'checked': announcement.status,
-                'checkedChildren': '开',
-                'unCheckedChildren': '关',
+                'checkedChildren': 'open',
+                'unCheckedChildren': 'close',
                 'custom': announcement.announcement,
             },
         }
@@ -39,17 +39,17 @@ def init_table(timeoutCount):
     return [
         fac.AntdModal(
             id='announcement-table-add-modal',
-            title='新增公告',
+            title=t__notification('新增公告'),
             renderFooter=True,
             okClickClose=False,
         ),
         Table(
             id='announcement-table',
             columns=[
-                {'title': '创建人', 'dataIndex': 'create_by', 'width': 'calc(100% / 5)'},
-                {'title': '内容', 'dataIndex': 'content', 'width': 'calc(100% * 2 / 5)'},
-                {'title': '发布时间', 'dataIndex': 'create_datetime', 'width': 'calc(100% / 5)'},
-                {'title': '启用', 'dataIndex': 'enable', 'renderOptions': {'renderType': 'switch'}, 'width': 'calc(100% / 5)'},
+                {'title': t__notification('创建人'), 'dataIndex': 'create_by', 'width': 'calc(100% / 5)'},
+                {'title': t__notification('内容'), 'dataIndex': 'content', 'width': 'calc(100% * 2 / 5)'},
+                {'title': t__notification('发布时间'), 'dataIndex': 'create_datetime', 'width': 'calc(100% / 5)'},
+                {'title': t__notification('启用'), 'dataIndex': 'enable', 'renderOptions': {'renderType': 'switch'}, 'width': 'calc(100% / 5)'},
             ],
             rowSelectionType='checkbox',
             data=get_table_data(),
@@ -69,14 +69,14 @@ def handle_delete(confirmCounts, selectedRows):
 
     # 若当前无已选中行
     if not selectedRows:
-        MessageManager.warning(content='请先选择要删除的行')
+        MessageManager.warning(content=t__notification('请先选择要删除的行'))
         return dash.no_update
 
     # 删除选中行
     from database.sql_db.dao import dao_announcement
 
     dao_announcement.delete_announcement([row['content'] for row in selectedRows])
-    MessageManager.success(content='选中行删除成功')
+    MessageManager.success(content=t__notification('选中行删除成功'))
 
     # 重置选中行
     set_props('announcement-table', {'selectedRows': []})
@@ -111,7 +111,7 @@ def refresh_add_modal(visible):
             [
                 fac.AntdFormItem(
                     fac.AntdInput(id='announcement-content'),
-                    label='发布内容',
+                    label=t__notification('发布内容'),
                 ),
             ],
         )
@@ -133,11 +133,11 @@ def handle_add_data(okCounts, value):
         op_user_name = get_menu_access(only_get_user_name=True)
         from database.sql_db.dao import dao_announcement
 
-        MessageManager.success(content='数据新增成功')
+        MessageManager.success(content=t__notification('数据新增成功'))
         dao_announcement.add_announcement(user_name=op_user_name, announcement=value)
         return get_table_data()
 
-    MessageManager.success(content='数据填写不完整')
+    MessageManager.success(content=t__notification('数据填写不完整'))
     return dash.no_update
 
 
@@ -158,7 +158,7 @@ def handle_enable_eow(recentlySwitchDataIndex, recentlySwitchStatus, recentlySwi
     content = recentlySwitchRow['enable']['custom']
     dao_announcement.update_announcement_status(content, status)
     if status:
-        MessageManager.success(content='公告打开成功')
+        MessageManager.success(content=t__notification('公告打开成功'))
     else:
-        MessageManager.success(content='公告关闭成功')
+        MessageManager.success(content=t__notification('公告关闭成功'))
     return dash.no_update
