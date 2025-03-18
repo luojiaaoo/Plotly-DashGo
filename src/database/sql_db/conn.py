@@ -1,7 +1,6 @@
 from config.dashgo_conf import SqlDbConf
 from playhouse.pool import PooledMySQLDatabase
 from peewee import SqliteDatabase
-from server import server
 from playhouse.shortcuts import ReconnectMixin
 
 
@@ -44,6 +43,7 @@ def initialize_database():
     if not db_instance.table_exists('sys_user'):
         from .entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole, SysGroupUser, SysRole, SysGroupRole, SysGroup
         from .entity.table_announcement import SysAnnouncement
+        from .entity.table_oauth2 import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
         from datetime import datetime
         import hashlib
 
@@ -57,6 +57,9 @@ def initialize_database():
                 SysGroupRole,
                 SysGroup,
                 SysAnnouncement,
+                OAuth2Client,
+                OAuth2AuthorizationCode,
+                OAuth2Token
             ]
         )
         SysRole.create(
@@ -86,14 +89,4 @@ def initialize_database():
         SysUserRole.create(user_name='admin', role_name='admin')
 
 
-# 自动管理数据库上下文
-@server.before_request
-def _db_connect():
-    db().connect(reuse_if_open=True)
 
-
-@server.teardown_request
-def _db_close(exc):
-    _db = db()
-    if not _db.is_closed():
-        _db.close()

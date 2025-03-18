@@ -24,6 +24,11 @@ class AuthException(Exception):
         self.message = message
         self.data = data
 
+class OAuth2Error(Exception):
+    def __init__(self, description, status_code=400):
+        self.description = description
+        self.status_code = status_code
+
 
 def global_exception_handler(error):
     from dash import set_props

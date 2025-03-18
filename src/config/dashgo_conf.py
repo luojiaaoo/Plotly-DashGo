@@ -7,7 +7,7 @@ class PathProj:
     ROOT_PATH = Path(__file__).parent.parent
     CONF_FILE_PATH = ROOT_PATH / 'config' / 'dashgo.ini'
     AVATAR_DIR_PATH = (ROOT_PATH / '..' / 'user_data' / 'avatars').resolve()
-    AVATAR_DIR_PATH.mkdir(parents=True,exist_ok=True)
+    AVATAR_DIR_PATH.mkdir(parents=True, exist_ok=True)
 
 
 conf = ConfigParser()
@@ -64,8 +64,17 @@ class JwtConf(metaclass=BaseMetaConf):
     JWT_ALGORITHM: str = 'HS256'
     JWT_EXPIRE_MINUTES: int = 1440
 
+
 class ProxyConf(metaclass=BaseMetaConf):
     NGINX_PROXY: bool = False
+
+
+class OAuth2Conf(metaclass=BaseMetaConf):
+    OAuth2AuthorizationCodeExpiresInMinutes: int
+    OAuth2AuthorizationCodeLength: int
+    OAuth2TokenExpiresInMinutes: int
+    OAuth2TokenLength: int
+
 
 class SqlDbConf(metaclass=BaseMetaConf):
     RDB_TYPE: str

@@ -770,7 +770,6 @@ def get_dict_group_name_users_roles(user_name) -> Dict[str, Union[str, Set]]:
 
     for group_name in group_names:
         group_remark, user_names, group_roles = get_user_and_role_for_group_name(group_name=group_name)
-        print(group_roles)
         user_infos = get_user_info(user_names=user_names)
         dict_user_info = {i.user_name: i for i in user_infos}
         for user_name_per, user_info in dict_user_info.items():
