@@ -24,14 +24,16 @@ DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架
 1. 多页面管理
 2. 组件和函数级别的细粒度权限管理
 3. 自带用户、角色和团队的权限的管理
-5. i18n国际化组件
-6. 密码和OTP登录
+4. i18n国际化组件
+5. 密码和OTP登录
+6. 支持OAuth2 provider
 
 ### 特点:
 
 1. 极易使用
 2. 只需要一个Python文件，就可以将应用嵌入系统，无需额外操作
 3. 符合主流数据平台风格
+4. 通过OAuth2接口+Iframe实现子系统接入（beta，自主开发的子系统见`https://github.com/luojiaaoo/dashgo-knowledge`）
 
 ------
 
@@ -56,6 +58,7 @@ DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架
 │  │  ├─access_
 │  │  ├─dashboard_
 │  │  ├─example_app        # 应用例子
+│  │  ├─notification_
 │  │  └─person_
 │  ├─framework
 │  └─pages

@@ -11,11 +11,13 @@ icon = None
 order = 2
 logger = Log.get_logger(__name__)
 
-access_metas = (
-    '应用1-基础权限',
-    '应用1-权限1',
-    '应用1-权限2',
-)
+
+def access_metas():
+    return (
+        '应用1-基础权限',
+        '应用1-权限1',
+        '应用1-权限2',
+    )
 
 
 def render_content(menu_access: MenuAccess, **kwargs):

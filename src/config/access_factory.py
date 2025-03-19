@@ -12,20 +12,22 @@ apps = [subapp2, subapp1]
 ################## 【结束】此处导入您的应用 ###################
 
 
-def trim_module_path2menu_item(module_path):
-    # 传进来的是__name__包路径，去掉前缀才是菜单项
-    menu_item_name = module_path.replace('dash_view.application.', '')
-    return menu_item_name
-
-
 class AccessFactory:
     from common.utilities.util_menu_access import MenuAccess
+    from cacheout import Cache
+
+    cache_dict_access_meta2menu_item = Cache()
 
     views = [role_mgmt, user_mgmt, group_auth, group_mgmt, workbench, monitor, personal_info, announcement, *apps]
 
-    # 读取每个VIEW中配置的所有权限
-    dict_access_meta2module_path = {access_meta: view.__name__ for view in views for access_meta in view.access_metas}
-    dict_access_meta2menu_item = {access_meta: trim_module_path2menu_item(module_path) for access_meta, module_path in dict_access_meta2module_path.items()}
+    # 读取每个VIEW中配置的所有权限，生成权限与模块路径的映射，缓存10秒
+    @classmethod
+    @cache_dict_access_meta2menu_item.memoize(ttl=10, typed=True)
+    def get_dict_access_meta2menu_item(cls):
+        dict_access_meta2module_path = {
+            access_meta: view.__name__ for view in cls.views for access_meta in (view.access_metas() if callable(view.access_metas) else view.access_metas)
+        }
+        return {access_meta: module_path.replace('dash_view.application.', '') for access_meta, module_path in dict_access_meta2module_path.items()}
 
     # 基础默认权限，主页和个人中心，每人都有，无需分配
     default_access_meta = (
@@ -47,11 +49,11 @@ class AccessFactory:
 
         logger = Log.get_logger(__name__)
 
-        # 角色类型附加权限检查
-        outliers = set(cls.default_access_meta) - set(cls.dict_access_meta2module_path.keys())
+        # 附加权限检查
+        outliers = (set(cls.default_access_meta) | set(cls.group_access_meta) | set(cls.admin_access_meta)) - set(cls.get_dict_access_meta2menu_item().keys())
         if outliers:
-            logger.error(f'角色类型附加权限中存在未定义的权限：{outliers}')
-            raise ValueError(f'角色类型附加权限中存在未定义的权限：{outliers}')
+            logger.error(f'附加权限中存在未定义的权限：{outliers}')
+            raise ValueError(f'附加权限中存在未定义的权限：{outliers}')
 
         # 每个VIEW的权限唯一性检查
         from collections import Counter
@@ -68,7 +70,7 @@ class AccessFactory:
         # 数据库检查
         from database.sql_db.dao import dao_user
 
-        outliers = set(dao_user.get_all_access_meta_for_setup_check()) - set(cls.dict_access_meta2module_path.keys())
+        outliers = set(dao_user.get_all_access_meta_for_setup_check()) - set(cls.get_dict_access_meta2menu_item().keys())
         if outliers:
             logger.error(f'数据库中存在未定义的权限：{outliers}')
             raise ValueError(f'数据库中存在未定义的权限：{outliers}')

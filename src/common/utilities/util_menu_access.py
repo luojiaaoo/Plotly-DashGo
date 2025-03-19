@@ -76,7 +76,7 @@ class MenuAccess:
         # 获取所有菜单项
         menu_items = set()
         for access_meta in all_access_meta:
-            menu_item = AccessFactory.dict_access_meta2menu_item.get(access_meta)
+            menu_item = AccessFactory.get_dict_access_meta2menu_item().get(access_meta)
             menu_items.add(menu_item)
         return menu_items
 
@@ -148,13 +148,16 @@ class MenuAccess:
 
     def has_access(self, access_meta) -> bool:
         return access_meta in self.all_access_metas
+    
+    @property
+    def dict_access_meta2menu_item():
+        from config.access_factory import AccessFactory
+        return AccessFactory.get_dict_access_meta2menu_item()
 
     def __init__(self, user_name) -> None:
-        from config.access_factory import AccessFactory
         from database.sql_db.dao import dao_user
 
         # 获取应用全部的权限元和菜单的对应关系
-        self.dict_access_meta2menu_item = AccessFactory.dict_access_meta2menu_item
         self.user_name = user_name
         try:
             self.user_info: dao_user.UserInfo = dao_user.get_user_info([user_name], exclude_disabled=True, exclude_role_admin=False)[0]
