@@ -4,7 +4,7 @@ from datetime import timedelta, datetime, timezone
 import jwt
 from dash import set_props
 from enum import Enum
-from flask import request
+from flask import request, session
 
 
 class AccessFailType(Enum):
@@ -80,13 +80,14 @@ def jwt_encode_save_access_to_session(data: Dict, expires_delta: Optional[timede
     返回:
     - NoReturn, 该函数不返回任何值。
     """
-    set_props('global-local-storage-authorization', {'data': ''})
-    set_props('global-cookie-authorization', {'value': '""'})
     access_token = jwt_encode(data, expires_delta=expires_delta)
+    session.permanent = True
     if session_permanent:
-        set_props('global-local-storage-authorization', {'data': f'Bearer {access_token}'})
+        session['keep_login'] = 1
+        set_props('global-cookie-authorization', {'expires': 3600 * 24 * 365})
     else:
-        set_props('global-cookie-authorization', {'value': f'Bearer {access_token}'})
+        session['keep_login'] = 0
+    set_props('global-cookie-authorization', {'value': f'Bearer {access_token}'})
 
 
 def jwt_decode_from_session(verify_exp: bool = True) -> Union[Dict, AccessFailType]:
@@ -113,7 +114,7 @@ def jwt_decode_from_session(verify_exp: bool = True) -> Union[Dict, AccessFailTy
             access_token = access_token_.split()[1]
         else:
             # TODO: 未来可能会支持其他类型的令牌
-            access_token = access_token_
+            raise NotImplementedError('Unsupported token type')
         try:
             access_data = jwt_decode(access_token, verify_exp=verify_exp)
         except ExpiredSignatureError:
@@ -132,5 +133,4 @@ def clear_access_token_from_session() -> None:
     返回:
     - None, 该函数不返回任何值。
     """
-    set_props('global-local-storage-authorization', {'data': ''})
     set_props('global-cookie-authorization', {'value': '""'})

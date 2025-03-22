@@ -1,6 +1,7 @@
 import feffery_antd_components as fac
 import feffery_utils_components as fuc
 from dash import dcc, html
+from flask import session
 
 
 def render():
@@ -31,6 +32,13 @@ def render():
         fuc.FefferyExecuteJs(id='main-execute-js-output'),
         # 监听窗口大小
         fuc.FefferyWindowSize(id='main-window-size'),
+        # 全局cookie登录令牌组件
+        fuc.FefferyCookie(
+            id='global-cookie-authorization',
+            cookieKey='global-cookie-authorization',
+            secure=True,
+            **(dict(expires=3600 * 24 * 365) if session.get('keep_login') else {}),
+        ),
         # 退出登录提示弹窗
         fac.AntdModal(
             html.Div(

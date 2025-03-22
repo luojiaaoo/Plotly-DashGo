@@ -36,10 +36,6 @@ app.layout = fuc.FefferyTopProgress(
         fac.Fragment(id='global-notification-container'),
         # URL初始化中继组件，触发root_router回调执行
         dcc.Store(id='global-url-init-load'),
-        # 全局本地存储登录令牌组件
-        fuc.FefferyLocalStorage(id='global-local-storage-authorization', initialSync=True),
-        # 全局cookie登录令牌组件
-        fuc.FefferyCookie(id='global-cookie-authorization', cookieKey='global-cookie-authorization'),
         # 应用根容器
         html.Div(id='root-container'),
     ],

@@ -26,12 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // if (url.includes('/_dash-update-component')) {
             config = config || {};
             let authToken = null;
-            // 检查 localStorage
-            authToken = localStorage.getItem('global-local-storage-authorization');
-            // 如果 localStorage 没有，检查 cookie
-            if (authToken == null || authToken == '' || authToken == '""') {
-                authToken = getCookie("global-cookie-authorization"); 
-            }
+            authToken = getCookie("global-cookie-authorization"); 
             // 如果存在 Token，添加 Header
             if (authToken !== null && authToken !== '' && authToken != '""') {
                 authToken = authToken.replace(/"/g, '')

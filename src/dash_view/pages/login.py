@@ -3,6 +3,7 @@ import feffery_antd_components as fac
 from config.dashgo_conf import ShowConf, JwtConf, LoginConf
 from dash import dcc
 from dash_view.framework.lang import render_lang_content
+from flask import session
 import dash_callback.pages.login_c  # noqa
 from i18n import t__other
 
@@ -123,6 +124,13 @@ def render_content():
                                             dcc.Store(id='login-store-need-vc', storage_type='local'),
                                             dcc.Store(id='login-store-fc', storage_type='local'),
                                             dcc.Store(id='login-password-sha256'),
+                                            # 全局cookie登录令牌组件
+                                            fuc.FefferyCookie(
+                                                id='global-cookie-authorization',
+                                                cookieKey='global-cookie-authorization',
+                                                secure=True,
+                                                **(dict(expires=3600 * 24 * 365) if session.get('keep_login') else {}),
+                                            ),
                                         ],
                                         direction='vertical',
                                         className={
