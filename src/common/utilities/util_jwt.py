@@ -2,8 +2,9 @@ from config.dashgo_conf import JwtConf
 from typing import Dict, Union, Optional
 from datetime import timedelta, datetime, timezone
 import jwt
-from flask import session
+from dash import set_props
 from enum import Enum
+from flask import request
 
 
 class AccessFailType(Enum):
@@ -79,9 +80,13 @@ def jwt_encode_save_access_to_session(data: Dict, expires_delta: Optional[timede
     返回:
     - NoReturn, 该函数不返回任何值。
     """
-    session.permanent = session_permanent
+    set_props('global-local-storage-authorization', {'data': ''})
+    set_props('global-cookie-authorization', {'value': '""'})
     access_token = jwt_encode(data, expires_delta=expires_delta)
-    session['Authorization'] = f'Bearer {access_token}'
+    if session_permanent:
+        set_props('global-local-storage-authorization', {'data': f'Bearer {access_token}'})
+    else:
+        set_props('global-cookie-authorization', {'value': f'Bearer {access_token}'})
 
 
 def jwt_decode_from_session(verify_exp: bool = True) -> Union[Dict, AccessFailType]:
@@ -100,13 +105,14 @@ def jwt_decode_from_session(verify_exp: bool = True) -> Union[Dict, AccessFailTy
     """
     from jwt.exceptions import ExpiredSignatureError
 
-    if not session.get('Authorization'):
+    if not request.headers.get('Authorization'):
         return AccessFailType.NO_ACCESS
     else:
-        access_token_ = session.get('Authorization')
+        access_token_ = request.headers.get('Authorization')
         if 'Bearer' in access_token_:
             access_token = access_token_.split()[1]
         else:
+            # TODO: 未来可能会支持其他类型的令牌
             access_token = access_token_
         try:
             access_data = jwt_decode(access_token, verify_exp=verify_exp)
@@ -126,4 +132,5 @@ def clear_access_token_from_session() -> None:
     返回:
     - None, 该函数不返回任何值。
     """
-    session.pop('Authorization', None)
+    set_props('global-local-storage-authorization', {'data': ''})
+    set_props('global-cookie-authorization', {'value': '""'})
