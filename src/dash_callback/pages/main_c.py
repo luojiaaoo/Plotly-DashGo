@@ -12,6 +12,7 @@ from common.utilities.util_menu_access import get_menu_access
 from dash_view.pages import page_404, page_401
 from i18n import t__access
 
+
 # 折叠侧边栏按钮回调
 app.clientside_callback(
     """(nClicks, collapsed) => {
@@ -42,13 +43,14 @@ app.clientside_callback(
         return window.dash_clientside.no_update;
     }""",
     Output('btn-menu-collapse-sider-menu', 'nClicks'),
-    Input('global-window-size', '_width'),
+    Input('main-window-size', '_width'),
     [
         State('btn-menu-collapse-sider-menu', 'nClicks'),
         State('menu-collapse-sider', 'collapsed'),
     ],
     prevent_initial_call=True,
 )
+
 
 # 地址栏-》更新地址URL中继store 或者 直接切换页面不进行路由回调
 app.clientside_callback(
@@ -71,17 +73,17 @@ app.clientside_callback(
         }
     """,
     [
-        Output('global-url-relay', 'data', allow_duplicate=True),
-        Output('global-menu', 'openKeys', allow_duplicate=True),
-        Output('global-menu', 'currentKey', allow_duplicate=True),
-        Output('header-breadcrumb', 'items', allow_duplicate=True),
+        Output('main-url-relay', 'data', allow_duplicate=True),
+        Output('main-menu', 'openKeys', allow_duplicate=True),
+        Output('main-menu', 'currentKey', allow_duplicate=True),
+        Output('main-header-breadcrumb', 'items', allow_duplicate=True),
         Output('tabs-container', 'activeKey', allow_duplicate=True),
     ],
-    Input('global-url-location', 'href'),
+    Input('main-url-location', 'href'),
     [
         State('tabs-container', 'activeKey'),
         State('tabs-container', 'itemKeys'),
-        State('global-opened-tab-pathname-infos', 'data'),
+        State('main-opened-tab-pathname-infos', 'data'),
         State('menu-collapse-sider', 'collapsed'),
     ],
     prevent_initial_call=True,
@@ -93,16 +95,16 @@ app.clientside_callback(
     [
         Output('tabs-container', 'items', allow_duplicate=True),
         Output('tabs-container', 'activeKey', allow_duplicate=True),
-        Output('global-menu', 'openKeys', allow_duplicate=True),
-        Output('global-menu', 'currentKey', allow_duplicate=True),
-        Output('header-breadcrumb', 'items', allow_duplicate=True),
-        Output('global-opened-tab-pathname-infos', 'data'),
+        Output('main-menu', 'openKeys', allow_duplicate=True),
+        Output('main-menu', 'currentKey', allow_duplicate=True),
+        Output('main-header-breadcrumb', 'items', allow_duplicate=True),
+        Output('main-opened-tab-pathname-infos', 'data'),
     ],
-    Input('global-url-relay', 'data'),
+    Input('main-url-relay', 'data'),
     [
         State('tabs-container', 'itemKeys'),
         State('menu-collapse-sider', 'collapsed'),
-        State('global-url-location', 'trigger'),
+        State('main-url-location', 'trigger'),
     ],
     prevent_initial_call=True,
 )
@@ -140,7 +142,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
         module_page = importlib.import_module(f'dash_view.application.{url_menu_item}')
     except Exception:
         # 没有该页面对应的模块，返回404
-        set_props('global-full-screen-container', {'children': page_404.render()})
+        set_props('root-container', {'children': page_404.render()})
         return dash.no_update
 
     def menu_item2url_path(menu_item: str, parent_count=0) -> str:
@@ -176,7 +178,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     menu_access: MenuAccess = get_menu_access()
     # 没有权限，返回401
     if url_menu_item not in menu_access.menu_items:
-        set_props('global-full-screen-container', {'children': page_401.render()})
+        set_props('root-container', {'children': page_401.render()})
         return dash.no_update
 
     ################# 返回页面 #################
@@ -194,8 +196,8 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     )
     if relocation:
         # 激活超时组件，马上动态更新到目标页
-        set_props('global-url-last-when-load', {'data': last_herf})
-        set_props('global-url-timeout-last-when-load', {'delay': 100})
+        set_props('main-url-last-when-load', {'data': last_herf})
+        set_props('main-url-timeout-last-when-load', {'delay': 100})
     return [
         p_items,  # tab标签页
         dash.no_update if relocation else key_url_path,  # tab选中key
@@ -233,9 +235,9 @@ app.clientside_callback(
             return data;
         }
     """,
-    Output('global-dcc-url', 'href'),
-    Input('global-url-timeout-last-when-load', 'timeoutCount'),
-    State('global-url-last-when-load', 'data'),
+    Output('main-dcc-url', 'href'),
+    Input('main-url-timeout-last-when-load', 'timeoutCount'),
+    State('main-url-last-when-load', 'data'),
     prevent_initial_call=True,
 )
 
@@ -249,7 +251,7 @@ app.clientside_callback(
         return activeKey;
     }
     """,
-    Output('global-dcc-url', 'pathname'),
+    Output('main-dcc-url', 'pathname'),
     Input('tabs-container', 'activeKey'),
     prevent_initial_call=True,
 )
@@ -293,7 +295,7 @@ app.clientside_callback(
         return true;
     }
     """,
-    Output('global-reload', 'reload', allow_duplicate=True),
+    Output('main-reload', 'reload', allow_duplicate=True),
     Input('tabs-refresh', 'nClicks'),
     prevent_initial_call=True,
 )

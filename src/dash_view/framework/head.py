@@ -39,7 +39,7 @@ def render_head_content(menu_access: MenuAccess):
                 [
                     fac.AntdBreadcrumb(
                         items=[{'title': t__access('首页'), 'href': '/dashboard_/workbench'}],
-                        id='header-breadcrumb',
+                        id='main-header-breadcrumb',
                         style={
                             'height': '100%',
                             'display': 'flex',
@@ -73,7 +73,7 @@ def render_head_content(menu_access: MenuAccess):
                 },
                 wrap=False,
             ),
-            id='header-breadcrumb-col',
+            id='main-header-breadcrumb-col',
             flex='1',
         ),
         # 页首右侧用户信息区域
@@ -158,8 +158,8 @@ def render_head_content(menu_access: MenuAccess):
 # 个人信息，退出登录
 @app.callback(
     [
-        Output('global-dcc-url', 'pathname', allow_duplicate=True),
-        Output('global-reload', 'reload', allow_duplicate=True),
+        Output('main-dcc-url', 'pathname', allow_duplicate=True),
+        Output('main-reload', 'reload', allow_duplicate=True),
     ],
     Input('global-head-user-name-dropdown', 'nClicks'),
     State('global-head-user-name-dropdown', 'clickedKey'),

@@ -11,7 +11,7 @@ from i18n import t__other
 # 定义一个客户端回调函数，用于处理登录验证代码的显示逻辑，总是显示login的路径，如果有next的query参数，则代表是OAuth2的请求
 app.clientside_callback(
     """
-    (fc_count,timeoutCount,url) => {
+    (fc_count,url) => {
         fc_count=fc_count || 0;
         const urlObj = new URL(url);
         const searchParams = new URLSearchParams(urlObj.search);
@@ -37,10 +37,8 @@ app.clientside_callback(
     ],
     [
         Input('login-store-fc', 'data'),
-        Input('timeout-trigger-verify-code', 'timeoutCount'),
     ],
     State('login-location-no-refresh', 'href'),
-    prevent_initial_call=True,
 )
 
 app.clientside_callback(

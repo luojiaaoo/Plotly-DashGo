@@ -1,11 +1,11 @@
 import feffery_antd_components as fac
 from dash_view.framework.aside import render_aside_content
 from dash_view.framework.head import render_head_content
-from dash_view.framework.func import render_func_content
 from common.utilities.util_browser import get_browser_info
 from common.utilities.util_menu_access import MenuAccess
 import feffery_utils_components as fuc
 from i18n import t__default
+from dash_view.framework import func_main
 import dash_callback.pages.main_c  # noqa
 
 
@@ -13,7 +13,7 @@ def render_content(menu_access: MenuAccess):
     return fac.AntdRow(
         [
             # 功能组件注入
-            *render_func_content(),
+            fac.Fragment(func_main.render()),
             # 菜单列
             fac.AntdCol(
                 fac.AntdSider(
@@ -92,7 +92,7 @@ def render_content(menu_access: MenuAccess):
                                     }
                                     if get_browser_info().type != 'firefox'
                                     else {}
-                                ), ## 火狐浏览器不支持通过伪类自定义滚动条样式
+                                ),  ## 火狐浏览器不支持通过伪类自定义滚动条样式
                                 '& .ant-tabs-content-holder > .ant-tabs-content': {'height': '100%'},
                                 '& .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane': {'height': '100%', 'paddingBottom': '8px'},
                                 '& .ant-tabs-nav': {'margin': '8px 0 8px 0'},
@@ -107,5 +107,4 @@ def render_content(menu_access: MenuAccess):
         ],
         className={'width': '100vw', 'height': '100vh'},
         wrap=False,
-        id='global-full-screen-container',
     )

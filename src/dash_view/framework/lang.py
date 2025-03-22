@@ -25,7 +25,7 @@ def render_lang_content(color='#95afc0'):
             clickExecuteJsString=(
                 """
                     window.dash_clientside.set_props('global-locale', { value: '%s' })
-                    window.dash_clientside.set_props('global-reload', { reload: true })
+                    window.dash_clientside.set_props('main-reload', { reload: true })
                 """
                 % ('zh-cn' if locale == 'en-us' else 'en-us')
             ),

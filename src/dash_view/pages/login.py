@@ -10,6 +10,7 @@ from i18n import t__other
 def render_content():
     return fuc.FefferyDiv(
         children=[
+            fac.Fragment(id='login-message-container'),
             fuc.FefferyDiv(
                 id='login-container',
                 children=[
@@ -169,11 +170,12 @@ def render_content():
                         tabBarGutter=0,
                         tabBarRightExtraContent=render_lang_content(),
                     ),
-                    fuc.FefferyReload(id='global-reload'),  # 为了和主页main统一回调
+                    # >>>>> 重定向组件
                     fac.Fragment(id='login-location-refresh-container'),
-                    fac.Fragment(id='login-message-container'),
-                    fuc.FefferyTimeout(id='timeout-trigger-verify-code', delay=0),
+                    # >>>>> 地址栏控制组件
                     dcc.Location(id='login-location-no-refresh', refresh=False),
+                    # >>>>> 消息组件
+                    fac.Fragment(id='login-message-container'),
                 ],
                 className={
                     'width': 'max(25%,300px)',
