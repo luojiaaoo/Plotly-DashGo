@@ -61,7 +61,7 @@ class OAuth2AuthorizationCode(BaseModel):
 class OAuth2Token(BaseModel):
     """颁发的访问令牌"""
 
-    token = CharField(max_length=48, help_text='访问令牌')
+    token = CharField(max_length=256, help_text='访问令牌')
     client_id = CharField(max_length=48, help_text='客户端ID')
     user_name = CharField(max_length=32, help_text='用户名')
     expires_at = DateTimeField(help_text='过期时间')
@@ -71,7 +71,12 @@ class OAuth2Token(BaseModel):
         indexes = ((('token',), True),)
 
     def is_valid(self):
-        from datetime import datetime
-
         """检查令牌是否有效"""
+        from datetime import datetime
+        from common.utilities.util_jwt import jwt_decode
+
+        try:
+            jwt_decode(self.token, verify_exp=True)
+        except Exception:
+            return False
         return self.expires_at > datetime.now()

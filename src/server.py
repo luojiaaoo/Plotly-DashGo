@@ -6,7 +6,7 @@ from common.utilities.util_logger import Log
 from common.exception import global_exception_handler
 from common.utilities.util_dash import CustomDash
 from common.constant import HttpStatusConstant
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,timezone
 from i18n import t__other
 
 
@@ -168,9 +168,9 @@ def issue_token():
     - client_id: 客户端ID（必须）
     - client_secret: 客户端密钥（必须）
     """
-    import secrets
     from database.sql_db.dao.dao_oauth2 import exist_code, validate_client, insert_token
     from config.dashgo_conf import OAuth2Conf
+    from common.utilities.util_jwt import jwt_encode
 
     # 验证客户端凭证
     client_id = request.form.get('client_id')
@@ -196,7 +196,12 @@ def issue_token():
     if not auth_code.check_redirect_uri(request.form.get('redirect_uri')):
         raise OAuth2Error('Redirect URI mismatch')
     if insert_token(
-        token=(token_ := secrets.token_urlsafe(OAuth2Conf.OAuth2TokenLength)),
+        token=(
+            token_ := jwt_encode(
+                data={'user_name': auth_code.user_name},
+                expires_delta=timedelta(minutes=OAuth2Conf.OAuth2TokenExpiresInMinutes),
+            )
+        ),
         client_id=client_id,
         user_name=auth_code.user_name,
         expires_at=datetime.now() + timedelta(minutes=OAuth2Conf.OAuth2TokenExpiresInMinutes),
@@ -221,8 +226,12 @@ def userinfo():
     """受保护端点"""
     from database.sql_db.dao.dao_user import get_user_info
     from common.utilities.util_menu_access import MenuAccess
+    from common.utilities.util_jwt import jwt_decode
 
     token = current_token()
+    user_name = jwt_decode(token.token)['user_name']
+    if user_name != token.user_name: # 不改数据库不可能发生
+        abort(HttpStatusConstant.ERROR)
     user = get_user_info(user_names=[token.user_name])[0]
     access_metas = MenuAccess(token.user_name).all_access_metas
     return jsonify(

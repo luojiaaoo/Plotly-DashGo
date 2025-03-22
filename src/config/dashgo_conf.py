@@ -73,7 +73,6 @@ class OAuth2Conf(metaclass=BaseMetaConf):
     OAuth2AuthorizationCodeExpiresInMinutes: int
     OAuth2AuthorizationCodeLength: int
     OAuth2TokenExpiresInMinutes: int
-    OAuth2TokenLength: int
 
 
 class SqlDbConf(metaclass=BaseMetaConf):
