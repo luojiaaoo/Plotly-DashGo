@@ -158,8 +158,8 @@ def render_head_content(menu_access: MenuAccess):
 # 个人信息，退出登录
 @app.callback(
     [
-        Output('global-dcc-url', 'pathname', allow_duplicate=True),
-        Output('global-reload', 'reload', allow_duplicate=True),
+        Output('main-dcc-url', 'pathname', allow_duplicate=True),
+        Output('main-reload', 'reload', allow_duplicate=True),
     ],
     Input('global-head-user-name-dropdown', 'nClicks'),
     State('global-head-user-name-dropdown', 'clickedKey'),

@@ -159,7 +159,7 @@ app.clientside_callback(
     [
         Output('login-location-refresh-container', 'children', allow_duplicate=True),
         Output('login-store-fc', 'data'),
-        Output('login-message-container', 'children', allow_duplicate=True),
+        Output('global-message-container', 'children', allow_duplicate=True),
         Output('login-verify-code-pic', 'refresh'),
     ],
     [

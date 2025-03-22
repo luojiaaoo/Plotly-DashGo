@@ -8,3 +8,17 @@ console.error = function (...args) {
         originalConsoleError.apply(console, args);
     }
 };
+
+document.addEventListener('DOMContentLoaded', function() {
+    const originalFetch = window.fetch;
+    window.fetch = function(url, config) {
+        // if (url.includes('/_dash/')) {
+            config = config || {};
+            config.headers = {
+                ...config.headers,
+                'Authorization': 'Bearer your_token_here'
+            };
+        // }
+        return originalFetch(url, config);
+    };
+});

@@ -12,7 +12,7 @@ app.clientside_callback(
         }
     }
     """,
-    Output('global-reload', 'reload'),
+    Output('main-reload', 'reload'),
     Input('global-token-err-modal', 'okCounts'),
 )
 
@@ -41,10 +41,8 @@ def render_func_content():
         #################################################################
         # 标 签 页 的 缓 存 组 件 ， 减 少 没 必 要 的 主 路 由 回 调 执 行 #
         #################################################################
-        # URL中继组件，用于保存最后一次新建的标签页的URL，如果在已打开的标签页之间切换，不触发路由回调
-        dcc.Store(id='global-url-relay'),
-        # 保存打开过的标签页的面包屑、展开key、选中key作为缓存
-        dcc.Store(id='global-opened-tab-pathname-infos', data={}),
+        # URL初始化中继组件，触发root_router回调执行
+        dcc.Store(id='global-url-init-load'), 
         #
         #################################################################
         #    在 打 开 工 作 页 之 后 ， 自 动 加 载 上 次 访 问 地 址      #
@@ -57,8 +55,6 @@ def render_func_content():
         ############################################
         #             功 能 组 件                   #
         ############################################
-        # 全局强制网页刷新组件
-        fuc.FefferyReload(id='global-reload'),
         # 全局js执行
         fuc.FefferyExecuteJs(id='global-execute-js-output'),
         # 监听窗口大小

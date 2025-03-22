@@ -6,14 +6,21 @@ from common.utilities.util_browser import get_browser_info
 from common.utilities.util_menu_access import MenuAccess
 import feffery_utils_components as fuc
 from i18n import t__default
+from dash import dcc
 import dash_callback.pages.main_c  # noqa
 
 
 def render_content(menu_access: MenuAccess):
     return fac.AntdRow(
         [
-            # 功能组件注入
-            *render_func_content(),
+            # URL中继组件，用于保存最后一次新建的标签页的URL，如果在已打开的标签页之间切换，不触发路由回调
+            dcc.Store(id='main-url-relay'),
+            # 保存打开过的标签页的面包屑、展开key、选中key作为缓存
+            dcc.Store(id='main-opened-tab-pathname-infos', data={}),
+            # 全局强制网页刷新组件
+            fuc.FefferyReload(id='main-reload'),
+            dcc.Location(id='main-dcc-url', refresh=False),
+            fuc.FefferyLocation(id='main-url-location'),
             # 菜单列
             fac.AntdCol(
                 fac.AntdSider(
@@ -92,7 +99,7 @@ def render_content(menu_access: MenuAccess):
                                     }
                                     if get_browser_info().type != 'firefox'
                                     else {}
-                                ), ## 火狐浏览器不支持通过伪类自定义滚动条样式
+                                ),  ## 火狐浏览器不支持通过伪类自定义滚动条样式
                                 '& .ant-tabs-content-holder > .ant-tabs-content': {'height': '100%'},
                                 '& .ant-tabs-content-holder > .ant-tabs-content > .ant-tabs-tabpane': {'height': '100%', 'paddingBottom': '8px'},
                                 '& .ant-tabs-nav': {'margin': '8px 0 8px 0'},
@@ -107,5 +114,4 @@ def render_content(menu_access: MenuAccess):
         ],
         className={'width': '100vw', 'height': '100vh'},
         wrap=False,
-        id='global-full-screen-container',
     )
