@@ -170,9 +170,12 @@ def render_content():
                         tabBarGutter=0,
                         tabBarRightExtraContent=render_lang_content(),
                     ),
+                    # >>>>> 重定向组件
                     fac.Fragment(id='login-location-refresh-container'),
-                    fuc.FefferyTimeout(id='timeout-trigger-verify-code', delay=0),
+                    # >>>>> 地址栏控制组件
                     dcc.Location(id='login-location-no-refresh', refresh=False),
+                    # >>>>> 消息组件
+                    fac.Fragment(id='login-message-container'),
                 ],
                 className={
                     'width': 'max(25%,300px)',

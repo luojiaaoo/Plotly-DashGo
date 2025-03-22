@@ -1,26 +1,19 @@
 import feffery_antd_components as fac
 from dash_view.framework.aside import render_aside_content
 from dash_view.framework.head import render_head_content
-from dash_view.framework.func import render_func_content
 from common.utilities.util_browser import get_browser_info
 from common.utilities.util_menu_access import MenuAccess
 import feffery_utils_components as fuc
 from i18n import t__default
-from dash import dcc
+from dash_view.framework import func_main
 import dash_callback.pages.main_c  # noqa
 
 
 def render_content(menu_access: MenuAccess):
     return fac.AntdRow(
         [
-            # URL中继组件，用于保存最后一次新建的标签页的URL，如果在已打开的标签页之间切换，不触发路由回调
-            dcc.Store(id='main-url-relay'),
-            # 保存打开过的标签页的面包屑、展开key、选中key作为缓存
-            dcc.Store(id='main-opened-tab-pathname-infos', data={}),
-            # 全局强制网页刷新组件
-            fuc.FefferyReload(id='main-reload'),
-            dcc.Location(id='main-dcc-url', refresh=False),
-            fuc.FefferyLocation(id='main-url-location'),
+            # 功能组件注入
+            fac.Fragment(func_main.render()),
             # 菜单列
             fac.AntdCol(
                 fac.AntdSider(

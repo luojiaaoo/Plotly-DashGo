@@ -10,17 +10,8 @@ from dash import set_props
 from yarl import URL
 from common.utilities.util_menu_access import get_menu_access
 from dash_view.pages import page_404, page_401
-from common.utilities import util_jwt
-import feffery_utils_components as fuc
-import feffery_antd_components as fac
-from dash import dcc, html
-from dash_view.pages import main, login
-from common.utilities.util_menu_access import MenuAccess
-from common.exception import NotFoundUserException
-from common.utilities.util_logger import Log
 from i18n import t__access
 
-logger = Log.get_logger(__name__)
 
 # 折叠侧边栏按钮回调
 app.clientside_callback(
@@ -52,7 +43,7 @@ app.clientside_callback(
         return window.dash_clientside.no_update;
     }""",
     Output('btn-menu-collapse-sider-menu', 'nClicks'),
-    Input('global-window-size', '_width'),
+    Input('main-window-size', '_width'),
     [
         State('btn-menu-collapse-sider-menu', 'nClicks'),
         State('menu-collapse-sider', 'collapsed'),
@@ -60,26 +51,6 @@ app.clientside_callback(
     prevent_initial_call=True,
 )
 
-
-# 如果首次加载，更新中继url
-app.clientside_callback(
-    """
-        (href,trigger) => {
-            console.log(trigger);
-            if(trigger=='load'){
-                return href;
-            }else{
-                return window.dash_clientside.no_update;
-            }
-        }
-    """,
-    Output('global-url-init-load', 'data'),
-    Input('global-url-location', 'href'),
-    [
-        State('global-url-location', 'trigger'),
-    ],
-    prevent_initial_call=True,
-)
 
 # 地址栏-》更新地址URL中继store 或者 直接切换页面不进行路由回调
 app.clientside_callback(
@@ -105,7 +76,7 @@ app.clientside_callback(
         Output('main-url-relay', 'data', allow_duplicate=True),
         Output('main-menu', 'openKeys', allow_duplicate=True),
         Output('main-menu', 'currentKey', allow_duplicate=True),
-        Output('header-breadcrumb', 'items', allow_duplicate=True),
+        Output('main-header-breadcrumb', 'items', allow_duplicate=True),
         Output('tabs-container', 'activeKey', allow_duplicate=True),
     ],
     Input('main-url-location', 'href'),
@@ -119,46 +90,6 @@ app.clientside_callback(
 )
 
 
-def handle_root_router_error(e):
-    """处理根节点路由错误"""
-    from dash_view.pages import page_500
-
-    set_props(
-        'root-container',
-        {
-            'children': page_500.render(e),
-        },
-    )
-
-
-@app.callback(
-    Output('root-container', 'children'),
-    Input('global-url-init-load', 'data'),
-    prevent_initial_call=True,
-    on_error=handle_root_router_error,
-)
-def root_router(href):
-    """判断是登录还是未登录"""
-    rt_access = util_jwt.jwt_decode_from_session(verify_exp=True)
-    if isinstance(rt_access, util_jwt.AccessFailType):
-        return login.render_content()
-    else:
-        try:
-            menu_access = MenuAccess(rt_access['user_name'])
-        # 找不到该授权用户
-        except NotFoundUserException as e:
-            logger.warning(e.message)
-            util_jwt.clear_access_token_from_session()
-            return login.render_content()
-        # # 如果session是永久，也就是用户登录勾选了保存会话，刷新jwt令牌，继续延长令牌有效期
-        # if session.permanent:
-        #     util_jwt.jwt_encode_save_access_to_session({'user_name': rt_access['user_name']}, session_permanent=True)
-        return main.render_content(
-            # 获取用户菜单权限，根据权限初始化主页内容
-            menu_access=menu_access,
-        )
-
-
 # 主路由函数：地址URL中继store -》 Tab新增+Tab切换+菜单展开+菜单选中+面包屑
 @app.callback(
     [
@@ -166,14 +97,14 @@ def root_router(href):
         Output('tabs-container', 'activeKey', allow_duplicate=True),
         Output('main-menu', 'openKeys', allow_duplicate=True),
         Output('main-menu', 'currentKey', allow_duplicate=True),
-        Output('header-breadcrumb', 'items', allow_duplicate=True),
+        Output('main-header-breadcrumb', 'items', allow_duplicate=True),
         Output('main-opened-tab-pathname-infos', 'data'),
     ],
     Input('main-url-relay', 'data'),
     [
         State('tabs-container', 'itemKeys'),
         State('menu-collapse-sider', 'collapsed'),
-        State('global-url-location', 'trigger'),
+        State('main-url-location', 'trigger'),
     ],
     prevent_initial_call=True,
 )
@@ -265,8 +196,8 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     )
     if relocation:
         # 激活超时组件，马上动态更新到目标页
-        set_props('global-url-last-when-load', {'data': last_herf})
-        set_props('global-url-timeout-last-when-load', {'delay': 100})
+        set_props('main-url-last-when-load', {'data': last_herf})
+        set_props('main-url-timeout-last-when-load', {'delay': 100})
     return [
         p_items,  # tab标签页
         dash.no_update if relocation else key_url_path,  # tab选中key
@@ -304,9 +235,9 @@ app.clientside_callback(
             return data;
         }
     """,
-    Output('global-dcc-url', 'href'),
-    Input('global-url-timeout-last-when-load', 'timeoutCount'),
-    State('global-url-last-when-load', 'data'),
+    Output('main-dcc-url', 'href'),
+    Input('main-url-timeout-last-when-load', 'timeoutCount'),
+    State('main-url-last-when-load', 'data'),
     prevent_initial_call=True,
 )
 
@@ -320,7 +251,7 @@ app.clientside_callback(
         return activeKey;
     }
     """,
-    Output('global-dcc-url', 'pathname'),
+    Output('main-dcc-url', 'pathname'),
     Input('tabs-container', 'activeKey'),
     prevent_initial_call=True,
 )

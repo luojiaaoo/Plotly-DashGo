@@ -1,9 +1,8 @@
 from config.dashgo_conf import JwtConf
-from typing import Dict, Union, NoReturn, Optional
+from typing import Dict, Union, Optional
 from datetime import timedelta, datetime, timezone
 import jwt
 from flask import session
-from common.exception import AuthException
 from enum import Enum
 
 

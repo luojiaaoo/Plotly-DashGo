@@ -39,7 +39,7 @@ def render_head_content(menu_access: MenuAccess):
                 [
                     fac.AntdBreadcrumb(
                         items=[{'title': t__access('首页'), 'href': '/dashboard_/workbench'}],
-                        id='header-breadcrumb',
+                        id='main-header-breadcrumb',
                         style={
                             'height': '100%',
                             'display': 'flex',
@@ -73,7 +73,7 @@ def render_head_content(menu_access: MenuAccess):
                 },
                 wrap=False,
             ),
-            id='header-breadcrumb-col',
+            id='main-header-breadcrumb-col',
             flex='1',
         ),
         # 页首右侧用户信息区域
