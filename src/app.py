@@ -38,10 +38,6 @@ app.layout = lambda: fuc.FefferyTopProgress(
         dcc.Store(id='global-url-init-load'),
         # 应用根容器
         html.Div(id='root-container'),
-        # 全局永久cookie登录令牌组件
-        fuc.FefferyCookie(id='global-cookie-authorization-permanent', cookieKey='global-cookie-authorization-permanent', secure=True, expires=3600 * 24 * 365),
-        # 全局会话cookie登录令牌组件
-        fuc.FefferyCookie(id='global-cookie-authorization-session', cookieKey='global-cookie-authorization-session', secure=True),
     ],
     listenPropsMode='include',
     includeProps=['root-container.children'],

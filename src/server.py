@@ -6,7 +6,7 @@ from common.utilities.util_logger import Log
 from common.exception import global_exception_handler
 from common.utilities.util_dash import CustomDash
 from common.constant import HttpStatusConstant
-from datetime import datetime, timedelta,timezone
+from datetime import datetime, timedelta, timezone
 from i18n import t__other
 
 
@@ -20,6 +20,18 @@ app = CustomDash(
     update_title=None,
     serve_locally=CommonConf.DASH_SERVE_LOCALLY,
     extra_hot_reload_paths=[],
+    hooks={
+        'request_pre': """
+(payload) => {
+    // 尝试获取键名为access_token的cookie，用于生成请求头令牌
+    let access_token = document.cookie.match(/access_token=([^;]+)/)
+    // 为来自dash的请求添加请求头
+    if (access_token){
+        store.getState().config.fetch.headers['Authorization'] = access_token[1].replace(/"/g, '')
+    }
+}
+"""
+    },
     on_error=global_exception_handler,
 )
 app.server.config['COMPRESS_ALGORITHM'] = FlaskConf.COMPRESS_ALGORITHM
@@ -230,7 +242,7 @@ def userinfo():
 
     token = current_token()
     user_name = jwt_decode(token.token)['user_name']
-    if user_name != token.user_name: # 不改数据库不可能发生
+    if user_name != token.user_name:  # 不改数据库不可能发生
         abort(HttpStatusConstant.ERROR)
     user = get_user_info(user_names=[token.user_name])[0]
     access_metas = MenuAccess(token.user_name).all_access_metas
