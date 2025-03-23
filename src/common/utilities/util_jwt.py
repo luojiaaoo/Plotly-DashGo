@@ -4,7 +4,7 @@ from datetime import timedelta, datetime, timezone
 import jwt
 from dash import set_props
 from enum import Enum
-from flask import request, session
+from flask import request
 
 
 class AccessFailType(Enum):
@@ -81,13 +81,12 @@ def jwt_encode_save_access_to_session(data: Dict, expires_delta: Optional[timede
     - NoReturn, 该函数不返回任何值。
     """
     access_token = jwt_encode(data, expires_delta=expires_delta)
-    session.permanent = True
     if session_permanent:
-        session['keep_login'] = 1
-        set_props('global-cookie-authorization', {'expires': 3600 * 24 * 365})
+        set_props('global-cookie-authorization-permanent', {'value': f'Bearer {access_token}'})
+        set_props('global-cookie-authorization-session', {'value': '""'})
     else:
-        session['keep_login'] = 0
-    set_props('global-cookie-authorization', {'value': f'Bearer {access_token}'})
+        set_props('global-cookie-authorization-permanent', {'value': '""'})
+        set_props('global-cookie-authorization-session', {'value': f'Bearer {access_token}'})
 
 
 def jwt_decode_from_session(verify_exp: bool = True) -> Union[Dict, AccessFailType]:
@@ -133,4 +132,5 @@ def clear_access_token_from_session() -> None:
     返回:
     - None, 该函数不返回任何值。
     """
-    set_props('global-cookie-authorization', {'value': '""'})
+    set_props('global-cookie-authorization-permanent', {'value': '""'})
+    set_props('global-cookie-authorization-session', {'value': '""'})

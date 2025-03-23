@@ -20,13 +20,18 @@ function getCookie(name) {
     return null; // 未找到返回 null
   }
   
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function() {
     const originalFetch = window.fetch;
     window.fetch = function(url, config) {
         // if (url.includes('/_dash-update-component')) {
             config = config || {};
             let authToken = null;
-            authToken = getCookie("global-cookie-authorization"); 
+            // 检查永久授权 cookie
+            authToken = getCookie("global-cookie-authorization-permanent");
+            // 如果永久授权 cookie 不存在，检查会话授权 cookie
+            if (authToken == null || authToken == '' || authToken == '""') {
+                authToken = getCookie("global-cookie-authorization-session"); 
+            }
             // 如果存在 Token，添加 Header
             if (authToken !== null && authToken !== '' && authToken != '""') {
                 authToken = authToken.replace(/"/g, '')
