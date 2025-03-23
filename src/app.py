@@ -26,7 +26,7 @@ initialize_database()
 AccessFactory.check_access_meta()
 
 # 全局功能组件+全局消息提示+全局通知信息+URL初始化中继组件+根容器
-app.layout = fuc.FefferyTopProgress(
+app.layout = lambda: fuc.FefferyTopProgress(
     [
         # 全局url监听组件，仅仅起到监听的作用
         fuc.FefferyLocation(id='global-url-location'),
