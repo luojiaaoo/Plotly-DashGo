@@ -2,7 +2,7 @@ from common.utilities.util_logger import Log
 from i18n import t__other
 
 
-logger = Log.get_logger(__name__)
+logger = Log.get_logger('global_exception')
 
 
 class NotFoundUserException(Exception):

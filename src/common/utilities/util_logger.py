@@ -26,6 +26,7 @@ class Log:
     @classmethod
     def get_logger(cls, logger_name: str) -> logging.Logger:
         logger = logging.getLogger(logger_name)
+        logger.propagate = False
         logger.setLevel(eval(f'logging.{LogConf.LOG_LEVEL}'))
         if LogConf.HANDLER_LOG_FILE:
             logger.addHandler(cls.handler_file)
