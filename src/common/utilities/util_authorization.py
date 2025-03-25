@@ -21,10 +21,10 @@ def auth_validate(verify_exp=True) -> tuple[AuthType, Union[Dict, AccessFailType
     auth_type, auth_token = auth_info
     if auth_type == AuthType.BEARER.value:
         # jwt验证
-        return AuthType.BEARER.value, jwt_decode_rt_type(auth_token, verify_exp=verify_exp)
+        return jwt_decode_rt_type(auth_token, verify_exp=verify_exp)
     elif auth_type == AuthType.DIGEST.value:
         # Basic认证
-        return AuthType.DIGEST.value, validate_basic(auth_token)
+        return validate_basic(auth_token)
 
 
 # Basic认证

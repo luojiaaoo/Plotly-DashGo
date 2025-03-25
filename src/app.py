@@ -51,6 +51,9 @@ def handle_root_router_error(e):
     """处理根节点路由错误"""
     from dash_view.pages import page_500
 
+    logger = Log.get_logger('global_exception')
+    logger.exception(f'[exception]{e}')
+
     set_props(
         'root-container',
         {
