@@ -1,7 +1,7 @@
-from flask import request, abort
+from flask import request, abort, jsonify
 from common.constant import HttpStatusConstant
 from enum import Enum
-from typing import Union,Dict
+from typing import Union, Dict
 from .util_jwt import jwt_decode_rt_type, AccessFailType
 
 
@@ -25,6 +25,7 @@ def auth_validate(verify_exp=True) -> tuple[AuthType, Union[Dict, AccessFailType
     elif auth_type == AuthType.DIGEST.value:
         # Basic认证
         return validate_basic(auth_token)
+    abort(jsonify({'error': f'Unsupport Type {auth_type}'}), HttpStatusConstant.UNSUPPORTED_TYPE)
 
 
 # Basic认证
