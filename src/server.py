@@ -24,7 +24,7 @@ app = CustomDash(
         'request_pre': """
 (payload) => {
     // 尝试获取键名为access_token的cookie，用于生成请求头令牌
-    let access_token = document.cookie.match(/access_token=([^;]+)/)
+    let access_token = document.cookie.match(/Authorization=([^;]+)/)
     // 为来自dash的请求添加请求头
     if (access_token){
         store.getState().config.fetch.headers['Authorization'] = access_token[1].replace(/"/g, '')

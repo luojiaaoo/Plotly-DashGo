@@ -82,7 +82,7 @@ def jwt_encode_save_access_to_session(data: Dict, expires_delta: Optional[timede
     - NoReturn, 该函数不返回任何值。
     """
     access_token = jwt_encode(data, expires_delta=expires_delta)
-    dash.ctx.response.set_cookie('access_token', f'Bearer {access_token}', max_age=3600 * 24 * 365 if session_permanent else None)
+    dash.ctx.response.set_cookie('Authorization', f'Bearer {access_token}', max_age=3600 * 24 * 365 if session_permanent else None)
 
 
 def jwt_decode_from_session(verify_exp: bool = True) -> Union[Dict, AccessFailType]:
@@ -100,11 +100,11 @@ def jwt_decode_from_session(verify_exp: bool = True) -> Union[Dict, AccessFailTy
       或者访问失败的错误类型（AccessFailType枚举）。
     """
     from jwt.exceptions import ExpiredSignatureError
-
-    if not request.headers.get('Authorization'):
+    # 因为不是每个组件都能加headers，所以还是也校验cookies中的token
+    access_token_ = token_ if (token_:=request.headers.get('Authorization')) else request.cookies.get('Authorization')
+    if not access_token_:
         return AccessFailType.NO_ACCESS
     else:
-        access_token_ = request.headers.get('Authorization')
         if 'Bearer' in access_token_:
             access_token = access_token_.split()[1]
         else:
@@ -128,4 +128,4 @@ def clear_access_token_from_session() -> None:
     返回:
     - None, 该函数不返回任何值。
     """
-    dash.ctx.response.set_cookie('access_token', '', expires=0)
+    dash.ctx.response.set_cookie('Authorization', '', expires=0)
