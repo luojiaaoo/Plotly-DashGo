@@ -6,7 +6,7 @@ from database.sql_db.conn import initialize_database
 import feffery_antd_components as fac
 from dash.dependencies import Input, Output, State
 from dash import set_props
-from common.utilities import util_jwt
+from common.utilities import util_jwt, util_authorization
 from dash_view.pages import main, login
 from common.utilities.util_menu_access import MenuAccess
 from common.exception import NotFoundUserException
@@ -67,7 +67,7 @@ def handle_root_router_error(e):
 )
 def root_router(href):
     """判断是登录还是未登录"""
-    rt_access = util_jwt.jwt_decode_from_session(verify_exp=True)
+    rt_access = util_authorization.auth_validate(verify_exp=True)
     if isinstance(rt_access, util_jwt.AccessFailType):
         return login.render_content()
     else:

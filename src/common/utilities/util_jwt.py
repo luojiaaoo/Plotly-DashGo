@@ -9,9 +9,9 @@ from flask import request
 
 
 class AccessFailType(Enum):
-    EXPIRED = 0
-    INVALID = 1
-    NO_ACCESS = 2
+    EXPIRED = 'EXPIRED'
+    INVALID = 'INVALID'
+    NO_ACCESS = 'NO_ACCESS'
 
 
 def jwt_encode(data: Dict, expires_delta: Optional[timedelta] = None):
@@ -85,7 +85,7 @@ def jwt_encode_save_access_to_session(data: Dict, expires_delta: Optional[timede
     dash.ctx.response.set_cookie('Authorization', f'Bearer {access_token}', max_age=3600 * 24 * 365 if session_permanent else None)
 
 
-def jwt_decode_from_session(verify_exp: bool = True) -> Union[Dict, AccessFailType]:
+def jwt_decode_rt_type(auth_token, verify_exp: bool = True) -> Union[Dict, AccessFailType]:
     """
     从会话中解码JWT（JSON Web Token）。
 
@@ -100,23 +100,13 @@ def jwt_decode_from_session(verify_exp: bool = True) -> Union[Dict, AccessFailTy
       或者访问失败的错误类型（AccessFailType枚举）。
     """
     from jwt.exceptions import ExpiredSignatureError
-    # 因为不是每个组件都能加headers，所以还是也校验cookies中的token
-    access_token_ = token_ if (token_:=request.headers.get('Authorization')) else request.cookies.get('Authorization')
-    if not access_token_:
-        return AccessFailType.NO_ACCESS
-    else:
-        if 'Bearer' in access_token_:
-            access_token = access_token_.split()[1]
-        else:
-            # TODO: 未来可能会支持其他类型的令牌
-            raise NotImplementedError('Unsupported token type')
-        try:
-            access_data = jwt_decode(access_token, verify_exp=verify_exp)
-        except ExpiredSignatureError:
-            return AccessFailType.EXPIRED
-        except Exception:
-            return AccessFailType.INVALID
-        return access_data
+    try:
+        access_data = jwt_decode(auth_token, verify_exp=verify_exp)
+    except ExpiredSignatureError:
+        return AccessFailType.EXPIRED
+    except Exception:
+        return AccessFailType.INVALID
+    return access_data
 
 
 def clear_access_token_from_session() -> None:

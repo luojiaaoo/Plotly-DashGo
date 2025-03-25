@@ -118,7 +118,8 @@ def authorize():
     - state: 客户端状态值（可选，本项目为必选）
     """
     from flask import request, render_template_string
-    from common.utilities.util_jwt import jwt_decode_from_session, AccessFailType
+    from common.utilities.util_jwt import AccessFailType
+    from common.utilities.util_authorization import auth_validate
     from common.utilities.util_oauth2 import authorize_html
     from config.dashgo_conf import OAuth2Conf
     from database.sql_db.dao.dao_oauth2 import exist_client, insert_authorization_code
@@ -126,7 +127,7 @@ def authorize():
     import secrets
 
     # 1. 如果没登陆，登录了再来认证
-    if isinstance((rt_access := jwt_decode_from_session()), AccessFailType):
+    if isinstance((rt_access := auth_validate()), AccessFailType):
         return redirect(URL.build(path='/login').with_query({'next': request.url}).__str__())
     ### 参数检查
     user_name = rt_access['user_name']
@@ -262,10 +263,10 @@ def userinfo():
 # oauth2_grant登录后重定向
 @server.before_request
 def oauth2_grant_redirect():
-    from common.utilities.util_jwt import jwt_decode_from_session, AccessFailType
+    from common.utilities.util_authorization import auth_validate, AccessFailType
     from yarl import URL
 
-    if not isinstance(jwt_decode_from_session(), AccessFailType) and request.path == '/' and request.args.get('next') is not None:
+    if not isinstance(auth_validate(), AccessFailType) and request.path == '/' and request.args.get('next') is not None:
         return redirect(URL(request.args.get('next')).extend_query(confirm='yes').__str__())
 
 

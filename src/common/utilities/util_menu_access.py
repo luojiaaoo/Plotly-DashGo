@@ -150,7 +150,7 @@ class MenuAccess:
         return access_meta in self.all_access_metas
     
     @property
-    def dict_access_meta2menu_item():
+    def dict_access_meta2menu_item(self):
         from config.access_factory import AccessFactory
         return AccessFactory.get_dict_access_meta2menu_item()
 
@@ -186,8 +186,9 @@ def get_menu_access(only_get_user_name=False) -> MenuAccess:
     """
     from common.utilities import util_jwt
     from config.dashgo_conf import LoginConf
+    from common.utilities.util_authorization import auth_validate
 
-    rt_access = util_jwt.jwt_decode_from_session(
+    rt_access = auth_validate(
         verify_exp=LoginConf.JWT_EXPIRED_FORCE_LOGOUT, # 查看权限的时候是否检测过期
     )
     if rt_access == util_jwt.AccessFailType.EXPIRED:
