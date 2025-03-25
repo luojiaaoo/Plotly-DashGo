@@ -7,7 +7,7 @@ from .util_jwt import jwt_decode_rt_type, AccessFailType
 
 class AuthType(Enum):
     BEARER = 'Bearer'
-    DIGEST = 'Digest'
+    BASIC = 'Basic'
 
 
 def auth_validate(verify_exp=True) -> tuple[AuthType, Union[Dict, AccessFailType]]:
@@ -22,7 +22,7 @@ def auth_validate(verify_exp=True) -> tuple[AuthType, Union[Dict, AccessFailType
     if auth_type == AuthType.BEARER.value:
         # jwt验证
         return jwt_decode_rt_type(auth_token, verify_exp=verify_exp)
-    elif auth_type == AuthType.DIGEST.value:
+    elif auth_type == AuthType.BASIC.value:
         # Basic认证
         return validate_basic(auth_token)
     abort(jsonify({'error': f'Unsupport Type {auth_type}'}), HttpStatusConstant.UNSUPPORTED_TYPE)
