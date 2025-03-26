@@ -34,10 +34,11 @@ def validate_basic(auth_token):
     from database.sql_db.dao import dao_user
     from otpauth import TOTP
     import re
+    from hashlib import sha256
 
     decoded_token = base64.b64decode(auth_token).decode('utf-8')
     user_name, password = decoded_token.split(':', 1)
-    if dao_user.user_password_verify(user_name, password) or (
+    if dao_user.user_password_verify(user_name, sha256(password.encode('utf-8')).hexdigest()) or (
         (otp_secret := dao_user.get_otp_secret(user_name)) and re.match(r'^\d+$', password) and TOTP(otp_secret.encode()).verify(int(password))
     ):
         return {'user_name': user_name}

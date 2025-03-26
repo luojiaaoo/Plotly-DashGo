@@ -263,11 +263,12 @@ def userinfo():
 # oauth2_grant登录后重定向
 @server.before_request
 def oauth2_grant_redirect():
-    from common.utilities.util_authorization import auth_validate, AccessFailType
-    from yarl import URL
+    if request.method == 'GET':
+        from common.utilities.util_authorization import auth_validate, AccessFailType
+        from yarl import URL
 
-    if not isinstance(auth_validate(), AccessFailType) and request.path == '/' and request.args.get('next') is not None:
-        return redirect(URL(request.args.get('next')).extend_query(confirm='yes').__str__())
+        if not isinstance(auth_validate(), AccessFailType) and request.path == '/' and request.args.get('next') is not None:
+            return redirect(URL(request.args.get('next')).extend_query(confirm='yes').__str__())
 
 
 # OAuth2错误处理器
@@ -279,5 +280,7 @@ def handle_oauth2_error(e):
 # 首页重定向
 @server.before_request
 def main_page_redirct():
-    if request.path == '/':
-        return redirect('/dashboard_/workbench')
+    if request.method == 'GET':
+        if request.path == '/':
+            return redirect('/dashboard_/workbench')
+
