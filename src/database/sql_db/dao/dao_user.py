@@ -117,9 +117,10 @@ def get_user_info(user_names: Optional[List[str]] = None, exclude_role_admin=Fal
     return user_infos
 
 
-def add_role_for_user(user_name: str, role_name: str) -> bool:
+def add_role_for_user(user_name: str, role_name: str, database=None) -> bool:
     """添加用户角色"""
-    database = db()
+    if database is None:
+        database = db()
     with database.atomic() as txn:
         try:
             SysUserRole.create(user_name=user_name, role_name=role_name)
@@ -132,9 +133,10 @@ def add_role_for_user(user_name: str, role_name: str) -> bool:
             return True
 
 
-def del_role_for_user(user_name: str, role_name: str) -> bool:
+def del_role_for_user(user_name: str, role_name: str, database=None) -> bool:
     """删除用户角色"""
-    database = db()
+    if database is None:
+        database = db()
     with database.atomic() as txn:
         try:
             SysUserRole.delete().where((SysUserRole.user_name == user_name) & (SysUserRole.role_name == role_name)).execute()
@@ -792,13 +794,23 @@ def update_user_roles_from_group(user_name, group_name, roles_in_range):
     is_ok = True
     user_roles = set(get_roles_from_user_name(user_name, exclude_disabled=True))
     roles_in_range = set(roles_in_range)
-    # 新增的权限
-    for i in set(roles_in_range) - user_roles:
-        is_ok = True and add_role_for_user(user_name, i)
-    # 需要删除的权限
-    for i in user_roles & (set(get_group_info([group_name], exclude_disabled=True)[0].group_roles) - roles_in_range):
-        is_ok = True and del_role_for_user(user_name, i)
-    return is_ok
+    user_name_op = get_menu_access(only_get_user_name=True)
+    database = db()
+    with database.atomic() as txn:
+        # 新增的权限
+        for i in set(roles_in_range) - user_roles:
+            is_ok = add_role_for_user(user_name, i, database)
+        # 需要删除的权限
+        for i in user_roles & (set(get_group_info([group_name], exclude_disabled=True)[0].group_roles) - roles_in_range):
+            is_ok = del_role_for_user(user_name, i, database)
+        if is_ok:
+            txn.commit()
+            return True
+        else:
+            logger.warning(f'用户{user_name_op}修改团队成员{user_name}权限时，出现异常: {e}', exc_info=True)
+            txn.rollback()
+            return False
+
 
 
 def exists_group_name(group_name: str) -> bool:

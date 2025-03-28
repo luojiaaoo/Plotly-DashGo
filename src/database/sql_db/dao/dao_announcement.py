@@ -4,6 +4,7 @@ from ..entity.table_user import SysUser
 from datetime import datetime
 from typing import List
 from dataclasses import dataclass
+from database.sql_db.conn import db
 
 
 def get_announcement() -> bool:
@@ -57,14 +58,23 @@ def get_all_announcements() -> List[Announcement]:
 
 def add_announcement(announcement: str, user_name: str) -> bool:
     """新增公告"""
-    return SysAnnouncement.create(announcement=announcement, user_name=user_name, datetime=datetime.now(), status=True)
+    database = db()
+    with database.atomic() as txn:
+        SysAnnouncement.create(announcement=announcement, user_name=user_name, datetime=datetime.now(), status=True)
+
 
 
 def delete_announcement(announcements: List[str]) -> bool:
     """删除公告"""
-    return SysAnnouncement.delete().where(SysAnnouncement.announcement.in_(announcements)).execute()
+    database = db()
+    with database.atomic() as txn:
+        SysAnnouncement.delete().where(SysAnnouncement.announcement.in_(announcements)).execute()
+
 
 
 def update_announcement_status(announcement: str, status: bool) -> bool:
     """更新公告状态"""
-    return SysAnnouncement.update(status=status).where(SysAnnouncement.announcement == announcement).execute()
+    database = db()
+    with database.atomic() as txn:
+        SysAnnouncement.update(status=status).where(SysAnnouncement.announcement == announcement).execute()
+

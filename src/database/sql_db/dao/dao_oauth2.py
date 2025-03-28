@@ -1,6 +1,7 @@
 from peewee import DoesNotExist
 from database.sql_db.entity.table_oauth2 import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
 from typing import Optional
+from database.sql_db.conn import db
 
 
 def exist_client(client_id) -> Optional[OAuth2Client]:
@@ -12,18 +13,23 @@ def exist_client(client_id) -> Optional[OAuth2Client]:
 
 
 def insert_authorization_code(code, client_id, user_name, redirect_uri, expires_at, scope) -> bool:
-    try:
-        OAuth2AuthorizationCode.create(
-            code=code,
-            client_id=client_id,
-            user_name=user_name,
-            redirect_uri=redirect_uri,
-            expires_at=expires_at,
-            scope=scope,
-        )
-        return True
-    except Exception as e:
-        return False
+    database = db()
+    with database.atomic() as txn:
+        try:
+            OAuth2AuthorizationCode.create(
+                code=code,
+                client_id=client_id,
+                user_name=user_name,
+                redirect_uri=redirect_uri,
+                expires_at=expires_at,
+                scope=scope,
+            )
+        except Exception as e:
+            txn.rollback()
+            return False
+        else:
+            txn.commit()
+            return True
 
 
 def exist_code(code, client_id) -> Optional[OAuth2AuthorizationCode]:
@@ -46,17 +52,22 @@ def validate_client(client_id, client_secret) -> Optional[OAuth2Client]:
 
 
 def insert_token(token, client_id, user_name, expires_at, scope) -> bool:
-    try:
-        OAuth2Token.create(
-            token=token,
-            client_id=client_id,
-            user_name=user_name,
-            expires_at=expires_at,
-            scope=scope,
-        )
-        return True
-    except Exception as e:
-        return False
+    database = db()
+    with database.atomic() as txn:
+        try:
+            OAuth2Token.create(
+                token=token,
+                client_id=client_id,
+                user_name=user_name,
+                expires_at=expires_at,
+                scope=scope,
+            )
+        except Exception as e:
+            txn.rollback()
+            return False
+        else:
+            txn.commit()
+            return True
 
 
 def exist_token(token) -> Optional[OAuth2Token]:
