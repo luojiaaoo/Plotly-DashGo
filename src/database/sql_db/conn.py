@@ -81,10 +81,10 @@ def initialize_database():
             SysUserRole.create(user_name='admin', role_name='admin')
     if not db_instance.table_exists(SysRoleAccessMeta._meta.table_name):
         db_instance.create_tables([SysRoleAccessMeta])
-    if not db_instance.table_exists(SysGroupUser._meta.table_name):
-        db_instance.create_tables([SysGroupUser])
     if not db_instance.table_exists(SysGroup._meta.table_name):
         db_instance.create_tables([SysGroup])
+    if not db_instance.table_exists(SysGroupUser._meta.table_name):
+        db_instance.create_tables([SysGroupUser])
     if not db_instance.table_exists(SysGroupRole._meta.table_name):
         db_instance.create_tables([SysGroupRole])
     if not db_instance.table_exists(SysAnnouncement._meta.table_name):
