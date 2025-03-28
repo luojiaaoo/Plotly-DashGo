@@ -2,7 +2,6 @@ from server import app, server  # noqa: F401
 import feffery_utils_components as fuc
 from dash import html, dcc
 from config.access_factory import AccessFactory
-from database.sql_db.conn import initialize_database
 import feffery_antd_components as fac
 from dash.dependencies import Input, Output, State
 from dash import set_props
@@ -18,9 +17,6 @@ logger = Log.get_logger(__name__)
 # 检查Python运行版本
 if sys.version_info < (3, 9):
     raise Exception('Python version must above 3.9 !!')
-
-# 初始化数据库
-initialize_database()
 
 # 启动检查权限
 AccessFactory.check_access_meta()
