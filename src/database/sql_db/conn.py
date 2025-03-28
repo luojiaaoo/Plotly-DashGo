@@ -66,30 +66,29 @@ def init_rds_data():
     from .entity.table_user import SysUser, SysUserRole, SysRole
     from datetime import datetime
     import hashlib
-    if not db_instance.table_exists('sys_user'):
-        with db_instance.atomic():
-            SysRole.create(
-                role_name='admin',
-                role_status=True,
-                update_datetime=datetime.now(),
-                update_by='admin',
-                create_datetime=datetime.now(),
-                create_by='admin',
-                role_remark='超级管理员角色',
-            )
-            SysUser.create(
-                user_name='admin',
-                user_full_name='超级管理员',
-                password_sha256=hashlib.sha256('admin123'.encode('utf-8')).hexdigest(),
-                user_status=True,
-                user_sex='未知',
-                user_email='',
-                phone_number='',
-                create_by='admin',
-                create_datetime=datetime.now(),
-                update_by='admin',
-                update_datetime=datetime.now(),
-                user_remark='',
-                otp_secret='',
-            )
-            SysUserRole.create(user_name='admin', role_name='admin')
+    with db_instance.atomic():
+        SysRole.create(
+            role_name='admin',
+            role_status=True,
+            update_datetime=datetime.now(),
+            update_by='admin',
+            create_datetime=datetime.now(),
+            create_by='admin',
+            role_remark='超级管理员角色',
+        )
+        SysUser.create(
+            user_name='admin',
+            user_full_name='超级管理员',
+            password_sha256=hashlib.sha256('admin123'.encode('utf-8')).hexdigest(),
+            user_status=True,
+            user_sex='未知',
+            user_email='',
+            phone_number='',
+            create_by='admin',
+            create_datetime=datetime.now(),
+            update_by='admin',
+            update_datetime=datetime.now(),
+            user_remark='',
+            otp_secret='',
+        )
+        SysUserRole.create(user_name='admin', role_name='admin')
