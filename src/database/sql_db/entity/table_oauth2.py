@@ -18,6 +18,7 @@ class OAuth2Client(BaseModel):
     scope = TextField(help_text='权限范围')
 
     class Meta:
+        table_name = 'oauth2_client'
         indexes = ((('client_id',), True),)
 
     # grant阶段验证
@@ -46,6 +47,7 @@ class OAuth2AuthorizationCode(BaseModel):
     scope = TextField(help_text='权限范围')
 
     class Meta:
+        table_name = 'oauth2_authorization_code'
         indexes = ((('code',), True),)
 
     def is_valid(self):
@@ -68,6 +70,7 @@ class OAuth2Token(BaseModel):
     scope = TextField(help_text='权限范围')
 
     class Meta:
+        table_name = 'oauth2_token'
         indexes = ((('token',), True),)
 
     def is_valid(self):
