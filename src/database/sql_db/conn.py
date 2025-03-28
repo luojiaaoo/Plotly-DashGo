@@ -38,16 +38,45 @@ def db():
 
 
 # 判断是否存在SysUser表，如不存在则初始化库
-def initialize_database():
+def create_rds_table():
+    db_instance = db()
     from .entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole, SysGroupUser, SysRole, SysGroupRole, SysGroup
     from .entity.table_announcement import SysAnnouncement
     from .entity.table_oauth2 import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
+
+    db_instance.create_tables(
+        [
+            SysUser,
+            SysRoleAccessMeta,
+            SysUserRole,
+            SysGroupUser,
+            SysRole,
+            SysGroupRole,
+            SysGroup,
+            SysAnnouncement,
+            OAuth2Client,
+            OAuth2AuthorizationCode,
+            OAuth2Token,
+        ],
+        safe=True,
+    )
+
+def init_rds_data():
+    db_instance = db()
+    from .entity.table_user import SysUser, SysUserRole, SysRole
     from datetime import datetime
     import hashlib
-    db_instance = db()
-    if not db_instance.table_exists(SysUser._meta.table_name):
-        db_instance.create_tables([SysUser])
+    if not db_instance.table_exists('sys_user'):
         with db_instance.atomic():
+            SysRole.create(
+                role_name='admin',
+                role_status=True,
+                update_datetime=datetime.now(),
+                update_by='admin',
+                create_datetime=datetime.now(),
+                create_by='admin',
+                role_remark='超级管理员角色',
+            )
             SysUser.create(
                 user_name='admin',
                 user_full_name='超级管理员',
@@ -63,35 +92,4 @@ def initialize_database():
                 user_remark='',
                 otp_secret='',
             )
-    if not db_instance.table_exists(SysRole._meta.table_name):
-        db_instance.create_tables([SysRole])
-        with db_instance.atomic():
-            SysRole.create(
-                role_name='admin',
-                role_status=True,
-                update_datetime=datetime.now(),
-                update_by='admin',
-                create_datetime=datetime.now(),
-                create_by='admin',
-                role_remark='超级管理员角色',
-            )
-    if not db_instance.table_exists(SysUserRole._meta.table_name):
-        db_instance.create_tables([SysUserRole])
-        with db_instance.atomic():
             SysUserRole.create(user_name='admin', role_name='admin')
-    if not db_instance.table_exists(SysRoleAccessMeta._meta.table_name):
-        db_instance.create_tables([SysRoleAccessMeta])
-    if not db_instance.table_exists(SysGroup._meta.table_name):
-        db_instance.create_tables([SysGroup])
-    if not db_instance.table_exists(SysGroupUser._meta.table_name):
-        db_instance.create_tables([SysGroupUser])
-    if not db_instance.table_exists(SysGroupRole._meta.table_name):
-        db_instance.create_tables([SysGroupRole])
-    if not db_instance.table_exists(SysAnnouncement._meta.table_name):
-        db_instance.create_tables([SysAnnouncement])
-    if not db_instance.table_exists(OAuth2Client._meta.table_name):
-        db_instance.create_tables([OAuth2Client])
-    if not db_instance.table_exists(OAuth2AuthorizationCode._meta.table_name):
-        db_instance.create_tables([OAuth2AuthorizationCode])
-    if not db_instance.table_exists(OAuth2Token._meta.table_name):
-        db_instance.create_tables([OAuth2Token])

@@ -1,4 +1,4 @@
-from server import app
+from server import app, server  # noqa: F401
 import feffery_utils_components as fuc
 from dash import html, dcc
 from config.access_factory import AccessFactory
