@@ -182,9 +182,14 @@ def render_content(menu_access: MenuAccess, **kwargs):
 
    安装依赖命令： python -m pip install -r requirements_xxx.txt
 
-2. 进入到src目录，执行python app.py，即可启动成功，根据日志提示中的URL进行访问，默认账号：admin、密码：admin123
+2. 执行bin/init下的create_rds_table和init_rds_data脚本，分别初始化数据库表结构和admin管理员数据
 
-3. 请在Dash的世界畅游吧！！！
+3. 进入到src目录，执行python app.py，即可启动调试模式，根据日志提示中的URL进行访问
+
+> 默认账号：admin、密码：admin123
+> bin目录下已放置启动脚本，可以作为生产启动脚本（windows用waitress/linux用gunicorn作为WSGI服务组件）
+
+4. 请在Dash的世界畅游吧！！！
 
 > 默认启动为sqlite数据库，如需用于生产，请根据config/dashgo.ini调整相关Mysql数据库配置
 
