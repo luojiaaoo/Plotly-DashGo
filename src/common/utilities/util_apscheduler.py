@@ -5,11 +5,11 @@ def add_ssh_interval_job(ip, password, script_text, interval, timeout, job_id):
     try:
         conn = rpyc.connect('localhost', 8091)
         job = conn.root.add_job(
-            'server:ssh_run_script',
+            'tasks:run_script',
             'interval',
-            args=[ip, password, script_text, timeout],
+            args=['ssh', script_text, timeout, ip, password],
             seconds=interval,
-            job_id=job_id,
+            id=job_id,
         )
         return job.id
     except Exception as e:
@@ -30,9 +30,9 @@ def add_ssh_cron_job(ip, password, script_text, cron_text, timeout, job_id, year
         else:
             raise Exception('cron_text error')
         job = conn.root.add_job(
-            'server:ssh_run_script',
+            'tasks:run_script',
             'cron',
-            args=[ip, password, script_text, timeout],
+            args=['ssh', script_text, timeout, ip, password],
             year=year,
             week=week,
             second=second,
@@ -41,7 +41,24 @@ def add_ssh_cron_job(ip, password, script_text, cron_text, timeout, job_id, year
             day=day,
             month=month,
             day_of_week=day_of_week,
-            job_id=job_id,
+            id=job_id,
+        )
+        return job.id
+    except Exception as e:
+        raise e
+    finally:
+        conn.close()
+
+
+def add_local_interval_job(script_text, interval, timeout, job_id):
+    try:
+        conn = rpyc.connect('localhost', 8091)
+        job = conn.root.add_job(
+            'tasks:run_script',
+            'interval',
+            args=['local', script_text, timeout],
+            seconds=interval,
+            id=job_id,
         )
         return job.id
     except Exception as e:
