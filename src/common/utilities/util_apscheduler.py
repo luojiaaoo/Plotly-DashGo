@@ -1,7 +1,7 @@
 import rpyc
 
 
-def add_ssh_interval_job(ip, password, script_text, interval, timeout, job_id, max_instances=10):
+def add_ssh_interval_job(ip, password, script_text, interval, timeout, job_id):
     try:
         conn = rpyc.connect('localhost', 8091)
         job = conn.root.add_job(
@@ -10,7 +10,6 @@ def add_ssh_interval_job(ip, password, script_text, interval, timeout, job_id, m
             args=[ip, password, script_text, timeout],
             seconds=interval,
             job_id=job_id,
-            max_instances=max_instances,
         )
         return job.id
     except Exception as e:
@@ -19,7 +18,7 @@ def add_ssh_interval_job(ip, password, script_text, interval, timeout, job_id, m
         conn.close()
 
 
-def add_ssh_cron_job(ip, password, script_text, cron_text, timeout, job_id, max_instances=10, year=None, week=None):
+def add_ssh_cron_job(ip, password, script_text, cron_text, timeout, job_id, year=None, week=None):
     """https://apscheduler.readthedocs.io/en/master/api.html#apscheduler.triggers.cron.CronTrigger"""
     try:
         conn = rpyc.connect('localhost', 8091)
@@ -43,7 +42,6 @@ def add_ssh_cron_job(ip, password, script_text, cron_text, timeout, job_id, max_
             month=month,
             day_of_week=day_of_week,
             job_id=job_id,
-            max_instances=max_instances,
         )
         return job.id
     except Exception as e:

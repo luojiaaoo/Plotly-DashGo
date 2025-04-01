@@ -1,6 +1,7 @@
 import rpyc
 from rpyc.utils.server import ThreadedServer
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.executors.pool import ThreadPoolExecutor
 # https://github.com/agronholm/apscheduler/blob/3.x/examples/rpc/server.py
 
 
@@ -31,7 +32,8 @@ class SchedulerService(rpyc.Service):
 
 
 if __name__ == '__main__':
-    scheduler = BackgroundScheduler()
+    thread_pool_executor = ThreadPoolExecutor(max_workers=5)
+    scheduler = BackgroundScheduler(executors={'default': thread_pool_executor})
     scheduler.add_jobstore('sqlalchemy', url='sqlite:///../apscheduler.db')
     scheduler.start()
     protocol_config = {'allow_public_attrs': True}
