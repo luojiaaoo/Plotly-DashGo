@@ -43,7 +43,7 @@ def create_rds_table():
     from .entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole, SysGroupUser, SysRole, SysGroupRole, SysGroup
     from .entity.table_announcement import SysAnnouncement
     from .entity.table_oauth2 import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
-    from .entity.table_apscheduler import ApschedulerDataResults, ApschedulerConsoleResults
+    from .entity.table_apscheduler import ApschedulerResults, ApschedulerExtractValue
 
     db_instance.create_tables(
         [
@@ -58,17 +58,19 @@ def create_rds_table():
             OAuth2Client,
             OAuth2AuthorizationCode,
             OAuth2Token,
-            ApschedulerDataResults,
-            ApschedulerConsoleResults,
+            ApschedulerResults,
+            ApschedulerExtractValue,
         ],
         safe=True,
     )
+
 
 def init_rds_data():
     db_instance = db()
     from .entity.table_user import SysUser, SysUserRole, SysRole
     from datetime import datetime
     import hashlib
+
     with db_instance.atomic():
         SysRole.create(
             role_name='admin',
