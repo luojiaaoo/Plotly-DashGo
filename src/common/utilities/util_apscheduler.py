@@ -5,7 +5,7 @@ def add_ssh_interval_job(ip, password, script_text, interval, timeout, job_id):
     try:
         conn = rpyc.connect('localhost', 8091)
         job = conn.root.add_job(
-            'tasks:run_script',
+            'app_apscheduler:run_script',
             'interval',
             args=['ssh', script_text, timeout, ip, password],
             seconds=interval,
@@ -30,7 +30,7 @@ def add_ssh_cron_job(ip, password, script_text, cron_text, timeout, job_id, year
         else:
             raise Exception('cron_text error')
         job = conn.root.add_job(
-            'tasks:run_script',
+            'app_apscheduler:run_script',
             'cron',
             args=['ssh', script_text, timeout, ip, password],
             year=year,
@@ -54,7 +54,7 @@ def add_local_interval_job(script_text, interval, timeout, job_id):
     try:
         conn = rpyc.connect('localhost', 8091)
         job = conn.root.add_job(
-            'tasks:run_script',
+            'app_apscheduler:run_script',
             'interval',
             args=['local', script_text, timeout],
             seconds=interval,
