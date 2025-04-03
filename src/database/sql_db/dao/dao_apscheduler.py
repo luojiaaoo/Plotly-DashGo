@@ -28,6 +28,8 @@ def insert_apscheduler_result(job_id, status, log, extract_names):
         now = datetime.now()
         with database.atomic():
             ApschedulerResults.create(job_id=job_id, status=status, log=log, finish_datetime=now)
+        if not extract_names:
+            return
         with database.atomic():
             for extract_name in extract_names:
                 type_ = extract_name['type']

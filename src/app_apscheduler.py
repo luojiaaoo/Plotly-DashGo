@@ -81,6 +81,9 @@ class SchedulerService(rpyc.Service):
         return scheduler.get_jobs(jobstore)
 
 def job_listener(event):
+    from apscheduler.events import JobEvent
+    if not isinstance(event, JobEvent):
+        return
     job_id = event.job_id
     job = scheduler.get_job(event.job_id)
     if event.code == EVENT_JOB_EXECUTED:

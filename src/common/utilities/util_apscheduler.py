@@ -1,20 +1,20 @@
 import rpyc
 
 
-def add_ssh_interval_job(ip, username, password, script_text, interval, timeout, job_id, extract_names):
+def add_ssh_interval_job(ip, username, password, script_text, interval, timeout, job_id, extract_names=None):
     try:
         conn = rpyc.connect('localhost', 8091)
         job = conn.root.add_job(
             'app_apscheduler:run_script',
             'interval',
             kwargs=dict(
-                type='ssh',
-                script_text=script_text,
-                timeout=timeout,
-                ip=ip,
-                username=username,
-                password=password,
-                extract_names=extract_names,
+                ('type', 'ssh'),
+                ('script_text', script_text),
+                ('timeout', timeout),
+                ('ip', ip),
+                ('username', username),
+                ('password', password),
+                ('extract_names', extract_names),
             ),
             seconds=interval,
             id=job_id,
@@ -26,7 +26,7 @@ def add_ssh_interval_job(ip, username, password, script_text, interval, timeout,
         conn.close()
 
 
-def add_ssh_cron_job(ip, username, password, script_text, cron_text, timeout, job_id, extract_names, year=None, week=None):
+def add_ssh_cron_job(ip, username, password, script_text, cron_text, timeout, job_id, extract_names=None, year=None, week=None):
     """https://apscheduler.readthedocs.io/en/master/api.html#apscheduler.triggers.cron.CronTrigger"""
     try:
         conn = rpyc.connect('localhost', 8091)
@@ -40,15 +40,15 @@ def add_ssh_cron_job(ip, username, password, script_text, cron_text, timeout, jo
         job = conn.root.add_job(
             'app_apscheduler:run_script',
             'cron',
-            kwargs=dict(
-                type='ssh',
-                script_text=script_text,
-                timeout=timeout,
-                ip=ip,
-                username=username,
-                password=password,
-                extract_names=extract_names,
-            ),
+            kwargs=[
+                ('type', 'ssh'),
+                ('script_text', script_text),
+                ('timeout', timeout),
+                ('ip', ip),
+                ('username', username),
+                ('password', password),
+                ('extract_names', extract_names),
+            ],
             year=year,
             week=week,
             second=second,
@@ -66,18 +66,18 @@ def add_ssh_cron_job(ip, username, password, script_text, cron_text, timeout, jo
         conn.close()
 
 
-def add_local_interval_job(script_text, interval, timeout, job_id, extract_names):
+def add_local_interval_job(script_text, interval, timeout, job_id, extract_names=None):
     try:
         conn = rpyc.connect('localhost', 8091)
         job = conn.root.add_job(
             'app_apscheduler:run_script',
             'interval',
-            kwargs=dict(
-                type='local',
-                script_text=script_text,
-                timeout=timeout,
-                extract_names=extract_names,
-            ),
+            kwargs=[
+                ('type', 'local'),
+                ('script_text', script_text),
+                ('timeout', timeout),
+                ('extract_names', extract_names),
+            ],
             seconds=interval,
             id=job_id,
         )
