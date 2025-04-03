@@ -28,7 +28,7 @@ def run_script(type, script_text, timeout=20, ip=None,username=None, password=No
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,  # 将标准错误重定向到标准输出
             shell=True,
-            capture_output=True,
+            # capture_output=True,
             text=True,
             timeout=timeout,
         )
@@ -92,7 +92,9 @@ def job_listener(event):
     elif event.code == EVENT_JOB_ERROR:
         log = str(event.exception)
         status = 'error'
-    insert_apscheduler_result(job_id, status=status, log=log, extract_names=job.kwargs)
+    else:
+        return
+    insert_apscheduler_result(job_id, status=status, log=log, extract_names=job.kwargs['extract_names'])
 
 if __name__ == '__main__':
     if SqlDbConf.RDB_TYPE == 'sqlite':
