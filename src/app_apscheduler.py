@@ -4,11 +4,14 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 import subprocess
+from database.sql_db.dao.dao_apscheduler import insert_apscheduler_result
 from config.dashgo_conf import SqlDbConf
+import paramiko
+from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 # https://github.com/agronholm/apscheduler/blob/3.x/examples/rpc/server.py
 
 
-def run_script(type, script_text, timeout=20, ip=None, password=None):
+def run_script(type, script_text, timeout=20, ip=None,username=None, password=None, extract_names=None):
     """
     根据类型执行脚本，支持本地和远程执行。
 
@@ -20,32 +23,34 @@ def run_script(type, script_text, timeout=20, ip=None, password=None):
     timeout (int): 命令执行的超时时间，单位为秒。
     """
     if type == 'local':
-        try:
-            result = subprocess.run(
-                script_text,
-                shell=True,
-                capture_output=True,
-                text=True,
-                timeout=timeout,
-            )
-            return result.stdout, result.stderr
-        except subprocess.TimeoutExpired:
-            return None, 'Command timed out'
-        except Exception as e:
-            return None, str(e)
+        result = subprocess.run(
+            script_text,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,  # 将标准错误重定向到标准输出
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        if result.returncode == 0:
+            return result.stdout
+        else:
+            raise Exception(result.stdout)
     elif type == 'ssh':
-        import paramiko
-
         try:
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(hostname=ip, username='root', password=password)
+            ssh.connect(hostname=ip, username=username, password=password)
             stdin, stdout, stderr = ssh.exec_command(script_text, get_pty=True, timeout=timeout)
-            output = stdout.read().decode()
-            error = stderr.read().decode()
-            return output, error
+            output = stdout.read().decode('utf-8')
+            error = stderr.read().decode('utf-8')
+            returncode = stdout.channel.recv_exit_status()
+            if returncode == 0:
+                return f'{output}\n\n### Warning:\n{error}' if error else output
+            else:
+                raise Exception(f'{output}\n\n### Warning:\n{error}' if error else output)
         except Exception as e:
-            return None, str(e)
+            raise e
         finally:
             ssh.close()
 
@@ -75,6 +80,16 @@ class SchedulerService(rpyc.Service):
     def exposed_get_jobs(self, jobstore=None):
         return scheduler.get_jobs(jobstore)
 
+def job_listener(event):
+    job_id = event.job_id
+    job = scheduler.get_job(event.job_id)
+    if event.code == EVENT_JOB_EXECUTED:
+        log = event.retval
+        status = 'success'
+    elif event.code == EVENT_JOB_ERROR:
+        log = str(event.exception)
+        status = 'error'
+    insert_apscheduler_result(job_id, status=status, log=log, extract_names=job.kwargs)
 
 if __name__ == '__main__':
     if SqlDbConf.RDB_TYPE == 'sqlite':
@@ -87,6 +102,7 @@ if __name__ == '__main__':
     }
     job_defaults = {'coalesce': True, 'max_instances': 10}
     scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
+    scheduler.add_listener(job_listener)
     scheduler.start()
     protocol_config = {'allow_public_attrs': True}
     server = ThreadedServer(SchedulerService, port=8091, protocol_config=protocol_config)
