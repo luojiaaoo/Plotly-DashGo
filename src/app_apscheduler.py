@@ -32,11 +32,11 @@ def run_script(type, script_text, job_id, timeout=20, ip=None, username=None, pa
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            universal_newlines=True,
+            universal_newlines=False,
         )
 
         for order in itertools.count():
-            output = process.stdout.read(errors='ignore')
+            output = process.stdout.read().decode('utf-8', errors='ignore')
             if output:
                 insert_apscheduler_running(
                     job_id=job_id,
@@ -50,7 +50,7 @@ def run_script(type, script_text, job_id, timeout=20, ip=None, username=None, pa
                 process.kill()
                 break
             time.sleep(2)  # 等待2秒钟读取一次日志
-        output = process.stdout.read()
+        output = process.stdout.read().decode('utf-8', errors='ignore')
         if output:
             insert_apscheduler_running(
                 job_id=job_id,
