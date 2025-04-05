@@ -4,14 +4,17 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 import subprocess
-from database.sql_db.dao.dao_apscheduler import insert_apscheduler_result
+from database.sql_db.dao.dao_apscheduler import insert_apscheduler_result, insert_apscheduler_running, delete_apscheduler_running, select_apscheduler_running_log
 from config.dashgo_conf import SqlDbConf
 import paramiko
+from datetime import datetime, timedelta
+import time
+import itertools
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 # https://github.com/agronholm/apscheduler/blob/3.x/examples/rpc/server.py
 
 
-def run_script(type, script_text, timeout=20, ip=None,username=None, password=None, extract_names=None):
+def run_script(type, script_text, job_id, timeout=20, ip=None, username=None, password=None, extract_names=None):
     """
     根据类型执行脚本，支持本地和远程执行。
 
@@ -22,20 +25,51 @@ def run_script(type, script_text, timeout=20, ip=None,username=None, password=No
     password (str): SSH 登录密码（仅在 'ssh' 类型时需要）。
     timeout (int): 命令执行的超时时间，单位为秒。
     """
+    start_datetime = datetime.now()
     if type == 'local':
-        result = subprocess.run(
+        process = subprocess.Popen(
             script_text,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,  # 将标准错误重定向到标准输出
             shell=True,
-            # capture_output=True,
-            text=True,
-            timeout=timeout,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            universal_newlines=True,
         )
-        if result.returncode == 0:
-            return result.stdout
-        else:
-            raise Exception(result.stdout)
+
+        for order in itertools.count():
+            output = process.stdout.read(errors='ignore')
+            if output:
+                insert_apscheduler_running(
+                    job_id=job_id,
+                    log=output,
+                    order=order,
+                    start_datetime=start_datetime,
+                )
+            if process.poll() is not None and output == '':
+                break
+            if datetime.now() - start_datetime > timedelta(seconds=timeout):
+                process.kill()
+                break
+            time.sleep(2)  # 等待2秒钟读取一次日志
+        output = process.stdout.read()
+        if output:
+            insert_apscheduler_running(
+                job_id=job_id,
+                log=output,
+                order=order + 1,
+                start_datetime=start_datetime,
+            )
+        return_code = process.wait()
+        try:
+            # 读取最后的输出
+            if return_code == 0:
+                return select_apscheduler_running_log(job_id=job_id, start_datetime=start_datetime)
+            else:
+                raise Exception(select_apscheduler_running_log(job_id=job_id, start_datetime=start_datetime))
+        except Exception as e:
+            raise e
+        finally:
+            # 清除实时日志
+            delete_apscheduler_running(job_id=job_id, start_datetime=start_datetime)
     elif type == 'ssh':
         try:
             ssh = paramiko.SSHClient()
@@ -57,6 +91,8 @@ def run_script(type, script_text, timeout=20, ip=None,username=None, password=No
 
 class SchedulerService(rpyc.Service):
     def exposed_add_job(self, func, *args, **kwargs):
+        kwargs['kwargs'] = list(kwargs['kwargs'])
+        kwargs['kwargs'].append(('job_id', kwargs['id']))  # 给函数传递job_id参数
         return scheduler.add_job(func, *args, **kwargs)
 
     def exposed_modify_job(self, job_id, jobstore=None, **changes):
@@ -80,8 +116,10 @@ class SchedulerService(rpyc.Service):
     def exposed_get_jobs(self, jobstore=None):
         return scheduler.get_jobs(jobstore)
 
+
 def job_listener(event):
     from apscheduler.events import JobEvent
+
     if not isinstance(event, JobEvent):
         return
     job_id = event.job_id
@@ -95,6 +133,7 @@ def job_listener(event):
     else:
         return
     insert_apscheduler_result(job_id, status=status, log=log, extract_names=job.kwargs['extract_names'])
+
 
 if __name__ == '__main__':
     if SqlDbConf.RDB_TYPE == 'sqlite':

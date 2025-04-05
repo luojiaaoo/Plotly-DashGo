@@ -1,7 +1,7 @@
 from database.sql_db.conn import db
 from peewee import DoesNotExist, IntegrityError
 from common.utilities.util_logger import Log
-from ..entity.table_apscheduler import ApschedulerResults, ApschedulerExtractValue
+from ..entity.table_apscheduler import ApschedulerResults, ApschedulerExtractValue, ApschedulerRunning
 from datetime import datetime, timedelta
 import re
 
@@ -20,6 +20,53 @@ def select_last_log_from_job_id(job_id: str, accept_timedelta: timedelta) -> str
         return result[0]
     except DoesNotExist as e:
         raise Exception('Job log not found') from e
+
+
+def insert_apscheduler_running(job_id, log, order, start_datetime):
+    """插入实时日志到数据库"""
+    database = db()
+    try:
+        with database.atomic():
+            ApschedulerRunning.create(job_id=job_id, log=log, order=order, start_datetime=start_datetime)
+    except IntegrityError as e:
+        logger.error(f'插入实时日志时发生数据库完整性错误: {e}')
+        raise Exception('Failed to insert apscheduler running log due to integrity error') from e
+    except Exception as e:
+        logger.error(f'插入实时日志时发生未知错误: {e}')
+        raise Exception('Failed to insert apscheduler running log due to an unknown error') from e
+
+
+def select_apscheduler_running_log(job_id, start_datetime, order=None):
+    """查询指定job_id的实时日志log"""
+    try:
+        if order is None:
+            results = (
+                ApschedulerRunning.select(ApschedulerRunning.log)
+                .where(ApschedulerRunning.job_id == job_id and ApschedulerRunning.start_datetime == start_datetime)
+                .order_by(ApschedulerRunning.order.asc())
+            )
+        else:
+            results = ApschedulerRunning.select(ApschedulerRunning.log).where(
+                ApschedulerRunning.job_id == job_id and ApschedulerRunning.start_datetime == start_datetime and ApschedulerRunning.order == order
+            )
+        result = [result.log for result in results]
+        return ''.join(result)
+    except DoesNotExist as e:
+        raise Exception('Job log not found') from e
+
+
+def delete_apscheduler_running(job_id, start_datetime):
+    """删除指定job_id的实时日志log"""
+    database = db()
+    try:
+        with database.atomic():
+            ApschedulerRunning.delete().where(ApschedulerRunning.job_id == job_id and ApschedulerRunning.start_datetime == start_datetime).execute()
+    except IntegrityError as e:
+        logger.error(f'删除实时日志时发生数据库完整性错误: {e}')
+        raise Exception('Failed to delete apscheduler running log due to integrity error') from e
+    except Exception as e:
+        logger.error(f'删除实时日志时发生未知错误: {e}')
+        raise Exception('Failed to delete apscheduler running log due to an unknown error') from e
 
 
 def insert_apscheduler_result(job_id, status, log, extract_names):
