@@ -91,6 +91,7 @@ def run_script(type, script_text, job_id, timeout=20, ip=None, username=None, pa
             job_id,
             status='success' if return_code == 0 else 'error',
             log=log,
+            start_datetime=start_datetime,
             extract_names=extract_names,
         )
         delete_apscheduler_running(job_id=job_id, start_datetime=start_datetime)
@@ -144,6 +145,7 @@ def run_script(type, script_text, job_id, timeout=20, ip=None, username=None, pa
                 job_id,
                 status='success' if return_code == 0 else 'error',
                 log=log,
+                start_datetime=start_datetime,
                 extract_names=extract_names,
             )
         except Exception as e:
@@ -192,7 +194,6 @@ if __name__ == '__main__':
     }
     job_defaults = {'coalesce': True, 'max_instances': 10}
     scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
-    scheduler.add_listener(job_listener)
     scheduler.start()
     protocol_config = {'allow_public_attrs': True}
     server = ThreadedServer(SchedulerService, port=8091, protocol_config=protocol_config)
