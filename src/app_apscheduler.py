@@ -10,6 +10,8 @@ import paramiko
 from datetime import datetime, timedelta
 import time
 import itertools
+from queue import Queue
+import threading
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 # https://github.com/agronholm/apscheduler/blob/3.x/examples/rpc/server.py
 
@@ -25,37 +27,63 @@ def run_script(type, script_text, job_id, timeout=20, ip=None, username=None, pa
     password (str): SSH 登录密码（仅在 'ssh' 类型时需要）。
     timeout (int): 命令执行的超时时间，单位为秒。
     """
+
     start_datetime = datetime.now()
+
+    def pop_from_stdout(process, event: threading.Event, queue_stdout: Queue):
+        while not event.is_set():
+            queue_stdout.put(process.stdout.readline().decode('utf-8', errors='ignore'))
+
+    def pop_from_stderr(process, event: threading.Event, queue_stderr: Queue):
+        while not event.is_set():
+            queue_stderr.put(process.stderr.readline().decode('utf-8', errors='ignore'))
+
     if type == 'local':
         process = subprocess.Popen(
             script_text,
             shell=True,
             stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
+            stderr=subprocess.PIPE,
             universal_newlines=False,
         )
-
-        for order in itertools.count():
-            output = process.stdout.read().decode('utf-8', errors='ignore')
-            if output:
+        queue_stdout = Queue()
+        queue_stderr = Queue()
+        event = threading.Event()
+        thread_stdout = threading.Thread(target=pop_from_stdout, args=(process,event,queue_stdout))
+        thread_stderr = threading.Thread(target=pop_from_stderr, args=(process,event,queue_stderr))
+        thread_stdout.daemon = True
+        thread_stderr.daemon = True
+        thread_stdout.start()
+        thread_stderr.start()
+        order = 0
+        while True:
+            output_list = []
+            output_list.extend(queue_stdout.get() for _ in range(queue_stdout.qsize()))
+            output_list.extend(queue_stderr.get() for _ in range(queue_stderr.qsize()))
+            if output := ''.join(output_list):
                 insert_apscheduler_running(
                     job_id=job_id,
                     log=output,
                     order=order,
                     start_datetime=start_datetime,
                 )
+                order += 1
             if process.poll() is not None and output == '':
                 break
             if datetime.now() - start_datetime > timedelta(seconds=timeout):
                 process.kill()
                 break
             time.sleep(2)  # 等待2秒钟读取一次日志
-        output = process.stdout.read().decode('utf-8', errors='ignore')
-        if output:
+        time.sleep(1)
+        event.set()
+        output_list = []
+        output_list.extend(queue_stdout.get() for _ in range(queue_stdout.qsize()))
+        output_list.extend(queue_stderr.get() for _ in range(queue_stderr.qsize()))
+        if output := ''.join(output_list):
             insert_apscheduler_running(
                 job_id=job_id,
                 log=output,
-                order=order + 1,
+                order=order,
                 start_datetime=start_datetime,
             )
         return_code = process.wait()
@@ -156,4 +184,5 @@ if __name__ == '__main__':
     except (KeyboardInterrupt, SystemExit):
         pass
     finally:
+        server.close()
         scheduler.shutdown()
