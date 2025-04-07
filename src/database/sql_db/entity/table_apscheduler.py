@@ -31,7 +31,7 @@ class ApschedulerResults(BaseModel):
 
     class Meta:
         table_name = 'sys_apscheduler_results'
-        indexes = ((('job_id', 'finish_datetime'), True),)
+        indexes = ((('job_id', 'start_datetime'), True),)
 
 
 class ApschedulerExtractValue(BaseModel):
@@ -46,4 +46,4 @@ class ApschedulerExtractValue(BaseModel):
 
     class Meta:
         table_name = 'sys_apscheduler_extract_value'
-        indexes = ((('job_id', 'finish_datetime'), True),)
+        indexes = ((('job_id', 'start_datetime'), True),)
