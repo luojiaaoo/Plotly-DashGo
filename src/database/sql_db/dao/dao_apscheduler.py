@@ -69,12 +69,12 @@ def delete_apscheduler_running(job_id, start_datetime):
         raise Exception('Failed to delete apscheduler running log due to an unknown error') from e
 
 
-def insert_apscheduler_result(job_id, status, log, extract_names):
+def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names):
     database = db()
     try:
         now = datetime.now()
         with database.atomic():
-            ApschedulerResults.create(job_id=job_id, status=status, log=log, finish_datetime=now)
+            ApschedulerResults.create(job_id=job_id, status=status, log=log, start_datetime=start_datetime, finish_datetime=now)
         if not extract_names:
             return
         with database.atomic():
@@ -95,6 +95,7 @@ def insert_apscheduler_result(job_id, status, log, extract_names):
                     extract_name=extract_name,
                     value_type=type_,
                     value=value,
+                    start_datetime=start_datetime,
                     finish_datetime=now,
                 )
     except IntegrityError as e:

@@ -16,7 +16,7 @@ from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 # https://github.com/agronholm/apscheduler/blob/3.x/examples/rpc/server.py
 
 
-def run_script(type, script_text, job_id, timeout=20, ip=None, username=None, password=None, extract_names=None):
+def run_script(type, script_text, job_id, start_datetime, timeout=20, ip=None, username=None, password=None, extract_names=None):
     """
     根据类型执行脚本，支持本地和远程执行。
 
@@ -27,8 +27,6 @@ def run_script(type, script_text, job_id, timeout=20, ip=None, username=None, pa
     password (str): SSH 登录密码（仅在 'ssh' 类型时需要）。
     timeout (int): 命令执行的超时时间，单位为秒。
     """
-
-    start_datetime = datetime.now()
 
     def pop_from_stdout(stdout, event: threading.Event, queue_stdout: Queue):
         while not event.is_set():
@@ -159,6 +157,7 @@ class SchedulerService(rpyc.Service):
     def exposed_add_job(self, func, *args, **kwargs):
         kwargs['kwargs'] = list(kwargs['kwargs'])
         kwargs['kwargs'].append(('job_id', kwargs['id']))  # 给函数传递job_id参数
+        kwargs['kwargs'].append(('start_datetime', datetime.now()))  # 给函数传递start_datetime参数
         return scheduler.add_job(func, *args, **kwargs)
 
     def exposed_modify_job(self, job_id, jobstore=None, **changes):
@@ -198,7 +197,7 @@ def job_listener(event):
         status = 'error'
     else:
         return
-    insert_apscheduler_result(job_id, status=status, log=log, extract_names=job.kwargs['extract_names'])
+    insert_apscheduler_result(job_id, status=status, log=log, start_datetime=job.kwargs['start_datetime'], extract_names=job.kwargs['extract_names'])
 
 
 if __name__ == '__main__':

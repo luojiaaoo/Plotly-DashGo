@@ -26,6 +26,7 @@ class ApschedulerResults(BaseModel):
     job_id = CharField(max_length=191, help_text='Job名')
     status = CharField(max_length=8, help_text='执行状态')
     log = TextField(help_text='返回的日志')
+    start_datetime = DateTimeField(help_text='开始时间')
     finish_datetime = DateTimeField(help_text='完成时间')
 
     class Meta:
@@ -40,6 +41,7 @@ class ApschedulerExtractValue(BaseModel):
     extract_name = CharField(max_length=32, help_text='提取数据名')
     value_type = CharField(max_length=16, help_text='提取数据类型')
     value = CharField(max_length=64, help_text='提取数据值')
+    start_datetime = DateTimeField(help_text='开始时间')
     finish_datetime = DateTimeField(help_text='完成时间')
 
     class Meta:
