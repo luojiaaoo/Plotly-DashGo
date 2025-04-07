@@ -16,7 +16,7 @@ from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 # https://github.com/agronholm/apscheduler/blob/3.x/examples/rpc/server.py
 
 
-def run_script(type, script_text, job_id, start_datetime, timeout=20, ip=None, username=None, password=None, extract_names=None):
+def run_script(type, script_text, job_id, timeout=20, ip=None, username=None, password=None, extract_names=None):
     """
     根据类型执行脚本，支持本地和远程执行。
 
@@ -27,6 +27,7 @@ def run_script(type, script_text, job_id, start_datetime, timeout=20, ip=None, u
     password (str): SSH 登录密码（仅在 'ssh' 类型时需要）。
     timeout (int): 命令执行的超时时间，单位为秒。
     """
+    start_datetime = datetime.now()
 
     def pop_from_stdout(stdout, event: threading.Event, queue_stdout: Queue):
         while not event.is_set():
@@ -85,17 +86,15 @@ def run_script(type, script_text, job_id, start_datetime, timeout=20, ip=None, u
                 start_datetime=start_datetime,
             )
         return_code = process.wait()
-        try:
-            # 读取最后的输出
-            if return_code == 0:
-                return select_apscheduler_running_log(job_id=job_id, start_datetime=start_datetime)
-            else:
-                raise Exception(select_apscheduler_running_log(job_id=job_id, start_datetime=start_datetime))
-        except Exception as e:
-            raise e
-        finally:
-            # 清除实时日志
-            delete_apscheduler_running(job_id=job_id, start_datetime=start_datetime)
+        log = select_apscheduler_running_log(job_id=job_id, start_datetime=start_datetime)
+        insert_apscheduler_result(
+            job_id,
+            status='success' if return_code == 0 else 'error',
+            log=log,
+            extract_names=extract_names,
+        )
+        delete_apscheduler_running(job_id=job_id, start_datetime=start_datetime)
+
     elif type == 'ssh':
         try:
             ssh = paramiko.SSHClient()
@@ -140,24 +139,24 @@ def run_script(type, script_text, job_id, start_datetime, timeout=20, ip=None, u
                     start_datetime=start_datetime,
                 )
             return_code = stdout.channel.recv_exit_status()
-            # 读取最后的输出
-            if return_code == 0:
-                return select_apscheduler_running_log(job_id=job_id, start_datetime=start_datetime)
-            else:
-                raise Exception(select_apscheduler_running_log(job_id=job_id, start_datetime=start_datetime))
+            log = select_apscheduler_running_log(job_id=job_id, start_datetime=start_datetime)
+            insert_apscheduler_result(
+                job_id,
+                status='success' if return_code == 0 else 'error',
+                log=log,
+                extract_names=extract_names,
+            )
         except Exception as e:
             raise e
         finally:
-            ssh.close()
-            # 清除实时日志
             delete_apscheduler_running(job_id=job_id, start_datetime=start_datetime)
+            ssh.close()
 
 
 class SchedulerService(rpyc.Service):
     def exposed_add_job(self, func, *args, **kwargs):
         kwargs['kwargs'] = list(kwargs['kwargs'])
         kwargs['kwargs'].append(('job_id', kwargs['id']))  # 给函数传递job_id参数
-        kwargs['kwargs'].append(('start_datetime', datetime.now()))  # 给函数传递start_datetime参数
         return scheduler.add_job(func, *args, **kwargs)
 
     def exposed_modify_job(self, job_id, jobstore=None, **changes):
@@ -180,24 +179,6 @@ class SchedulerService(rpyc.Service):
 
     def exposed_get_jobs(self, jobstore=None):
         return scheduler.get_jobs(jobstore)
-
-
-def job_listener(event):
-    from apscheduler.events import JobEvent
-
-    if not isinstance(event, JobEvent):
-        return
-    job_id = event.job_id
-    job = scheduler.get_job(event.job_id)
-    if event.code == EVENT_JOB_EXECUTED:
-        log = event.retval
-        status = 'success'
-    elif event.code == EVENT_JOB_ERROR:
-        log = str(event.exception)
-        status = 'error'
-    else:
-        return
-    insert_apscheduler_result(job_id, status=status, log=log, start_datetime=job.kwargs['start_datetime'], extract_names=job.kwargs['extract_names'])
 
 
 if __name__ == '__main__':
