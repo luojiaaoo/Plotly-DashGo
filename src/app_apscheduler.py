@@ -30,13 +30,13 @@ def run_script(type, script_text, job_id, timeout=20, ip=None, username=None, pa
 
     start_datetime = datetime.now()
 
-    def pop_from_stdout(process, event: threading.Event, queue_stdout: Queue):
+    def pop_from_stdout(stdout, event: threading.Event, queue_stdout: Queue):
         while not event.is_set():
-            queue_stdout.put(process.stdout.readline().decode('utf-8', errors='ignore'))
+            queue_stdout.put(stdout.readline().decode('utf-8', errors='ignore'))
 
-    def pop_from_stderr(process, event: threading.Event, queue_stderr: Queue):
+    def pop_from_stderr(stderr, event: threading.Event, queue_stderr: Queue):
         while not event.is_set():
-            queue_stderr.put(process.stderr.readline().decode('utf-8', errors='ignore'))
+            queue_stderr.put(stderr.readline().decode('utf-8', errors='ignore'))
 
     if type == 'local':
         process = subprocess.Popen(
@@ -49,8 +49,8 @@ def run_script(type, script_text, job_id, timeout=20, ip=None, username=None, pa
         queue_stdout = Queue()
         queue_stderr = Queue()
         event = threading.Event()
-        thread_stdout = threading.Thread(target=pop_from_stdout, args=(process,event,queue_stdout))
-        thread_stderr = threading.Thread(target=pop_from_stderr, args=(process,event,queue_stderr))
+        thread_stdout = threading.Thread(target=pop_from_stdout, args=(process.stdout, event, queue_stdout))
+        thread_stderr = threading.Thread(target=pop_from_stderr, args=(process.stderr, event, queue_stderr))
         thread_stdout.daemon = True
         thread_stderr.daemon = True
         thread_stdout.start()
@@ -104,17 +104,55 @@ def run_script(type, script_text, job_id, timeout=20, ip=None, username=None, pa
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
             ssh.connect(hostname=ip, username=username, password=password)
             stdin, stdout, stderr = ssh.exec_command(script_text, get_pty=True, timeout=timeout)
-            output = stdout.read().decode('utf-8')
-            error = stderr.read().decode('utf-8')
-            returncode = stdout.channel.recv_exit_status()
-            if returncode == 0:
-                return f'{output}\n\n### Warning:\n{error}' if error else output
+            queue_stdout = Queue()
+            queue_stderr = Queue()
+            event = threading.Event()
+            thread_stdout = threading.Thread(target=pop_from_stdout, args=(stdout, event, queue_stdout))
+            thread_stderr = threading.Thread(target=pop_from_stderr, args=(stderr, event, queue_stderr))
+            thread_stdout.daemon = True
+            thread_stderr.daemon = True
+            thread_stdout.start()
+            thread_stderr.start()
+            order = 0
+            while True:
+                output_list = []
+                output_list.extend(queue_stdout.get() for _ in range(queue_stdout.qsize()))
+                output_list.extend(queue_stderr.get() for _ in range(queue_stderr.qsize()))
+                if output := ''.join(output_list):
+                    insert_apscheduler_running(
+                        job_id=job_id,
+                        log=output,
+                        order=order,
+                        start_datetime=start_datetime,
+                    )
+                    order += 1
+                if stdout.channel.exit_status_ready() and output == '':
+                    break
+                time.sleep(2)  # 等待2秒钟读取一次日志
+            time.sleep(1)
+            event.set()
+            output_list = []
+            output_list.extend(queue_stdout.get() for _ in range(queue_stdout.qsize()))
+            output_list.extend(queue_stderr.get() for _ in range(queue_stderr.qsize()))
+            if output := ''.join(output_list):
+                insert_apscheduler_running(
+                    job_id=job_id,
+                    log=output,
+                    order=order,
+                    start_datetime=start_datetime,
+                )
+            return_code = stdout.channel.recv_exit_status()
+            # 读取最后的输出
+            if return_code == 0:
+                return select_apscheduler_running_log(job_id=job_id, start_datetime=start_datetime)
             else:
-                raise Exception(f'{output}\n\n### Warning:\n{error}' if error else output)
+                raise Exception(select_apscheduler_running_log(job_id=job_id, start_datetime=start_datetime))
         except Exception as e:
             raise e
         finally:
             ssh.close()
+            # 清除实时日志
+            delete_apscheduler_running(job_id=job_id, start_datetime=start_datetime)
 
 
 class SchedulerService(rpyc.Service):
