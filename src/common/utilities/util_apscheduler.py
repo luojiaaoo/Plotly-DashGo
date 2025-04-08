@@ -1,6 +1,7 @@
 import rpyc
 import json
 from dataclasses import dataclass
+from typing import Optional, Dict
 
 
 def add_ssh_interval_job(ip, username, password, script_text, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names=None):
@@ -109,11 +110,12 @@ class JobInfo:
     job_id: str
     status: bool
     job_next_run_time: str
-    plan: dict
+    trigger: str
+    plan: Dict
     type: str
     script_text: str
     timeout: int
-    extract_names: list
+    extract_names: Optional[Dict]
     update_by: str
     update_datetime: str
     create_by: str
@@ -129,6 +131,7 @@ def get_apscheduler_all_jobs():
                 job_id=job_json['id'],
                 status=job_json['status'],
                 job_next_run_time=job_json['next_run_time'],
+                trigger=job_json['trigger'],
                 plan=job_json['plan'],
                 type=job_json['kwargs']['type'],
                 script_text=job_json['kwargs']['script_text'],

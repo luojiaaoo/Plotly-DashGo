@@ -188,25 +188,28 @@ class SchedulerService(rpyc.Service):
         for job in jobs:
             if isinstance(job.trigger, IntervalTrigger):
                 plan = {
-                    'trigger': 'interval',
                     'seconds': job.trigger.interval_length,
                 }
+                trigger = 'interval'
             else:
-                plan = {
-                    'trigger': 'cron',
-                    'second': job.trigger.second,
-                    'minute': job.trigger.minute,
-                    'hour': job.trigger.hour,
-                    'day': job.trigger.day,
-                    'month': job.trigger.month,
-                    'day_of_week': job.trigger.day_of_week,
-                }
+                plan = (
+                    {
+                        'second': job.trigger.second,
+                        'minute': job.trigger.minute,
+                        'hour': job.trigger.hour,
+                        'day': job.trigger.day,
+                        'month': job.trigger.month,
+                        'day_of_week': job.trigger.day_of_week,
+                    },
+                )
+                trigger = 'cron'
             result.append(
                 {
                     'id': job.id,
                     'status': job.next_run_time is not None,
                     'next_run_time': f'{job.next_run_time:%Y-%m-%dT%H:%M:%S}' if job.next_run_time else '',
                     'kwargs': job.kwargs,
+                    'trigger': trigger,
                     'plan': plan,
                 }
             )

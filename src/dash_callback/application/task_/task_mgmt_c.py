@@ -17,8 +17,9 @@ def get_table_data():
             'job_id': job.job_id,
             'type': job.type,
             'script_text': job.script_text,
-            'extract_names': job.extract_names,
-            'plan': str(job.plan),
+            'extract_names': '-' if job.extract_names is None else str(job.extract_names),
+            'trigger': job.trigger,
+            'plan': f'{job.plan}',
             'job_next_run_time': job.job_next_run_time,
             'enable': {
                 'checked': job.status,
@@ -26,11 +27,11 @@ def get_table_data():
                 'unCheckedChildren': 'close',
                 'custom': f'enable:{job.job_id}',
             },
-            'view_history': {
-                    'content': 'view History',
-                    'type': 'primary',
-                    'custom': f'view_history:{job.job_id}',
-                },
+            'view_log': {
+                'content': 'View Log',
+                'type': 'primary',
+                'custom': f'view_log:{job.job_id}',
+            },
         }
         for job in get_apscheduler_all_jobs()
     ]
@@ -57,10 +58,11 @@ def init_table(timeoutCount):
                 {'title': '类型', 'dataIndex': 'type', 'width': 'calc(100% / 8)'},
                 {'title': '脚本', 'dataIndex': 'script_text', 'width': 'calc(100% / 8)'},
                 {'title': '数据采集', 'dataIndex': 'extract_names', 'width': 'calc(100% / 8)'},
+                {'title': '触发器', 'dataIndex': 'trigger', 'width': 'calc(100% / 8)'},
                 {'title': '执行计划', 'dataIndex': 'plan', 'width': 'calc(100% / 8)'},
                 {'title': '下一次执行时间', 'dataIndex': 'job_next_run_time', 'width': 'calc(100% / 8)'},
                 {'title': '启用', 'dataIndex': 'enable', 'renderOptions': {'renderType': 'switch'}, 'width': 'calc(100% / 8)'},
-                {'title': '执行记录', 'dataIndex': 'view_history', 'renderOptions': {'renderType': 'button'}, 'width': 'calc(100% / 8)'},
+                {'title': '执行记录', 'dataIndex': 'view_log', 'renderOptions': {'renderType': 'button'}, 'width': 'calc(100% / 8)'},
             ],
             rowSelectionType='checkbox',
             data=get_table_data(),
