@@ -18,7 +18,7 @@ def get_table_data():
             'type': job.type,
             'script_text': job.script_text,
             'extract_names': job.extract_names,
-            'plan': job.plan,
+            'plan': str(job.plan),
             'job_next_run_time': job.job_next_run_time,
             'enable': {
                 'checked': job.status,

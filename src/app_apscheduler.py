@@ -186,27 +186,30 @@ class SchedulerService(rpyc.Service):
         jobs = scheduler.get_jobs(jobstore)
         result = []
         for job in jobs:
+            if isinstance(job.trigger, IntervalTrigger):
+                plan = {
+                    'trigger': 'interval',
+                    'seconds': job.trigger.interval_length,
+                }
+            else:
+                plan = {
+                    'trigger': 'cron',
+                    'second': job.trigger.second,
+                    'minute': job.trigger.minute,
+                    'hour': job.trigger.hour,
+                    'day': job.trigger.day,
+                    'month': job.trigger.month,
+                    'day_of_week': job.trigger.day_of_week,
+                }
             result.append(
                 {
                     'id': job.id,
                     'status': job.next_run_time is not None,
                     'next_run_time': f'{job.next_run_time:%Y-%m-%dT%H:%M:%S}' if job.next_run_time else '',
                     'kwargs': job.kwargs,
-                    'plan': {
-                        'second': job.trigger.second,
-                        'minute': job.trigger.minute,
-                        'hour': job.trigger.hour,
-                        'day': job.trigger.day,
-                        'month': job.trigger.month,
-                        'day_of_week': job.trigger.day_of_week,
-                    }
-                    if not isinstance(job.trigger, IntervalTrigger)
-                    else {
-                        'seconds': job.trigger.interval_length,
-                    },
+                    'plan': plan,
                 }
             )
-        print(f'jobs: {result}')
         return json.dumps(result, ensure_ascii=False)
 
 
