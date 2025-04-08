@@ -7,28 +7,33 @@ from dash import set_props
 from dash_components import MessageManager
 import time
 from database.sql_db.dao import dao_apscheduler
-from common.utilities.util_apscheduler import add_local_interval_job, get_apscheduler_all_job
+from common.utilities.util_apscheduler import add_local_interval_job, get_apscheduler_all_jobs
 from feffery_dash_utils.style_utils import style
 
 
 def get_table_data():
-    return get_apscheduler_all_job()
-    # from database.sql_db.dao import dao_apscheduler
-
-    # return [
-    #     {
-    #         'content': announcement.announcement,
-    #         'create_datetime': announcement.datetime,
-    #         'create_by': announcement.name,
-    #         'enable': {
-    #             'checked': announcement.status,
-    #             'checkedChildren': 'open',
-    #             'unCheckedChildren': 'close',
-    #             'custom': announcement.announcement,
-    #         },
-    #     }
-    #     for announcement in dao_announcement.get_all_announcements()
-    # ]
+    return [
+        {
+            'job_id': job.job_id,
+            'type': job.type,
+            'script_text': job.script_text,
+            'extract_names': job.extract_names,
+            'plan': job.plan,
+            'job_next_run_time': job.job_next_run_time,
+            'enable': {
+                'checked': job.status,
+                'checkedChildren': 'open',
+                'unCheckedChildren': 'close',
+                'custom': f'enable:{job.job_id}',
+            },
+            'view_history': {
+                    'content': 'view History',
+                    'type': 'primary',
+                    'custom': f'view_history:{job.job_id}',
+                },
+        }
+        for job in get_apscheduler_all_jobs()
+    ]
 
 
 @app.callback(
@@ -48,18 +53,17 @@ def init_table(timeoutCount):
         Table(
             id='task-mgmt-table',
             columns=[
-                {'title': '任务名', 'dataIndex': 'create_by', 'width': 'calc(100% / 8)'},
-                {'title': '任务类型', 'dataIndex': 'content', 'width': 'calc(100% / 8)'},
-                {'title': '脚本', 'dataIndex': 'content', 'width': 'calc(100% / 8)'},
-                {'title': '数据采集', 'dataIndex': 'content', 'width': 'calc(100% / 8)'},
-                {'title': '执行计划', 'dataIndex': 'create_datetime', 'width': 'calc(100% / 8)'},
-                {'title': '下一次执行时间', 'dataIndex': 'create_datetime', 'width': 'calc(100% / 8)'},
+                {'title': '任务名', 'dataIndex': 'job_id', 'width': 'calc(100% / 8)'},
+                {'title': '类型', 'dataIndex': 'type', 'width': 'calc(100% / 8)'},
+                {'title': '脚本', 'dataIndex': 'script_text', 'width': 'calc(100% / 8)'},
+                {'title': '数据采集', 'dataIndex': 'extract_names', 'width': 'calc(100% / 8)'},
+                {'title': '执行计划', 'dataIndex': 'plan', 'width': 'calc(100% / 8)'},
+                {'title': '下一次执行时间', 'dataIndex': 'job_next_run_time', 'width': 'calc(100% / 8)'},
                 {'title': '启用', 'dataIndex': 'enable', 'renderOptions': {'renderType': 'switch'}, 'width': 'calc(100% / 8)'},
-                {'title': '执行记录', 'dataIndex': 'enable', 'renderOptions': {'renderType': 'button'}, 'width': 'calc(100% / 8)'},
+                {'title': '执行记录', 'dataIndex': 'view_history', 'renderOptions': {'renderType': 'button'}, 'width': 'calc(100% / 8)'},
             ],
             rowSelectionType='checkbox',
-            # data=get_table_data(),
+            data=get_table_data(),
             pageSize=10,
         ),
     ]
-

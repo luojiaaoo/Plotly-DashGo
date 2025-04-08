@@ -3,6 +3,7 @@ from rpyc.utils.server import ThreadedServer
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.triggers.interval import IntervalTrigger
 import subprocess
 from database.sql_db.dao.dao_apscheduler import insert_apscheduler_result, insert_apscheduler_running, delete_apscheduler_running, select_apscheduler_running_log
 from config.dashgo_conf import SqlDbConf
@@ -179,7 +180,7 @@ class SchedulerService(rpyc.Service):
     def exposed_get_job(self, job_id):
         return scheduler.get_job(job_id)
 
-    def exposed_get_jobs(self, jobstore='default'):
+    def exposed_get_jobs(self, jobstore=None):
         import json
 
         jobs = scheduler.get_jobs(jobstore)
@@ -188,10 +189,24 @@ class SchedulerService(rpyc.Service):
             result.append(
                 {
                     'id': job.id,
+                    'status': job.next_run_time is not None,
                     'next_run_time': f'{job.next_run_time:%Y-%m-%dT%H:%M:%S}' if job.next_run_time else '',
                     'kwargs': job.kwargs,
+                    'plan': {
+                        'second': job.trigger.second,
+                        'minute': job.trigger.minute,
+                        'hour': job.trigger.hour,
+                        'day': job.trigger.day,
+                        'month': job.trigger.month,
+                        'day_of_week': job.trigger.day_of_week,
+                    }
+                    if not isinstance(job.trigger, IntervalTrigger)
+                    else {
+                        'seconds': job.trigger.interval_length,
+                    },
                 }
             )
+        print(f'jobs: {result}')
         return json.dumps(result, ensure_ascii=False)
 
 

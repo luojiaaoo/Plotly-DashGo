@@ -103,23 +103,26 @@ def add_local_interval_job(script_text, interval, timeout, job_id, update_by, up
         conn.close()
 
 
-def get_apscheduler_all_job():
+def get_apscheduler_all_jobs():
     try:
         conn = rpyc.connect('localhost', 8091)
         job_jsons = json.loads(conn.root.get_jobs())
         return [
-            dict(
-                job_id=job_json['id'],
-                job_next_run_time=job_json['next_run_time'],
-                type=job_json['kwargs']['type'],
-                script_text=job_json['kwargs']['script_text'],
-                timeout=job_json['kwargs']['timeout'],
-                extract_names=job_json['kwargs']['extract_names'],
-                update_by=job_json['kwargs']['update_by'],
-                update_datetime=job_json['kwargs']['update_datetime'],
-                create_by=job_json['kwargs']['create_by'],
-                create_datetime=job_json['kwargs']['create_datetime'],
-            )
+            {
+                'job_id': job_json['id'],
+                'status': job_json['status'],
+                'job_next_run_time': job_json['next_run_time'],
+                'plan': job_json['plan'],
+                'type': job_json['kwargs']['type'],
+                'script_text': job_json['kwargs']['script_text'],
+                'timeout': job_json['kwargs']['timeout'],
+                'extract_names': job_json['kwargs']['extract_names'],
+                'update_by': job_json['kwargs']['update_by'],
+                'update_datetime': job_json['kwargs']['update_datetime'],
+                'create_by': job_json['kwargs']['create_by'],
+                'create_datetime': job_json['kwargs']['create_datetime'],
+                # 'extract_names': job_json['kwargs']['extract_names'] if job_json['kwargs'].get('extract_names', None) is not None else '',
+            }
             for job_json in job_jsons
         ]
     except Exception as e:
