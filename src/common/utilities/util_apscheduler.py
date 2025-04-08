@@ -6,7 +6,7 @@ from typing import Optional, Dict
 
 def add_ssh_interval_job(ip, username, password, script_text, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names=None):
     try:
-        conn = rpyc.connect('localhost', 8091)
+        conn = rpyc.connect('127.0.0.1', 8091)
         job = conn.root.add_job(
             'app_apscheduler:run_script',
             'interval',

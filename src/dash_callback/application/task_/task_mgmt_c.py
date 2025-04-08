@@ -62,7 +62,7 @@ def init_table(timeoutCount):
                 {'title': '启用', 'dataIndex': 'enable', 'renderOptions': {'renderType': 'switch'}, 'width': 'calc(100% / 8)'},
                 {'title': '执行记录', 'dataIndex': 'view_log', 'renderOptions': {'renderType': 'button'}, 'width': 'calc(100% / 8)'},
             ],
-            rowSelectionType='checkbox',
+            rowSelectionType='radio',
             data=get_table_data(),
             pageSize=10,
         ),

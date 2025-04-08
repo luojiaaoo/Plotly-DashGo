@@ -229,7 +229,7 @@ if __name__ == '__main__':
     scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
     scheduler.start()
     protocol_config = {'allow_public_attrs': True}
-    server = ThreadedServer(SchedulerService, port=8091, protocol_config=protocol_config)
+    server = ThreadedServer(SchedulerService, hostname='127.0.0.1', port=8091, protocol_config=protocol_config)
 
     try:
         server.start()
