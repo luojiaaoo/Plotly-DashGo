@@ -16,7 +16,7 @@ from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 # https://github.com/agronholm/apscheduler/blob/3.x/examples/rpc/server.py
 
 
-def run_script(type, script_text, job_id, timeout=20, ip=None, username=None, password=None, extract_names=None):
+def run_script(type, script_text, job_id, update_by, update_datetime, create_by, create_datetime, timeout=20, ip=None, username=None, password=None, extract_names=None):
     """
     根据类型执行脚本，支持本地和远程执行。
 
@@ -179,8 +179,20 @@ class SchedulerService(rpyc.Service):
     def exposed_get_job(self, job_id):
         return scheduler.get_job(job_id)
 
-    def exposed_get_jobs(self, jobstore=None):
-        return scheduler.get_jobs(jobstore)
+    def exposed_get_jobs(self, jobstore='default'):
+        import json
+
+        jobs = scheduler.get_jobs(jobstore)
+        result = []
+        for job in jobs:
+            result.append(
+                {
+                    'id': job.id,
+                    'next_run_time': f'{job.next_run_time:%Y-%m-%dT%H:%M:%S}' if job.next_run_time else '',
+                    'kwargs': job.kwargs,
+                }
+            )
+        return json.dumps(result, ensure_ascii=False)
 
 
 if __name__ == '__main__':
