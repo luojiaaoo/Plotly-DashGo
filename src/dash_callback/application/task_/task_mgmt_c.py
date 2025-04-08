@@ -16,7 +16,6 @@ def get_table_data():
         {
             'job_id': job.job_id,
             'type': job.type,
-            'script_text': job.script_text,
             'extract_names': '-' if job.extract_names is None else str(job.extract_names),
             'trigger': job.trigger,
             'plan': f'{job.plan}',
@@ -56,7 +55,6 @@ def init_table(timeoutCount):
             columns=[
                 {'title': '任务名', 'dataIndex': 'job_id', 'width': 'calc(100% / 8)'},
                 {'title': '类型', 'dataIndex': 'type', 'width': 'calc(100% / 8)'},
-                {'title': '脚本', 'dataIndex': 'script_text', 'width': 'calc(100% / 8)'},
                 {'title': '数据采集', 'dataIndex': 'extract_names', 'width': 'calc(100% / 8)'},
                 {'title': '触发器', 'dataIndex': 'trigger', 'width': 'calc(100% / 8)'},
                 {'title': '执行计划', 'dataIndex': 'plan', 'width': 'calc(100% / 8)'},
