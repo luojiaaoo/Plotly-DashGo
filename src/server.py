@@ -55,8 +55,8 @@ def download_file(user_name):
         return send_from_directory(PathProj.AVATAR_DIR_PATH, file_name)
 
 
-@app.server.route('/<prefix>/vs/<path:path>')
-def vs_proxy(prefix,path):
+@app.server.route('/<path:prefix>/vs/<path:path>')
+def vs_proxy(prefix, path):
     """转发vscode editor底层相关请求到正确的地址上"""
     return redirect(get_asset_url(f'vs/{path}'))
 
