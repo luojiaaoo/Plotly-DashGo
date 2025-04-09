@@ -7,7 +7,7 @@ from dash import set_props
 from dash_components import MessageManager
 import time
 from database.sql_db.dao import dao_apscheduler
-from common.utilities.util_apscheduler import add_local_interval_job, get_apscheduler_all_jobs
+from common.utilities.util_apscheduler import add_local_interval_job, get_apscheduler_all_jobs, start_stop_job
 from feffery_dash_utils.style_utils import style
 
 
@@ -24,7 +24,7 @@ def get_table_data():
                 'checked': job.status,
                 'checkedChildren': 'open',
                 'unCheckedChildren': 'close',
-                'custom': f'enable:{job.job_id}',
+                'custom': job.job_id,
             },
             'view_log': {
                 'content': 'View Log',
@@ -67,3 +67,24 @@ def init_table(timeoutCount):
             pageSize=10,
         ),
     ]
+
+
+@app.callback(
+    Output('task-mgmt-table', 'data', allow_duplicate=True),
+    [
+        Input('task-mgmt-table', 'recentlySwitchDataIndex'),
+        Input('task-mgmt-table', 'recentlySwitchStatus'),
+        Input('task-mgmt-table', 'recentlySwitchRow'),
+    ],
+    prevent_initial_call=True,
+)
+def handle_enable_eow(recentlySwitchDataIndex, recentlySwitchStatus, recentlySwitchRow):
+    """处理启用、关闭逻辑"""
+    status = recentlySwitchRow['enable']['checked']
+    job_id = recentlySwitchRow['enable']['custom']
+    start_stop_job(job_id=job_id, is_start=status)
+    if status:
+        MessageManager.success(content=f'作业{job_id}打开成功')
+    else:
+        MessageManager.success(content=f'作业{job_id}关闭成功')
+    return get_table_data()

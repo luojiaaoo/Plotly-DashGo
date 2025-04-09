@@ -151,7 +151,7 @@ def handle_add_data(okCounts, value):
     prevent_initial_call=True,
 )
 def handle_enable_eow(recentlySwitchDataIndex, recentlySwitchStatus, recentlySwitchRow):
-    """处理新增数据逻辑"""
+    """处理启用、关闭逻辑"""
     from database.sql_db.dao import dao_announcement
 
     status = recentlySwitchRow['enable']['checked']

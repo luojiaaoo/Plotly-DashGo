@@ -160,9 +160,9 @@ def start_stop_job(job_id, is_start: bool):
     try:
         conn = get_connect()
         if is_start:
-            json.loads(conn.root.resume_job(job_id=job_id))
+            conn.root.resume_job(job_id=job_id)
         else:
-            json.loads(conn.root.pause_job(job_id=job_id))
+            conn.root.pause_job(job_id=job_id)
     except Exception as e:
         raise e
     finally:
@@ -172,7 +172,7 @@ def start_stop_job(job_id, is_start: bool):
 def remove_job(job_id):
     try:
         conn = get_connect()
-        json.loads(conn.root.remove_job(job_id=job_id))
+        conn.root.remove_job(job_id=job_id)
     except Exception as e:
         raise e
     finally:
@@ -182,7 +182,7 @@ def remove_job(job_id):
 def modify_job(job_id, **kwargs):
     try:
         conn = get_connect()
-        json.loads(conn.root.modify_job(job_id=job_id, **kwargs))
+        conn.root.modify_job(job_id=job_id, **kwargs)
     except Exception as e:
         raise e
     finally:
@@ -192,19 +192,17 @@ def modify_job(job_id, **kwargs):
 def reschedule_job_cron(job_id, second, minute, hour, day, month, day_of_week, year=None, week=None):
     try:
         conn = get_connect()
-        json.loads(
-            conn.root.reschedule_job(
-                job_id,
-                'cron',
-                year=year,
-                week=week,
-                second=second,
-                minute=minute,
-                hour=hour,
-                day=day,
-                month=month,
-                day_of_week=day_of_week,
-            )
+        conn.root.reschedule_job(
+            job_id,
+            'cron',
+            year=year,
+            week=week,
+            second=second,
+            minute=minute,
+            hour=hour,
+            day=day,
+            month=month,
+            day_of_week=day_of_week,
         )
     except Exception as e:
         raise e
