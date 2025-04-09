@@ -7,6 +7,7 @@ from common.exception import global_exception_handler
 from common.utilities.util_dash import CustomDash
 from common.constant import HttpStatusConstant
 from datetime import datetime, timedelta, timezone
+from dash import get_asset_url
 from i18n import t__other
 
 
@@ -52,6 +53,12 @@ def download_file(user_name):
         abort(HttpStatusConstant.FORBIDDEN)
     else:
         return send_from_directory(PathProj.AVATAR_DIR_PATH, file_name)
+
+
+@app.server.route('/task_/vs/<path:path>')
+def vs_proxy(path):
+    """转发vscode editor底层相关请求到正确的地址上"""
+    return redirect(get_asset_url(f'vs/{path}'))
 
 
 # nginx代理后，拦截直接访问
@@ -283,4 +290,3 @@ def main_page_redirct():
     if request.method == 'GET':
         if request.path == '/':
             return redirect('/dashboard_/workbench')
-
