@@ -106,7 +106,7 @@ def handle_enable_eow(recentlySwitchDataIndex, recentlySwitchStatus, recentlySwi
     prevent_initial_call=True,
 )
 def open_add_modal(nClicks):
-    """显示新增数据模态框"""
+    """显示新增interval数据模态框"""
     return True
 
 
@@ -117,7 +117,7 @@ def open_add_modal(nClicks):
     prevent_initial_call=True,
 )
 def refresh_add_modal(visible):
-    """刷新新增数据模态框内容"""
+    """刷新新增interval数据模态框内容"""
 
     if visible:
         time.sleep(0.5)
@@ -171,11 +171,12 @@ def refresh_add_modal(visible):
                                         id='task-mgmt-table-add-interval-modal-editor-fullscreen',
                                         targetId='task-mgmt-table-add-interval-modal-editor-mount-target',
                                     ),
+                                    fac.AntdButton('收起/展开', id='task-mgmt-table-add-interval-modal-editor-collapse-btn'),
                                     fac.AntdButton('全屏', id='task-mgmt-table-add-interval-modal-editor-fullscreen-btn'),
                                 ],
                             ),
                             # 代码编辑器挂载点
-                            html.Div(id='task-mgmt-table-add-interval-modal-editor-mount-target', style=style(height=400)),
+                            html.Div(id='task-mgmt-table-add-interval-modal-editor-mount-target'),
                         ],
                         direction='vertical',
                         style=style(width=600),
@@ -190,7 +191,7 @@ def refresh_add_modal(visible):
     return dash.no_update
 
 
-# ssh参数隐藏/显示
+# interval-ssh参数隐藏/显示
 app.clientside_callback(
     """(value) => {
         if(value=='ssh'){
@@ -203,18 +204,35 @@ app.clientside_callback(
     Input('task-mgmt-table-add-interval-modal-type-select', 'value'),
 )
 
+# interval代码编辑器折叠
+app.clientside_callback(
+    """(value,style) => {
+        if(style === undefined || style['display']!='None'){
+            return {'display':'None','height': '300px'}
+        }else{
+            return {'display':'block','height': '300px'}
+        }
+    }""",
+    Output('task-mgmt-table-add-interval-modal-editor-mount-target', 'style'),
+    Input('task-mgmt-table-add-interval-modal-editor-collapse-btn', 'nClicks'),
+    State('task-mgmt-table-add-interval-modal-editor-mount-target', 'style'),
+)
 
-# 全屏脚本编辑器
+
+# interval全屏代码编辑器
 @app.callback(
-    Output('task-mgmt-table-add-interval-modal-editor-fullscreen', 'isFullscreen'),
+    [
+        Output('task-mgmt-table-add-interval-modal-editor-mount-target', 'style', allow_duplicate=True),
+        Output('task-mgmt-table-add-interval-modal-editor-fullscreen', 'isFullscreen'),
+    ],
     Input('task-mgmt-table-add-interval-modal-editor-fullscreen-btn', 'nClicks'),
     State('task-mgmt-table-add-interval-modal-editor-fullscreen', 'isFullscreen'),
     prevent_initial_call=True,
 )
 def toggle_fullscreen(nClicks, isFullscreen):
-    return not isFullscreen
+    return style(display='block', height='300px'), not isFullscreen
 
-
+# 注入interval代码编辑器
 app.clientside_callback(
     """(language, id) => {
 
