@@ -213,13 +213,20 @@ def reschedule_job_cron(job_id, second, minute, hour, day, month, day_of_week, y
 def reschedule_job_interval(job_id, seconds):
     try:
         conn = get_connect()
-        json.loads(
-            conn.root.reschedule_job(
-                job_id,
-                'interval',
-                seconds=seconds,
-            )
+        conn.root.reschedule_job(
+            job_id,
+            'interval',
+            seconds=seconds,
         )
+    except Exception as e:
+        raise e
+    finally:
+        conn.close()
+
+def get_platform():
+    try:
+        conn = get_connect()
+        return conn.root.get_platform()
     except Exception as e:
         raise e
     finally:

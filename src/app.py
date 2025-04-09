@@ -104,5 +104,22 @@ app.clientside_callback(
     ],
     prevent_initial_call=True,
 )
+
+app.clientside_callback(
+    # 初始化vscode editor配置
+    """
+        (id) => {
+        const script = document.createElement('script');
+        script.textContent = `
+            var require = {
+                'vs/nls': { availableLanguages: { '*': 'zh-cn' } }
+            }
+        `;
+        document.body.appendChild(script);
+        return window.dash_clientside.no_update;
+    }""",
+    Input('root-container', 'id'),
+)
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8090, debug=True)

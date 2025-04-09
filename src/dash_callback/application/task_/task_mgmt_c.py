@@ -1,13 +1,14 @@
 from server import app
 from dash.dependencies import Input, Output, State
 import feffery_antd_components as fac
+import feffery_utils_components as fuc
 from dash_components import Table
 import dash
-from dash import set_props
+from dash import set_props, html
 from dash_components import MessageManager
 import time
 from database.sql_db.dao import dao_apscheduler
-from common.utilities.util_apscheduler import add_local_interval_job, get_apscheduler_all_jobs, start_stop_job
+from common.utilities.util_apscheduler import add_local_interval_job, get_apscheduler_all_jobs, start_stop_job, get_platform
 from feffery_dash_utils.style_utils import style
 from uuid import uuid4
 
@@ -46,16 +47,18 @@ def init_table(timeoutCount):
     """页面加载时初始化渲染表格"""
     return [
         fac.AntdModal(
-            id='task-mgmt-table-add-modal-interval',
+            id='task-mgmt-table-add-interval-modal',
             title='新增周期任务',
             renderFooter=True,
             okClickClose=False,
+            width=800,
         ),
         fac.AntdModal(
-            id='task-mgmt-table-add-modal-cron',
+            id='task-mgmt-table-add-cron-modal',
             title='新增定时任务',
             renderFooter=True,
             okClickClose=False,
+            width=800,
         ),
         Table(
             id='task-mgmt-table',
@@ -98,7 +101,7 @@ def handle_enable_eow(recentlySwitchDataIndex, recentlySwitchStatus, recentlySwi
 
 
 @app.callback(
-    Output('task-mgmt-table-add-modal-interval', 'visible'),
+    Output('task-mgmt-table-add-interval-modal', 'visible'),
     Input('task-mgmt-button-add-interval', 'nClicks'),
     prevent_initial_call=True,
 )
@@ -108,9 +111,9 @@ def open_add_modal(nClicks):
 
 
 @app.callback(
-    Output('task-mgmt-table-add-modal-interval', 'children'),
-    Input('task-mgmt-table-add-modal-interval', 'visible'),
-    running=[Output('task-mgmt-table-add-modal-interval', 'loading'), True, False],
+    Output('task-mgmt-table-add-interval-modal', 'children'),
+    Input('task-mgmt-table-add-interval-modal', 'visible'),
+    running=[Output('task-mgmt-table-add-interval-modal', 'loading'), True, False],
     prevent_initial_call=True,
 )
 def refresh_add_modal(visible):
@@ -118,14 +121,16 @@ def refresh_add_modal(visible):
 
     if visible:
         time.sleep(0.5)
-
         return fac.AntdForm(
             [
                 fac.AntdFormItem(
                     fac.AntdSegmented(
                         key=uuid4().hex,
-                        id='task-mgmt-table-add-modal-interval-type-select',
-                        options=[{'label': '本地脚本', 'value': 'local', 'icon': 'md-home'}, {'label': 'ssh远程执行', 'value': 'ssh', 'icon': 'antd-cloud'}],
+                        id='task-mgmt-table-add-interval-modal-type-select',
+                        options=[
+                            {'label': '本地脚本' + f'<系统类型为{get_platform()}>', 'value': 'local', 'icon': 'md-home'},
+                            {'label': 'ssh远程执行', 'value': 'ssh', 'icon': 'antd-cloud'},
+                        ],
                         defaultValue='local',
                         block=True,
                     ),
@@ -135,33 +140,57 @@ def refresh_add_modal(visible):
                     [
                         fac.AntdFormItem(
                             fac.AntdInput(
-                                id='task-mgmt-table-add-modal-interval-ssh-username',
+                                id='task-mgmt-table-add-interval-modal-ssh-username',
                             ),
                             label='ssh用户名',
                         ),
                         fac.AntdFormItem(
                             fac.AntdInput(
                                 mode='password',
-                                id='task-mgmt-table-add-modal-interval-ssh-password',
+                                id='task-mgmt-table-add-interval-modal-ssh-password',
                             ),
                             label='ssh密码',
                         ),
                     ],
-                    id='task-mgmt-table-add-modal-interval-ssh-container',
+                    id='task-mgmt-table-add-interval-modal-ssh-container',
                     style=style(display='none'),
                 ),
                 fac.AntdFormItem(
-                    fac.AntdInput(id='task-mgmt-table-add-modal-interval-script-text', mode='text-area', showCount=True),
+                    fac.AntdSpace(
+                        [
+                            fac.AntdSpace(
+                                [
+                                    fac.AntdRadioGroup(
+                                        id='task-mgmt-table-add-interval-modal-update-editor-language',
+                                        options=['Bat', 'Shell'],
+                                        optionType='button',
+                                        buttonStyle='solid',
+                                        value='Bat',
+                                    ),
+                                    fuc.FefferyFullscreen(
+                                        id='task-mgmt-table-add-interval-modal-editor-fullscreen',
+                                        targetId='task-mgmt-table-add-interval-modal-editor-mount-target',
+                                    ),
+                                    fac.AntdButton('全屏', id='task-mgmt-table-add-interval-modal-editor-fullscreen-btn'),
+                                ],
+                            ),
+                            # 代码编辑器挂载点
+                            html.Div(id='task-mgmt-table-add-interval-modal-editor-mount-target', style=style(height=400)),
+                        ],
+                        direction='vertical',
+                        style=style(width=600),
+                    ),
                     label='脚本',
                 ),
             ],
-            labelCol={'span': 5},
+            labelCol={'span': 3},
             wrapperCol={'span': 20},
-            style={'width': 400},
+            style={'width': 700},
         )
     return dash.no_update
 
 
+# ssh参数隐藏/显示
 app.clientside_callback(
     """(value) => {
         if(value=='ssh'){
@@ -170,6 +199,40 @@ app.clientside_callback(
             return {'display':'None'}
         }
     }""",
-    Output('task-mgmt-table-add-modal-interval-ssh-container', 'style'),
-    Input('task-mgmt-table-add-modal-interval-type-select', 'value'),
+    Output('task-mgmt-table-add-interval-modal-ssh-container', 'style'),
+    Input('task-mgmt-table-add-interval-modal-type-select', 'value'),
+)
+
+
+# 全屏脚本编辑器
+@app.callback(
+    Output('task-mgmt-table-add-interval-modal-editor-fullscreen', 'isFullscreen'),
+    Input('task-mgmt-table-add-interval-modal-editor-fullscreen-btn', 'nClicks'),
+    State('task-mgmt-table-add-interval-modal-editor-fullscreen', 'isFullscreen'),
+    prevent_initial_call=True,
+)
+def toggle_fullscreen(nClicks, isFullscreen):
+    return not isFullscreen
+
+
+app.clientside_callback(
+    """(language, id) => {
+
+    // 销毁先前已存在的编辑器实例
+    if ( window.myEditor ) {
+        window.myEditor.dispose();
+    }
+    window.myEditor = monaco.editor.create(document.getElementById(id), {
+        value: null,
+        language: language.toLowerCase(),
+        automaticLayout: true,
+        lineNumbers: "on",
+        theme: "vs-dark"
+    });
+    return window.dash_clientside.no_update;
+}""",
+    Output('task-mgmt-table-add-interval-modal-editor-mount-target', 'children', allow_duplicate=True),
+    Input('task-mgmt-table-add-interval-modal-update-editor-language', 'value'),
+    State('task-mgmt-table-add-interval-modal-editor-mount-target', 'id'),
+    prevent_initial_call='initial_duplicate',
 )

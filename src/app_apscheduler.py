@@ -178,6 +178,10 @@ class SchedulerService(rpyc.Service):
 
     def exposed_get_job(self, job_id):
         return scheduler.get_job(job_id)
+    
+    def exposed_get_platform(self):
+        import platform
+        return platform.system()
 
     def exposed_get_jobs(self, jobstore=None):
         import json

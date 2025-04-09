@@ -1,6 +1,7 @@
 from configparser import ConfigParser
 from pathlib import Path
 from typing import List
+import platform
 
 
 class PathProj:
@@ -40,6 +41,7 @@ class LogConf(metaclass=BaseMetaConf):
 class CommonConf(metaclass=BaseMetaConf):
     ENCRYPT_KEY: str
     DASH_SERVE_LOCALLY: bool
+    SYSTEM_IS_UNIX: str = platform.system() != 'Windows'
 
 
 class LoginConf(metaclass=BaseMetaConf):
