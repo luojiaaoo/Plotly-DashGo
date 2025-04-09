@@ -10,10 +10,9 @@ from config.dashgo_conf import SqlDbConf
 import paramiko
 from datetime import datetime, timedelta
 import time
-import itertools
+from config.dashgo_conf import ApSchedulerConf
 from queue import Queue
 import threading
-from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 # https://github.com/agronholm/apscheduler/blob/3.x/examples/rpc/server.py
 
 
@@ -229,7 +228,7 @@ if __name__ == '__main__':
     scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
     scheduler.start()
     protocol_config = {'allow_public_attrs': True}
-    server = ThreadedServer(SchedulerService, hostname='127.0.0.1', port=8091, protocol_config=protocol_config)
+    server = ThreadedServer(SchedulerService, hostname=ApSchedulerConf.HOST, port=ApSchedulerConf.PORT, protocol_config=protocol_config)
 
     try:
         server.start()

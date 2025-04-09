@@ -75,6 +75,11 @@ class OAuth2Conf(metaclass=BaseMetaConf):
     OAuth2TokenExpiresInMinutes: int
 
 
+class ApSchedulerConf(metaclass=BaseMetaConf):
+    HOST: str
+    PORT: int
+
+
 class SqlDbConf(metaclass=BaseMetaConf):
     RDB_TYPE: str
     SQLITE_DB_PATH: str

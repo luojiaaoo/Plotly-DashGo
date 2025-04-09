@@ -2,11 +2,16 @@ import rpyc
 import json
 from dataclasses import dataclass
 from typing import Optional, Dict
+from config.dashgo_conf import ApSchedulerConf
+
+
+def get_connect():
+    return rpyc.connect(ApSchedulerConf.HOST, ApSchedulerConf.PORT)
 
 
 def add_ssh_interval_job(ip, username, password, script_text, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names=None):
     try:
-        conn = rpyc.connect('127.0.0.1', 8091)
+        conn = get_connect()
         job = conn.root.add_job(
             'app_apscheduler:run_script',
             'interval',
@@ -38,7 +43,7 @@ def add_ssh_cron_job(
 ):
     """https://apscheduler.readthedocs.io/en/master/api.html#apscheduler.triggers.cron.CronTrigger"""
     try:
-        conn = rpyc.connect('localhost', 8091)
+        conn = get_connect()
         if len(cron_text) == 5:
             minute, hour, day, month, day_of_week = cron_text
             second = None
@@ -81,7 +86,7 @@ def add_ssh_cron_job(
 
 def add_local_interval_job(script_text, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names=None):
     try:
-        conn = rpyc.connect('localhost', 8091)
+        conn = get_connect()
         job = conn.root.add_job(
             'app_apscheduler:run_script',
             'interval',
@@ -124,7 +129,7 @@ class JobInfo:
 
 def get_apscheduler_all_jobs():
     try:
-        conn = rpyc.connect('localhost', 8091)
+        conn = get_connect()
         job_jsons = json.loads(conn.root.get_jobs())
         return [
             JobInfo(
@@ -145,6 +150,78 @@ def get_apscheduler_all_jobs():
             )
             for job_json in job_jsons
         ]
+    except Exception as e:
+        raise e
+    finally:
+        conn.close()
+
+
+def start_stop_job(job_id, is_start: bool):
+    try:
+        conn = get_connect()
+        if is_start:
+            json.loads(conn.root.resume_job(job_id=job_id))
+        else:
+            json.loads(conn.root.pause_job(job_id=job_id))
+    except Exception as e:
+        raise e
+    finally:
+        conn.close()
+
+
+def remove_job(job_id):
+    try:
+        conn = get_connect()
+        json.loads(conn.root.remove_job(job_id=job_id))
+    except Exception as e:
+        raise e
+    finally:
+        conn.close()
+
+
+def modify_job(job_id, **kwargs):
+    try:
+        conn = get_connect()
+        json.loads(conn.root.modify_job(job_id=job_id, **kwargs))
+    except Exception as e:
+        raise e
+    finally:
+        conn.close()
+
+
+def reschedule_job_cron(job_id, second, minute, hour, day, month, day_of_week, year=None, week=None):
+    try:
+        conn = get_connect()
+        json.loads(
+            conn.root.reschedule_job(
+                job_id,
+                'cron',
+                year=year,
+                week=week,
+                second=second,
+                minute=minute,
+                hour=hour,
+                day=day,
+                month=month,
+                day_of_week=day_of_week,
+            )
+        )
+    except Exception as e:
+        raise e
+    finally:
+        conn.close()
+
+
+def reschedule_job_interval(job_id, seconds):
+    try:
+        conn = get_connect()
+        json.loads(
+            conn.root.reschedule_job(
+                job_id,
+                'interval',
+                seconds=seconds,
+            )
+        )
     except Exception as e:
         raise e
     finally:
