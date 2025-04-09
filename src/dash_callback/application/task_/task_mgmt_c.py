@@ -45,8 +45,14 @@ def init_table(timeoutCount):
     """页面加载时初始化渲染表格"""
     return [
         fac.AntdModal(
-            id='task-mgmt-table-add-modal',
-            title='新增任务',
+            id='task-mgmt-table-add-modal-interval',
+            title='新增周期任务',
+            renderFooter=True,
+            okClickClose=False,
+        ),
+        fac.AntdModal(
+            id='task-mgmt-table-add-modal-cron',
+            title='新增定时任务',
             renderFooter=True,
             okClickClose=False,
         ),
@@ -84,7 +90,80 @@ def handle_enable_eow(recentlySwitchDataIndex, recentlySwitchStatus, recentlySwi
     job_id = recentlySwitchRow['enable']['custom']
     start_stop_job(job_id=job_id, is_start=status)
     if status:
-        MessageManager.success(content=f'作业{job_id}打开成功')
+        MessageManager.success(content=f'{job_id}任务启用成功')
     else:
-        MessageManager.success(content=f'作业{job_id}关闭成功')
+        MessageManager.success(content=f'{job_id}任务停用成功')
     return get_table_data()
+
+
+@app.callback(
+    Output('task-mgmt-table-add-modal-interval', 'visible'),
+    Input('task-mgmt-button-add-interval', 'nClicks'),
+    prevent_initial_call=True,
+)
+def open_add_modal(nClicks):
+    """显示新增数据模态框"""
+    return True
+
+
+@app.callback(
+    Output('task-mgmt-table-add-modal-interval', 'children'),
+    Input('task-mgmt-table-add-modal-interval', 'visible'),
+    running=[Output('task-mgmt-table-add-modal-interval', 'loading'), True, False],
+    prevent_initial_call=True,
+)
+def refresh_add_modal(visible):
+    """刷新新增数据模态框内容"""
+
+    if visible:
+        time.sleep(0.5)
+
+        return fac.AntdForm(
+            [
+                fac.AntdFormItem(
+                    fac.AntdSegmented(
+                        id='task-mgmt-table-add-modal-interval-type-select',
+                        options=[{'label': '本地脚本', 'value': 'local', 'icon': 'md-home'}, {'label': 'ssh远程执行', 'value': 'ssh', 'icon': 'antd-cloud'}],
+                        defaultValue='local',
+                        block=True,
+                    ),
+                    label='类型',
+                ),
+                fac.AntdSpace(
+                    [
+                        fac.AntdFormItem(
+                            fac.AntdInput(
+                                id='task-mgmt-table-add-modal-interval-ssh-username',
+                            ),
+                            label='ssh用户名',
+                        ),
+                        fac.AntdFormItem(
+                            fac.AntdInput(
+                                mode='password',
+                                id='task-mgmt-table-add-modal-interval-ssh-password',
+                            ),
+                            label='ssh密码',
+                        ),
+                    ],
+                    id='task-mgmt-table-add-modal-interval-ssh-container',
+                    style=style(display='none'),
+                ),
+            ],
+            labelCol={'span': 5},
+            wrapperCol={'span': 20},
+            style={'width': 400},
+        )
+    return dash.no_update
+
+
+app.clientside_callback(
+    """(value) => {
+        if(value=='ssh'){
+            return {'display':'block'}
+        }else{
+            return {'display':'None'}
+        }
+    }""",
+    Output('task-mgmt-table-add-modal-interval-ssh-container', 'style'),
+    Input('task-mgmt-table-add-modal-interval-type-select', 'value'),
+)

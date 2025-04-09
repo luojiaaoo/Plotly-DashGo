@@ -20,7 +20,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
     return [
         fac.Fragment(
             [
-                fuc.FefferyTimeout(id='task-mgmt-init-timeout', delay=1),
+                fuc.FefferyTimeout(id='task-mgmt-init-timeout', delay=100),
             ]
         ),
         fac.AntdSpace(
@@ -28,10 +28,16 @@ def render_content(menu_access: MenuAccess, **kwargs):
                 fac.AntdSpace(
                     [
                         fac.AntdButton(
-                            id='task-mgmt-button-add',
-                            children='新增任务',
+                            id='task-mgmt-button-add-interval',
+                            children='新增周期任务',
                             type='primary',
-                            icon=fac.AntdIcon(icon='antd-plus'),
+                            icon=fac.AntdIcon(icon='md-update'),
+                        ),
+                        fac.AntdButton(
+                            id='task-mgmt-button-cron',
+                            children='新增定时任务',
+                            type='primary',
+                            icon=fac.AntdIcon(icon='md-schedule'),
                         ),
                         fac.AntdPopconfirm(
                             fac.AntdButton(
