@@ -9,6 +9,7 @@ import time
 from database.sql_db.dao import dao_apscheduler
 from common.utilities.util_apscheduler import add_local_interval_job, get_apscheduler_all_jobs, start_stop_job
 from feffery_dash_utils.style_utils import style
+from uuid import uuid4
 
 
 def get_table_data():
@@ -122,6 +123,7 @@ def refresh_add_modal(visible):
             [
                 fac.AntdFormItem(
                     fac.AntdSegmented(
+                        key=uuid4().hex,
                         id='task-mgmt-table-add-modal-interval-type-select',
                         options=[{'label': '本地脚本', 'value': 'local', 'icon': 'md-home'}, {'label': 'ssh远程执行', 'value': 'ssh', 'icon': 'antd-cloud'}],
                         defaultValue='local',
@@ -147,6 +149,10 @@ def refresh_add_modal(visible):
                     ],
                     id='task-mgmt-table-add-modal-interval-ssh-container',
                     style=style(display='none'),
+                ),
+                fac.AntdFormItem(
+                    fac.AntdInput(id='task-mgmt-table-add-modal-interval-script-text', mode='text-area', showCount=True),
+                    label='脚本',
                 ),
             ],
             labelCol={'span': 5},
