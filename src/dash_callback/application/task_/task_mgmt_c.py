@@ -171,8 +171,8 @@ def refresh_add_modal(visible):
                                         id='task-mgmt-table-add-interval-modal-editor-fullscreen',
                                         targetId='task-mgmt-table-add-interval-modal-editor-mount-target',
                                     ),
-                                    fac.AntdButton('收起/展开', id='task-mgmt-table-add-interval-modal-editor-collapse-btn'),
-                                    fac.AntdButton('全屏', id='task-mgmt-table-add-interval-modal-editor-fullscreen-btn'),
+                                    fac.AntdButton('收起/展开', color='primary', variant='outlined', id='task-mgmt-table-add-interval-modal-editor-collapse-btn'),
+                                    fac.AntdButton('全屏', color='primary', variant='outlined', id='task-mgmt-table-add-interval-modal-editor-fullscreen-btn'),
                                 ],
                             ),
                             # 代码编辑器挂载点
@@ -232,15 +232,16 @@ app.clientside_callback(
 def toggle_fullscreen(nClicks, isFullscreen):
     return style(display='block', height='300px'), not isFullscreen
 
+
 # 注入interval代码编辑器
 app.clientside_callback(
     """(language, id) => {
 
     // 销毁先前已存在的编辑器实例
-    if ( window.myEditor ) {
-        window.myEditor.dispose();
+    if ( window.intervalTaskEditor ) {
+        window.intervalTaskEditor.dispose();
     }
-    window.myEditor = monaco.editor.create(document.getElementById(id), {
+    window.intervalTaskEditor = monaco.editor.create(document.getElementById(id), {
         value: null,
         language: language.toLowerCase(),
         automaticLayout: true,
