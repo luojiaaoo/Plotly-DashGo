@@ -181,11 +181,11 @@ def refresh_add_modal(visible):
                     label='脚本',
                 ),
                 fac.AntdFormItem(
-                    fac.AntdSelect(id='task-mgmt-table-add-interval-modal-extract-names-type-number', mode='tags', allowClear=False),
+                    fac.AntdSelect(id='task-mgmt-table-add-interval-modal-extract-names-type-number', mode='tags', allowClear=False, value=[]),
                     label='抽取-数值类型',
                 ),
                 fac.AntdFormItem(
-                    fac.AntdSelect(id='task-mgmt-table-add-interval-modal-extract-names-type-string', mode='tags', allowClear=False),
+                    fac.AntdSelect(id='task-mgmt-table-add-interval-modal-extract-names-type-string', mode='tags', allowClear=False, value=[]),
                     label='抽取-字符类型',
                 ),
             ],
@@ -308,8 +308,8 @@ def add_interval_job(
     if type_run == 'local':
         add_local_interval_job(
             script_text=script_text,
-            interval=interval,
-            timeout=timeout,
+            interval=int(interval),
+            timeout=int(timeout),
             job_id=job_id,
             update_by=op_user_name,
             update_datetime=datetime.now(),
@@ -326,8 +326,8 @@ def add_interval_job(
             username=ssh_username,
             password=ssh_password,
             script_text=script_text,
-            interval=interval,
-            timeout=timeout,
+            interval=int(interval),
+            timeout=int(timeout),
             job_id=job_id,
             update_by=op_user_name,
             update_datetime=datetime.now(),
