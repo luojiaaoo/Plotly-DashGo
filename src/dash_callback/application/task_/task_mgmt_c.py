@@ -277,6 +277,7 @@ app.clientside_callback(
 
 
 @app.callback(
+        Output('task-mgmt-table', 'data', allow_duplicate=True),
     Input('task-mgmt-table-add-interval-modal-ok-trigger-store', 'data'),
     [
         State('task-mgmt-table-add-interval-modal-type-select', 'value'),  # 执行类型 ssh/local
@@ -312,9 +313,9 @@ def add_interval_job(
             timeout=int(timeout),
             job_id=job_id,
             update_by=op_user_name,
-            update_datetime=datetime.now(),
+            update_datetime=f'{datetime.now():%Y-%m-%dT%H:%M:%S}',
             create_by=op_user_name,
-            create_datetime=datetime.now(),
+            create_datetime=f'{datetime.now():%Y-%m-%dT%H:%M:%S}',
             extract_names=[
                 *[{'type': 'string', 'value': i} for i in extract_names_number],
                 *[{'type': 'number', 'value': i} for i in extract_names_string],
@@ -330,9 +331,9 @@ def add_interval_job(
             timeout=int(timeout),
             job_id=job_id,
             update_by=op_user_name,
-            update_datetime=datetime.now(),
+            update_datetime=f'{datetime.now():%Y-%m-%dT%H:%M:%S}',
             create_by=op_user_name,
-            create_datetime=datetime.now(),
+            create_datetime=f'{datetime.now():%Y-%m-%dT%H:%M:%S}',
             extract_names=[
                 *[{'type': 'string', 'value': i} for i in extract_names_number],
                 *[{'type': 'number', 'value': i} for i in extract_names_string],
@@ -342,3 +343,4 @@ def add_interval_job(
         MessageManager.error(content='不支持的运行类型' + type_run)
         return
     MessageManager.success(content='添加任务成功')
+    return get_table_data()
