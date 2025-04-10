@@ -4,13 +4,15 @@ import feffery_antd_components as fac
 import feffery_utils_components as fuc
 from dash_components import Table
 import dash
-from dash import set_props, html
+from dash import set_props, html, dcc
 from dash_components import MessageManager
 import time
 from database.sql_db.dao import dao_apscheduler
-from common.utilities.util_apscheduler import add_local_interval_job, get_apscheduler_all_jobs, start_stop_job, get_platform
+from common.utilities.util_apscheduler import add_local_interval_job, get_apscheduler_all_jobs, start_stop_job, get_platform, add_ssh_interval_job
 from feffery_dash_utils.style_utils import style
 from uuid import uuid4
+from datetime import datetime, timedelta
+from common.utilities.util_menu_access import get_menu_access
 
 
 def get_table_data():
@@ -123,6 +125,8 @@ def refresh_add_modal(visible):
         time.sleep(0.5)
         return fac.AntdForm(
             [
+                dcc.Store(id='task-mgmt-table-add-interval-modal-ok-trigger-store'),
+                dcc.Store(id='task-mgmt-table-add-interval-modal-editor-script-text-store'),
                 fac.AntdFormItem(
                     fac.AntdSegmented(
                         key=uuid4().hex,
@@ -136,25 +140,18 @@ def refresh_add_modal(visible):
                     ),
                     label='类型',
                 ),
+                fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-interval-modal-job-id'), label='任务名'),
                 fac.AntdSpace(
                     [
-                        fac.AntdFormItem(
-                            fac.AntdInput(
-                                id='task-mgmt-table-add-interval-modal-ssh-username',
-                            ),
-                            label='ssh用户名',
-                        ),
-                        fac.AntdFormItem(
-                            fac.AntdInput(
-                                mode='password',
-                                id='task-mgmt-table-add-interval-modal-ssh-password',
-                            ),
-                            label='ssh密码',
-                        ),
+                        fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-interval-modal-ssh-host'), label='ssh主机'),
+                        fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-interval-modal-ssh-username'), label='ssh用户名'),
+                        fac.AntdFormItem(fac.AntdInput(mode='password', id='task-mgmt-table-add-interval-modal-ssh-password'), label='ssh密码'),
                     ],
                     id='task-mgmt-table-add-interval-modal-ssh-container',
                     style=style(display='none'),
                 ),
+                fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-interval-modal-interval'), label='周期（秒）'),
+                fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-interval-modal-timeout'), label='超时时间（秒）'),
                 fac.AntdFormItem(
                     fac.AntdSpace(
                         [
@@ -183,8 +180,16 @@ def refresh_add_modal(visible):
                     ),
                     label='脚本',
                 ),
+                fac.AntdFormItem(
+                    fac.AntdSelect(id='task-mgmt-table-add-interval-modal-extract-names-type-number', mode='tags', allowClear=False),
+                    label='抽取-数值类型',
+                ),
+                fac.AntdFormItem(
+                    fac.AntdSelect(id='task-mgmt-table-add-interval-modal-extract-names-type-string', mode='tags', allowClear=False),
+                    label='抽取-字符类型',
+                ),
             ],
-            labelCol={'span': 3},
+            labelCol={'span': 4},
             wrapperCol={'span': 20},
             style={'width': 700},
         )
@@ -255,3 +260,85 @@ app.clientside_callback(
     State('task-mgmt-table-add-interval-modal-editor-mount-target', 'id'),
     prevent_initial_call='initial_duplicate',
 )
+
+app.clientside_callback(
+    """
+        (okCounts) => {
+            return [Date.now(), window.intervalTaskEditor.getValue()]
+        }
+    """,
+    [
+        Output('task-mgmt-table-add-interval-modal-ok-trigger-store', 'data'),
+        Output('task-mgmt-table-add-interval-modal-editor-script-text-store', 'data'),
+    ],
+    Input('task-mgmt-table-add-interval-modal', 'okCounts'),
+    prevent_initial_call=True,
+)
+
+
+@app.callback(
+    Input('task-mgmt-table-add-interval-modal-ok-trigger-store', 'data'),
+    [
+        State('task-mgmt-table-add-interval-modal-type-select', 'value'),  # 执行类型 ssh/local
+        State('task-mgmt-table-add-interval-modal-editor-script-text-store', 'data'),  # 脚本
+        State('task-mgmt-table-add-interval-modal-job-id', 'value'),  # 任务名
+        State('task-mgmt-table-add-interval-modal-ssh-host', 'value'),  # ssh主机
+        State('task-mgmt-table-add-interval-modal-ssh-username', 'value'),  # ssh用户名
+        State('task-mgmt-table-add-interval-modal-ssh-password', 'value'),  # ssh密码
+        State('task-mgmt-table-add-interval-modal-interval', 'value'),  # 周期
+        State('task-mgmt-table-add-interval-modal-timeout', 'value'),  # 超时时间
+        State('task-mgmt-table-add-interval-modal-extract-names-type-number', 'value'),  # 抽取数据-数值类型
+        State('task-mgmt-table-add-interval-modal-extract-names-type-string', 'value'),  # 超时时间-字符串类型
+    ],
+)
+def add_interval_job(
+    trigger,
+    type_run,
+    script_text,
+    job_id,
+    ssh_host,
+    ssh_username,
+    ssh_password,
+    interval,
+    timeout,
+    extract_names_number,
+    extract_names_string,
+):
+    op_user_name = get_menu_access(only_get_user_name=True)
+    if type_run == 'local':
+        add_local_interval_job(
+            script_text=script_text,
+            interval=interval,
+            timeout=timeout,
+            job_id=job_id,
+            update_by=op_user_name,
+            update_datetime=datetime.now(),
+            create_by=op_user_name,
+            create_datetime=datetime.now(),
+            extract_names=[
+                *[{'type': 'string', 'value': i} for i in extract_names_number],
+                *[{'type': 'number', 'value': i} for i in extract_names_string],
+            ],
+        )
+    elif type_run == 'ssh':
+        add_ssh_interval_job(
+            ip=ssh_host,
+            username=ssh_username,
+            password=ssh_password,
+            script_text=script_text,
+            interval=interval,
+            timeout=timeout,
+            job_id=job_id,
+            update_by=op_user_name,
+            update_datetime=datetime.now(),
+            create_by=op_user_name,
+            create_datetime=datetime.now(),
+            extract_names=[
+                *[{'type': 'string', 'value': i} for i in extract_names_number],
+                *[{'type': 'number', 'value': i} for i in extract_names_string],
+            ],
+        )
+    else:
+        MessageManager.error(content='不支持的运行类型' + type_run)
+        return
+    MessageManager.success(content='添加任务成功')

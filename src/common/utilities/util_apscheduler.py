@@ -9,7 +9,9 @@ def get_connect():
     return rpyc.connect(ApSchedulerConf.HOST, ApSchedulerConf.PORT)
 
 
-def add_ssh_interval_job(ip, username, password, script_text, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names=None):
+def add_ssh_interval_job(ip, username, password, script_text, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names):
+    if not extract_names:
+        extract_names = None
     try:
         conn = get_connect()
         job = conn.root.add_job(
@@ -39,9 +41,11 @@ def add_ssh_interval_job(ip, username, password, script_text, interval, timeout,
 
 
 def add_ssh_cron_job(
-    ip, username, password, script_text, cron_text, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names=None, year=None, week=None
+    ip, username, password, script_text, cron_text, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, year=None, week=None
 ):
     """https://apscheduler.readthedocs.io/en/master/api.html#apscheduler.triggers.cron.CronTrigger"""
+    if not extract_names:
+        extract_names = None
     try:
         conn = get_connect()
         if len(cron_text) == 5:
@@ -84,7 +88,9 @@ def add_ssh_cron_job(
         conn.close()
 
 
-def add_local_interval_job(script_text, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names=None):
+def add_local_interval_job(script_text, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names):
+    if not extract_names:
+        extract_names = None
     try:
         conn = get_connect()
         job = conn.root.add_job(
@@ -222,6 +228,7 @@ def reschedule_job_interval(job_id, seconds):
         raise e
     finally:
         conn.close()
+
 
 def get_platform():
     try:

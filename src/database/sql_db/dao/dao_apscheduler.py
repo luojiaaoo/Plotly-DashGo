@@ -82,11 +82,9 @@ def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names
                 type_ = extract_name['type']
                 name = extract_name['name']
                 value = re.search(r'<SOPS_VAR>%s:(.+?)</SOPS_VAR>' % name, log).group(1)
-                if type_ == 'enum':
+                if type_ == 'string':
                     value = str(value)
-                elif type_ == 'int':
-                    value = int(value)
-                elif type_ == 'float':
+                elif type_ == 'number':
                     value = float(value)
                 else:
                     raise ValueError('不支持的提取数据类型')
