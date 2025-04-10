@@ -291,6 +291,7 @@ app.clientside_callback(
         State('task-mgmt-table-add-interval-modal-extract-names-type-number', 'value'),  # 抽取数据-数值类型
         State('task-mgmt-table-add-interval-modal-extract-names-type-string', 'value'),  # 超时时间-字符串类型
     ],
+    prevent_initial_call=True,
 )
 def add_interval_job(
     trigger,
