@@ -4,8 +4,15 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.triggers.interval import IntervalTrigger
+from apscheduler.triggers.cron import CronTrigger
 import subprocess
-from database.sql_db.dao.dao_apscheduler import insert_apscheduler_result, insert_apscheduler_running, delete_apscheduler_running, select_apscheduler_running_log,truncate_apscheduler_running
+from database.sql_db.dao.dao_apscheduler import (
+    insert_apscheduler_result,
+    insert_apscheduler_running,
+    delete_apscheduler_running,
+    select_apscheduler_running_log,
+    truncate_apscheduler_running,
+)
 from config.dashgo_conf import SqlDbConf
 import paramiko
 from datetime import datetime, timedelta
@@ -178,9 +185,10 @@ class SchedulerService(rpyc.Service):
 
     def exposed_get_job(self, job_id):
         return scheduler.get_job(job_id)
-    
+
     def exposed_get_platform(self):
         import platform
+
         return platform.system()
 
     def exposed_get_jobs(self, jobstore=None):
@@ -194,18 +202,20 @@ class SchedulerService(rpyc.Service):
                     'seconds': job.trigger.interval_length,
                 }
                 trigger = 'interval'
-            else:
+            elif isinstance(job.trigger, CronTrigger):
                 plan = (
                     {
-                        'second': job.trigger.second,
-                        'minute': job.trigger.minute,
-                        'hour': job.trigger.hour,
-                        'day': job.trigger.day,
-                        'month': job.trigger.month,
-                        'day_of_week': job.trigger.day_of_week,
+                        'second':job.trigger.fields[CronTrigger.FIELD_NAMES.index('second')],
+                        'minute': job.trigger.fields[CronTrigger.FIELD_NAMES.index('minute')],
+                        'hour': job.trigger.fields[CronTrigger.FIELD_NAMES.index('hour')],
+                        'day': job.trigger.fields[CronTrigger.FIELD_NAMES.index('day')],
+                        'month': job.trigger.fields[CronTrigger.FIELD_NAMES.index('month')],
+                        'day_of_week': job.trigger.fields[CronTrigger.FIELD_NAMES.index('day_of_week')],
                     },
                 )
                 trigger = 'cron'
+            else:
+                raise Exception('不支持的触发器类型')
             result.append(
                 {
                     'id': job.id,

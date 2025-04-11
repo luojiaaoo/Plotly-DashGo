@@ -168,7 +168,7 @@ def refresh_add_modal(visible, task_type):
     ]
     return fac.AntdForm(
         [
-            dcc.Store(id='task-mgmt-table-add-modal-ok-trigger-store'),
+            dcc.Store(id='task-mgmt-table-add-modal-ok-trigger-store', data=''),
             dcc.Store(id='task-mgmt-table-add-modal-editor-script-text-store'),
             fac.AntdFormItem(
                 fac.AntdSegmented(
