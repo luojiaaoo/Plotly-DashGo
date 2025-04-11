@@ -36,7 +36,7 @@ def get_table_data():
                 'custom': f'view_log:{job.job_id}',
             },
         }
-        for job in get_apscheduler_all_jobs()
+        for job in sorted(get_apscheduler_all_jobs(), key=lambda job: job.job_id)
     ]
 
 
@@ -99,6 +99,15 @@ def handle_enable_eow(recentlySwitchDataIndex, recentlySwitchStatus, recentlySwi
         MessageManager.success(content=f'{job_id}任务启用成功')
     else:
         MessageManager.success(content=f'{job_id}任务停用成功')
+    return get_table_data()
+
+
+@app.callback(
+    Output('task-mgmt-table', 'data', allow_duplicate=True),
+    Input('task-mgmt-button-flash', 'nClicks'),
+    prevent_initial_call=True,
+)
+def flash_table(nClicks):
     return get_table_data()
 
 
@@ -306,7 +315,7 @@ def add_interval_job(
     extract_names_number,
     extract_names_string,
 ):
-    if not trigger: # fix: 无法避免初始化调用
+    if not trigger:  # fix: 无法避免初始化调用
         return dash.no_update
     op_user_name = get_menu_access(only_get_user_name=True)
     if type_run == 'local':

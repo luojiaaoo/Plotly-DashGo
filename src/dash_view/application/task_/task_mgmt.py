@@ -50,6 +50,13 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             title='确认删除选中行吗？',
                             locale=translator.get_current_locale(),
                         ),
+                        fac.AntdButton(
+                            '刷新',
+                            id='task-mgmt-button-flash',
+                            color='primary',
+                            variant='link',
+                            icon=fac.AntdIcon(icon='antd-reload'),
+                        ),
                     ]
                 ),
                 Card(
