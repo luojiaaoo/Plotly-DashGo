@@ -186,10 +186,18 @@ def refresh_add_modal(visible, task_type):
             fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-modal-job-id'), label='任务名'),
             fac.AntdSpace(
                 [
-                    fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-modal-ssh-host'), label='ssh主机'),
-                    fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-modal-ssh-port'), label='ssh端口'),
-                    fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-modal-ssh-username'), label='ssh用户名'),
-                    fac.AntdFormItem(fac.AntdInput(mode='password', id='task-mgmt-table-add-modal-ssh-password'), label='ssh密码'),
+                    fac.AntdFormItem(
+                        fac.AntdSpace(
+                            [fac.AntdInput(id='task-mgmt-table-add-modal-ssh-host'), fac.AntdInputNumber(id='task-mgmt-table-add-modal-ssh-port', value=22)],
+                        ),
+                        label='主机/端口',
+                    ),
+                    fac.AntdFormItem(
+                        fac.AntdSpace(
+                            [fac.AntdInput(id='task-mgmt-table-add-modal-ssh-username'), fac.AntdInput(mode='password', id='task-mgmt-table-add-modal-ssh-password')],
+                        ),
+                        label='用户名/密码',
+                    ),
                 ],
                 id='task-mgmt-table-add-modal-ssh-container',
                 style=style(display='none'),
