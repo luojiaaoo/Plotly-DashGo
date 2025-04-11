@@ -34,7 +34,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             icon=fac.AntdIcon(icon='md-update'),
                         ),
                         fac.AntdButton(
-                            id='task-mgmt-button-cron',
+                            id='task-mgmt-button-add-cron',
                             children='新增定时任务',
                             type='primary',
                             icon=fac.AntdIcon(icon='md-schedule'),

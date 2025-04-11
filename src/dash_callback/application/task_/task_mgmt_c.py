@@ -49,15 +49,11 @@ def init_table(timeoutCount):
     """页面加载时初始化渲染表格"""
     return [
         fac.AntdModal(
+            title=[
+                fac.AntdText(id='task-mgmt-table-add-interval-modal-title'),
+                dcc.Store(id='task-mgmt-table-add-interval-modal-type-store'),
+            ],
             id='task-mgmt-table-add-interval-modal',
-            title='新增周期任务',
-            renderFooter=True,
-            okClickClose=False,
-            width=800,
-        ),
-        fac.AntdModal(
-            id='task-mgmt-table-add-cron-modal',
-            title='新增定时任务',
             renderFooter=True,
             okClickClose=False,
             width=800,
@@ -112,23 +108,36 @@ def flash_table(nClicks):
 
 
 @app.callback(
-    Output('task-mgmt-table-add-interval-modal', 'visible'),
-    Input('task-mgmt-button-add-interval', 'nClicks'),
+    [
+        Output('task-mgmt-table-add-interval-modal', 'visible'),
+        Output('task-mgmt-table-add-interval-modal-title', 'children'),
+        Output('task-mgmt-table-add-interval-modal-type-store', 'data'),
+    ],
+    [
+        Input('task-mgmt-button-add-interval', 'nClicks'),
+        Input('task-mgmt-button-add-cron', 'nClicks'),
+    ],
     prevent_initial_call=True,
 )
-def open_add_modal(nClicks):
+def open_add_modal(nClicks, nClicks_):
     """显示新增interval数据模态框"""
-    return True
+    if dash.ctx.triggered_id == 'task-mgmt-button-add-interval':
+        return True, '新增周期任务', 'interval'
+    elif dash.ctx.triggered_id == 'task-mgmt-button-add-cron':
+        return True, '新增定时任务', 'cron'
+    MessageManager.error(content='不支持的任务类型')
+    return dash.no_update
 
 
 @app.callback(
     Output('task-mgmt-table-add-interval-modal', 'children'),
     Input('task-mgmt-table-add-interval-modal', 'visible'),
+    State('task-mgmt-table-add-interval-modal-type-store', 'data'),
     running=[Output('task-mgmt-table-add-interval-modal', 'loading'), True, False],
     prevent_initial_call=True,
 )
-def refresh_add_modal(visible):
-    """刷新新增interval数据模态框内容"""
+def refresh_add_modal(visible, task_type):
+    """刷新新增数据模态框内容"""
 
     if visible:
         time.sleep(0.5)
