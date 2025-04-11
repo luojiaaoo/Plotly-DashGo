@@ -277,7 +277,7 @@ app.clientside_callback(
 
 
 @app.callback(
-        Output('task-mgmt-table', 'data', allow_duplicate=True),
+    Output('task-mgmt-table', 'data', allow_duplicate=True),
     Input('task-mgmt-table-add-interval-modal-ok-trigger-store', 'data'),
     [
         State('task-mgmt-table-add-interval-modal-type-select', 'value'),  # 执行类型 ssh/local
@@ -306,6 +306,8 @@ def add_interval_job(
     extract_names_number,
     extract_names_string,
 ):
+    if not trigger: # fix: 无法避免初始化调用
+        return dash.no_update
     op_user_name = get_menu_access(only_get_user_name=True)
     if type_run == 'local':
         add_local_interval_job(

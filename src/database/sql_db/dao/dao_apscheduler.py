@@ -68,6 +68,13 @@ def delete_apscheduler_running(job_id, start_datetime):
         logger.error(f'删除实时日志时发生未知错误: {e}')
         raise Exception('Failed to delete apscheduler running log due to an unknown error') from e
 
+def truncate_apscheduler_running():
+    database = db()
+    try:
+        with database.atomic():
+            ApschedulerRunning.delete().execute()
+    except IntegrityError as e:
+        logger.error(f'清空实时日志时发生数据库完整性错误: {e}')
 
 def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names):
     database = db()

@@ -5,7 +5,7 @@ from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.triggers.interval import IntervalTrigger
 import subprocess
-from database.sql_db.dao.dao_apscheduler import insert_apscheduler_result, insert_apscheduler_running, delete_apscheduler_running, select_apscheduler_running_log
+from database.sql_db.dao.dao_apscheduler import insert_apscheduler_result, insert_apscheduler_running, delete_apscheduler_running, select_apscheduler_running_log,truncate_apscheduler_running
 from config.dashgo_conf import SqlDbConf
 import paramiko
 from datetime import datetime, timedelta
@@ -224,7 +224,7 @@ if __name__ == '__main__':
         jobstores = {'default': SQLAlchemyJobStore(url=f'sqlite:///{SqlDbConf.SQLITE_DB_PATH}')}
     elif SqlDbConf.RDB_TYPE == 'mysql':
         jobstores = {'default': SQLAlchemyJobStore(url=f'mysql+pymysql://{SqlDbConf.USER}:{SqlDbConf.PASSWORD}@{SqlDbConf.HOST}:{SqlDbConf.PORT}/{SqlDbConf.DATABASE}')}
-
+    truncate_apscheduler_running()
     executors = {
         'default': ThreadPoolExecutor(20),
     }
@@ -233,7 +233,6 @@ if __name__ == '__main__':
     scheduler.start()
     protocol_config = {'allow_public_attrs': True}
     server = ThreadedServer(SchedulerService, hostname=ApSchedulerConf.HOST, port=ApSchedulerConf.PORT, protocol_config=protocol_config)
-
     try:
         server.start()
     except (KeyboardInterrupt, SystemExit):
