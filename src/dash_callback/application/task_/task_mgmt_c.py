@@ -392,7 +392,7 @@ def add_interval_job(
     elif type_run == 'ssh' and task_type == 'interval':
         add_ssh_interval_job(
             host=ssh_host,
-            port=port,
+            port=ssh_port,
             username=ssh_username,
             password=ssh_password,
             script_text=script_text,
@@ -426,7 +426,7 @@ def add_interval_job(
     elif type_run == 'ssh' and task_type == 'cron':
         add_ssh_cron_job(
             host=ssh_host,
-            port=port,
+            port=ssh_port,
             username=ssh_username,
             password=ssh_password,
             script_text=script_text,
