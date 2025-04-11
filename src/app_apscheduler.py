@@ -23,7 +23,7 @@ import threading
 # https://github.com/agronholm/apscheduler/blob/3.x/examples/rpc/server.py
 
 
-def run_script(type, script_text, job_id, update_by, update_datetime, create_by, create_datetime, timeout=20, ip=None, username=None, password=None, extract_names=None):
+def run_script(type, script_text, job_id, update_by, update_datetime, create_by, create_datetime, timeout=20, host=None, port=22, username=None, password=None, extract_names=None):
     """
     根据类型执行脚本，支持本地和远程执行。
 
@@ -107,7 +107,7 @@ def run_script(type, script_text, job_id, update_by, update_datetime, create_by,
         try:
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(hostname=ip, username=username, password=password)
+            ssh.connect(hostname=host, username=username, password=password, port=port)
             stdin, stdout, stderr = ssh.exec_command(script_text, get_pty=True, timeout=timeout)
             queue_stdout = Queue()
             queue_stderr = Queue()

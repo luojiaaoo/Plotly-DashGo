@@ -155,11 +155,11 @@ def refresh_add_modal(visible, task_type):
         fac.AntdFormItem(
             fac.AntdSpace(
                 [
-                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-minute', defaultValue='*', addonAfter='分'),
-                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-hour', defaultValue='*', addonAfter='时'),
-                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-day', defaultValue='*', addonAfter='日'),
-                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-month', defaultValue='*', addonAfter='月'),
-                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-day-of-week', defaultValue='*', addonAfter='周'),
+                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-minute', value='*', addonAfter='分'),
+                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-hour', value='*', addonAfter='时'),
+                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-day', value='*', addonAfter='日'),
+                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-month', value='*', addonAfter='月'),
+                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-day-of-week', value='*', addonAfter='周'),
                 ],
             ),
             label='Cron定时字串',
@@ -187,6 +187,7 @@ def refresh_add_modal(visible, task_type):
             fac.AntdSpace(
                 [
                     fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-modal-ssh-host'), label='ssh主机'),
+                    fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-modal-ssh-port'), label='ssh端口'),
                     fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-modal-ssh-username'), label='ssh用户名'),
                     fac.AntdFormItem(fac.AntdInput(mode='password', id='task-mgmt-table-add-modal-ssh-password'), label='ssh密码'),
                 ],
@@ -327,6 +328,7 @@ app.clientside_callback(
         State('task-mgmt-table-add-modal-editor-script-text-store', 'data'),  # 脚本
         State('task-mgmt-table-add-modal-job-id', 'value'),  # 任务名
         State('task-mgmt-table-add-modal-ssh-host', 'value'),  # ssh主机
+        State('task-mgmt-table-add-modal-ssh-port', 'value'),  # ssh 端口
         State('task-mgmt-table-add-modal-ssh-username', 'value'),  # ssh用户名
         State('task-mgmt-table-add-modal-ssh-password', 'value'),  # ssh密码
         State('task-mgmt-table-add-modal-timeout', 'value'),  # 超时时间
@@ -348,6 +350,7 @@ def add_interval_job(
     script_text,
     job_id,
     ssh_host,
+    ssh_port,
     ssh_username,
     ssh_password,
     timeout,
@@ -380,7 +383,8 @@ def add_interval_job(
         )
     elif type_run == 'ssh' and task_type == 'interval':
         add_ssh_interval_job(
-            ip=ssh_host,
+            host=ssh_host,
+            port=port,
             username=ssh_username,
             password=ssh_password,
             script_text=script_text,
@@ -413,7 +417,8 @@ def add_interval_job(
         )
     elif type_run == 'ssh' and task_type == 'cron':
         add_ssh_cron_job(
-            ip=ssh_host,
+            host=ssh_host,
+            port=port,
             username=ssh_username,
             password=ssh_password,
             script_text=script_text,

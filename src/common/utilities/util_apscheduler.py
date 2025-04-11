@@ -9,7 +9,7 @@ def get_connect():
     return rpyc.connect(ApSchedulerConf.HOST, ApSchedulerConf.PORT)
 
 
-def add_ssh_interval_job(ip, username, password, script_text, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names):
+def add_ssh_interval_job(host, post, username, password, script_text, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names):
     if not extract_names:
         extract_names = None
     try:
@@ -21,7 +21,8 @@ def add_ssh_interval_job(ip, username, password, script_text, interval, timeout,
                 ('type', 'ssh'),
                 ('script_text', script_text),
                 ('timeout', timeout),
-                ('ip', ip),
+                ('host', host),
+                ('port', post),
                 ('username', username),
                 ('password', password),
                 ('extract_names', extract_names),
@@ -40,7 +41,7 @@ def add_ssh_interval_job(ip, username, password, script_text, interval, timeout,
         conn.close()
 
 
-def add_ssh_cron_job(ip, username, password, script_text, cron_list, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names):
+def add_ssh_cron_job(host, post, username, password, script_text, cron_list, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names):
     """https://apscheduler.readthedocs.io/en/master/api.html#apscheduler.triggers.cron.CronTrigger"""
     if not extract_names:
         extract_names = None
@@ -54,7 +55,8 @@ def add_ssh_cron_job(ip, username, password, script_text, cron_list, timeout, jo
                 ('type', 'ssh'),
                 ('script_text', script_text),
                 ('timeout', timeout),
-                ('ip', ip),
+                ('host', host),
+                ('port', post),
                 ('username', username),
                 ('password', password),
                 ('extract_names', extract_names),
