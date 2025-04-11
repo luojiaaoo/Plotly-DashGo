@@ -204,7 +204,6 @@ class SchedulerService(rpyc.Service):
                 trigger = 'interval'
             elif isinstance(job.trigger, CronTrigger):
                 plan = {
-                    'second': job.trigger.fields[CronTrigger.FIELD_NAMES.index('second')].__str__(),
                     'minute': job.trigger.fields[CronTrigger.FIELD_NAMES.index('minute')].__str__(),
                     'hour': job.trigger.fields[CronTrigger.FIELD_NAMES.index('hour')].__str__(),
                     'day': job.trigger.fields[CronTrigger.FIELD_NAMES.index('day')].__str__(),

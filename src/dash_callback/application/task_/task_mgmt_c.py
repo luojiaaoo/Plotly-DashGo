@@ -155,11 +155,11 @@ def refresh_add_modal(visible, task_type):
         fac.AntdFormItem(
             fac.AntdSpace(
                 [
-                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-minute', addonBefore='分'),
-                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-hour', addonBefore='时'),
-                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-day', addonBefore='日'),
-                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-month', addonBefore='月'),
-                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-day-of-week', addonBefore='周'),
+                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-minute', defaultValue='*', addonAfter='分'),
+                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-hour', defaultValue='*', addonAfter='时'),
+                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-day', defaultValue='*', addonAfter='日'),
+                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-month', defaultValue='*', addonAfter='月'),
+                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-day-of-week', defaultValue='*', addonAfter='周'),
                 ],
             ),
             label='Cron定时字串',
