@@ -8,7 +8,15 @@ from dash import set_props, html, dcc
 from dash_components import MessageManager
 import time
 from database.sql_db.dao import dao_apscheduler
-from common.utilities.util_apscheduler import add_local_interval_job, get_apscheduler_all_jobs, start_stop_job, get_platform, add_ssh_interval_job
+from common.utilities.util_apscheduler import (
+    get_apscheduler_all_jobs,
+    start_stop_job,
+    get_platform,
+    add_local_interval_job,
+    add_ssh_interval_job,
+    add_local_cron_job,
+    add_ssh_cron_job,
+)
 from feffery_dash_utils.style_utils import style
 from uuid import uuid4
 from datetime import datetime, timedelta
@@ -50,10 +58,10 @@ def init_table(timeoutCount):
     return [
         fac.AntdModal(
             title=[
-                fac.AntdText(id='task-mgmt-table-add-interval-modal-title'),
-                dcc.Store(id='task-mgmt-table-add-interval-modal-type-store'),
+                fac.AntdText(id='task-mgmt-table-add-modal-title'),
+                dcc.Store(id='task-mgmt-table-add-modal-type-store'),
             ],
-            id='task-mgmt-table-add-interval-modal',
+            id='task-mgmt-table-add-modal',
             renderFooter=True,
             okClickClose=False,
             width=800,
@@ -109,9 +117,9 @@ def flash_table(nClicks):
 
 @app.callback(
     [
-        Output('task-mgmt-table-add-interval-modal', 'visible'),
-        Output('task-mgmt-table-add-interval-modal-title', 'children'),
-        Output('task-mgmt-table-add-interval-modal-type-store', 'data'),
+        Output('task-mgmt-table-add-modal', 'visible'),
+        Output('task-mgmt-table-add-modal-title', 'children'),
+        Output('task-mgmt-table-add-modal-type-store', 'data'),
     ],
     [
         Input('task-mgmt-button-add-interval', 'nClicks'),
@@ -130,88 +138,104 @@ def open_add_modal(nClicks, nClicks_):
 
 
 @app.callback(
-    Output('task-mgmt-table-add-interval-modal', 'children'),
-    Input('task-mgmt-table-add-interval-modal', 'visible'),
-    State('task-mgmt-table-add-interval-modal-type-store', 'data'),
-    running=[Output('task-mgmt-table-add-interval-modal', 'loading'), True, False],
+    Output('task-mgmt-table-add-modal', 'children'),
+    Input('task-mgmt-table-add-modal', 'visible'),
+    State('task-mgmt-table-add-modal-type-store', 'data'),
+    running=[Output('task-mgmt-table-add-modal', 'loading'), True, False],
     prevent_initial_call=True,
 )
 def refresh_add_modal(visible, task_type):
     """刷新新增数据模态框内容"""
 
-    if visible:
-        time.sleep(0.5)
-        return fac.AntdForm(
-            [
-                dcc.Store(id='task-mgmt-table-add-interval-modal-ok-trigger-store'),
-                dcc.Store(id='task-mgmt-table-add-interval-modal-editor-script-text-store'),
-                fac.AntdFormItem(
-                    fac.AntdSegmented(
-                        key=uuid4().hex,
-                        id='task-mgmt-table-add-interval-modal-type-select',
-                        options=[
-                            {'label': '本地脚本' + f'<系统类型为{get_platform()}>', 'value': 'local', 'icon': 'md-home'},
-                            {'label': 'ssh远程执行', 'value': 'ssh', 'icon': 'antd-cloud'},
-                        ],
-                        defaultValue='local',
-                        block=True,
-                    ),
-                    label='类型',
+    if not visible:
+        return dash.no_update
+    time.sleep(0.2)
+    custom_items = [
+        fac.AntdFormItem(fac.AntdInputNumber(id='task-mgmt-table-add-modal-interval'), label='周期（秒）', style=style(display='block' if task_type == 'interval' else 'none')),
+        fac.AntdFormItem(
+            fac.AntdSpace(
+                [
+                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-minute', addonBefore='分'),
+                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-hour', addonBefore='时'),
+                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-day', addonBefore='日'),
+                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-month', addonBefore='月'),
+                    fac.AntdInput(id='task-mgmt-table-add-modal-cron-day-of-week', addonBefore='周'),
+                ],
+            ),
+            label='Cron定时字串',
+            style=style(display='block' if task_type == 'cron' else 'none'),
+        ),
+    ]
+    return fac.AntdForm(
+        [
+            dcc.Store(id='task-mgmt-table-add-modal-ok-trigger-store'),
+            dcc.Store(id='task-mgmt-table-add-modal-editor-script-text-store'),
+            fac.AntdFormItem(
+                fac.AntdSegmented(
+                    key=uuid4().hex,
+                    id='task-mgmt-table-add-modal-type-select',
+                    options=[
+                        {'label': '本地脚本' + f'<系统类型为{get_platform()}>', 'value': 'local', 'icon': 'md-home'},
+                        {'label': 'ssh远程执行', 'value': 'ssh', 'icon': 'antd-cloud'},
+                    ],
+                    defaultValue='local',
+                    block=True,
                 ),
-                fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-interval-modal-job-id'), label='任务名'),
+                label='类型',
+            ),
+            fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-modal-job-id'), label='任务名'),
+            fac.AntdSpace(
+                [
+                    fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-modal-ssh-host'), label='ssh主机'),
+                    fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-modal-ssh-username'), label='ssh用户名'),
+                    fac.AntdFormItem(fac.AntdInput(mode='password', id='task-mgmt-table-add-modal-ssh-password'), label='ssh密码'),
+                ],
+                id='task-mgmt-table-add-modal-ssh-container',
+                style=style(display='none'),
+            ),
+            *custom_items,
+            fac.AntdFormItem(fac.AntdInputNumber(id='task-mgmt-table-add-modal-timeout'), label='超时时间（秒）'),
+            fac.AntdFormItem(
                 fac.AntdSpace(
                     [
-                        fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-interval-modal-ssh-host'), label='ssh主机'),
-                        fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-interval-modal-ssh-username'), label='ssh用户名'),
-                        fac.AntdFormItem(fac.AntdInput(mode='password', id='task-mgmt-table-add-interval-modal-ssh-password'), label='ssh密码'),
+                        fac.AntdSpace(
+                            [
+                                fac.AntdRadioGroup(
+                                    id='task-mgmt-table-add-modal-update-editor-language',
+                                    options=['Bat', 'Shell'],
+                                    optionType='button',
+                                    buttonStyle='solid',
+                                    value='Bat',
+                                ),
+                                fuc.FefferyFullscreen(
+                                    id='task-mgmt-table-add-modal-editor-fullscreen',
+                                    targetId='task-mgmt-table-add-modal-editor-mount-target',
+                                ),
+                                fac.AntdButton('收起/展开', color='primary', variant='outlined', id='task-mgmt-table-add-modal-editor-collapse-btn'),
+                                fac.AntdButton('全屏', color='primary', variant='outlined', id='task-mgmt-table-add-modal-editor-fullscreen-btn'),
+                            ],
+                        ),
+                        # 代码编辑器挂载点
+                        html.Div(id='task-mgmt-table-add-modal-editor-mount-target'),
                     ],
-                    id='task-mgmt-table-add-interval-modal-ssh-container',
-                    style=style(display='none'),
+                    direction='vertical',
+                    style=style(width=600),
                 ),
-                fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-interval-modal-interval'), label='周期（秒）'),
-                fac.AntdFormItem(fac.AntdInput(id='task-mgmt-table-add-interval-modal-timeout'), label='超时时间（秒）'),
-                fac.AntdFormItem(
-                    fac.AntdSpace(
-                        [
-                            fac.AntdSpace(
-                                [
-                                    fac.AntdRadioGroup(
-                                        id='task-mgmt-table-add-interval-modal-update-editor-language',
-                                        options=['Bat', 'Shell'],
-                                        optionType='button',
-                                        buttonStyle='solid',
-                                        value='Bat',
-                                    ),
-                                    fuc.FefferyFullscreen(
-                                        id='task-mgmt-table-add-interval-modal-editor-fullscreen',
-                                        targetId='task-mgmt-table-add-interval-modal-editor-mount-target',
-                                    ),
-                                    fac.AntdButton('收起/展开', color='primary', variant='outlined', id='task-mgmt-table-add-interval-modal-editor-collapse-btn'),
-                                    fac.AntdButton('全屏', color='primary', variant='outlined', id='task-mgmt-table-add-interval-modal-editor-fullscreen-btn'),
-                                ],
-                            ),
-                            # 代码编辑器挂载点
-                            html.Div(id='task-mgmt-table-add-interval-modal-editor-mount-target'),
-                        ],
-                        direction='vertical',
-                        style=style(width=600),
-                    ),
-                    label='脚本',
-                ),
-                fac.AntdFormItem(
-                    fac.AntdSelect(id='task-mgmt-table-add-interval-modal-extract-names-type-number', mode='tags', allowClear=False, value=[]),
-                    label='抽取-数值类型',
-                ),
-                fac.AntdFormItem(
-                    fac.AntdSelect(id='task-mgmt-table-add-interval-modal-extract-names-type-string', mode='tags', allowClear=False, value=[]),
-                    label='抽取-字符类型',
-                ),
-            ],
-            labelCol={'span': 4},
-            wrapperCol={'span': 20},
-            style={'width': 700},
-        )
-    return dash.no_update
+                label='脚本',
+            ),
+            fac.AntdFormItem(
+                fac.AntdSelect(id='task-mgmt-table-add-modal-extract-names-type-number', mode='tags', allowClear=False, value=[]),
+                label='抽取-数值类型',
+            ),
+            fac.AntdFormItem(
+                fac.AntdSelect(id='task-mgmt-table-add-modal-extract-names-type-string', mode='tags', allowClear=False, value=[]),
+                label='抽取-字符类型',
+            ),
+        ],
+        labelCol={'span': 4},
+        wrapperCol={'span': 20},
+        style={'width': 700},
+    )
 
 
 # interval-ssh参数隐藏/显示
@@ -223,8 +247,8 @@ app.clientside_callback(
             return {'display':'None'}
         }
     }""",
-    Output('task-mgmt-table-add-interval-modal-ssh-container', 'style'),
-    Input('task-mgmt-table-add-interval-modal-type-select', 'value'),
+    Output('task-mgmt-table-add-modal-ssh-container', 'style'),
+    Input('task-mgmt-table-add-modal-type-select', 'value'),
 )
 
 # interval代码编辑器折叠
@@ -236,20 +260,20 @@ app.clientside_callback(
             return {'display':'block','height': '300px'}
         }
     }""",
-    Output('task-mgmt-table-add-interval-modal-editor-mount-target', 'style'),
-    Input('task-mgmt-table-add-interval-modal-editor-collapse-btn', 'nClicks'),
-    State('task-mgmt-table-add-interval-modal-editor-mount-target', 'style'),
+    Output('task-mgmt-table-add-modal-editor-mount-target', 'style'),
+    Input('task-mgmt-table-add-modal-editor-collapse-btn', 'nClicks'),
+    State('task-mgmt-table-add-modal-editor-mount-target', 'style'),
 )
 
 
 # interval全屏代码编辑器
 @app.callback(
     [
-        Output('task-mgmt-table-add-interval-modal-editor-mount-target', 'style', allow_duplicate=True),
-        Output('task-mgmt-table-add-interval-modal-editor-fullscreen', 'isFullscreen'),
+        Output('task-mgmt-table-add-modal-editor-mount-target', 'style', allow_duplicate=True),
+        Output('task-mgmt-table-add-modal-editor-fullscreen', 'isFullscreen'),
     ],
-    Input('task-mgmt-table-add-interval-modal-editor-fullscreen-btn', 'nClicks'),
-    State('task-mgmt-table-add-interval-modal-editor-fullscreen', 'isFullscreen'),
+    Input('task-mgmt-table-add-modal-editor-fullscreen-btn', 'nClicks'),
+    State('task-mgmt-table-add-modal-editor-fullscreen', 'isFullscreen'),
     prevent_initial_call=True,
 )
 def toggle_fullscreen(nClicks, isFullscreen):
@@ -273,9 +297,9 @@ app.clientside_callback(
     });
     return window.dash_clientside.no_update;
 }""",
-    Output('task-mgmt-table-add-interval-modal-editor-mount-target', 'children', allow_duplicate=True),
-    Input('task-mgmt-table-add-interval-modal-update-editor-language', 'value'),
-    State('task-mgmt-table-add-interval-modal-editor-mount-target', 'id'),
+    Output('task-mgmt-table-add-modal-editor-mount-target', 'children', allow_duplicate=True),
+    Input('task-mgmt-table-add-modal-update-editor-language', 'value'),
+    State('task-mgmt-table-add-modal-editor-mount-target', 'id'),
     prevent_initial_call='initial_duplicate',
 )
 
@@ -286,48 +310,60 @@ app.clientside_callback(
         }
     """,
     [
-        Output('task-mgmt-table-add-interval-modal-ok-trigger-store', 'data'),
-        Output('task-mgmt-table-add-interval-modal-editor-script-text-store', 'data'),
+        Output('task-mgmt-table-add-modal-ok-trigger-store', 'data'),
+        Output('task-mgmt-table-add-modal-editor-script-text-store', 'data'),
     ],
-    Input('task-mgmt-table-add-interval-modal', 'okCounts'),
+    Input('task-mgmt-table-add-modal', 'okCounts'),
     prevent_initial_call=True,
 )
 
 
 @app.callback(
     Output('task-mgmt-table', 'data', allow_duplicate=True),
-    Input('task-mgmt-table-add-interval-modal-ok-trigger-store', 'data'),
+    Input('task-mgmt-table-add-modal-ok-trigger-store', 'data'),
     [
-        State('task-mgmt-table-add-interval-modal-type-select', 'value'),  # 执行类型 ssh/local
-        State('task-mgmt-table-add-interval-modal-editor-script-text-store', 'data'),  # 脚本
-        State('task-mgmt-table-add-interval-modal-job-id', 'value'),  # 任务名
-        State('task-mgmt-table-add-interval-modal-ssh-host', 'value'),  # ssh主机
-        State('task-mgmt-table-add-interval-modal-ssh-username', 'value'),  # ssh用户名
-        State('task-mgmt-table-add-interval-modal-ssh-password', 'value'),  # ssh密码
-        State('task-mgmt-table-add-interval-modal-interval', 'value'),  # 周期
-        State('task-mgmt-table-add-interval-modal-timeout', 'value'),  # 超时时间
-        State('task-mgmt-table-add-interval-modal-extract-names-type-number', 'value'),  # 抽取数据-数值类型
-        State('task-mgmt-table-add-interval-modal-extract-names-type-string', 'value'),  # 超时时间-字符串类型
+        State('task-mgmt-table-add-modal-type-store', 'data'),  # 任务类型 周期/定时
+        State('task-mgmt-table-add-modal-type-select', 'value'),  # 执行类型 ssh/local
+        State('task-mgmt-table-add-modal-editor-script-text-store', 'data'),  # 脚本
+        State('task-mgmt-table-add-modal-job-id', 'value'),  # 任务名
+        State('task-mgmt-table-add-modal-ssh-host', 'value'),  # ssh主机
+        State('task-mgmt-table-add-modal-ssh-username', 'value'),  # ssh用户名
+        State('task-mgmt-table-add-modal-ssh-password', 'value'),  # ssh密码
+        State('task-mgmt-table-add-modal-timeout', 'value'),  # 超时时间
+        State('task-mgmt-table-add-modal-extract-names-type-number', 'value'),  # 抽取数据-数值类型
+        State('task-mgmt-table-add-modal-extract-names-type-string', 'value'),  # 超时时间-字符串类型
+        State('task-mgmt-table-add-modal-interval', 'value'),  # interval周期
+        State('task-mgmt-table-add-modal-cron-minute', 'data'),  # cron 分
+        State('task-mgmt-table-add-modal-cron-hour', 'data'),  # cron 小时
+        State('task-mgmt-table-add-modal-cron-day', 'data'),  # cron 天
+        State('task-mgmt-table-add-modal-cron-month', 'data'),  # cron 月
+        State('task-mgmt-table-add-modal-cron-day-of-week', 'data'),  # cron 周
     ],
     prevent_initial_call=True,
 )
 def add_interval_job(
     trigger,
+    task_type,
     type_run,
     script_text,
     job_id,
     ssh_host,
     ssh_username,
     ssh_password,
-    interval,
     timeout,
     extract_names_number,
     extract_names_string,
+    interval,
+    cron_minute,
+    cron_hour,
+    cron_day,
+    cron_month,
+    cron_day_of_week,
 ):
     if not trigger:  # fix: 无法避免初始化调用
         return dash.no_update
     op_user_name = get_menu_access(only_get_user_name=True)
-    if type_run == 'local':
+    if type_run == 'local' and task_type == 'interval':
         add_local_interval_job(
             script_text=script_text,
             interval=int(interval),
@@ -342,13 +378,46 @@ def add_interval_job(
                 *[{'type': 'number', 'value': i} for i in extract_names_string],
             ],
         )
-    elif type_run == 'ssh':
+    elif type_run == 'ssh' and task_type == 'interval':
         add_ssh_interval_job(
             ip=ssh_host,
             username=ssh_username,
             password=ssh_password,
             script_text=script_text,
             interval=int(interval),
+            timeout=int(timeout),
+            job_id=job_id,
+            update_by=op_user_name,
+            update_datetime=f'{datetime.now():%Y-%m-%dT%H:%M:%S}',
+            create_by=op_user_name,
+            create_datetime=f'{datetime.now():%Y-%m-%dT%H:%M:%S}',
+            extract_names=[
+                *[{'type': 'string', 'value': i} for i in extract_names_number],
+                *[{'type': 'number', 'value': i} for i in extract_names_string],
+            ],
+        )
+    elif type_run == 'local' and task_type == 'cron':
+        add_local_cron_job(
+            script_text=script_text,
+            cron_list=[None, cron_minute, cron_hour, cron_day, cron_month, cron_day_of_week, None, None],
+            timeout=int(timeout),
+            job_id=job_id,
+            update_by=op_user_name,
+            update_datetime=f'{datetime.now():%Y-%m-%dT%H:%M:%S}',
+            create_by=op_user_name,
+            create_datetime=f'{datetime.now():%Y-%m-%dT%H:%M:%S}',
+            extract_names=[
+                *[{'type': 'string', 'value': i} for i in extract_names_number],
+                *[{'type': 'number', 'value': i} for i in extract_names_string],
+            ],
+        )
+    elif type_run == 'ssh' and task_type == 'cron':
+        add_ssh_cron_job(
+            ip=ssh_host,
+            username=ssh_username,
+            password=ssh_password,
+            script_text=script_text,
+            cron_list=[None, cron_minute, cron_hour, cron_day, cron_month, cron_day_of_week, None, None],
             timeout=int(timeout),
             job_id=job_id,
             update_by=op_user_name,

@@ -40,21 +40,13 @@ def add_ssh_interval_job(ip, username, password, script_text, interval, timeout,
         conn.close()
 
 
-def add_ssh_cron_job(
-    ip, username, password, script_text, cron_text, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, year=None, week=None
-):
+def add_ssh_cron_job(ip, username, password, script_text, cron_list, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names):
     """https://apscheduler.readthedocs.io/en/master/api.html#apscheduler.triggers.cron.CronTrigger"""
     if not extract_names:
         extract_names = None
     try:
         conn = get_connect()
-        if len(cron_text) == 5:
-            minute, hour, day, month, day_of_week = cron_text
-            second = None
-        elif len(cron_text) == 6:
-            second, minute, hour, day, month, day_of_week = cron_text
-        else:
-            raise Exception('cron_text error')
+        second, minute, hour, day, month, day_of_week, year, week = cron_list
         job = conn.root.add_job(
             'app_apscheduler:run_script',
             'cron',
@@ -107,6 +99,42 @@ def add_local_interval_job(script_text, interval, timeout, job_id, update_by, up
                 ('create_datetime', create_datetime),
             ],
             seconds=interval,
+            id=job_id,
+        )
+        return job.id
+    except Exception as e:
+        raise e
+    finally:
+        conn.close()
+
+
+def add_local_cron_job(script_text, cron_list, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names):
+    if not extract_names:
+        extract_names = None
+    try:
+        conn = get_connect()
+        second, minute, hour, day, month, day_of_week, year, week = cron_list
+        job = conn.root.add_job(
+            'app_apscheduler:run_script',
+            'cron',
+            kwargs=[
+                ('type', 'ssh'),
+                ('script_text', script_text),
+                ('timeout', timeout),
+                ('extract_names', extract_names),
+                ('update_by', update_by),
+                ('update_datetime', update_datetime),
+                ('create_by', create_by),
+                ('create_datetime', create_datetime),
+            ],
+            year=year,
+            week=week,
+            second=second,
+            minute=minute,
+            hour=hour,
+            day=day,
+            month=month,
+            day_of_week=day_of_week,
             id=job_id,
         )
         return job.id
