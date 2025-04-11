@@ -120,7 +120,7 @@ def add_local_cron_job(script_text, cron_list, timeout, job_id, update_by, updat
             'app_apscheduler:run_script',
             'cron',
             kwargs=[
-                ('type', 'ssh'),
+                ('type', 'local'),
                 ('script_text', script_text),
                 ('timeout', timeout),
                 ('extract_names', extract_names),
