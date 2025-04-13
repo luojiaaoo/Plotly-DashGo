@@ -18,7 +18,9 @@ def render():
         #
         # >>>>> 当初始化load页面时，访问的页面不为主页，主动加载主页，然后跳转目标页
         # 当标签页重载时，如访问页面不是首页，保存访问地址
-        dcc.Store(id='main-url-last-when-load'),
+        dcc.Store(id='main-url-pathname-last-when-load'),
+        dcc.Store(id='main-url-search-last-when-load'),
+        dcc.Store(id='main-url-hash-last-when-load'),
         # 触发进入目标页面上面Store保存的访问地址的超时组件
         fuc.FefferyTimeout(id='main-url-timeout-last-when-load'),
         #

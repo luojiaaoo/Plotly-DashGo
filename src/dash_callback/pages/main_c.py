@@ -117,6 +117,8 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     url_menu_item = '.'.join(url.parts[1:])  # 访问路径，第一个为/，去除
     url_query: Dict = url.query  # 查询参数
     url_fragment: str = url.fragment  # 获取锚链接
+    if 'flash' in url_query: # 排除强制刷新flash参数
+        url_query.pop('flash')
     param = {
         **url_query,
         **({'url_fragment': url_fragment} if url_fragment else {}),
@@ -124,19 +126,18 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
 
     # 当重载页面时，如果访问的不是首页，则先访问首页，再自动访问目标页
     relocation = False
-    last_herf = ''
+    _last_pathname = ''
+    _last_search = {}
+    _last_hash = ''
     if trigger == 'load' and url_menu_item != 'dashboard_.workbench':
         relocation = True
         # 强制访问首页
         url_menu_item = 'dashboard_.workbench'
         param = {}
         # 保存目标页的url
-        last_herf = str(
-            URL()
-            .with_path(url.path)
-            .with_query({**url_query, 'flush': str(uuid4())[:8]})  # 添加随机码，强制刷新'global-url-location', 'href'，触发目标页面打开
-            .with_fragment(url_fragment)
-        )
+        _last_pathname = url.path
+        _last_search = url_query
+        _last_hash = url_fragment
     try:
         # 导入对应的页面模块
         module_page = importlib.import_module(f'dash_view.application.{url_menu_item}')
@@ -196,7 +197,9 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     )
     if relocation:
         # 激活超时组件，马上动态更新到目标页
-        set_props('main-url-last-when-load', {'data': last_herf})
+        set_props('main-url-pathname-last-when-load', {'data': _last_pathname})
+        set_props('main-url-search-last-when-load', {'data': dict(_last_search)})
+        set_props('main-url-hash-last-when-load', {'data': _last_hash})
         set_props('main-url-timeout-last-when-load', {'delay': 100})
     return [
         p_items,  # tab标签页
@@ -228,18 +231,28 @@ app.clientside_callback(
     prevent_initial_call=True,
 )
 
+
 # 在初始化非主页时，在访问主页后，自动通过超时组件切换值目标页
-app.clientside_callback(
-    """
-        (timeoutCount,data) => {
-            return data;
-        }
-    """,
-    Output('main-dcc-url', 'href'),
+@app.callback(
+    [
+        Output('main-dcc-url', 'pathname', allow_duplicate=True),
+        Output('main-dcc-url', 'search'),
+        Output('main-dcc-url', 'hash'),
+    ],
     Input('main-url-timeout-last-when-load', 'timeoutCount'),
-    State('main-url-last-when-load', 'data'),
+    [
+        State('main-url-pathname-last-when-load', 'data'),
+        State('main-url-search-last-when-load', 'data'),
+        State('main-url-hash-last-when-load', 'data'),
+    ],
     prevent_initial_call=True,
 )
+def jump_to_init_page(timeoutCount, pathname, search, hash):
+    from yarl import URL
+
+    url = URL(pathname).with_query({**search, **{'flash': uuid4().hex[:8]}}).with_fragment(hash)
+    return url.path, ('?' + url.query_string) if url.query_string else {}, ('#' + url.fragment) if url.fragment else ''
+
 
 # 地址栏随tabs的activeKey变化
 app.clientside_callback(
