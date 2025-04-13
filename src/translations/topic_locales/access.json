@@ -269,6 +269,15 @@
         "公告管理-页面": {
             "en-us": "Notification Mgmt"
         },
+        "任务中心": {
+            "en-us": "Task Center"
+        },
+        "任务管理": {
+            "en-us": "Task Mgmt"
+        },
+        "任务日志": {
+            "en-us": "Task Log"
+        },
         "应用案例": {
             "en-us": "App Example"
         },

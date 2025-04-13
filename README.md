@@ -27,6 +27,7 @@ DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架
 4. i18n国际化组件
 5. 密码和OTP登录
 6. 支持OAuth2 provider
+7. 支持任务模块，支持周期任务和定时任务
 
 ### 特点:
 
@@ -186,11 +187,15 @@ def render_content(menu_access: MenuAccess, **kwargs):
 
 3. 进入到src目录，执行python app.py，即可启动调试模式，根据日志提示中的URL进行访问
 
-> 默认账号：admin、密码：admin123
->
-> bin目录下已放置启动脚本，可以作为生产启动脚本（windows用waitress/linux用gunicorn作为WSGI服务组件）
+   > 默认账号：admin、密码：admin123
+   >
+   > bin目录下已放置启动start脚本，可以作为生产启动脚本（windows用waitress/linux用gunicorn作为WSGI服务组件）
 
-4. 请在Dash的世界畅游吧！！！
+4. 如要使用任务中心模块，需要进入到src目录，执行python app_apscheduler.py启动任务进程
+
+   > bin目录下已放置启动start_background_task脚本，可以作为生产启动脚本
+
+5. 请在Dash的世界畅游吧！！！
 
 > 默认启动为sqlite数据库，如需用于生产，请根据config/dashgo.ini调整相关Mysql数据库配置
 
@@ -203,6 +208,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
 |![](screenshots/moniter.png)|![](screenshots/moniter-en.png)|
 |![](screenshots/role.png)|![](screenshots/person.png)|
 |![](screenshots/user.png)|![](screenshots/group.png)|
+|![](screenshots/task_mgmt.png)|![](screenshots/task_log.png)|
 
 
 
