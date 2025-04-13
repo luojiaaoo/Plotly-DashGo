@@ -22,19 +22,19 @@ def select_last_log_from_job_id(job_id: str, accept_timedelta: timedelta) -> str
         raise Exception('Job log not found') from e
 
 
-def get_apscheduler_start_datetime_with_status_by_job_id(job_id: str) -> datetime:
+def get_apscheduler_start_finish_datetime_with_status_by_job_id(job_id: str) -> datetime:
     """查询指定job_id的开始时间"""
     try:
         result_running = (
             ApschedulerRunning.select(ApschedulerRunning.start_datetime).where(ApschedulerRunning.job_id == job_id).distinct().order_by(ApschedulerRunning.start_datetime.desc())
         )
         result_done = (
-            ApschedulerResults.select(ApschedulerResults.start_datetime, ApschedulerResults.status)
+            ApschedulerResults.select(ApschedulerResults.start_datetime, ApschedulerResults.finish_datetime, ApschedulerResults.status)
             .where(ApschedulerResults.job_id == job_id)
             .order_by(ApschedulerResults.start_datetime.desc())
         )
-        start_datetimes_running = [(i.start_datetime, 'running') for i in result_running]
-        start_datetimes_done = [(i.start_datetime, i.status) for i in result_done]
+        start_datetimes_running = [(i.start_datetime, '...', 'running') for i in result_running]
+        start_datetimes_done = [(i.start_datetime, i.finish_datetime, i.status) for i in result_done]
         return [*start_datetimes_running, *start_datetimes_done]
     except DoesNotExist as e:
         raise Exception('Job start datetime not found') from e

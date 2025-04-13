@@ -10,25 +10,30 @@ def color_job_finish_status(status):
     elif status == 'error':
         return 'red'
     elif status == 'timeout':
-        return 'purple'
-    elif status == 'running':
         return 'orange'
+    elif status == 'running':
+        return 'purple'
     else:
         raise ValueError(f'未知的status：{status}')
 
 
 def get_start_datetime_options_by_job_id(job_id):
-    from database.sql_db.dao.dao_apscheduler import get_apscheduler_start_datetime_with_status_by_job_id
+    from database.sql_db.dao.dao_apscheduler import get_apscheduler_start_finish_datetime_with_status_by_job_id
+    from datetime import datetime
 
     return [
         {
-            'label': fac.AntdTag(
-                content=f'{start_datetime:%Y-%m-%dT%H:%M:%S}',
-                color=color_job_finish_status(status),
-            ),
+            'label': [
+                fac.AntdText(job_id, keyboard=True),
+                f' Run Time:{start_datetime:%Y-%m-%dT%H:%M:%S} - {f"{finish_datetime:%Y-%m-%dT%H:%M:%S}" if isinstance(finish_datetime, datetime) else finish_datetime} (Duration:{f"{int((finish_datetime - start_datetime).total_seconds())}s" if isinstance(finish_datetime, datetime) else "unfinish"}) ',
+                fac.AntdTag(
+                    content=f'Status:{status.upper()}',
+                    color=color_job_finish_status(status),
+                ),
+            ],
             'value': f'{start_datetime:%Y-%m-%dT%H:%M:%S.%f}',
         }
-        for start_datetime, status in get_apscheduler_start_datetime_with_status_by_job_id(job_id)
+        for start_datetime, finish_datetime, status in get_apscheduler_start_finish_datetime_with_status_by_job_id(job_id)
     ]
 
 

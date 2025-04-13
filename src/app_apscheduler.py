@@ -148,9 +148,12 @@ def run_script(
         delete_apscheduler_running(job_id=job_id, start_datetime=start_datetime)
         # 删除旧的脚本文件
         script_filepath_old = glob.glob(os.path.join(tempfile.gettempdir(), 'dashgo_*'))
-        script_filepath_old.sort(key=os.path.getmtime, reverse=True)
-        for i in script_filepath_old[30:]:  # 最多只保留30个脚本文件
-            os.remove(i)
+        try:
+            script_filepath_old.sort(key=os.path.getmtime, reverse=True)
+            for i in script_filepath_old[30:]:  # 最多只保留30个脚本文件
+                os.remove(i)
+        except Exception as e:
+            pass
     elif type == 'ssh':
         # ssh默认都认为是linux系统
         with tempfile.NamedTemporaryFile(

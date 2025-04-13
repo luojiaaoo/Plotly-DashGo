@@ -27,7 +27,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             fac.AntdSelect(
                                 id='task-log-job-id-select',
                                 options=[{'label': job.job_id, 'value': job.job_id} for job in get_apscheduler_all_jobs()],
-                                style={'width': 350},
+                                style={'width': 700},
                                 prefix=fac.AntdIcon(icon='bi-table'),
                             ),
                             fac.AntdButton('查询执行记录', id='task-log-get-start-datetime-btn'),
@@ -35,13 +35,10 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     ),
                     fac.AntdSpace(
                         [
-                            fac.AntdTooltip(
-                                fac.AntdSelect(
-                                    id='task-log-start-datetime-select',
-                                    prefix=fac.AntdIcon(icon='md-query-builder'),
-                                    style={'width': 350},
-                                ),
-                                title='绿色-成功；红色-失败；紫色-超时；黄色-正在运行',
+                            fac.AntdSelect(
+                                id='task-log-start-datetime-select',
+                                prefix=fac.AntdIcon(icon='md-query-builder'),
+                                style={'width': 700},
                             ),
                             fac.AntdButton('查询执行日志', id='task-log-get-log-btn'),
                             fac.AntdSwitch(
