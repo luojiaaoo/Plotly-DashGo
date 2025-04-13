@@ -32,7 +32,7 @@ class MenuAccess:
         json_menu_item_access_meta = {}
         for access_meta, menu_item in dict_access_meta2menu_item.items():
             # 此权限无需分配
-            if access_meta in (*AccessFactory.default_access_meta, *AccessFactory.admin_access_meta, *AccessFactory.group_access_meta):
+            if access_meta in (*AccessFactory.default_access_meta, *AccessFactory.admin_access_meta, *AccessFactory.group_access_meta) and access_meta not in AccessFactory.assignable_access_meta:
                 continue
             level1_name, level2_name = menu_item.split('.')
             if json_menu_item_access_meta.get(level1_name, None) is None:

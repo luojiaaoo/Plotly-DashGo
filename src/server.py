@@ -1,4 +1,4 @@
-from flask import request, redirect, send_from_directory, abort, jsonify
+from flask import request, redirect, send_from_directory, abort, jsonify, Response
 from common.exception import OAuth2Error
 from common.utilities.util_oauth2 import current_token, require_oauth
 from config.dashgo_conf import ShowConf, FlaskConf, CommonConf, PathProj
@@ -7,6 +7,8 @@ from common.exception import global_exception_handler
 from common.utilities.util_dash import CustomDash
 from common.constant import HttpStatusConstant
 from datetime import datetime, timedelta, timezone
+import time
+from dash import get_asset_url
 from i18n import t__other
 
 
@@ -52,6 +54,48 @@ def download_file(user_name):
         abort(HttpStatusConstant.FORBIDDEN)
     else:
         return send_from_directory(PathProj.AVATAR_DIR_PATH, file_name)
+
+
+@app.server.route('/<path:prefix>/vs/<path:path>')
+def vs_proxy(prefix, path):
+    """转发vscode editor底层相关请求到正确的地址上"""
+    return redirect(get_asset_url(f'vs/{path}'))
+
+
+@server.route('/task_log_sse', methods=['POST'])
+def task_log_sse():
+    from common.utilities.util_menu_access import get_menu_access
+    from database.sql_db.dao.dao_apscheduler import get_running_log, get_done_log
+    from urllib.parse import unquote
+
+    menu_access = get_menu_access()
+    if not menu_access.has_access('任务日志-页面'):
+        response = jsonify({'error': 'Task Log SSE Permission Rejected.'})
+        response.status_code = HttpStatusConstant.FORBIDDEN
+        return response
+
+    job_id = unquote(request.headers.get('job-id'))
+    start_datetime = request.headers.get('start-datetime')
+    start_datetime = datetime.strptime(start_datetime, '%Y-%m-%dT%H:%M:%S.%f')
+
+    def _stream():
+        total_log = None
+        order = 0
+        while True:
+            time.sleep(0.1)
+            total_log = get_done_log(job_id=job_id, start_datetime=start_datetime)
+            if total_log is not None:
+                break
+            else:
+                order_log = get_running_log(job_id=job_id, start_datetime=start_datetime, order=order)
+                if order_log is not None:
+                    data = order_log.replace('\r\n', '<换行符>').replace('\n', '<换行符>')
+                    yield 'data: {}\n\n'.format(data)
+                    order += 1
+
+        yield 'data: <响应结束>{}\n\n'.format(total_log.replace('\r\n', '<换行符>').replace('\n', '<换行符>'))
+
+    return Response(_stream(), mimetype='text/event-stream')
 
 
 # nginx代理后，拦截直接访问
@@ -283,4 +327,3 @@ def main_page_redirct():
     if request.method == 'GET':
         if request.path == '/':
             return redirect('/dashboard_/workbench')
-
