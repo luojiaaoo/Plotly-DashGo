@@ -115,7 +115,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     has_open_tab_keys = has_open_tab_keys or []
     url = URL(href)
     url_menu_item = '.'.join(url.parts[1:])  # 访问路径，第一个为/，去除
-    url_query: Dict = url.query  # 查询参数
+    url_query: Dict = dict(url.query)  # 查询参数
     url_fragment: str = url.fragment  # 获取锚链接
     if 'flash' in url_query: # 排除强制刷新flash参数
         url_query.pop('flash')
@@ -198,7 +198,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     if relocation:
         # 激活超时组件，马上动态更新到目标页
         set_props('main-url-pathname-last-when-load', {'data': _last_pathname})
-        set_props('main-url-search-last-when-load', {'data': dict(_last_search)})
+        set_props('main-url-search-last-when-load', {'data': _last_search})
         set_props('main-url-hash-last-when-load', {'data': _last_hash})
         set_props('main-url-timeout-last-when-load', {'delay': 100})
     return [
