@@ -38,13 +38,17 @@ def get_start_datetime_options_by_job_id(job_id):
 
 
 @app.callback(
-    Output('task-log-start-datetime-select', 'options'),
+    [
+        Output('task-log-start-datetime-select', 'options'),
+        Output('task-log-start-datetime-select', 'value'),
+    ],
     Input('task-log-get-start-datetime-btn', 'nClicks'),
     State('task-log-job-id-select', 'value'),
     prevent_initial_call=True,
 )
 def get_run_times(nClicks, job_id):
-    return get_start_datetime_options_by_job_id(job_id)
+    all_time_of_job = get_start_datetime_options_by_job_id(job_id)
+    return all_time_of_job, all_time_of_job[0]['value']
 
 
 # app.clientside_callback(
