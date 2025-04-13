@@ -78,6 +78,7 @@ class OAuth2Conf(metaclass=BaseMetaConf):
 
 
 class ApSchedulerConf(metaclass=BaseMetaConf):
+    DATA_EXPIRE_DAY: int
     HOST: str
     PORT: int
 

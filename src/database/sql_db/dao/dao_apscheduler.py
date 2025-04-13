@@ -169,3 +169,19 @@ def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names
     except Exception as e:
         logger.error(f'插入任务结果时发生未知错误: {e}')
         raise Exception('Failed to insert apscheduler result due to an unknown error') from e
+
+def delete_expire_data(day):
+    # 删除ApschedulerResults和ApschedulerExtractValue超时的数据
+    try:
+        database = db()
+        with database.atomic():
+            expire_time = datetime.now() - timedelta(days=day)
+            ApschedulerResults.delete().where(ApschedulerResults.start_datetime < expire_time).execute()
+            ApschedulerExtractValue.delete().where(ApschedulerExtractValue.start_datetime < expire_time).execute()
+    except IntegrityError as e:
+        logger.error(f'删除超时数据时发生数据库完整性错误: {e}')
+        raise Exception('Failed to delete expired data due to integrity error') from e
+    except Exception as e:
+        logger.error(f'删除超时数据时发生未知错误: {e}')
+        raise Exception('Failed to delete expired data due to an unknown error') from e
+    

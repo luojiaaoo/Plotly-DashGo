@@ -14,6 +14,7 @@ from database.sql_db.dao.dao_apscheduler import (
     delete_apscheduler_running,
     select_apscheduler_running_log,
     truncate_apscheduler_running,
+    delete_expire_data,
 )
 from config.dashgo_conf import SqlDbConf
 import paramiko
@@ -63,7 +64,7 @@ def run_script(
     run_cmd = RUN_CMD[script_type]
     if type == 'local':
         # 如果本地是中文版windows的话，需要gbk解码
-        encoding='gbk' if suffix == '.bat' else 'utf-8'
+        encoding = 'gbk' if suffix == '.bat' else 'utf-8'
         # 创建文件
         with tempfile.NamedTemporaryFile(
             delete=False,
@@ -244,6 +245,11 @@ def run_script(
             ssh.close()
 
 
+def delete_expire_data_for_cron(day):
+    delete_expire_data(day)
+
+CLEAR_JOB_ID = 'sys_delete_expire_data_for_cron'
+
 class SchedulerService(rpyc.Service):
     def exposed_add_job(self, func, *args, **kwargs):
         kwargs['kwargs'] = list(kwargs['kwargs'])
@@ -276,6 +282,8 @@ class SchedulerService(rpyc.Service):
         jobs = scheduler.get_jobs(jobstore)
         result = []
         for job in jobs:
+            if job.id == CLEAR_JOB_ID:
+                continue
             result.append(self.get_job_dict(job))
         return json.dumps(result, ensure_ascii=False)
 
@@ -321,6 +329,29 @@ if __name__ == '__main__':
     scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
     scheduler.start()
     protocol_config = {'allow_public_attrs': True}
+    # 添加清理作业
+    try:
+        scheduler.remove_job(CLEAR_JOB_ID)
+        print('清理作业删除成功')
+    except:
+        pass
+    scheduler.add_job(
+        'app_apscheduler:delete_expire_data_for_cron',
+        'cron',
+        kwargs=[
+            ('day', ApSchedulerConf.DATA_EXPIRE_DAY),
+        ],
+        year='*',
+        week='*',
+        second=0,
+        minute=0,
+        hour=1,
+        day='*',
+        month='*',
+        day_of_week='*',
+        id=CLEAR_JOB_ID,
+    )
+    print(f'清理作业添加成功，保留天数为{ApSchedulerConf.DATA_EXPIRE_DAY}')
     server = ThreadedServer(SchedulerService, hostname=ApSchedulerConf.HOST, port=ApSchedulerConf.PORT, protocol_config=protocol_config)
     try:
         server.start()
