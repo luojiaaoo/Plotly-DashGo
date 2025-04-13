@@ -63,12 +63,12 @@ app.clientside_callback(
             pathname = urlObj.pathname;
             if (has_open_tab_keys.includes(pathname)){
                 if (collapsed){
-                    return [window.dash_clientside.no_update, window.dash_clientside.no_update, opened_tab_pathname_infos[pathname][1], opened_tab_pathname_infos[pathname][2],pathname];
+                    return [window.dash_clientside.no_update, window.dash_clientside.no_update, opened_tab_pathname_infos[pathname][1], opened_tab_pathname_infos[pathname][2],pathname,opened_tab_pathname_infos[pathname][3]];
                 }else{
-                    return [window.dash_clientside.no_update, [opened_tab_pathname_infos[pathname][0]], opened_tab_pathname_infos[pathname][1], opened_tab_pathname_infos[pathname][2],pathname];
+                    return [window.dash_clientside.no_update, [opened_tab_pathname_infos[pathname][0]], opened_tab_pathname_infos[pathname][1], opened_tab_pathname_infos[pathname][2],pathname,opened_tab_pathname_infos[pathname][3]];
                 }
             }else{
-                return [href, window.dash_clientside.no_update, window.dash_clientside.no_update, window.dash_clientside.no_update, window.dash_clientside.no_update];
+                return [href, window.dash_clientside.no_update, window.dash_clientside.no_update, window.dash_clientside.no_update, window.dash_clientside.no_update, window.dash_clientside.no_update];
             }
         }
     """,
@@ -78,6 +78,7 @@ app.clientside_callback(
         Output('main-menu', 'currentKey', allow_duplicate=True),
         Output('main-header-breadcrumb', 'items', allow_duplicate=True),
         Output('tabs-container', 'activeKey', allow_duplicate=True),
+        Output('main-dcc-url', 'search', allow_duplicate=True),
     ],
     Input('main-url-location', 'href'),
     [
@@ -114,10 +115,11 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
         raise PreventUpdate
     has_open_tab_keys = has_open_tab_keys or []
     url = URL(href)
+    url_pathname = url.path
     url_menu_item = '.'.join(url.parts[1:])  # 访问路径，第一个为/，去除
     url_query: Dict = dict(url.query)  # 查询参数
     url_fragment: str = url.fragment  # 获取锚链接
-    if 'flash' in url_query: # 排除强制刷新flash参数
+    if 'flash' in url_query:  # 排除强制刷新flash参数
         url_query.pop('flash')
     param = {
         **url_query,
@@ -131,13 +133,16 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     _last_hash = ''
     if trigger == 'load' and url_menu_item != 'dashboard_.workbench':
         relocation = True
-        # 强制访问首页
-        url_menu_item = 'dashboard_.workbench'
-        param = {}
         # 保存目标页的url
-        _last_pathname = url.path
+        _last_pathname = url_pathname
         _last_search = url_query
         _last_hash = url_fragment
+        # 强制访问首页，不带参数
+        url_menu_item = 'dashboard_.workbench'
+        url_pathname = '/dashboard_/workbench'
+        url_query = {}
+        url_fragment = ''
+        param = {}
     try:
         # 导入对应的页面模块
         module_page = importlib.import_module(f'dash_view.application.{url_menu_item}')
@@ -153,7 +158,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
             return '/' + '/'.join(menu_item.split('.'))
 
     # 构建key的字符串格式
-    key_url_path = menu_item2url_path(url_menu_item)
+    key_url_path = menu_item2url_path(url_menu_item)  # 其实应该和url_pathname的值相同
     key_url_path_parent = menu_item2url_path(url_menu_item, 1)
 
     # 构建面包屑格式
@@ -185,7 +190,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     ################# 返回页面 #################
     p_items = Patch()
     p_opened_tab_pathname_infos = Patch()
-    p_opened_tab_pathname_infos[key_url_path] = [key_url_path_parent, key_url_path, breadcrumb_items]
+    p_opened_tab_pathname_infos[key_url_path] = [key_url_path_parent, key_url_path, breadcrumb_items, URL.build(query=url_query).__str__()]
     # 情况2： 未打开，通过Patch组件，将新的tab添加到tabs组件中
     p_items.append(
         {
@@ -207,7 +212,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
         dash.no_update if is_collapsed_menu or relocation else [key_url_path_parent],  # 菜单展开
         dash.no_update if relocation else key_url_path,  # 菜单选中
         dash.no_update if relocation else breadcrumb_items,  # 面包屑
-        p_opened_tab_pathname_infos,  # 保存目标标题对应的展开key、选中key、面包屑
+        p_opened_tab_pathname_infos,  # 保存目标标题对应的展开key、选中key、面包屑、get参数
     ]
 
 
@@ -236,8 +241,8 @@ app.clientside_callback(
 @app.callback(
     [
         Output('main-dcc-url', 'pathname', allow_duplicate=True),
-        Output('main-dcc-url', 'search'),
-        Output('main-dcc-url', 'hash'),
+        Output('main-dcc-url', 'search', allow_duplicate=True),
+        Output('main-dcc-url', 'hash', allow_duplicate=True),
     ],
     Input('main-url-timeout-last-when-load', 'timeoutCount'),
     [
@@ -251,7 +256,7 @@ def jump_to_init_page(timeoutCount, pathname, search, hash):
     from yarl import URL
 
     url = URL(pathname).with_query({**search, **{'flash': uuid4().hex[:8]}}).with_fragment(hash)
-    return url.path, ('?' + url.query_string) if url.query_string else {}, ('#' + url.fragment) if url.fragment else ''
+    return url.path, URL.build(query=url.query).__str__(), URL.build(fragment=url.fragment).__str__()
 
 
 # 地址栏随tabs的activeKey变化
@@ -272,24 +277,28 @@ app.clientside_callback(
 # Tab关闭
 app.clientside_callback(
     """
-    (tabCloseCounts, items, latestDeletePane, itemKeys,activeKey) => {
+    (tabCloseCounts, items, latestDeletePane, itemKeys,activeKey,pathname_info) => {
+        //const { latestDeletePane, ...new_pathname_info } = pathname_info;
+        //Reflect.deleteProperty(pathname_info, latestDeletePane);
+        delete pathname_info[latestDeletePane];
         let del_index = itemKeys.findIndex(item => item === latestDeletePane);
         items.splice(del_index, 1);
         itemKeys.splice(del_index, 1);
         if (activeKey==latestDeletePane) {
              if (itemKeys[del_index] !== undefined){
-                 return [items, itemKeys[del_index]];
+                 return [items, itemKeys[del_index], pathname_info];
             }else{
-                return [items, itemKeys[del_index-1]];
+                return [items, itemKeys[del_index-1], pathname_info];
             }
         }else{
-            return [items, activeKey];
+            return [items, activeKey, pathname_info];
         }
     }
     """,
     [
         Output('tabs-container', 'items', allow_duplicate=True),
         Output('tabs-container', 'activeKey', allow_duplicate=True),
+        Output('main-opened-tab-pathname-infos', 'data', allow_duplicate=True),
     ],
     Input('tabs-container', 'tabCloseCounts'),
     [
@@ -297,6 +306,7 @@ app.clientside_callback(
         State('tabs-container', 'latestDeletePane'),
         State('tabs-container', 'itemKeys'),
         State('tabs-container', 'activeKey'),
+        State('main-opened-tab-pathname-infos', 'data'),
     ],
     prevent_initial_call=True,
 )
