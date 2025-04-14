@@ -237,18 +237,29 @@ def run_script(
                 start_datetime=start_datetime,
                 extract_names=extract_names,
             )
+        except TimeoutError:
+            insert_apscheduler_result(
+                    job_id,
+                    status='error',
+                    log=f'[ERROR] Cannot connect to the host {host}, <SOPS_VAR>ssh_status:unconnect</SOPS_VAR>',
+                    start_datetime=start_datetime,
+                    extract_names=extract_names,
+            )
         except Exception as e:
             raise e
-        finally:
+        else:
             delete_apscheduler_running(job_id=job_id, start_datetime=start_datetime)
             ssh.exec_command("ls /tmp/dashgo_*|sort -r|sed '1,30d'|xargs -n 30 rm -f", get_pty=True, timeout=20)  # 清理历史脚本，最多保留30个
+        finally:
             ssh.close()
 
 
 def delete_expire_data_for_cron(day):
     delete_expire_data(day)
 
+
 CLEAR_JOB_ID = 'sys_delete_expire_data_for_cron'
+
 
 class SchedulerService(rpyc.Service):
     def exposed_add_job(self, func, *args, **kwargs):
