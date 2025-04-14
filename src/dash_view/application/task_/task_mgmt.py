@@ -58,7 +58,6 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             icon=fac.AntdIcon(icon='antd-reload'),
                         ),
                         fuc.FefferyTimeout(id='task-mgmt-view-jump-timeout'),
-                        dcc.Store(id='task-mgmt-view-jump-job-id'),
                     ]
                 ),
                 Card(

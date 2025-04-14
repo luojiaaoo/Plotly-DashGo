@@ -2,6 +2,9 @@ from server import app
 from dash.dependencies import Input, Output, State
 import feffery_antd_components as fac
 import feffery_utils_components as fuc
+import dash
+from dash import set_props
+from common.utilities.util_apscheduler import get_apscheduler_all_jobs
 
 
 def color_job_finish_status(status):
@@ -130,3 +133,33 @@ app.clientside_callback(
     ],
     prevent_initial_call=True,
 )
+
+
+@app.callback(
+    Output('main-task-mgmt-jump-to-task-log-job-id-store', 'data'),
+    Input('task-log-viewport', 'inViewport'),
+    [
+        State('main-task-mgmt-jump-to-task-log-job-id-store', 'data'),
+        State('task-log-get-log-btn', 'nClicks'),
+    ],
+    prevent_initial_call=True,
+)
+def jump_to_log_view(inViewport, job_id, nClicks):
+    if not inViewport or not job_id:
+        return dash.no_update
+    from dash_callback.application.task_.task_log_c import get_start_datetime_options_by_job_id
+
+    all_job = [{'label': job.job_id, 'value': job.job_id} for job in get_apscheduler_all_jobs()]
+    set_props(
+        'task-log-job-id-select',
+        {'options': all_job},
+    )
+    set_props('task-log-job-id-select', {'value': job_id})
+    all_time_of_job = get_start_datetime_options_by_job_id(job_id)
+    set_props(
+        'task-log-start-datetime-select',
+        {'options': all_time_of_job},
+    )
+    set_props('task-log-start-datetime-select', {'value': all_time_of_job[0]['value']})
+    set_props('task-log-get-log-btn', {'nClicks': (nClicks or 0) + 1})
+    return None

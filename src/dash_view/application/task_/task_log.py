@@ -18,7 +18,7 @@ access_metas = ('任务日志-页面',)
 
 
 def render_content(menu_access: MenuAccess, **kwargs):
-    return (
+    return fuc.FefferyInViewport(
         Card(
             fac.AntdSpace(
                 [
@@ -79,4 +79,5 @@ def render_content(menu_access: MenuAccess, **kwargs):
             style={'width': '100%', 'height': '100%'},
             className={'& .ant-card-body': {'height': '100%'}},
         ),
+        id='task-log-viewport'
     )

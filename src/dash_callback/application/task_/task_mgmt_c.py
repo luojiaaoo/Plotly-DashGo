@@ -164,37 +164,10 @@ def show_modal(nClicks, nClicks_, nClicksButton, clickedCustom, recentlyButtonCl
     elif dash.ctx.triggered_id == 'task-mgmt-table' and clickedCustom.startswith('view'):
         set_props('main-dcc-url', {'pathname': '/task_/task_log'})
         job_id = clickedCustom.split(':', 1)[-1]
-        set_props('task-mgmt-view-jump-job-id', {'data': job_id})
-        set_props('task-mgmt-view-jump-timeout', {'delay': 1000})  # 1秒后触发jump_to_log_view对view的参数进行填写
+        set_props('main-task-mgmt-jump-to-task-log-job-id-store', {'data': job_id})
         return dash.no_update
     MessageManager.error(content='不支持的任务类型')
     return dash.no_update
-
-
-@app.callback(
-    Input('task-mgmt-view-jump-timeout', 'timeoutCount'),
-    [
-        State('task-mgmt-view-jump-job-id', 'data'),
-        State('task-log-get-log-btn', 'nClicks'),
-    ],
-    prevent_initial_call=True,
-)
-def jump_to_log_view(timeoutCount, job_id, nClicks):
-    from dash_callback.application.task_.task_log_c import get_start_datetime_options_by_job_id
-
-    all_job = [{'label': job.job_id, 'value': job.job_id} for job in get_apscheduler_all_jobs()]
-    set_props(
-        'task-log-job-id-select',
-        {'options': all_job},
-    )
-    set_props('task-log-job-id-select', {'value': job_id})
-    all_time_of_job = get_start_datetime_options_by_job_id(job_id)
-    set_props(
-        'task-log-start-datetime-select',
-        {'options': all_time_of_job},
-    )
-    set_props('task-log-start-datetime-select', {'value': all_time_of_job[0]['value']})
-    set_props('task-log-get-log-btn', {'nClicks': (nClicks or 0) + 1})
 
 
 @app.callback(

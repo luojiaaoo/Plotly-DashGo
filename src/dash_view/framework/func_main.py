@@ -54,4 +54,7 @@ def render():
             centered=True,
             cancelButtonProps={'style': {'display': 'none'}},
         ),
+        #
+        # >> 多页面交互缓存
+        dcc.Store(id='main-task-mgmt-jump-to-task-log-job-id-store'),
     ]
