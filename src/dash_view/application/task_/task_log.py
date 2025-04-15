@@ -5,6 +5,7 @@ from common.utilities.util_logger import Log
 from dash import html
 from dash_components import Card
 from i18n import translator
+from i18n import t__task
 import dash_callback.application.task_.task_log_c  # noqa: F401
 from common.utilities.util_apscheduler import get_apscheduler_all_jobs
 
@@ -31,7 +32,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                 listHeight=200,
                                 prefix=fac.AntdIcon(icon='bi-table'),
                             ),
-                            fac.AntdButton('查询执行记录', id='task-log-get-start-datetime-btn'),
+                            fac.AntdButton(t__task('查询执行记录'), id='task-log-get-start-datetime-btn'),
                         ]
                     ),
                     fac.AntdSpace(
@@ -42,12 +43,12 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                 listHeight=500,
                                 style={'width': 700},
                             ),
-                            fac.AntdButton('查询执行日志', id='task-log-get-log-btn'),
+                            fac.AntdButton(t__task('查询执行日志'), id='task-log-get-log-btn'),
                             fac.AntdSwitch(
                                 checked=True,
                                 id='task-log-scroll-log',
-                                checkedChildren='自动滚动',
-                                unCheckedChildren='关闭滚动',
+                                checkedChildren=t__task('自动滚动'),
+                                unCheckedChildren=t__task('关闭滚动'),
                             ),
                         ]
                     ),

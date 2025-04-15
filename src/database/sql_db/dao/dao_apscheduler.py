@@ -3,6 +3,7 @@ from peewee import DoesNotExist, IntegrityError
 from common.utilities.util_logger import Log
 from ..entity.table_apscheduler import ApschedulerResults, ApschedulerExtractValue, ApschedulerRunning
 from datetime import datetime, timedelta
+from common.notify import send_notify
 import re
 
 logger = Log.get_logger(__name__)
@@ -153,6 +154,8 @@ def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names
                         except:
                             logger.warning(f'提取数据类型为string，但无法转换为字符串: {value}')
                             continue
+                    elif type_ == 'notify':
+                        send_notify(title=name, short=value, desp=value)
                     else:
                         raise ValueError('不支持的提取数据类型')
                     ApschedulerExtractValue.create(
@@ -170,6 +173,7 @@ def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names
         logger.error(f'插入任务结果时发生未知错误: {e}')
         raise Exception('Failed to insert apscheduler result due to an unknown error') from e
 
+
 def delete_expire_data(day):
     # 删除ApschedulerResults和ApschedulerExtractValue超时的数据
     try:
@@ -184,4 +188,3 @@ def delete_expire_data(day):
     except Exception as e:
         logger.error(f'删除超时数据时发生未知错误: {e}')
         raise Exception('Failed to delete expired data due to an unknown error') from e
-    

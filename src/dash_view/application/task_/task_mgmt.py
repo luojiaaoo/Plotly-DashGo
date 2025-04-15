@@ -5,6 +5,7 @@ from common.utilities.util_logger import Log
 from dash import html,dcc
 from dash_components import Card
 from i18n import translator
+from i18n import t__task
 import dash_callback.application.task_.task_mgmt_c  # noqa
 
 
@@ -29,29 +30,29 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     [
                         fac.AntdButton(
                             id='task-mgmt-button-add-interval',
-                            children='新增周期任务',
+                            children=t__task('新增周期任务'),
                             type='primary',
                             icon=fac.AntdIcon(icon='md-update'),
                         ),
                         fac.AntdButton(
                             id='task-mgmt-button-add-cron',
-                            children='新增定时任务',
+                            children=t__task('新增定时任务'),
                             type='primary',
                             icon=fac.AntdIcon(icon='md-schedule'),
                         ),
                         fac.AntdPopconfirm(
                             fac.AntdButton(
-                                '删除选中',
+                                t__task('删除选中'),
                                 type='primary',
                                 danger=True,
                                 icon=fac.AntdIcon(icon='antd-close'),
                             ),
                             id='task-mgmt-button-delete',
-                            title='确认删除选中行吗？',
+                            title=t__task('确认删除选中行吗？'),
                             locale=translator.get_current_locale(),
                         ),
                         fac.AntdButton(
-                            '刷新',
+                            t__task('刷新'),
                             id='task-mgmt-button-flash',
                             color='primary',
                             variant='link',

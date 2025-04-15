@@ -1,0 +1,150 @@
+{
+    "root_locale": "zh-cn",
+    "topic": "task",
+    "contents": {
+        "查询执行记录": {
+            "en-us": "Query Execution Record"
+        },
+        "查询执行日志": {
+            "en-us": "Query Execution Log"
+        },
+        "自动滚动": {
+            "en-us": "Auto Roll"
+        },
+        "关闭滚动": {
+            "en-us": "Close Roll"
+        },
+        "新增周期任务": {
+            "en-us": "Add Interval Task"
+        },
+        "新增定时任务": {
+            "en-us": "Add Cron Task"
+        },
+        "删除选中": {
+            "en-us": "Delete Selected"
+        },
+        "确认删除选中行吗？": {
+            "en-us": "Confirm to delete selected rows?"
+        },
+        "刷新": {
+            "en-us": "Flash"
+        },
+        "任务名": {
+            "en-us": "Task Name"
+        },
+        "类型": {
+            "en-us": "Task Type"
+        },
+        "数据采集": {
+            "en-us": "Data Extract"
+        },
+        "触发器": {
+            "en-us": "Tragger"
+        },
+        "执行计划": {
+            "en-us": "Plan"
+        },
+        "下一次执行时间": {
+            "en-us": "Next Run Time"
+        },
+        "创建人": {
+            "en-us": "Create by"
+        },
+        "创建时间": {
+            "en-us": "Create Time"
+        },
+        "启用": {
+            "en-us": "Enable"
+        },
+        "操作": {
+            "en-us": "Action"
+        },
+        "任务启用成功": {
+            "en-us": "Task Start Success"
+        },
+        "任务停用成功": {
+            "en-us": "Task Stop Success"
+        },
+        "编辑任务": {
+            "en-us": "Edit Task"
+        },
+        "不支持的任务类型": {
+            "en-us": "Unsupported Task Type"
+        },
+        "周期（秒）": {
+            "en-us": "Interval (s)"
+        },
+        "分": {
+            "en-us": "Min"
+        },
+        "时": {
+            "en-us": "Hour"
+        },
+        "日": {
+            "en-us": "Day"
+        },
+        "月": {
+            "en-us": "Month"
+        },
+        "周": {
+            "en-us": "Week"
+        },
+        "Cron定时字串": {
+            "en-us": "Cron String"
+        },
+        "本地脚本": {
+            "en-us": "Local Script"
+        },
+        "<系统类型为": {
+            "en-us": "<System is"
+        },
+        "ssh远程执行": {
+            "en-us": "SSH Remote"
+        },
+        "执行类型": {
+            "en-us": "Run Type"
+        },
+        "主机/端口": {
+            "en-us": "Host/Port"
+        },
+        "用户名/密码": {
+            "en-us": "Username/Password"
+        },
+        "收起/展开": {
+            "en-us": "Collapse/Expand"
+        },
+        "全屏": {
+            "en-us": "Full Screen"
+        },
+        "以下选项为数据抽取，输出格式为：<SOPS_VAR>name:val</SOPS_VAR>，name为变量名，val为变量值": {
+            "en-us": "The following options are data extraction. The output format is: <SOPS_VAR>name:val</SOPS_VAR>, name is the name of the variable, and val is the value of the variable"
+        },
+        "1、符合格式要求的数值类型/字符类型，会写入数据库sys_apscheduler_extract_value表中；": {
+            "en-us": "1. The value type/character type that meets the format requirements will be written to the sys_apscheduler_extract_value table of the database;"
+        },
+        "2、符合格式要求的通知类型，会把name当作标题，val为内容，通过配置的“系统设置/通知接口”发送出去。": {
+            "en-us": "2. The notification type that meets the format requirements will be sent through the configured System Settings/Notify Api with name as the title and val as the content."
+        },
+        "抽取-数值类型": {
+            "en-us": "Extract-Number"
+        },
+        "抽取-字符类型": {
+            "en-us": "Extract-String"
+        },
+        "抽取-通知类型": {
+            "en-us": "Extract-Notify"
+        },
+        "不支持的运行类型": {
+            "en-us": "Unsupported Run Type"
+        },
+        "添加任务成功": {
+            "en-us": "Add Task Success"
+        },
+        "请先选择要删除的行": {
+            "en-us": "Please select the row to delete"
+        },
+        "选中行删除成功": {
+            "en-us": "Selected Row Delete Success"
+        }
+    }
+}

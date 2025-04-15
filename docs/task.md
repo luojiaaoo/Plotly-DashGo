@@ -49,7 +49,7 @@
 
   ![](../screenshots/task_run_type.png)
 
-### 4、数据采集
+### 4、数据采集与消息推送
 
 实现数据的收集，用于数据大屏、数据监控等目的
 
@@ -61,7 +61,13 @@
 <SOPS_VAR>cpu_load:99.1</SOPS_VAR>
 ```
 
-任务模块会将99.1保存至数据库的`ApschedulerExtractValue`表中
+任务模块会将99.1保存至数据库的`sys_apscheduler_extract_value`表中
+
+> 1、符合格式要求的数值类型/字符类型，会写入数据库sys_apscheduler_extract_value表中； 
+>
+> 2、符合格式要求的通知类型，会把name当作标题，val为内容，通过配置的“系统设置/通知接口”发送出去。[Server酱购买渠道](https://sct.ftqq.com/r/16293)
+>
+> ![](../screenshots/setting_notify.png)
 
 ### 5、 日志查看
 

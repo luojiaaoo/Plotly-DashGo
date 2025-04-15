@@ -3,6 +3,7 @@ from dash.dependencies import Input, Output, State
 import feffery_antd_components as fac
 import feffery_utils_components as fuc
 import dash
+from uuid import uuid4
 from dash import set_props
 from common.utilities.util_apscheduler import get_apscheduler_all_jobs
 
@@ -44,6 +45,7 @@ def get_start_datetime_options_by_job_id(job_id):
     [
         Output('task-log-start-datetime-select', 'options'),
         Output('task-log-start-datetime-select', 'value'),
+        Output('task-log-start-datetime-select', 'key'),
     ],
     Input('task-log-get-start-datetime-btn', 'nClicks'),
     State('task-log-job-id-select', 'value'),
@@ -51,7 +53,7 @@ def get_start_datetime_options_by_job_id(job_id):
 )
 def get_run_times(nClicks, job_id):
     all_time_of_job = get_start_datetime_options_by_job_id(job_id)
-    return all_time_of_job, all_time_of_job[0]['value']
+    return all_time_of_job, all_time_of_job[0]['value'], uuid4().hex
 
 
 # app.clientside_callback(
@@ -159,6 +161,10 @@ def jump_to_log_view(inViewport, job_id, nClicks):
     set_props(
         'task-log-start-datetime-select',
         {'options': all_time_of_job},
+    )
+    set_props(
+        'task-log-start-datetime-select',
+        {'key': uuid4().hex},
     )
     set_props('task-log-start-datetime-select', {'value': all_time_of_job[0]['value']})
     set_props('task-log-get-log-btn', {'nClicks': (nClicks or 0) + 1})

@@ -1,0 +1,42 @@
+{
+    "root_locale": "zh-cn",
+    "topic": "setting",
+    "contents": {
+        "激活通道": {
+            "en-us": "Activate Channel"
+        },
+        "通道配置": {
+            "en-us": "Channel Configuration"
+        },
+        "保存": {
+            "en-us": "Save"
+        },
+        "消息测试": {
+            "en-us": "Test"
+        },
+        "一天1毛钱的极简微信等消息接口，点击此处购买Server酱消息推送": {
+            "en-us": "One dollar a day, a simple wechat message push service, click here to buy Server酱 msg push"
+        },
+        "配置保存成功": {
+            "en-us": "Config Save Success"
+        },
+        "配置保存失败": {
+            "en-us": "Config Save Failed"
+        },
+        "测试": {
+            "en-us": "Test"
+        },
+        "这是一条测试消息，用于验证推送功能。": {
+            "en-us": "This is a test message, used to verify the push function."
+        },
+        "Server酱测试发送成功": {
+            "en-us": "Server酱 send test success"
+        },
+        "消息加入Server酱队列成功，但可能未发送成功": {
+            "en-us": "The message was successfully added to the Server msg queue, but may not have been successfully sent"
+        },
+        "Server酱测试发送失败": {
+            "en-us": "Server酱 send test failed"
+        }
+    }
+}

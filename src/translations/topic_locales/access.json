@@ -260,14 +260,14 @@
         "您确定要删除角色 ": {
             "en-us": "Are you sure to delete role "
         },
-        "通知管理": {
-            "en-us": "Notification Mgmt"
+        "消息管理": {
+            "en-us": "Message Mgmt"
         },
         "公告管理": {
             "en-us": "Announcement"
         },
         "公告管理-页面": {
-            "en-us": "Notification Mgmt"
+            "en-us": "Announcement Mgmt Show"
         },
         "任务中心": {
             "en-us": "Task Center"
@@ -275,8 +275,23 @@
         "任务管理": {
             "en-us": "Task Mgmt"
         },
+        "任务管理-页面": {
+            "en-us": "Task Mgmt Show"
+        },
+        "系统设置": {
+            "en-us": "System Setting"
+        },
+        "通知接口": {
+            "en-us": "Notify Api"
+        },
+        "通知接口-页面": {
+            "en-us": "Notify Api Show"
+        },
         "任务日志": {
             "en-us": "Task Log"
+        },
+        "任务日志-页面": {
+            "en-us": "Task Log Show"
         },
         "应用案例": {
             "en-us": "App Example"

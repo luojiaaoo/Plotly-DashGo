@@ -5,7 +5,7 @@
 <p align="center">
     <a href="https://gitee.com/luojiaaoo/DashGo"><img src="https://gitee.com/luojiaaoo/DashGo/badge/star.svg?theme=dark"></a>
     <a href="https://github.com/luojiaaoo/Plotly-DashGo"><img src="https://img.shields.io/github/stars/luojiaaoo/Plotly-DashGo?style=social"></a>
-    <a href="https://gitee.com/luojiaaoo/DashGo"><img src="https://img.shields.io/badge/DashGo-v1.1.0-brightgreen.svg"></a>
+    <a href="https://gitee.com/luojiaaoo/DashGo"><img src="https://img.shields.io/badge/DashGo-v1.1.1-brightgreen.svg"></a>
     <img src="https://img.shields.io/badge/license-MIT-blue.svg">
     <img src="https://img.shields.io/badge/python-≥3.9-blue">
     <img src="https://img.shields.io/badge/MySQL-≥5.7-blue">
@@ -28,6 +28,7 @@ DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架
 5. 密码和OTP登录
 6. 支持OAuth2 provider
 7. 支持任务模块，支持周期任务和定时任务， <a href="docs/task.md">使用文档</a>
+8. 任务模块支持数据抽取与信息推送，可以实现数据大屏和实时监控
 
 ### 特点:
 

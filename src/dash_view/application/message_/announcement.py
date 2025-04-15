@@ -4,7 +4,7 @@ import feffery_utils_components as fuc
 from common.utilities.util_logger import Log
 from dash import html
 from dash_components import Card
-import dash_callback.application.notification_.announcement_c  # noqa: F401
+import dash_callback.application.message_.announcement_c  # noqa: F401
 from i18n import t__notification, translator
 
 

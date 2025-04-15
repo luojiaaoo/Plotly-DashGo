@@ -2,8 +2,9 @@
 from dash_view.application.access_ import role_mgmt, user_mgmt, group_auth, group_mgmt
 from dash_view.application.dashboard_ import workbench, monitor
 from dash_view.application.person_ import personal_info
-from dash_view.application.notification_ import announcement
+from dash_view.application.message_ import announcement
 from dash_view.application.task_ import task_mgmt, task_log
+from dash_view.application.setting_ import notify_api
 
 ################## 【开始】此处导入您的应用 ###################
 from dash_view.application.example_app import subapp1, subapp2
@@ -30,6 +31,7 @@ class AccessFactory:
         announcement,
         task_mgmt,
         task_log,
+        notify_api,
         *apps,
     ]
 
@@ -53,10 +55,21 @@ class AccessFactory:
     group_access_meta = ('团队授权-页面',)
 
     # 系统管理员默认权限
-    admin_access_meta = ('用户管理-页面', '角色管理-页面', '团队管理-页面', '公告管理-页面', '任务管理-页面', '任务日志-页面')
+    admin_access_meta = (
+        '用户管理-页面',
+        '角色管理-页面',
+        '团队管理-页面',
+        '公告管理-页面',
+        '任务管理-页面',
+        '任务日志-页面',
+        '通知接口-页面',
+    )
 
     # 内置可以分配的权限
-    assignable_access_meta = ('任务管理-页面', '任务日志-页面')
+    assignable_access_meta = (
+        '任务管理-页面',
+        '任务日志-页面',
+    )
 
     # 检查数据库和应用权限
     @classmethod
