@@ -60,6 +60,7 @@ DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架
 │  │  ├─dashboard_
 │  │  ├─example_app        # 应用例子
 │  │  ├─notification_
+│  │  ├─task_
 │  │  └─person_
 │  ├─framework
 │  └─pages
@@ -181,23 +182,38 @@ def render_content(menu_access: MenuAccess, **kwargs):
 
 1. windows用户根据requirements_win.txt，linux用户根据requirements_linux.txt 安装Python依赖
 
-   安装依赖命令： python -m pip install -r requirements_xxx.txt
-
-2. 执行bin/init下的create_rds_table和init_rds_data脚本，分别初始化数据库表结构和admin管理员数据
-
-3. 进入到src目录，执行python app.py，即可启动调试模式，根据日志提示中的URL进行访问
-
-   > 默认账号：admin、密码：admin123
+   > 安装依赖命令： python -m pip install -r requirements_xxx.txt
    >
-   > bin目录下已放置启动start脚本，可以作为生产启动脚本（windows用waitress/linux用gunicorn作为WSGI服务组件）
+   > **推荐安装虚拟环境**：[https://blog.csdn.net/m0_37789876/article/details/146011318](https://blog.csdn.net/m0_37789876/article/details/146011318)
 
-4. 如要使用任务中心模块，需要进入到src目录，执行python app_apscheduler.py启动任务进程
+2. 切换工作区到src目录
 
-   > bin目录下已放置启动start_background_task脚本，可以作为生产启动脚本
+   > windows:     cd /d e:\xxxx
+   >
+   > linux:            cd /app/xxxx
 
-5. 请在Dash的世界畅游吧！！！
+1. 初始化数据库表结构和admin管理员数据
 
-> 默认启动为sqlite数据库，如需用于生产，请根据config/dashgo.ini调整相关Mysql数据库配置
+   > 数据库初始化操作：
+   >
+   > - 数据库表初始化表结构： python -c "from database.sql_db.conn import create_rds_table; create_rds_table()"
+   >
+   > - 数据库初始化admin用户：python -c "from database.sql_db.conn import init_rds_data; init_rds_data()"
+
+4. 执行python app.py，即可启动Dash debugger调试模式，根据日志提示中的URL进行访问
+
+   > 生产环境（非debugger）启动命令：
+   >
+   > - **Windows**：   waitress-serve --host=0.0.0.0 --port=8090 --url-scheme=http --trusted-proxy=* --trusted-proxy-headers=x-forwarded-for --threads=8 app:server
+   > - **Linux**:            gunicorn --capture-output -w 4 -b 0.0.0.0:8090 app:server
+   >
+   > `默认账号`：admin、密码：admin123
+
+3. 如要使用任务中心模块，执行python app_apscheduler.py启动任务进程
+
+4. 请在Dash的世界畅游吧！！！
+
+   > 默认启动为sqlite数据库，如需用于生产，请根据config/dashgo.ini调整相关Mysql数据库配置
 
 ------
 
