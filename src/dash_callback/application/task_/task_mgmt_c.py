@@ -422,12 +422,25 @@ app.clientside_callback(
     };
     value=null;
     if (language.toLowerCase() === 'bat'){
-        value="@echo off\\n:: Python Example: \\nconda activate env1\\npython E:\\\\script\\\\example.py\\n:: Echo Example\\necho \\"<SOPS_VAR>name:val</SOPS_VAR>\\"";
+        value="@echo off\\n:: Python Example \\nconda activate env1\\npython E:\\\\script\\\\example.py\\n:: Echo Example\\necho \\"<SOPS_VAR>name:val</SOPS_VAR>\\"";
     }else if(language.toLowerCase() === 'shell'){
-        value="# Python Example: \\nconda activate env1\\npython /app/script/example.py\\n# Echo Example\\necho \\"<SOPS_VAR>name:val</SOPS_VAR>\\"";
+        value="# Python Example \\nconda activate env1\\npython /app/script/example.py\\n# Echo Example\\necho \\"<SOPS_VAR>name:val</SOPS_VAR>\\"";
     }else if(language.toLowerCase() === 'python'){
         value="# Echo Example\\nprint(\\"<SOPS_VAR>name:val</SOPS_VAR>\\")";
     }
+
+    monaco.languages.register({ id: 'python' });
+    monaco.languages.setMonarchTokensProvider('python', {
+        tokenizer: {
+            root: [
+                [/print|def|class|if|else|elif|for|while|return|try|except|finally|with|import|from|as|pass|break|continue/, 'keyword'],
+                [/#.*$/, 'comment'],
+                [/"[^"]*"|'[^']*'/, 'string'],
+                [/\d+/, 'number'],
+                [/[a-zA-Z_]\w*/, 'identifier'],
+            ]
+        }
+    });
 
     window.taskEditor = monaco.editor.create(document.getElementById(id), {
         value: value,
