@@ -139,7 +139,7 @@ def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names
             for extract_name in extract_names:
                 type_ = extract_name['type']
                 name = extract_name['name']
-                re_search = re.search(r'<SOPS_VAR>%s:(.+?)</SOPS_VAR>' % name, log, flags=re.DOTALL)
+                re_search = re.search(r'<SOPS_VAR>%s:(.+?)</SOPS_VAR>' % re.escape(name), log, flags=re.DOTALL)
                 if re_search:
                     value = re_search.group(1)
                     if type_ == 'string':
@@ -155,7 +155,7 @@ def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names
                             logger.warning(f'提取数据类型为string，但无法转换为字符串: {value}')
                             continue
                     elif type_ == 'notify':
-                        send_notify(title=name, short=value, desp=value + f'\nThe message from Job {job_id}')
+                        send_notify(title=name, short=value, desp=value + f'【The message from Job {job_id}】')
                     else:
                         raise ValueError('不支持的提取数据类型')
                     ApschedulerExtractValue.create(
