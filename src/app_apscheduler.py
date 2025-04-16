@@ -52,13 +52,19 @@ def run_script(
 
     def pop_from_stdout(stdout, event: threading.Event, queue_stdout: Queue, encoding='utf8'):
         while not event.is_set():
-            if tmp := stdout.readline().decode(encoding, errors='ignore'):
-                queue_stdout.put(tmp)
+            line = stdout.readline()
+            if isinstance(line, bytes):
+                queue_stdout.put(line.decode(encoding, errors='ignore'))
+            else:
+                queue_stdout.put(line)
 
     def pop_from_stderr(stderr, event: threading.Event, queue_stderr: Queue, encoding='utf8'):
         while not event.is_set():
-            if tmp := stderr.readline().decode(encoding, errors='ignore'):
-                queue_stderr.put(tmp)
+            line = stderr.readline()
+            if isinstance(line, bytes):
+                queue_stderr.put(line.decode(encoding, errors='ignore'))
+            else:
+                queue_stderr.put(line)
 
     suffix = SUFFIX[script_type]
     run_cmd = RUN_CMD[script_type]
@@ -239,11 +245,11 @@ def run_script(
             )
         except TimeoutError:
             insert_apscheduler_result(
-                    job_id,
-                    status='error',
-                    log=f'[ERROR] Cannot connect to the host {host}, <SOPS_VAR>ssh_status:unconnect</SOPS_VAR>',
-                    start_datetime=start_datetime,
-                    extract_names=extract_names,
+                job_id,
+                status='error',
+                log=f'[ERROR] Cannot connect to the host {host}, <SOPS_VAR>ssh_status:unconnect</SOPS_VAR>',
+                start_datetime=start_datetime,
+                extract_names=extract_names,
             )
         except Exception as e:
             raise e
