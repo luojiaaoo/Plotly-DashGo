@@ -432,6 +432,8 @@ app.clientside_callback(
     window.taskEditor = monaco.editor.create(document.getElementById(id), {
         value: value,
         language: "shell",
+        wordWrap: "on",
+        wrappingIndent: "same",
         automaticLayout: true,
         lineNumbers: "on",
         theme: "vs-dark"
