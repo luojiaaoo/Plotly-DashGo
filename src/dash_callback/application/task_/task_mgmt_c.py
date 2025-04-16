@@ -412,7 +412,7 @@ def toggle_fullscreen(nClicks, isFullscreen):
     return style(display='block', height='300px'), not isFullscreen
 
 
-# 注入代码编辑器
+# 注入vscode代码编辑器
 app.clientside_callback(
     """(language, id) => {
 
@@ -422,7 +422,7 @@ app.clientside_callback(
     };
     value=null;
     if (language.toLowerCase() === 'bat'){
-        value="@echo off\\n:: Python Example: \\nconda activate env1\\npython E:\\script\\example.py\\n:: Echo Example\\necho \\"<SOPS_VAR>name:val</SOPS_VAR>\\"";
+        value="@echo off\\n:: Python Example: \\nconda activate env1\\npython E:\\\\script\\\\example.py\\n:: Echo Example\\necho \\"<SOPS_VAR>name:val</SOPS_VAR>\\"";
     }else if(language.toLowerCase() === 'shell'){
         value="# Python Example: \\nconda activate env1\\npython /app/script/example.py\\n# Echo Example\\necho \\"<SOPS_VAR>name:val</SOPS_VAR>\\"";
     }else if(language.toLowerCase() === 'python'){
@@ -431,7 +431,7 @@ app.clientside_callback(
 
     window.taskEditor = monaco.editor.create(document.getElementById(id), {
         value: value,
-        language: "shell",
+        language: language.toLowerCase(),
         wordWrap: "on",
         wrappingIndent: "same",
         automaticLayout: true,

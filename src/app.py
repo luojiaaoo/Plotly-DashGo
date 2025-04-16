@@ -112,6 +112,8 @@ app.clientside_callback(
         const script = document.createElement('script');
         script.textContent = `
             var require = {
+                baseUrl: '/assets/vendor',
+                paths: {'vs': 'monaco-editor/min/vs'},
                 'vs/nls': { availableLanguages: { '*': 'zh-cn' } }
             }
         `;
