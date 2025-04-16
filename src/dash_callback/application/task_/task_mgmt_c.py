@@ -422,9 +422,11 @@ app.clientside_callback(
     };
     value=null;
     if (language.toLowerCase() === 'bat'){
-        value=":: Python Example: \\nconda activate env1\\npython E:\\script\\example.py";
+        value="@echo off\\n:: Python Example: \\nconda activate env1\\npython E:\\script\\example.py\\n:: Echo Example\\necho \\"<SOPS_VAR>name:val</SOPS_VAR>\\"";
     }else if(language.toLowerCase() === 'shell'){
-        value="# Python Example: \\nconda activate env1\\npython /app/script/example.py";
+        value="# Python Example: \\nconda activate env1\\npython /app/script/example.py\\n# Echo Example\\necho \\"<SOPS_VAR>name:val</SOPS_VAR>\\"";
+    }else if(language.toLowerCase() === 'python'){
+        value="# Echo Example\\nprint(\\"<SOPS_VAR>name:val</SOPS_VAR>\\")";
     }
 
     window.taskEditor = monaco.editor.create(document.getElementById(id), {
