@@ -1,5 +1,6 @@
 import requests
 from common.constant import HttpStatusConstant
+from config.dashgo_conf import ShowConf
 
 
 def send_notify(SendKey, Noip, Channel, title, desp, short=None, Openid=None):
@@ -7,7 +8,7 @@ def send_notify(SendKey, Noip, Channel, title, desp, short=None, Openid=None):
         short = short[:64]
     url = f'https://sctapi.ftqq.com/{SendKey}.send'
     data = {
-        'title': title,
+        'title': title + f'[from {ShowConf.APP_NAME}]',
         'desp': desp,
         **({'short': short} if short else {'short': desp[:64]}),
         **({'Noip': 1} if Noip else {}),

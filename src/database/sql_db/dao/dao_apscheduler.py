@@ -155,7 +155,7 @@ def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names
                             logger.warning(f'提取数据类型为string，但无法转换为字符串: {value}')
                             continue
                     elif type_ == 'notify':
-                        send_notify(title=name, short=value, desp=value)
+                        send_notify(title=name, short=value, desp=value + f'\nThe message from Job {job_id}')
                     else:
                         raise ValueError('不支持的提取数据类型')
                     ApschedulerExtractValue.create(
