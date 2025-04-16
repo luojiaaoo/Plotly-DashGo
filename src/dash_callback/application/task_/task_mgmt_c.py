@@ -424,7 +424,7 @@ app.clientside_callback(
     if (language.toLowerCase() === 'bat'){
         value=":: Python Example: \\nconda activate env1\\npython E:\\script\\example.py";
     }else if(language.toLowerCase() === 'shell'){
-        value="# Python Example: \\nconda activate env1\\npython E:\\script\\example.py";
+        value="# Python Example: \\nconda activate env1\\npython /app/script/example.py";
     }
 
     window.taskEditor = monaco.editor.create(document.getElementById(id), {
