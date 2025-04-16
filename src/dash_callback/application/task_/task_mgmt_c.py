@@ -259,7 +259,7 @@ def refresh_add_modal(visible, task_type):
                             [
                                 fac.AntdRadioGroup(
                                     id='task-mgmt-table-add-modal-update-editor-language',
-                                    options=['Shell', 'Bat'],
+                                    options=['Shell', 'Bat', 'Python'],
                                     optionType='button',
                                     buttonStyle='solid',
                                     value='Shell',
@@ -419,10 +419,17 @@ app.clientside_callback(
     // 销毁先前已存在的编辑器实例
     if ( window.taskEditor ) {
         window.taskEditor.dispose();
+    };
+    value=null;
+    if (language.toLowerCase() === 'bat'){
+        value=":: Python Example: \\nconda activate env1\\npython E:\\script\\example.py";
+    }else if(language.toLowerCase() === 'shell'){
+        value="# Python Example: \\nconda activate env1\\npython E:\\script\\example.py";
     }
+
     window.taskEditor = monaco.editor.create(document.getElementById(id), {
-        value: null,
-        language: language.toLowerCase(),
+        value: value,
+        language: "shell",
         automaticLayout: true,
         lineNumbers: "on",
         theme: "vs-dark"
