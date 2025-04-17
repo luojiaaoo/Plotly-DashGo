@@ -59,8 +59,14 @@
         "企业微信群机器人测试发送成功": {
             "en-us": "WeCom Group Robot send test success"
         },
-        "企业微信群机器人测试发送失败": {
-            "en-us": "WeCom Group Robot send test failed"
+        "删除成功": {
+            "en-us": "Delete success"
+        },
+        "删除失败": {
+            "en-us": "Delete failed"
+        },
+        "删除": {
+            "en-us": "Delete"
         }
     }
 }

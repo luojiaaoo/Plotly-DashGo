@@ -40,6 +40,7 @@ def get_tabs_items():
             items.append(
                 {
                     'key': api_name,
+                    'contextMenu': [{'key': api_name, 'label': t__setting('删除')}],
                     'label': api_name_label + f' ({t__setting(api_type)})',
                     'children': fac.AntdSpace(
                         [
@@ -102,6 +103,7 @@ def get_tabs_items():
                 {
                     'key': api_name,
                     'label': api_name_label + f' ({t__setting(api_type)})',
+                    'contextMenu': [{'key': api_name, 'label': t__setting('删除')}],
                     'children': fac.AntdSpace(
                         [
                             dcc.Store(id={'type': 'notify-api-wecom-group-robot-api-name', 'name': api_name}, data=api_name),
@@ -324,3 +326,23 @@ def test_wecom_group_robot_api(nClicks, Key):
     else:
         MessageManager.error(content=t__setting('企业微信群机器人测试发送失败') + 'ERROR:' + str(rt))
     return dash.no_update
+
+
+# 删除通知渠道
+@app.callback(
+    [
+        Output('notify-api-edit-tabs', 'items', allow_duplicate=True),
+        Output('notify-api-activate', 'options', allow_duplicate=True),
+        Output('notify-api-activate', 'value', allow_duplicate=True),
+    ],
+    Input('notify-api-edit-tabs', 'clickedContextMenu'),
+    prevent_initial_call=True,
+)
+def delete_notify_channel(clickedContextMenu):
+    api_name = clickedContextMenu['tabKey']
+    api_name_label = api_name_value2label(api_name)
+    if dao_notify.delete_notify_api_by_name(api_name=api_name):
+        MessageManager.success(content=api_name_label + t__setting('删除成功'))
+    else:
+        MessageManager.error(content=api_name_label + t__setting('删除失败'))
+    return [get_tabs_items(), *get_notify_api()]

@@ -46,6 +46,8 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     items=notify_api_c.get_tabs_items(),
                     id='notify-api-edit-tabs',
                     tabPosition='left',
+                    tabBarGutter=0,
+                    size='small',
                     placeholder=fac.AntdEmpty(description='There are no available notify api at present'),
                     style=style(width='100%'),
                 ),
