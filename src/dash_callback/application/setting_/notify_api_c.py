@@ -2,14 +2,9 @@ from dash.dependencies import Input, Output, State
 from server import app
 import feffery_antd_components as fac
 from dash_components import MessageManager
-from dash import set_props
 from database.sql_db.dao import dao_notify
-import dash
-from common.utilities.util_menu_access import get_menu_access
-from uuid import uuid4
 import json
 import time
-from dash.exceptions import PreventUpdate
 from common.notify.server_jiang import send_notify, is_send_success
 from i18n import t__setting
 
@@ -32,6 +27,7 @@ def get_tabs_items():
             'label': 'Server酱',
             'children': fac.AntdSpace(
                 [
+                    fac.AntdDivider('Server酱', innerTextOrientation='left'),
                     fac.AntdForm(
                         [
                             fac.AntdFormItem(fac.AntdInput(id='notify-server-jiang-SendKey', value=SendKey), label='SendKey'),
@@ -62,12 +58,21 @@ def get_tabs_items():
     )
     # Server酱-No2配置
     server_jiang = dao_notify.get_notify_api_by_name(api_name='Server酱-No2')
+    if server_jiang is not None:
+        server_jiang_json = json.loads(server_jiang.params_json)
+        SendKey = server_jiang_json['SendKey']
+        Noip = server_jiang_json['Noip']
+        Channel = server_jiang_json['Channel']
+        Openid = server_jiang_json['Openid']
+    else:
+        SendKey, Noip, Channel, Openid = '', True, '', ''
     items.append(
         {
             'key': 'Server酱-No2',
             'label': 'Server酱-No2',
             'children': fac.AntdSpace(
                 [
+                    fac.AntdDivider('Server酱-No2', innerTextOrientation='left'),
                     fac.AntdForm(
                         [
                             fac.AntdFormItem(fac.AntdInput(id='notify-server-jiang-no2-SendKey', value=SendKey), label='SendKey'),
