@@ -38,6 +38,8 @@
 
 > 支持bat脚本执行（内部调用指令为：cmd /c，需要为windows系统才可执行）
 
+- **Python脚本**
+
   ![](../screenshots/task_script_shell.png)
 
 ### 3、 支持本地脚本/ssh远程连接
@@ -49,7 +51,7 @@
 
   ![](../screenshots/task_run_type.png)
 
-### 4、数据采集与消息推送
+### 4、数据采集 与 消息推送
 
 实现数据的收集，用于数据大屏、数据监控等目的
 
@@ -67,9 +69,18 @@
 >
 > 2、符合格式要求的通知类型，会把name当作标题，val为内容，通过配置的“系统设置/通知接口”发送出去。[Server酱购买渠道](https://sct.ftqq.com/r/16293)
 >
+> #### 每个任务可以独立绑定通知渠道，可以定义个性化的消息通知服务
+>
+> ![](../screenshots/setting_notify_bind.png)
+
+
+
+### 5、支持Server酱、企业微信群机器人、邮箱多种通知渠道
+
+>
 > ![](../screenshots/setting_notify.png)
 
-### 5、 日志查看
+### 6、 实时日志查看
 
 1. 选择对应的任务名，点击查询
 
