@@ -9,25 +9,26 @@ from dash import dcc
 import json
 import time
 import json
-from common.notify.server_jiang import send_notify, is_send_success
+from common.notify import server_jiang, enterprise_wechat
 from feffery_dash_utils.style_utils import style
 from i18n import t__setting
 
 
 def api_name_value2label(api_name: str):
-    return api_name.split('***', 1)[0]
+    return api_name.split('\0', 1)[0]
 
 
 def get_tabs_items():
     items = []
     # server酱配置
     notify_apis = dao_notify.get_notify_api_by_name(api_name=None)
+    notify_apis.sort(key=lambda x: x.api_name)
     for notify_api in notify_apis:
         api_type = notify_api.api_type
         if api_type not in dao_notify.support_api_types:
             raise Exception(f'不支持{api_type}类型的消息推送')
         api_name = notify_api.api_name
-        label_api_name = api_name_value2label(api_name)
+        api_name_label = api_name_value2label(api_name)
         params_json = notify_api.params_json
         if api_type == 'Server酱':
             if params_json and (params_json := json.loads(params_json)):
@@ -40,11 +41,11 @@ def get_tabs_items():
             items.append(
                 {
                     'key': api_name,
-                    'label': label_api_name + f' ({t__setting(api_type)})',
+                    'label': api_name_label + f' ({t__setting(api_type)})',
                     'children': fac.AntdSpace(
                         [
-                            dcc.Store(id={'type': 'notify-api-server-jiang-api-name', 'name': api_name}),
-                            fac.AntdDivider(label_api_name, innerTextOrientation='left'),
+                            dcc.Store(id={'type': 'notify-api-server-jiang-api-name', 'name': api_name}, data=api_name),
+                            fac.AntdDivider(api_name_label, innerTextOrientation='left'),
                             fac.AntdForm(
                                 [
                                     fac.AntdFormItem(
@@ -101,11 +102,11 @@ def get_tabs_items():
             items.append(
                 {
                     'key': api_name,
-                    'label': label_api_name + f' ({t__setting(api_type)})',
+                    'label': api_name_label + f' ({t__setting(api_type)})',
                     'children': fac.AntdSpace(
                         [
-                            dcc.Store(id={'type': 'notify-api-wecom-group-robot-api-name', 'name': api_name}),
-                            fac.AntdDivider(label_api_name, innerTextOrientation='left'),
+                            dcc.Store(id={'type': 'notify-api-wecom-group-robot-api-name', 'name': api_name}, data=api_name),
+                            fac.AntdDivider(api_name_label, innerTextOrientation='left'),
                             fac.AntdForm(
                                 [
                                     fac.AntdFormItem(
@@ -173,7 +174,7 @@ def add_server_chan_notify_api(nClick, api_name_label):
         if api_name_value2label(i.api_name) == api_name_label:
             MessageManager.error(content=api_name_label + t__setting('已存在'))
             return dash.no_update
-    dao_notify.insert_notify_api(api_name=api_name_label + f'***{uuid4().hex}', api_type='Server酱', enable=False, params_json='{}')
+    dao_notify.insert_notify_api(api_name=api_name_label + f'\0{uuid4().hex[:12]}', api_type='Server酱', enable=False, params_json='{}')
     MessageManager.success(content=api_name_label + t__setting('创建成功'))
     return [get_tabs_items(), *get_notify_api()]
 
@@ -194,7 +195,7 @@ def add_wecom_group_robot_notify_api(nClick, api_name_label):
         if api_name_value2label(i.api_name) == api_name_label:
             MessageManager.error(content=api_name_label + t__setting('已存在'))
             return dash.no_update
-    dao_notify.insert_notify_api(api_name=api_name_label + f'***{uuid4().hex}', api_type='企业微信群机器人', enable=False, params_json='{}')
+    dao_notify.insert_notify_api(api_name=api_name_label + f'\0{uuid4().hex}', api_type='企业微信群机器人', enable=False, params_json='{}')
     MessageManager.success(content=api_name_label + t__setting('创建成功'))
     return [get_tabs_items(), *get_notify_api()]
 
@@ -220,61 +221,106 @@ def enable_notify_api(enables, options):
 
 
 # server酱保存回调
-# @app.callback(
-#     Input({'type': 'notify-api-server-jiang-save', 'name': MATCH}, 'nClicks'),
-#     [
-#         State({'type': 'notify-api-server-jiang-SendKey', 'name': MATCH}, 'value'),
-#         State({'type': 'notify-api-server-jiang-Noip', 'name': MATCH}, 'checked'),
-#         State({'type': 'notify-api-server-jiang-Channel', 'name': MATCH}, 'value'),
-#         State({'type': 'notify-api-server-jiang-Openid', 'name': MATCH}, 'value'),
-#         State({'type': 'notify-api-server-jiang-api-name', 'name': MATCH}, 'data'),
-#     ],
-#     prevent_initial_call=True,
-# )
-# def save_server_jiang_api(nClick, SendKey, Noip, Channel, Openid, api_name):
-#     print(SendKey, Noip, Channel, Openid, api_name)
-    # name = 'Server酱'
-    # values = dict(
-    #     SendKey=SendKey,
-    #     Noip=Noip,
-    #     Channel=Channel,
-    #     Openid=Openid,
-    # )
-    # dao_notify.delete_notify_api_by_name(api_name=name)
-    # if dao_notify.insert_notify_api(api_name=name, enable=True, params_json=json.dumps(values)):
-    #     MessageManager.success(content=name + t__setting('配置保存成功'))
-    # else:
-    #     MessageManager.error(content=name + t__setting('配置保存失败'))
+@app.callback(
+    Output({'type': 'notify-api-server-jiang-save', 'name': MATCH}, 'id'),
+    Input({'type': 'notify-api-server-jiang-save', 'name': MATCH}, 'nClicks'),
+    [
+        State({'type': 'notify-api-server-jiang-SendKey', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-server-jiang-Noip', 'name': MATCH}, 'checked'),
+        State({'type': 'notify-api-server-jiang-Channel', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-server-jiang-Openid', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-server-jiang-api-name', 'name': MATCH}, 'data'),
+    ],
+    prevent_initial_call=True,
+)
+def save_server_jiang_api(nClick, SendKey, Noip, Channel, Openid, api_name):
+    values = dict(
+        SendKey=SendKey,
+        Noip=Noip,
+        Channel=Channel,
+        Openid=Openid,
+    )
+    api_name_label = api_name_value2label(api_name)
+    dao_notify.delete_notify_api_by_name(api_name=api_name)
+    if dao_notify.insert_notify_api(api_name=api_name, api_type='Server酱', enable=True, params_json=json.dumps(values)):
+        MessageManager.success(content=api_name_label + t__setting('配置保存成功'))
+    else:
+        MessageManager.error(content=api_name_label + t__setting('配置保存失败'))
+    return dash.no_update
 
 
-# # server酱测试通道
-# @app.callback(
-#     Input('notify-api-server-jiang-test', 'nClicks'),
-#     [
-#         State('notify-server-jiang-SendKey', 'value'),
-#         State('notify-server-jiang-Noip', 'checked'),
-#         State('notify-server-jiang-Channel', 'value'),
-#         State('notify-server-jiang-Openid', 'value'),
-#     ],
-#     prevent_initial_call=True,
-# )
-# def test_server_jiang_api(nClick, SendKey, Noip, Channel, Openid):
-#     is_ok, rt = send_notify(
-#         SendKey=SendKey,
-#         Noip=Noip,
-#         Channel=Channel,
-#         title=t__setting('测试'),
-#         desp=t__setting('这是一条测试消息，用于验证推送功能。'),
-#         Openid=Openid,
-#     )
-#     if is_ok:
-#         pushid = rt['pushid']
-#         readkey = rt['readkey']
-#         time.sleep(5)
-#         is_ok_test, rt_test = is_send_success(pushid, readkey)
-#         if is_ok_test:
-#             MessageManager.success(content=t__setting('Server酱测试发送成功'))
-#         else:
-#             MessageManager.error(content=t__setting('消息加入Server酱队列成功，但可能未发送成功') + 'ERROR:' + str(rt_test))
-#     else:
-#         MessageManager.error(content=t__setting('Server酱测试发送失败') + 'ERROR:' + str(rt))
+# server酱测试通道
+@app.callback(
+    Output({'type': 'notify-api-server-jiang-test', 'name': MATCH}, 'id'),
+    Input({'type': 'notify-api-server-jiang-test', 'name': MATCH}, 'nClicks'),
+    [
+        State({'type': 'notify-api-server-jiang-SendKey', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-server-jiang-Noip', 'name': MATCH}, 'checked'),
+        State({'type': 'notify-api-server-jiang-Channel', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-server-jiang-Openid', 'name': MATCH}, 'value'),
+    ],
+    prevent_initial_call=True,
+)
+def test_server_jiang_api(nClicks, SendKey, Noip, Channel, Openid):
+    is_ok, rt = server_jiang.send_notify(
+        SendKey=SendKey,
+        Noip=Noip,
+        Channel=Channel,
+        title=t__setting('测试'),
+        desp=t__setting('这是一条测试消息，用于验证推送功能。'),
+        Openid=Openid,
+    )
+    if is_ok:
+        MessageManager.success(content=t__setting('Server酱测试发送成功'))
+        # pushid = rt['pushid']
+        # readkey = rt['readkey']
+        # time.sleep(5)
+        # is_ok_test, rt_test = server_jiang.is_send_success(pushid, readkey)
+        # if is_ok_test:
+        #     MessageManager.success(content=t__setting('Server酱测试发送成功'))
+        # else:
+        #     MessageManager.error(content=t__setting('消息加入Server酱队列成功，但可能未发送成功') + 'ERROR:' + str(rt_test))
+    else:
+        MessageManager.error(content=t__setting('Server酱测试发送失败') + 'ERROR:' + str(rt))
+    return dash.no_update
+
+
+# 企业微信群机器人保存回调
+@app.callback(
+    Output({'type': 'notify-api-wecom-group-robot-save', 'name': MATCH}, 'id'),
+    Input({'type': 'notify-api-wecom-group-robot-save', 'name': MATCH}, 'nClicks'),
+    [
+        State({'type': 'notify-api-wecom-group-robot-Key', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-wecom-group-robot-api-name', 'name': MATCH}, 'data'),
+    ],
+    prevent_initial_call=True,
+)
+def save_wecom_group_robot_api(nClick, Key, api_name):
+    values = dict(Key=Key)
+    api_name_label = api_name_value2label(api_name)
+    dao_notify.delete_notify_api_by_name(api_name=api_name)
+    if dao_notify.insert_notify_api(api_name=api_name, api_type='企业微信群机器人', enable=True, params_json=json.dumps(values)):
+        MessageManager.success(content=api_name_label + t__setting('配置保存成功'))
+    else:
+        MessageManager.error(content=api_name_label + t__setting('配置保存失败'))
+    return dash.no_update
+
+
+# 企业微信群机器人测试通道
+@app.callback(
+    Output({'type': 'notify-api-wecom-group-robot-test', 'name': MATCH}, 'id'),
+    Input({'type': 'notify-api-wecom-group-robot-test', 'name': MATCH}, 'nClicks'),
+    State({'type': 'notify-api-wecom-group-robot-Key', 'name': MATCH}, 'value'),
+    prevent_initial_call=True,
+)
+def test_wecom_group_robot_api(nClicks, Key):
+    is_ok, rt = enterprise_wechat.wechat_text(
+        title=t__setting('测试'),
+        content=t__setting('这是一条测试消息，用于验证推送功能。'),
+        key=Key,
+    )
+    if is_ok:
+        MessageManager.success(content=t__setting('企业微信群机器人测试发送成功'))
+    else:
+        MessageManager.error(content=t__setting('企业微信群机器人测试发送失败') + 'ERROR:' + str(rt))
+    return dash.no_update

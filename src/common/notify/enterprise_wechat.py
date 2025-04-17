@@ -129,7 +129,7 @@ def wechat_markdowns(top='', title='', content='', user='', links={}, df_links={
 # 2.1.企业微信群机器人-推送消息类型-text：
 # 功能：@对象支持使用企业微信英文名或手机号、支持 '@all' 或 @多个人；
 # 参数：[content]支持数据类型str/list，列表中的每个元素文本代表一行。
-def wechat_text(top='', title='', content='', users_name=[], users_phone=[], key=None):
+def wechat_text(title='', content='', users_name=[], users_phone=[], key=None):
     import requests, json, re
 
     if key == None:
@@ -149,10 +149,9 @@ def wechat_text(top='', title='', content='', users_name=[], users_phone=[], key
         'msgtype': 'text',
         'text': {
             'content': """
-                     ★{}★\n
-                     >主题：{}
-                     >内容：\n{}
-                     """.format(top, title, ctstr),
+                     主题：{}
+                     内容：\n{}
+                     """.format(title, ctstr),
             'mentioned_list': users_name,
             'mentioned_mobile_list': users_phone,
         },
@@ -160,8 +159,11 @@ def wechat_text(top='', title='', content='', users_name=[], users_phone=[], key
     text['text']['content'] = re.sub(' +', ' ', text['text']['content'])
     headers = {'Content-Type': 'application/json'}
     response = requests.post(url='https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=' + key, headers=headers, data=json.dumps(text))
+    result_json = response.json()
+    # {"errcode":0,"errmsg":"ok"}
     if 'ok' in response.text:
-        print(f'【OK】{title}')
+        return True, result_json
+    return False, result_json
 
 
 # 3.1.企业微信群机器人-推送消息类型-@群成员：

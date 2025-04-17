@@ -29,7 +29,7 @@
         "添加企业微信群机器人": {
             "en-us": "Add WeCom Group Robot Channel"
         },
-        "输入通知渠道名字": {
+        "输入通知渠道名": {
             "en-us": "Input Channel Name"
         },
         "一天1毛钱的极简微信等消息接口，点击此处购买Server酱消息推送": {
@@ -55,6 +55,12 @@
         },
         "Server酱测试发送失败": {
             "en-us": "Server酱 send test failed"
+        },
+        "企业微信群机器人测试发送成功": {
+            "en-us": "WeCom Group Robot send test success"
+        },
+        "企业微信群机器人测试发送失败": {
+            "en-us": "WeCom Group Robot send test failed"
         }
     }
 }
