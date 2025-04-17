@@ -152,7 +152,7 @@ def wechat_text(title='', content='', users_name=[], users_phone=[], key=None):
             'content': """
                      标题：{} 【from {}】
                      内容：\n{}
-                     """.format(title, ShowConf.APP_NAME, ctstr),
+                     """.format(title, ShowConf.APP_NAME, ctstr[:1900]),
             'mentioned_list': users_name,
             'mentioned_mobile_list': users_phone,
         },

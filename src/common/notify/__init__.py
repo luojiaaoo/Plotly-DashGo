@@ -1,4 +1,4 @@
-from . import server_jiang, enterprise_wechat
+from . import server_jiang, enterprise_wechat, email_smtp
 from database.sql_db.dao.dao_notify import get_notify_api_by_name
 from common.utilities.util_logger import Log
 from typing import List
@@ -40,15 +40,35 @@ def send_text_notify(title: str, short: str, desp: str, notify_channels: List):
             )
             if not is_ok:
                 logger.error(f'发送{api_name}通知失败，错误信息：{rt}')
-        if api_type == '企业微信群机器人' and api_name in notify_channels:
+        elif api_type == '企业微信群机器人' and api_name in notify_channels:
             if not notify_api.params_json:
                 logger.error(f'{api_name}的Key未配置')
                 continue
             Key = params_json['Key']
             is_ok, rt = enterprise_wechat.wechat_text(
                 title=title,
-                content=desp[:1900],
+                content=desp,
                 key=Key,
+            )
+            if not is_ok:
+                logger.error(f'发送{api_name}通知失败，错误信息：{rt}')
+        elif api_type == '邮件SMTP协议' and api_name in notify_channels:
+            if not notify_api.params_json:
+                logger.error(f'{api_name}的Key未配置')
+                continue
+            Host = params_json['Host']
+            Port = params_json['Port']
+            User = params_json['User']
+            Password = params_json['Password']
+            Receivers = params_json['Receivers'].split(',')
+            is_ok, rt = email_smtp.send_mail(
+                host=Host,
+                port=Port,
+                user=User,
+                password=Password,
+                receivers=Receivers.split(','),
+                title=title,
+                content=desp,
             )
             if not is_ok:
                 logger.error(f'发送{api_name}通知失败，错误信息：{rt}')

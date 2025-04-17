@@ -43,8 +43,8 @@ def create_rds_table():
     from .entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole, SysGroupUser, SysRole, SysGroupRole, SysGroup
     from .entity.table_announcement import SysAnnouncement
     from .entity.table_oauth2 import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
-    from .entity.table_apscheduler import ApschedulerResults, ApschedulerExtractValue, ApschedulerRunning
-    from .entity.table_notify_api import NotifyApi
+    from .entity.table_apscheduler import SysApschedulerResults, SysApschedulerExtractValue, SysApschedulerRunning
+    from .entity.table_notify_api import SysNotifyApi
 
     db_instance.create_tables(
         [
@@ -59,10 +59,10 @@ def create_rds_table():
             OAuth2Client,
             OAuth2AuthorizationCode,
             OAuth2Token,
-            ApschedulerResults,
-            ApschedulerExtractValue,
-            ApschedulerRunning,
-            NotifyApi,
+            SysApschedulerResults,
+            SysApschedulerExtractValue,
+            SysApschedulerRunning,
+            SysNotifyApi,
         ],
         safe=True,
     )

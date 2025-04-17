@@ -30,6 +30,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                     fac.AntdInput(size='small', placeholder=t__setting('输入通知渠道名'), id='notify-api-add-name'),
                     fac.AntdButton(t__setting('添加Server酱'), type='primary', size='small', id='notify-api-add-serverchan'),
                     fac.AntdButton(t__setting('添加企业微信群机器人'), type='primary', size='small', id='notify-api-add-wecom-group-robot'),
+                    fac.AntdButton(t__setting('添加邮件SMTP协议'), type='primary', size='small', id='notify-api-add-email-smtp'),
                 ],
                 style=style(width=800),
             ),

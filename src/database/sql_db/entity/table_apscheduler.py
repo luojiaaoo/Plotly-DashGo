@@ -7,7 +7,7 @@ class BaseModel(Model):
         database = db()
 
 
-class ApschedulerRunning(BaseModel):
+class SysApschedulerRunning(BaseModel):
     """保存控制台任务实时输出日志"""
 
     job_id = CharField(max_length=191, help_text='Job名')
@@ -20,7 +20,7 @@ class ApschedulerRunning(BaseModel):
         indexes = ((('job_id', 'start_datetime', 'order'), False),)
 
 
-class ApschedulerResults(BaseModel):
+class SysApschedulerResults(BaseModel):
     """保存控制台任务输出日志"""
 
     job_id = CharField(max_length=191, help_text='Job名')
@@ -34,10 +34,10 @@ class ApschedulerResults(BaseModel):
         indexes = ((('job_id', 'start_datetime'), True),)
 
 
-class ApschedulerExtractValue(BaseModel):
+class SysApschedulerExtractValue(BaseModel):
     """保存任务输出提取数据"""
 
-    job_id = ForeignKeyField(ApschedulerResults, backref='extract_value', column_name='job_id', help_text='Job名')
+    job_id = ForeignKeyField(SysApschedulerResults, backref='extract_value', column_name='job_id', help_text='Job名')
     extract_name = CharField(max_length=32, help_text='提取数据名')
     value_type = CharField(max_length=16, help_text='提取数据类型')
     value = CharField(max_length=64, help_text='提取数据值')

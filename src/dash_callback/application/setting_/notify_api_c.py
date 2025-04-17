@@ -7,9 +7,8 @@ import dash
 from uuid import uuid4
 from dash import dcc
 import json
-import time
-import json
-from common.notify import server_jiang, enterprise_wechat
+from typing import List
+from common.notify import email_smtp, server_jiang, enterprise_wechat
 from feffery_dash_utils.style_utils import style
 from i18n import t__setting
 
@@ -138,6 +137,75 @@ def get_tabs_items():
                     ),
                 }
             )
+        elif api_type == '邮件SMTP协议':
+            if params_json and (params_json := json.loads(params_json)):
+                Host: str = params_json['Host']
+                Port: str = params_json['Port']
+                User: str = params_json['User']
+                Password: str = params_json['Password']
+                Receivers: List = params_json['Receivers']
+            else:
+                Host = ''
+                Port = '465'
+                User = ''
+                Password = ''
+                Receivers = ''
+            items.append(
+                {
+                    'key': api_name,
+                    'label': api_name_label + f' ({t__setting(api_type)})',
+                    'contextMenu': [{'key': api_name, 'label': t__setting('删除')}],
+                    'children': fac.AntdSpace(
+                        [
+                            dcc.Store(id={'type': 'notify-api-email-smtp-api-name', 'name': api_name}, data=api_name),
+                            fac.AntdDivider(api_name_label, innerTextOrientation='left'),
+                            fac.AntdForm(
+                                [
+                                    fac.AntdFormItem(
+                                        fac.AntdInput(id={'type': 'notify-api-email-smtp-Host', 'name': api_name}, value=Host),
+                                        label='Host',
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdInput(id={'type': 'notify-api-email-smtp-Post', 'name': api_name}, value=Port),
+                                        label='Post',
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdInput(id={'type': 'notify-api-email-smtp-User', 'name': api_name}, value=User),
+                                        label='User',
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdInput(id={'type': 'notify-api-email-smtp-Password', 'name': api_name}, value=Password),
+                                        label='Password',
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdInput(id={'type': 'notify-api-email-smtp-Receivers', 'name': api_name}, value=Receivers),
+                                        label='Receivers',
+                                        tooltip=t__setting('多个邮箱按逗号分割'),
+                                    ),
+                                ],
+                                labelCol={'span': 5},
+                                wrapperCol={'span': 20},
+                            ),
+                            fac.AntdSpace(
+                                [
+                                    fac.AntdButton(
+                                        t__setting('保存'),
+                                        id={'type': 'notify-api-email-smtp-save', 'name': api_name},
+                                        type='primary',
+                                    ),
+                                    fac.AntdButton(
+                                        t__setting('消息测试'),
+                                        id={'type': 'notify-api-email-smtp-test', 'name': api_name},
+                                        type='default',
+                                    ),
+                                ],
+                            ),
+                        ],
+                        direction='vertical',
+                        style=style(width='100%'),
+                    ),
+                }
+            )
     return items
 
 
@@ -197,7 +265,28 @@ def add_wecom_group_robot_notify_api(nClick, api_name_label):
         if api_name_value2label(i.api_name) == api_name_label:
             MessageManager.error(content=api_name_label + t__setting('已存在'))
             return dash.no_update
-    dao_notify.insert_notify_api(api_name=api_name_label + f'\0{uuid4().hex}', api_type='企业微信群机器人', enable=False, params_json='{}')
+    dao_notify.insert_notify_api(api_name=api_name_label + f'\0{uuid4().hex[:12]}', api_type='企业微信群机器人', enable=False, params_json='{}')
+    MessageManager.success(content=api_name_label + t__setting('创建成功'))
+    return [get_tabs_items(), *get_notify_api()]
+
+
+# 新建邮箱API
+@app.callback(
+    [
+        Output('notify-api-edit-tabs', 'items', allow_duplicate=True),
+        Output('notify-api-activate', 'options', allow_duplicate=True),
+        Output('notify-api-activate', 'value', allow_duplicate=True),
+    ],
+    Input('notify-api-add-email-smtp', 'nClicks'),
+    State('notify-api-add-name', 'value'),
+    prevent_initial_call=True,
+)
+def add_email_smtp_notify_api(nClick, api_name_label):
+    for i in dao_notify.get_notify_api_by_name(api_name=None):
+        if api_name_value2label(i.api_name) == api_name_label:
+            MessageManager.error(content=api_name_label + t__setting('已存在'))
+            return dash.no_update
+    dao_notify.insert_notify_api(api_name=api_name_label + f'\0{uuid4().hex[:12]}', api_type='邮件SMTP协议', enable=False, params_json='{}')
     MessageManager.success(content=api_name_label + t__setting('创建成功'))
     return [get_tabs_items(), *get_notify_api()]
 
@@ -325,6 +414,61 @@ def test_wecom_group_robot_api(nClicks, Key):
         MessageManager.success(content=t__setting('企业微信群机器人测试发送成功'))
     else:
         MessageManager.error(content=t__setting('企业微信群机器人测试发送失败') + 'ERROR:' + str(rt))
+    return dash.no_update
+
+
+# 邮件SMTP协议保存回调
+@app.callback(
+    Output({'type': 'notify-api-email-smtp-save', 'name': MATCH}, 'id'),
+    Input({'type': 'notify-api-email-smtp-save', 'name': MATCH}, 'nClicks'),
+    [
+        State({'type': 'notify-api-email-smtp-Host', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-email-smtp-Port', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-email-smtp-User', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-email-smtp-Password', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-email-smtp-Receivers', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-email-smtp-api-name', 'name': MATCH}, 'data'),
+    ],
+    prevent_initial_call=True,
+)
+def save_email_smtp_api(nClick, Host, Port, User, Password, Receivers, api_name):
+    values = dict(Host=Host, Port=Port, User=User, Password=Password, Receivers=Receivers)
+    api_name_label = api_name_value2label(api_name)
+    dao_notify.delete_notify_api_by_name(api_name=api_name)
+    if dao_notify.insert_notify_api(api_name=api_name, api_type='邮件SMTP协议', enable=True, params_json=json.dumps(values)):
+        MessageManager.success(content=api_name_label + t__setting('配置保存成功'))
+    else:
+        MessageManager.error(content=api_name_label + t__setting('配置保存失败'))
+    return dash.no_update
+
+
+# 邮件SMTP协议测试通道
+@app.callback(
+    Output({'type': 'notify-api-email-smtp-test', 'name': MATCH}, 'id'),
+    Input({'type': 'notify-api-email-smtp-test', 'name': MATCH}, 'nClicks'),
+    [
+        State({'type': 'notify-api-email-smtp-Host', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-email-smtp-Port', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-email-smtp-User', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-email-smtp-Password', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-email-smtp-Receivers', 'name': MATCH}, 'value'),
+    ],
+    prevent_initial_call=True,
+)
+def test_email_smtp_api(nClicks, Host, Port, User, Password, Receivers):
+    is_ok, rt = email_smtp.send_mail(
+        host=Host,
+        port=Port,
+        user=User,
+        password=Password,
+        receivers=Receivers.split(','),
+        title=t__setting('测试'),
+        content=t__setting('这是一条测试消息，用于验证推送功能。'),
+    )
+    if is_ok:
+        MessageManager.success(content=t__setting('邮件SMTP协议测试发送成功'))
+    else:
+        MessageManager.error(content=t__setting('邮件SMTP协议测试发送失败') + 'ERROR:' + str(rt))
     return dash.no_update
 
 

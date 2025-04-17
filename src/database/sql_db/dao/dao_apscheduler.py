@@ -1,7 +1,7 @@
 from database.sql_db.conn import db
 from peewee import DoesNotExist, IntegrityError
 from common.utilities.util_logger import Log
-from ..entity.table_apscheduler import ApschedulerResults, ApschedulerExtractValue, ApschedulerRunning
+from ..entity.table_apscheduler import SysApschedulerResults, SysApschedulerExtractValue, SysApschedulerRunning
 from datetime import datetime, timedelta
 from common.notify import send_text_notify
 import re
@@ -13,9 +13,9 @@ def select_last_log_from_job_id(job_id: str, accept_timedelta: timedelta) -> str
     """查询指定job_id的最新的日志log"""
     try:
         result = (
-            ApschedulerResults.select(ApschedulerResults.log)
-            .where(ApschedulerResults.job_id == job_id and ApschedulerResults.finish_datetime > datetime.now() - accept_timedelta)
-            .order_by(ApschedulerResults.finish_datetime.desc())
+            SysApschedulerResults.select(SysApschedulerResults.log)
+            .where(SysApschedulerResults.job_id == job_id and SysApschedulerResults.finish_datetime > datetime.now() - accept_timedelta)
+            .order_by(SysApschedulerResults.finish_datetime.desc())
             .get()
         )
         return result[0]
@@ -27,12 +27,12 @@ def get_apscheduler_start_finish_datetime_with_status_by_job_id(job_id: str) -> 
     """查询指定job_id的开始时间"""
     try:
         result_running = (
-            ApschedulerRunning.select(ApschedulerRunning.start_datetime).where(ApschedulerRunning.job_id == job_id).distinct().order_by(ApschedulerRunning.start_datetime.desc())
+            SysApschedulerRunning.select(SysApschedulerRunning.start_datetime).where(SysApschedulerRunning.job_id == job_id).distinct().order_by(SysApschedulerRunning.start_datetime.desc())
         )
         result_done = (
-            ApschedulerResults.select(ApschedulerResults.start_datetime, ApschedulerResults.finish_datetime, ApschedulerResults.status)
-            .where(ApschedulerResults.job_id == job_id)
-            .order_by(ApschedulerResults.start_datetime.desc())
+            SysApschedulerResults.select(SysApschedulerResults.start_datetime, SysApschedulerResults.finish_datetime, SysApschedulerResults.status)
+            .where(SysApschedulerResults.job_id == job_id)
+            .order_by(SysApschedulerResults.start_datetime.desc())
         )
         start_datetimes_running = [(i.start_datetime, '...', 'running') for i in result_running]
         start_datetimes_done = [(i.start_datetime, i.finish_datetime, i.status) for i in result_done]
@@ -45,8 +45,8 @@ def get_running_log(job_id: str, start_datetime: datetime, order: int = None) ->
     """查询指定job_id的日志log"""
     try:
         return (
-            ApschedulerRunning.select(ApschedulerRunning.log)
-            .where(ApschedulerRunning.job_id == job_id and ApschedulerRunning.start_datetime == start_datetime and ApschedulerRunning.order == order)
+            SysApschedulerRunning.select(SysApschedulerRunning.log)
+            .where(SysApschedulerRunning.job_id == job_id and SysApschedulerRunning.start_datetime == start_datetime and SysApschedulerRunning.order == order)
             .dicts()
             .get()['log']
         )
@@ -60,8 +60,8 @@ def get_done_log(job_id: str, start_datetime: datetime) -> str:
     """查询指定job_id的日志log"""
     try:
         return (
-            ApschedulerResults.select(ApschedulerResults.log)
-            .where(ApschedulerResults.job_id == job_id and ApschedulerResults.start_datetime == start_datetime)
+            SysApschedulerResults.select(SysApschedulerResults.log)
+            .where(SysApschedulerResults.job_id == job_id and SysApschedulerResults.start_datetime == start_datetime)
             .dicts()
             .get()['log']
         )
@@ -76,7 +76,7 @@ def insert_apscheduler_running(job_id, log, order, start_datetime):
     database = db()
     try:
         with database.atomic():
-            ApschedulerRunning.create(job_id=job_id, log=log, order=order, start_datetime=start_datetime)
+            SysApschedulerRunning.create(job_id=job_id, log=log, order=order, start_datetime=start_datetime)
     except IntegrityError as e:
         logger.error(f'插入实时日志时发生数据库完整性错误: {e}')
         raise Exception('Failed to insert apscheduler running log due to integrity error') from e
@@ -90,13 +90,13 @@ def select_apscheduler_running_log(job_id, start_datetime, order=None):
     try:
         if order is None:
             results = (
-                ApschedulerRunning.select(ApschedulerRunning.log)
-                .where(ApschedulerRunning.job_id == job_id and ApschedulerRunning.start_datetime == start_datetime)
-                .order_by(ApschedulerRunning.order.asc())
+                SysApschedulerRunning.select(SysApschedulerRunning.log)
+                .where(SysApschedulerRunning.job_id == job_id and SysApschedulerRunning.start_datetime == start_datetime)
+                .order_by(SysApschedulerRunning.order.asc())
             )
         else:
-            results = ApschedulerRunning.select(ApschedulerRunning.log).where(
-                ApschedulerRunning.job_id == job_id and ApschedulerRunning.start_datetime == start_datetime and ApschedulerRunning.order == order
+            results = SysApschedulerRunning.select(SysApschedulerRunning.log).where(
+                SysApschedulerRunning.job_id == job_id and SysApschedulerRunning.start_datetime == start_datetime and SysApschedulerRunning.order == order
             )
         result = [result.log for result in results]
         return ''.join(result)
@@ -109,7 +109,7 @@ def delete_apscheduler_running(job_id, start_datetime):
     database = db()
     try:
         with database.atomic():
-            ApschedulerRunning.delete().where(ApschedulerRunning.job_id == job_id and ApschedulerRunning.start_datetime == start_datetime).execute()
+            SysApschedulerRunning.delete().where(SysApschedulerRunning.job_id == job_id and SysApschedulerRunning.start_datetime == start_datetime).execute()
     except IntegrityError as e:
         logger.error(f'删除实时日志时发生数据库完整性错误: {e}')
         raise Exception('Failed to delete apscheduler running log due to integrity error') from e
@@ -122,7 +122,7 @@ def truncate_apscheduler_running():
     database = db()
     try:
         with database.atomic():
-            ApschedulerRunning.delete().execute()
+            SysApschedulerRunning.delete().execute()
     except IntegrityError as e:
         logger.error(f'清空实时日志时发生数据库完整性错误: {e}')
 
@@ -132,7 +132,7 @@ def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names
     try:
         now = datetime.now()
         with database.atomic():
-            ApschedulerResults.create(job_id=job_id, status=status, log=log, start_datetime=start_datetime, finish_datetime=now)
+            SysApschedulerResults.create(job_id=job_id, status=status, log=log, start_datetime=start_datetime, finish_datetime=now)
         if not extract_names:
             return
         with database.atomic():
@@ -163,7 +163,7 @@ def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names
                         )
                     else:
                         raise ValueError('不支持的提取数据类型')
-                    ApschedulerExtractValue.create(
+                    SysApschedulerExtractValue.create(
                         job_id=job_id,
                         extract_name=extract_name,
                         value_type=type_,
@@ -180,13 +180,13 @@ def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names
 
 
 def delete_expire_data(day):
-    # 删除ApschedulerResults和ApschedulerExtractValue超时的数据
+    # 删除SysApschedulerResults和SysApschedulerExtractValue超时的数据
     try:
         database = db()
         with database.atomic():
             expire_time = datetime.now() - timedelta(days=day)
-            ApschedulerResults.delete().where(ApschedulerResults.start_datetime < expire_time).execute()
-            ApschedulerExtractValue.delete().where(ApschedulerExtractValue.start_datetime < expire_time).execute()
+            SysApschedulerResults.delete().where(SysApschedulerResults.start_datetime < expire_time).execute()
+            SysApschedulerExtractValue.delete().where(SysApschedulerExtractValue.start_datetime < expire_time).execute()
     except IntegrityError as e:
         logger.error(f'删除超时数据时发生数据库完整性错误: {e}')
         raise Exception('Failed to delete expired data due to integrity error') from e

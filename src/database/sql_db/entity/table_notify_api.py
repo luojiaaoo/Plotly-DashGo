@@ -9,7 +9,7 @@ class BaseModel(Model):
         database = db()
 
 
-class NotifyApi(BaseModel):
+class SysNotifyApi(BaseModel):
     """通知API"""
 
     api_name = CharField(max_length=64, primary_key=True, help_text='通知API名')

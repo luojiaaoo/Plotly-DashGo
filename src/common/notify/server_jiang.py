@@ -9,7 +9,7 @@ def send_notify(SendKey, Noip, Channel, title, desp, short=None, Openid=None):
     url = f'https://sctapi.ftqq.com/{SendKey}.send'
     data = {
         'title': title + f'【from {ShowConf.APP_NAME}】',
-        'desp': desp,
+        'desp': desp[: 10 * 1024],
         **({'short': short} if short else {'short': desp[:64]}),
         **({'Noip': 1} if Noip else {}),
         'channel': Channel,
