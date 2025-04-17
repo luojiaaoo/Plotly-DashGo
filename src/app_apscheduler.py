@@ -67,19 +67,25 @@ def run_script(
 
     def pop_from_stdout(stdout, event: threading.Event, queue_stdout: Queue, encoding='utf8'):
         while not event.is_set():
-            line = stdout.readline()
-            if isinstance(line, bytes):
-                queue_stdout.put(line.decode(encoding, errors='ignore'))
-            else:
-                queue_stdout.put(line)
+            try:  # ugly fix: 避免ssh命令超时后，这里疯狂报错
+                line = stdout.readline()
+                if isinstance(line, bytes):
+                    queue_stdout.put(line.decode(encoding, errors='ignore'))
+                else:
+                    queue_stdout.put(line)
+            except:
+                ...
 
     def pop_from_stderr(stderr, event: threading.Event, queue_stderr: Queue, encoding='utf8'):
         while not event.is_set():
-            line = stderr.readline()
-            if isinstance(line, bytes):
-                queue_stderr.put(line.decode(encoding, errors='ignore'))
-            else:
-                queue_stderr.put(line)
+            try:  # ugly fix: 避免ssh命令超时后，这里疯狂报错
+                line = stderr.readline()
+                if isinstance(line, bytes):
+                    queue_stderr.put(line.decode(encoding, errors='ignore'))
+                else:
+                    queue_stderr.put(line)
+            except:
+                ...
 
     suffix = SUFFIX[script_type]
     run_cmd = RUN_CMD[script_type]
@@ -239,6 +245,7 @@ def run_script(
                         order=order,
                         start_datetime=start_datetime,
                     )
+                stdout.readline() # 尝试读一下，如果是超时的异常，则会抛出socket.timeout
             except socket.timeout:
                 # 超时
                 log = select_apscheduler_running_log(job_id=job_id, start_datetime=start_datetime)
