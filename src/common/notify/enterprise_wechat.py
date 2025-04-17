@@ -131,6 +131,7 @@ def wechat_markdowns(top='', title='', content='', user='', links={}, df_links={
 # 参数：[content]支持数据类型str/list，列表中的每个元素文本代表一行。
 def wechat_text(title='', content='', users_name=[], users_phone=[], key=None):
     import requests, json, re
+    from config.dashgo_conf import ShowConf
 
     if key == None:
         key = wechat_key()
@@ -149,9 +150,9 @@ def wechat_text(title='', content='', users_name=[], users_phone=[], key=None):
         'msgtype': 'text',
         'text': {
             'content': """
-                     主题：{}
+                     标题：{} 【from {}】
                      内容：\n{}
-                     """.format(title, ctstr),
+                     """.format(title, ShowConf.APP_NAME, ctstr),
             'mentioned_list': users_name,
             'mentioned_mobile_list': users_phone,
         },
