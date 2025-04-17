@@ -10,7 +10,7 @@ def get_connect():
 
 
 def add_ssh_interval_job(
-    host, port, username, password, script_text, script_type, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, notify_channels
+    host, port, username, password, script_text, script_type, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, notify_channels, is_pause
 ):
     if not extract_names:
         extract_names = None
@@ -35,6 +35,7 @@ def add_ssh_interval_job(
                 ('create_by', create_by),
                 ('create_datetime', create_datetime),
             ],
+            is_pause=is_pause,
             seconds=interval,
             id=job_id,
         )
@@ -46,7 +47,7 @@ def add_ssh_interval_job(
 
 
 def add_ssh_cron_job(
-    host, port, username, password, script_text, script_type, cron_list, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, notify_channels
+    host, port, username, password, script_text, script_type, cron_list, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, notify_channels, is_pause
 ):
     """https://apscheduler.readthedocs.io/en/master/api.html#apscheduler.triggers.cron.CronTrigger"""
     if not extract_names:
@@ -73,6 +74,7 @@ def add_ssh_cron_job(
                 ('create_by', create_by),
                 ('create_datetime', create_datetime),
             ],
+            is_pause=is_pause,
             year=year,
             week=week,
             second=second,
@@ -90,7 +92,7 @@ def add_ssh_cron_job(
         conn.close()
 
 
-def add_local_interval_job(script_text, script_type, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, notify_channels):
+def add_local_interval_job(script_text, script_type, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, notify_channels, is_pause):
     if not extract_names:
         extract_names = None
     try:
@@ -110,6 +112,7 @@ def add_local_interval_job(script_text, script_type, interval, timeout, job_id, 
                 ('create_by', create_by),
                 ('create_datetime', create_datetime),
             ],
+            is_pause=is_pause,
             seconds=interval,
             id=job_id,
         )
@@ -120,7 +123,7 @@ def add_local_interval_job(script_text, script_type, interval, timeout, job_id, 
         conn.close()
 
 
-def add_local_cron_job(script_text, script_type, cron_list, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, notify_channels):
+def add_local_cron_job(script_text, script_type, cron_list, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, notify_channels, is_pause):
     if not extract_names:
         extract_names = None
     try:
@@ -141,6 +144,7 @@ def add_local_cron_job(script_text, script_type, cron_list, timeout, job_id, upd
                 ('create_by', create_by),
                 ('create_datetime', create_datetime),
             ],
+            is_pause=is_pause,
             year=year,
             week=week,
             second=second,

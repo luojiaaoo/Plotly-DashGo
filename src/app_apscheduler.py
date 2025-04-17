@@ -35,7 +35,21 @@ RUN_CMD = {'Bat': ['cmd', '/c'], 'Shell': ['sh'], 'Python': ['python']}
 
 
 def run_script(
-    type, script_text, script_type, job_id, update_by, update_datetime, create_by, create_datetime, notify_channels, extract_names=None, timeout=20, host=None, port=22, username=None, password=None
+    type,
+    script_text,
+    script_type,
+    job_id,
+    update_by,
+    update_datetime,
+    create_by,
+    create_datetime,
+    notify_channels,
+    extract_names=None,
+    timeout=20,
+    host=None,
+    port=22,
+    username=None,
+    password=None,
 ):
     """
     根据类型执行脚本，支持本地和远程执行。
@@ -275,9 +289,17 @@ CLEAR_JOB_ID = 'sys_delete_expire_data_for_cron'
 
 class SchedulerService(rpyc.Service):
     def exposed_add_job(self, func, *args, **kwargs):
+        kwargs = dict(kwargs)
         kwargs['kwargs'] = list(kwargs['kwargs'])
         kwargs['kwargs'].append(('job_id', kwargs['id']))  # 给函数传递job_id参数
-        return scheduler.add_job(func, *args, **kwargs)
+        is_pause = False
+        if kwargs.get('is_pause', None):
+            is_pause = True
+        kwargs.pop('is_pause')
+        job = scheduler.add_job(func, *args, **kwargs)
+        if is_pause:
+            job.pause()
+        return job
 
     def exposed_modify_job(self, job_id, jobstore=None, **changes):
         return scheduler.modify_job(job_id, jobstore, **changes)

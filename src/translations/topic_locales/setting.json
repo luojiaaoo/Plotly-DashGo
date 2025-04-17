@@ -14,8 +14,26 @@
         "消息测试": {
             "en-us": "Test"
         },
+        "创建成功": {
+            "en-us": "Test"
+        },
+        "Server酱": {
+            "en-us": "ServerChan"
+        },
+        "企业微信群机器人": {
+            "en-us": "WeCom Group Robot"
+        },
+        "添加Server酱": {
+            "en-us": "Add Server酱 Channel"
+        },
+        "添加企业微信群机器人": {
+            "en-us": "Add WeCom Group Robot Channel"
+        },
+        "输入通知渠道名字": {
+            "en-us": "Input Channel Name"
+        },
         "一天1毛钱的极简微信等消息接口，点击此处购买Server酱消息推送": {
-            "en-us": "One dollar a day, a simple wechat message push service, click here to buy Server酱 msg push"
+            "en-us": "A cheap simple wechat message push service, click here to buy Server酱 msg push"
         },
         "配置保存成功": {
             "en-us": "Config Save Success"

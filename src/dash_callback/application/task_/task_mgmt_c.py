@@ -10,6 +10,7 @@ import time
 import json
 import random
 import re
+from dash_callback.application.setting_.notify_api_c import api_name_value2label
 from common.utilities.util_apscheduler import (
     get_apscheduler_all_jobs,
     start_stop_job,
@@ -21,7 +22,7 @@ from common.utilities.util_apscheduler import (
     remove_job,
     get_job,
 )
-from database.sql_db.dao.dao_notify import api_names
+from database.sql_db.dao.dao_notify import get_notify_api_by_name
 from feffery_dash_utils.style_utils import style
 from uuid import uuid4
 from datetime import datetime
@@ -35,9 +36,9 @@ def get_table_data():
         {
             'job_id': job.job_id,
             'type': job.type,
-            'extract_names': '-' if not job.extract_names else str(json.loads(job.extract_names)),
+            'extract_names': str(json.loads(job.extract_names)) if job.extract_names and json.loads(job.extract_names) else '-',
             'trigger': job.trigger,
-            'notify_channels': '-' if not job.notify_channels else str(json.loads(job.notify_channels)),
+            'notify_channels': str([api_name_value2label(i) for i in json.loads(job.notify_channels)]) if job.notify_channels and json.loads(job.notify_channels) else '-',
             'plan': f'{job.plan}',
             'job_next_run_time': job.job_next_run_time,
             'create_by': job.create_by,
@@ -307,7 +308,7 @@ def refresh_add_modal(visible, task_type):
             ),
             fac.AntdFormItem(
                 fac.AntdCheckboxGroup(
-                    options=[{'label': api_name, 'value': api_name} for api_name in api_names],
+                    options=[{'label': api_name_value2label(notify_api.api_name), 'value': notify_api.api_name} for notify_api in get_notify_api_by_name(api_name=None)],
                     value=[],
                     id='task-mgmt-table-add-modal-extract-names-type-notify-for-notify-channels',
                 ),
@@ -323,12 +324,16 @@ def refresh_add_modal(visible, task_type):
 @app.callback(
     Output('task-mgmt-table-add-modal-editor-script-text-store', 'id'),
     Input('task-mgmt-table-add-modal-editor-script-text-store', 'id'),
-    State('task-mgmt-table-add-modal-title', 'children'),
+    [
+        State('task-mgmt-table-add-modal-title', 'children'),
+        State('task-mgmt-table-add-modal-extract-names-type-notify-for-notify-channels', 'options'),
+    ],
 )
-def full_value_for_edit(id, title):
+def full_value_for_edit(id, title, notify_channels_options):
     # 如果是编辑，初始化数据
     if '⠆' not in title:  # 特殊盲文符号，作为编辑动作的标志位
         return dash.no_update
+    notify_channels_options_value = [notify_channels_option['value'] for notify_channels_option in notify_channels_options]
     job_id = title.split('⠆')[-1]
     job_dict = get_job(job_id)
     set_props('task-mgmt-table-add-modal-update-editor-language', {'value': job_dict['kwargs']['script_type']})
@@ -360,7 +365,7 @@ def full_value_for_edit(id, title):
         notify_channels = json.loads(job_dict['kwargs']['notify_channels'])
         set_props(
             'task-mgmt-table-add-modal-extract-names-type-notify-for-notify-channels',
-            {'value': [notify_channel for notify_channel in notify_channels]},
+            {'value': [notify_channel for notify_channel in notify_channels if notify_channel in notify_channels_options_value]},
         )  # 通知类型-通知渠道
     if job_dict['trigger'] == 'interval':
         set_props('task-mgmt-table-add-modal-interval', {'value': job_dict['plan']['seconds']})  # interval周期
@@ -549,12 +554,16 @@ def add_edit_job(
     if not re.match(cron_verify, f'{cron_minute} {cron_hour} {cron_day} {cron_month} {cron_day_of_week}'):
         MessageManager.error(content='cron表达式不正确')
         return dash.no_update
+    is_edit = False
+    status = True
     create_by, create_datetime = None, None
     if '⠆' in title:  # 特殊盲文符号，作为编辑动作的标志位，先删后增
         job_dict = get_job(job_id)
+        status = job_dict['status']
         create_by = job_dict['kwargs']['create_by']
         create_datetime = job_dict['kwargs']['create_datetime']
         remove_job(job_id)  # 删除
+        is_edit = True
     # 新增
     op_user_name = get_menu_access(only_get_user_name=True)
     now = f'{datetime.now():%Y-%m-%dT%H:%M:%S}'
@@ -579,6 +588,7 @@ def add_edit_job(
                 ]
             ),
             notify_channels=json.dumps(notify_channels),
+            is_pause=not status,
         )
     elif type_run == 'ssh' and task_type == 'interval':
         add_ssh_interval_job(
@@ -603,6 +613,7 @@ def add_edit_job(
                 ]
             ),
             notify_channels=json.dumps(notify_channels),
+            is_pause=not status,
         )
     elif type_run == 'local' and task_type == 'cron':
         add_local_cron_job(
@@ -624,6 +635,7 @@ def add_edit_job(
                 ]
             ),
             notify_channels=json.dumps(notify_channels),
+            is_pause=not status,
         )
     elif type_run == 'ssh' and task_type == 'cron':
         add_ssh_cron_job(
@@ -649,11 +661,15 @@ def add_edit_job(
                 ]
             ),
             notify_channels=json.dumps(notify_channels),
+            is_pause=not status,
         )
     else:
         MessageManager.error(content=t__task('不支持的运行类型') + type_run)
         return
-    MessageManager.success(content=t__task('添加任务成功'))
+    if not is_edit:
+        MessageManager.success(content=t__task('添加任务成功'))
+    else:
+        MessageManager.success(content=t__task('修改任务成功'))
     return get_table_data()
 
 
