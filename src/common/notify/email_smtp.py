@@ -4,6 +4,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import List
 from email.header import Header
+from config.dashgo_conf import ShowConf
 
 
 def send_mail(host: str, port: str, user: str, password: str, receivers: List[str], title: str, content: str):
@@ -18,7 +19,7 @@ def send_mail(host: str, port: str, user: str, password: str, receivers: List[st
     # 创建邮件对象
     msg = MIMEMultipart()
     # 设置邮件主题
-    msg['Subject'] = Header(title, 'utf-8').encode()
+    msg['Subject'] = Header(title + f'【from {ShowConf.APP_NAME}】', 'utf-8').encode()
     # 设置邮件发送者
     msg['From'] = f'{user} <{user}>'
     # 设置邮件接受者

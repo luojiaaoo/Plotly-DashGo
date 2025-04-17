@@ -60,7 +60,7 @@ def send_text_notify(title: str, short: str, desp: str, notify_channels: List):
             Port = params_json['Port']
             User = params_json['User']
             Password = params_json['Password']
-            Receivers = params_json['Receivers'].split(',')
+            Receivers = params_json['Receivers']
             is_ok, rt = email_smtp.send_mail(
                 host=Host,
                 port=Port,

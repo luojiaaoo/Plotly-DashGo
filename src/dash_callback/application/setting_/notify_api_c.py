@@ -166,8 +166,8 @@ def get_tabs_items():
                                         label='Host',
                                     ),
                                     fac.AntdFormItem(
-                                        fac.AntdInput(id={'type': 'notify-api-email-smtp-Post', 'name': api_name}, value=Port),
-                                        label='Post',
+                                        fac.AntdInput(id={'type': 'notify-api-email-smtp-Port', 'name': api_name}, value=Port),
+                                        label='Port',
                                     ),
                                     fac.AntdFormItem(
                                         fac.AntdInput(id={'type': 'notify-api-email-smtp-User', 'name': api_name}, value=User),
