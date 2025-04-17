@@ -26,7 +26,9 @@ def insert_notify_api(api_name: str, api_type: str, enable: bool, params_json: s
 def get_notify_api_by_name(api_name: Optional[str] = None) -> Union[NotifyApi, List[NotifyApi]]:
     database = db()
     if api_name is None:
-        return [i for i in NotifyApi.select()]
+        notify_apis = [i for i in NotifyApi.select()]
+        notify_apis.sort(key=lambda x: x.api_name)
+        return notify_apis
     else:
         try:
             with database.atomic():

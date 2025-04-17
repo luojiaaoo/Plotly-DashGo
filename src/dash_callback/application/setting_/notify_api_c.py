@@ -22,7 +22,6 @@ def get_tabs_items():
     items = []
     # server酱配置
     notify_apis = dao_notify.get_notify_api_by_name(api_name=None)
-    notify_apis.sort(key=lambda x: x.api_name)
     for notify_api in notify_apis:
         api_type = notify_api.api_type
         if api_type not in dao_notify.support_api_types:
@@ -143,7 +142,8 @@ def get_tabs_items():
 def get_notify_api():
     api_names = []
     api_names_enabled = []
-    for notify_api in dao_notify.get_notify_api_by_name(api_name=None):
+    notify_apis = dao_notify.get_notify_api_by_name(api_name=None)
+    for notify_api in notify_apis:
         api_name = notify_api.api_name
         enable = notify_api.enable
         if enable:
