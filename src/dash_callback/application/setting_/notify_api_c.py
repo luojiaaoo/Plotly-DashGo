@@ -60,6 +60,42 @@ def get_tabs_items():
             ),
         }
     )
+    # Server酱-No2配置
+    server_jiang = dao_notify.get_notify_api_by_name(api_name='Server酱-No2')
+    items.append(
+        {
+            'key': 'Server酱-No2',
+            'label': 'Server酱-No2',
+            'children': fac.AntdSpace(
+                [
+                    fac.AntdForm(
+                        [
+                            fac.AntdFormItem(fac.AntdInput(id='notify-server-jiang-no2-SendKey', value=SendKey), label='SendKey'),
+                            fac.AntdFormItem(fac.AntdSwitch(id='notify-server-jiang-no2-Noip', checked=Noip), label='Noip', tooltip='是否隐藏IP'),
+                            fac.AntdFormItem(fac.AntdInput(id='notify-server-jiang-no2-Channel', value=Channel), label='Channel', tooltip='发送通道'),
+                            fac.AntdFormItem(fac.AntdInput(id='notify-server-jiang-no2-Openid', value=Openid), label='Openid', tooltip='只有测试号和企业微信应用消息需要填写'),
+                        ],
+                        labelCol={'span': 5},
+                        wrapperCol={'span': 20},
+                    ),
+                    fac.AntdSpace(
+                        [
+                            fac.AntdButton(t__setting('保存'), id='notify-api-server-jiang-no2-save', type='primary'),
+                            fac.AntdButton(t__setting('消息测试'), id='notify-api-server-jiang-no2-test', type='default'),
+                        ],
+                    ),
+                    fac.AntdButton(
+                        '💕' + t__setting('一天1毛钱的极简微信等消息接口，点击此处购买Server酱消息推送') + '💕',
+                        variant='dashed',
+                        color='primary',
+                        href='https://sct.ftqq.com/r/16293',
+                        target='_blank',
+                    ),
+                ],
+                direction='vertical',
+            ),
+        }
+    )
     return items
 
 
@@ -150,6 +186,73 @@ def save_server_jiang_api(nClick, SendKey, Noip, Channel, Openid):
     prevent_initial_call=True,
 )
 def test_server_jiang_api(nClick, SendKey, Noip, Channel, Openid):
+    is_ok, rt = send_notify(
+        SendKey=SendKey,
+        Noip=Noip,
+        Channel=Channel,
+        title=t__setting('测试'),
+        desp=t__setting('这是一条测试消息，用于验证推送功能。'),
+        Openid=Openid,
+    )
+    if is_ok:
+        pushid = rt['pushid']
+        readkey = rt['readkey']
+        time.sleep(5)
+        is_ok_test, rt_test = is_send_success(pushid, readkey)
+        if is_ok_test:
+            MessageManager.success(content=t__setting('Server酱测试发送成功'))
+        else:
+            MessageManager.error(content=t__setting('消息加入Server酱队列成功，但可能未发送成功') + 'ERROR:' + str(rt_test))
+    else:
+        MessageManager.error(content=t__setting('Server酱测试发送失败') + 'ERROR:' + str(rt))
+
+
+# server酱-No2保存回调
+@app.callback(
+    [
+        Output('notify-api-edit-tabs', 'items', allow_duplicate=True),
+        Output('notify-api-activate', 'options', allow_duplicate=True),
+        Output('notify-api-activate', 'value', allow_duplicate=True),
+    ],
+    Input('notify-api-server-jiang-no2-save', 'nClicks'),
+    [
+        State('notify-server-jiang-no2-SendKey', 'value'),
+        State('notify-server-jiang-no2-Noip', 'checked'),
+        State('notify-server-jiang-no2-Channel', 'value'),
+        State('notify-server-jiang-no2-Openid', 'value'),
+    ],
+    prevent_initial_call=True,
+)
+def save_server_jiang_no2_api(nClick, SendKey, Noip, Channel, Openid):
+    import json
+
+    name = 'Server酱-No2'
+    values = dict(
+        SendKey=SendKey,
+        Noip=Noip,
+        Channel=Channel,
+        Openid=Openid,
+    )
+    dao_notify.delete_notify_api_by_name(api_name=name)
+    if dao_notify.insert_notify_api(api_name=name, enable=True, params_json=json.dumps(values)):
+        MessageManager.success(content=name + t__setting('配置保存成功'))
+    else:
+        MessageManager.error(content=name + t__setting('配置保存失败'))
+    return [get_tabs_items(), *get_notify_api_activate()]
+
+
+# server酱测试通道
+@app.callback(
+    Input('notify-api-server-jiang-no2-test', 'nClicks'),
+    [
+        State('notify-server-jiang-no2-SendKey', 'value'),
+        State('notify-server-jiang-no2-Noip', 'checked'),
+        State('notify-server-jiang-no2-Channel', 'value'),
+        State('notify-server-jiang-no2-Openid', 'value'),
+    ],
+    prevent_initial_call=True,
+)
+def test_server_jiang_no2_api(nClick, SendKey, Noip, Channel, Openid):
     is_ok, rt = send_notify(
         SendKey=SendKey,
         Noip=Noip,

@@ -9,6 +9,7 @@ from typing import Iterator
 logger = Log.get_logger(__name__)
 api_names = [
     'Server酱',
+    'Server酱-No2',
 ]
 
 

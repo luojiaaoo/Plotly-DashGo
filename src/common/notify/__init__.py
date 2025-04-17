@@ -15,11 +15,11 @@ def send_text_notify(title: str, short: str, desp: str, notify_channels: List):
     import json
 
     for api_name in api_names:
-        if api_name == 'Server酱' and api_name in notify_channels:
+        if api_name in ('Server酱', 'Server酱-No2') and api_name in notify_channels:
             notify_api = get_notify_api_by_name(api_name=api_name)
             if notify_api and notify_api.enable:
                 if not notify_api.params_json:
-                    logger.error('Server酱的SendKey未配置')
+                    logger.error(f'{api_name}的SendKey未配置')
                     continue
                 server_jiang_json = json.loads(notify_api.params_json)
                 SendKey = server_jiang_json['SendKey']
@@ -36,4 +36,4 @@ def send_text_notify(title: str, short: str, desp: str, notify_channels: List):
                     Openid=Openid,
                 )
                 if not is_ok:
-                    logger.error(f'发送Server酱通知失败，错误信息：{rt}')
+                    logger.error(f'发送{api_name}通知失败，错误信息：{rt}')
