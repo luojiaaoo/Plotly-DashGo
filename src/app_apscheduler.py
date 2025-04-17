@@ -370,14 +370,14 @@ class SchedulerService(rpyc.Service):
 
 if __name__ == '__main__':
     if SqlDbConf.RDB_TYPE == 'sqlite':
-        jobstores = {'default': SQLAlchemyJobStore(url=f'sqlite:///{SqlDbConf.SQLITE_DB_PATH}')}
+        jobstores = {'default': SQLAlchemyJobStore(url=f'sqlite:///{SqlDbConf.SQLITE_DB_PATH}?timeout=20')}
     elif SqlDbConf.RDB_TYPE == 'mysql':
         jobstores = {'default': SQLAlchemyJobStore(url=f'mysql+pymysql://{SqlDbConf.USER}:{SqlDbConf.PASSWORD}@{SqlDbConf.HOST}:{SqlDbConf.PORT}/{SqlDbConf.DATABASE}')}
     truncate_apscheduler_running()
     executors = {
         'default': ThreadPoolExecutor(64),
     }
-    job_defaults = {'coalesce': True, 'max_instances': 64}
+    job_defaults = {'coalesce': True, 'max_instances': 8}
     scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
     scheduler.start()
     protocol_config = {'allow_public_attrs': True}

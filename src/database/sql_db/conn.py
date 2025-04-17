@@ -23,7 +23,7 @@ if SqlDbConf.RDB_TYPE == 'mysql':
                 )
             return cls._instance
 elif SqlDbConf.RDB_TYPE == 'sqlite':
-    sqlite_db = SqliteDatabase(SqlDbConf.SQLITE_DB_PATH)
+    sqlite_db = SqliteDatabase(SqlDbConf.SQLITE_DB_PATH, timeout=20)
 else:
     raise NotImplementedError('Unsupported database type')
 
