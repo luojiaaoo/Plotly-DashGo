@@ -35,7 +35,7 @@ RUN_CMD = {'Bat': ['cmd', '/c'], 'Shell': ['sh'], 'Python': ['python']}
 
 
 def run_script(
-    type, script_text, script_type, job_id, update_by, update_datetime, create_by, create_datetime, timeout=20, host=None, port=22, username=None, password=None, extract_names=None
+    type, script_text, script_type, job_id, update_by, update_datetime, create_by, create_datetime, notify_channels, extract_names=None, timeout=20, host=None, port=22, username=None, password=None
 ):
     """
     根据类型执行脚本，支持本地和远程执行。
@@ -49,6 +49,7 @@ def run_script(
     """
     start_datetime = datetime.now()
     extract_names = json.loads(extract_names)
+    notify_channels = json.loads(notify_channels)
 
     def pop_from_stdout(stdout, event: threading.Event, queue_stdout: Queue, encoding='utf8'):
         while not event.is_set():
@@ -141,6 +142,7 @@ def run_script(
                 log=log,
                 start_datetime=start_datetime,
                 extract_names=extract_names,
+                notify_channels=notify_channels,
             )
         else:
             return_code = process.wait()
@@ -151,6 +153,7 @@ def run_script(
                 log=log,
                 start_datetime=start_datetime,
                 extract_names=extract_names,
+                notify_channels=notify_channels,
             )
         delete_apscheduler_running(job_id=job_id, start_datetime=start_datetime)
         # 删除旧的脚本文件
@@ -231,6 +234,7 @@ def run_script(
                     log=log,
                     start_datetime=start_datetime,
                     extract_names=extract_names,
+                    notify_channels=notify_channels,
                 )
                 return
             return_code = stdout.channel.recv_exit_status()
@@ -242,6 +246,7 @@ def run_script(
                 log=log,
                 start_datetime=start_datetime,
                 extract_names=extract_names,
+                notify_channels=notify_channels,
             )
         except TimeoutError:
             insert_apscheduler_result(
@@ -250,6 +255,7 @@ def run_script(
                 log=f'[ERROR] Cannot connect to the host {host}, <SOPS_VAR>ssh_status:unconnect</SOPS_VAR>',
                 start_datetime=start_datetime,
                 extract_names=extract_names,
+                notify_channels=notify_channels,
             )
         except Exception as e:
             raise e

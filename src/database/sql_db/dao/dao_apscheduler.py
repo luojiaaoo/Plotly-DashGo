@@ -3,7 +3,7 @@ from peewee import DoesNotExist, IntegrityError
 from common.utilities.util_logger import Log
 from ..entity.table_apscheduler import ApschedulerResults, ApschedulerExtractValue, ApschedulerRunning
 from datetime import datetime, timedelta
-from common.notify import send_notify
+from common.notify import send_text_notify
 import re
 
 logger = Log.get_logger(__name__)
@@ -127,7 +127,7 @@ def truncate_apscheduler_running():
         logger.error(f'清空实时日志时发生数据库完整性错误: {e}')
 
 
-def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names):
+def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names, notify_channels):
     database = db()
     try:
         now = datetime.now()
@@ -155,7 +155,12 @@ def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names
                             logger.warning(f'提取数据类型为string，但无法转换为字符串: {value}')
                             continue
                     elif type_ == 'notify':
-                        send_notify(title=name, short=value, desp=value + f'【The message from Job {job_id}】')
+                        send_text_notify(
+                            title=name,
+                            short=value,
+                            desp=value + f'【The message from Job {job_id}】',
+                            notify_channels=notify_channels,
+                        )
                     else:
                         raise ValueError('不支持的提取数据类型')
                     ApschedulerExtractValue.create(

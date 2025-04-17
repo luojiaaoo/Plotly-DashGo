@@ -1,7 +1,7 @@
 import rpyc
 import json
 from dataclasses import dataclass
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from config.dashgo_conf import ApSchedulerConf
 
 
@@ -10,7 +10,7 @@ def get_connect():
 
 
 def add_ssh_interval_job(
-    host, port, username, password, script_text, script_type, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names
+    host, port, username, password, script_text, script_type, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, notify_channels
 ):
     if not extract_names:
         extract_names = None
@@ -29,6 +29,7 @@ def add_ssh_interval_job(
                 ('username', username),
                 ('password', password),
                 ('extract_names', extract_names),
+                ('notify_channels', notify_channels),
                 ('update_by', update_by),
                 ('update_datetime', update_datetime),
                 ('create_by', create_by),
@@ -44,7 +45,9 @@ def add_ssh_interval_job(
         conn.close()
 
 
-def add_ssh_cron_job(host, port, username, password, script_text, script_type, cron_list, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names):
+def add_ssh_cron_job(
+    host, port, username, password, script_text, script_type, cron_list, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, notify_channels
+):
     """https://apscheduler.readthedocs.io/en/master/api.html#apscheduler.triggers.cron.CronTrigger"""
     if not extract_names:
         extract_names = None
@@ -64,6 +67,7 @@ def add_ssh_cron_job(host, port, username, password, script_text, script_type, c
                 ('username', username),
                 ('password', password),
                 ('extract_names', extract_names),
+                ('notify_channels', notify_channels),
                 ('update_by', update_by),
                 ('update_datetime', update_datetime),
                 ('create_by', create_by),
@@ -86,7 +90,7 @@ def add_ssh_cron_job(host, port, username, password, script_text, script_type, c
         conn.close()
 
 
-def add_local_interval_job(script_text, script_type, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names):
+def add_local_interval_job(script_text, script_type, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, notify_channels):
     if not extract_names:
         extract_names = None
     try:
@@ -100,6 +104,7 @@ def add_local_interval_job(script_text, script_type, interval, timeout, job_id, 
                 ('script_type', script_type),
                 ('timeout', timeout),
                 ('extract_names', extract_names),
+                ('notify_channels', notify_channels),
                 ('update_by', update_by),
                 ('update_datetime', update_datetime),
                 ('create_by', create_by),
@@ -115,7 +120,7 @@ def add_local_interval_job(script_text, script_type, interval, timeout, job_id, 
         conn.close()
 
 
-def add_local_cron_job(script_text, script_type, cron_list, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names):
+def add_local_cron_job(script_text, script_type, cron_list, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, notify_channels):
     if not extract_names:
         extract_names = None
     try:
@@ -130,6 +135,7 @@ def add_local_cron_job(script_text, script_type, cron_list, timeout, job_id, upd
                 ('script_type', script_type),
                 ('timeout', timeout),
                 ('extract_names', extract_names),
+                ('notify_channels', notify_channels),
                 ('update_by', update_by),
                 ('update_datetime', update_datetime),
                 ('create_by', create_by),
@@ -163,7 +169,8 @@ class JobInfo:
     script_text: str
     script_type: str
     timeout: int
-    extract_names: Optional[Dict]
+    extract_names: Optional[List]
+    notify_channels: Optional[List]
     update_by: str
     update_datetime: str
     create_by: str
@@ -186,6 +193,7 @@ def get_apscheduler_all_jobs():
                 script_type=job_json['kwargs']['script_type'],
                 timeout=job_json['kwargs']['timeout'],
                 extract_names=job_json['kwargs']['extract_names'],
+                notify_channels=job_json['kwargs']['notify_channels'],
                 update_by=job_json['kwargs']['update_by'],
                 update_datetime=job_json['kwargs']['update_datetime'],
                 create_by=job_json['kwargs']['create_by'],

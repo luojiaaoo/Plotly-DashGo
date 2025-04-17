@@ -38,6 +38,9 @@
         "数据采集": {
             "en-us": "Data Extract"
         },
+        "通知渠道": {
+            "en-us": "Notify Channels"
+        },
         "触发器": {
             "en-us": "Tragger"
         },
@@ -133,6 +136,9 @@
         },
         "抽取-通知类型": {
             "en-us": "Extract-Notify"
+        },
+        "通知类型-通知渠道": {
+            "en-us": "Notify-Channel"
         },
         "不支持的运行类型": {
             "en-us": "Unsupported Run Type"

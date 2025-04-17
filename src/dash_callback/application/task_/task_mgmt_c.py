@@ -21,6 +21,7 @@ from common.utilities.util_apscheduler import (
     remove_job,
     get_job,
 )
+from database.sql_db.dao.dao_notify import api_names
 from feffery_dash_utils.style_utils import style
 from uuid import uuid4
 from datetime import datetime
@@ -34,8 +35,9 @@ def get_table_data():
         {
             'job_id': job.job_id,
             'type': job.type,
-            'extract_names': '-' if job.extract_names is None else str(json.loads(job.extract_names)),
+            'extract_names': '-' if not job.extract_names else str(json.loads(job.extract_names)),
             'trigger': job.trigger,
+            'notify_channels': '-' if not job.notify_channels else str(json.loads(job.notify_channels)),
             'plan': f'{job.plan}',
             'job_next_run_time': job.job_next_run_time,
             'create_by': job.create_by,
@@ -79,22 +81,23 @@ def init_table(timeoutCount):
             id='task-mgmt-table-add-modal',
             renderFooter=True,
             okClickClose=False,
-            width=800,
+            width=900,
         ),
         fac.AntdSpin(
             Table(
                 id='task-mgmt-table',
                 columns=[
-                    {'title': t__task('任务名'), 'dataIndex': 'job_id', 'width': 'calc(100% / 10)'},
-                    {'title': t__task('类型'), 'dataIndex': 'type', 'width': 'calc(100% / 10)'},
-                    {'title': t__task('数据采集'), 'dataIndex': 'extract_names', 'width': 'calc(100% / 10)'},
-                    {'title': t__task('触发器'), 'dataIndex': 'trigger', 'width': 'calc(100% / 10)'},
-                    {'title': t__task('执行计划'), 'dataIndex': 'plan', 'width': 'calc(100% / 10)'},
-                    {'title': t__task('下一次执行时间'), 'dataIndex': 'job_next_run_time', 'width': 'calc(100% / 10)'},
-                    {'title': t__task('创建人'), 'dataIndex': 'create_by', 'width': 'calc(100% / 10)'},
-                    {'title': t__task('创建时间'), 'dataIndex': 'create_datetime', 'width': 'calc(100% / 10)'},
-                    {'title': t__task('启用'), 'dataIndex': 'enable', 'renderOptions': {'renderType': 'switch'}, 'width': 'calc(100% / 10)'},
-                    {'title': t__task('操作'), 'dataIndex': 'action', 'renderOptions': {'renderType': 'button'}, 'width': 'calc(100% / 10)'},
+                    {'title': t__task('任务名'), 'dataIndex': 'job_id', 'width': 'calc(100% / 11)'},
+                    {'title': t__task('类型'), 'dataIndex': 'type', 'width': 'calc(100% / 11)'},
+                    {'title': t__task('数据采集'), 'dataIndex': 'extract_names', 'width': 'calc(100% / 11)'},
+                    {'title': t__task('通知渠道'), 'dataIndex': 'notify_channels', 'width': 'calc(100% / 11)'},
+                    {'title': t__task('触发器'), 'dataIndex': 'trigger', 'width': 'calc(100% / 11)'},
+                    {'title': t__task('执行计划'), 'dataIndex': 'plan', 'width': 'calc(100% / 11)'},
+                    {'title': t__task('下一次执行时间'), 'dataIndex': 'job_next_run_time', 'width': 'calc(100% / 11)'},
+                    {'title': t__task('创建人'), 'dataIndex': 'create_by', 'width': 'calc(100% / 11)'},
+                    {'title': t__task('创建时间'), 'dataIndex': 'create_datetime', 'width': 'calc(100% / 11)'},
+                    {'title': t__task('启用'), 'dataIndex': 'enable', 'renderOptions': {'renderType': 'switch'}, 'width': 'calc(100% / 11)'},
+                    {'title': t__task('操作'), 'dataIndex': 'action', 'renderOptions': {'renderType': 'button'}, 'width': 'calc(100% / 11)'},
                 ],
                 rowSelectionType='checkbox',
                 data=get_table_data(),
@@ -201,11 +204,11 @@ def refresh_add_modal(visible, task_type):
             ),
             label=t__task('Cron定时字串'),
             tooltip="""
-『int|str minute: minute (0-59)』
-『int|str hour: hour (0-23)』
-『int|str day: day of month (1-31)』
-『int|str month: month (1-12)』
-『int|str day_of_week: number or name of weekday (0-6 or mon,tue,wed,thu,fri,sat,sun)』
+『minute: minute (0-59)』
+『hour: hour (0-23)』
+『day: day of month (1-31)』
+『month: month (1-12)』
+『day_of_week: number or name of weekday (0-6 or mon,tue,wed,thu,fri,sat,sun)』
 """,
             style=style(display='block' if task_type == 'cron' else 'none'),
         ),
@@ -302,10 +305,18 @@ def refresh_add_modal(visible, task_type):
                 fac.AntdSelect(id='task-mgmt-table-add-modal-extract-names-type-notify', mode='tags', allowClear=False, value=[]),
                 label=t__task('抽取-通知类型'),
             ),
+            fac.AntdFormItem(
+                fac.AntdCheckboxGroup(
+                    options=[{'label': api_name, 'value': api_name} for api_name in api_names],
+                    value=[],
+                    id='task-mgmt-table-add-modal-extract-names-type-notify-for-notify-channels',
+                ),
+                label=t__task('通知类型-通知渠道'),
+            ),
         ],
-        labelCol={'span': 4},
+        labelCol={'span': 5},
         wrapperCol={'span': 20},
-        style={'width': 700},
+        style={'width': 800},
     )
 
 
@@ -345,6 +356,12 @@ def full_value_for_edit(id, title):
             'task-mgmt-table-add-modal-extract-names-type-notify',
             {'value': [extract_name['name'] for extract_name in extract_names if extract_name['type'] == 'notify']},
         )  # 抽取数据-通知类型
+    if job_dict['kwargs']['notify_channels']:
+        notify_channels = json.loads(job_dict['kwargs']['notify_channels'])
+        set_props(
+            'task-mgmt-table-add-modal-extract-names-type-notify-for-notify-channels',
+            {'value': [notify_channel for notify_channel in notify_channels]},
+        )  # 通知类型-通知渠道
     if job_dict['trigger'] == 'interval':
         set_props('task-mgmt-table-add-modal-interval', {'value': job_dict['plan']['seconds']})  # interval周期
     if job_dict['trigger'] == 'cron':
@@ -490,7 +507,8 @@ app.clientside_callback(
         State('task-mgmt-table-add-modal-timeout', 'value'),  # 超时时间
         State('task-mgmt-table-add-modal-extract-names-type-number', 'value'),  # 抽取数据-数值类型
         State('task-mgmt-table-add-modal-extract-names-type-string', 'value'),  # 抽取数据-字符串类型
-        State('task-mgmt-table-add-modal-extract-names-type-notify', 'value'),  # 抽取数据-字符串类型
+        State('task-mgmt-table-add-modal-extract-names-type-notify', 'value'),  # 抽取数据-通知类型
+        State('task-mgmt-table-add-modal-extract-names-type-notify-for-notify-channels', 'value'),  # 通知类型-通知渠道
         State('task-mgmt-table-add-modal-interval', 'value'),  # interval周期
         State('task-mgmt-table-add-modal-cron-minute', 'value'),  # cron 分
         State('task-mgmt-table-add-modal-cron-hour', 'value'),  # cron 小时
@@ -516,6 +534,7 @@ def add_edit_job(
     extract_names_number,
     extract_names_string,
     extract_names_notify,
+    notify_channels,
     interval,
     cron_minute,
     cron_hour,
@@ -559,6 +578,7 @@ def add_edit_job(
                     *[{'type': 'notify', 'name': i} for i in extract_names_notify],
                 ]
             ),
+            notify_channels=json.dumps(notify_channels),
         )
     elif type_run == 'ssh' and task_type == 'interval':
         add_ssh_interval_job(
@@ -582,6 +602,7 @@ def add_edit_job(
                     *[{'type': 'notify', 'name': i} for i in extract_names_notify],
                 ]
             ),
+            notify_channels=json.dumps(notify_channels),
         )
     elif type_run == 'local' and task_type == 'cron':
         add_local_cron_job(
@@ -602,6 +623,7 @@ def add_edit_job(
                     *[{'type': 'notify', 'name': i} for i in extract_names_notify],
                 ]
             ),
+            notify_channels=json.dumps(notify_channels),
         )
     elif type_run == 'ssh' and task_type == 'cron':
         add_ssh_cron_job(
@@ -626,6 +648,7 @@ def add_edit_job(
                     *[{'type': 'notify', 'name': i} for i in extract_names_notify],
                 ]
             ),
+            notify_channels=json.dumps(notify_channels),
         )
     else:
         MessageManager.error(content=t__task('不支持的运行类型') + type_run)
