@@ -5,6 +5,7 @@ from dash_view.application.person_ import personal_info
 from dash_view.application.message_ import announcement
 from dash_view.application.task_ import task_mgmt, task_log
 from dash_view.application.setting_ import notify_api
+from dash_view.application.host_ import host_node, host_conn
 
 ################## 【开始】此处导入您的应用 ###################
 from dash_view.application.example_app import subapp1, subapp2
@@ -32,6 +33,8 @@ class AccessFactory:
         task_mgmt,
         task_log,
         notify_api,
+        host_node,
+        host_conn,
         *apps,
     ]
 
@@ -63,6 +66,8 @@ class AccessFactory:
         '任务管理-页面',
         '任务日志-页面',
         '通知接口-页面',
+        '主机节点-页面',
+        '主机连接-页面',
     )
 
     # 内置可以分配的权限
@@ -89,7 +94,7 @@ class AccessFactory:
 
         all_access_metas = []
         for view in cls.views:
-            all_access_metas.append(view.access_metas)
+            all_access_metas.extend(view.access_metas() if callable(view.access_metas) else view.access_metas)
         dict_va_cou = Counter(all_access_metas)
         for va, cou in dict_va_cou.items():
             if cou > 1:
