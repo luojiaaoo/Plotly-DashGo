@@ -20,11 +20,17 @@
         "Server酱": {
             "en-us": "ServerChan"
         },
+        "Gewechat": {
+            "en-us": "Gewechat"
+        },
         "企业微信群机器人": {
             "en-us": "WeCom Group Robot"
         },
         "添加Server酱": {
             "en-us": "Add Server酱"
+        },
+        "添加Gewechat": {
+            "en-us": "Add Gewechat"
         },
         "添加企业微信群机器人": {
             "en-us": "Add WeCom Group Robot"
