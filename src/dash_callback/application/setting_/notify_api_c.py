@@ -8,7 +8,7 @@ from uuid import uuid4
 from dash import dcc
 import json
 from typing import List
-from common.notify import email_smtp, server_jiang, enterprise_wechat
+from common.notify import email_smtp, server_jiang, enterprise_wechat, gewechat
 from feffery_dash_utils.style_utils import style
 from i18n import t__setting
 
@@ -83,6 +83,68 @@ def get_tabs_items():
                                     fac.AntdButton(
                                         t__setting('消息测试'),
                                         id={'type': 'notify-api-server-jiang-test', 'name': api_name},
+                                        type='default',
+                                    ),
+                                ],
+                            ),
+                        ],
+                        direction='vertical',
+                        style=style(width='100%'),
+                    ),
+                }
+            )
+        elif api_type == 'Gewechat':
+            if params_json and (params_json := json.loads(params_json)):
+                token = params_json['token']
+                app_id = params_json['app_id']
+                base_url = params_json['base_url']
+                wxid = params_json['wxid']
+            else:
+                token = ''
+                app_id = ''
+                base_url = ''
+                wxid = ''
+            items.append(
+                {
+                    'key': api_name,
+                    'label': api_name_label + f' ({t__setting(api_type)})',
+                    'contextMenu': [{'key': api_name, 'label': t__setting('删除')}],
+                    'children': fac.AntdSpace(
+                        [
+                            dcc.Store(id={'type': 'notify-api-Gewechat-api-name', 'name': api_name}, data=api_name),
+                            fac.AntdDivider(api_name_label, innerTextOrientation='left'),
+                            fac.AntdForm(
+                                [
+                                    fac.AntdFormItem(
+                                        fac.AntdInput(id={'type': 'notify-api-Gewechat-token', 'name': api_name}, value=token),
+                                        label='token',
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdInput(id={'type': 'notify-api-Gewechat-app_id', 'name': api_name}, value=app_id),
+                                        label='app_id',
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdInput(id={'type': 'notify-api-Gewechat-base_url', 'name': api_name}, value=base_url),
+                                        label='base_url',
+                                    ),
+                                    fac.AntdFormItem(
+                                        fac.AntdInput(id={'type': 'notify-api-Gewechat-wxid', 'name': api_name}, value=wxid),
+                                        label='wxid',
+                                    ),
+                                ],
+                                labelCol={'span': 5},
+                                wrapperCol={'span': 20},
+                            ),
+                            fac.AntdSpace(
+                                [
+                                    fac.AntdButton(
+                                        t__setting('保存'),
+                                        id={'type': 'notify-api-Gewechat-save', 'name': api_name},
+                                        type='primary',
+                                    ),
+                                    fac.AntdButton(
+                                        t__setting('消息测试'),
+                                        id={'type': 'notify-api-Gewechat-test', 'name': api_name},
                                         type='default',
                                     ),
                                 ],
@@ -240,11 +302,38 @@ def get_notify_api():
     prevent_initial_call=True,
 )
 def add_server_chan_notify_api(nClick, api_name_label):
+    if not api_name_label:
+        MessageManager.error(content=t__setting('请输入API名称'))
+        return dash.no_update
     for i in dao_notify.get_notify_api_by_name(api_name=None):
         if api_name_value2label(i.api_name) == api_name_label:
             MessageManager.error(content=api_name_label + t__setting('已存在'))
             return dash.no_update
     dao_notify.insert_notify_api(api_name=api_name_label + f'\0{uuid4().hex[:12]}', api_type='Server酱', enable=False, params_json='{}')
+    MessageManager.success(content=api_name_label + t__setting('创建成功'))
+    return [get_tabs_items(), *get_notify_api()]
+
+
+# 新建Gewechat api
+@app.callback(
+    [
+        Output('notify-api-edit-tabs', 'items', allow_duplicate=True),
+        Output('notify-api-activate', 'options', allow_duplicate=True),
+        Output('notify-api-activate', 'value', allow_duplicate=True),
+    ],
+    Input('notify-api-add-Gewechat', 'nClicks'),
+    State('notify-api-add-name', 'value'),
+    prevent_initial_call=True,
+)
+def add_Gewechat_notify_api(nClick, api_name_label):
+    if not api_name_label:
+        MessageManager.error(content=t__setting('请输入API名称'))
+        return dash.no_update
+    for i in dao_notify.get_notify_api_by_name(api_name=None):
+        if api_name_value2label(i.api_name) == api_name_label:
+            MessageManager.error(content=api_name_label + t__setting('已存在'))
+            return dash.no_update
+    dao_notify.insert_notify_api(api_name=api_name_label + f'\0{uuid4().hex[:12]}', api_type='Gewechat', enable=False, params_json='{}')
     MessageManager.success(content=api_name_label + t__setting('创建成功'))
     return [get_tabs_items(), *get_notify_api()]
 
@@ -261,6 +350,9 @@ def add_server_chan_notify_api(nClick, api_name_label):
     prevent_initial_call=True,
 )
 def add_wecom_group_robot_notify_api(nClick, api_name_label):
+    if not api_name_label:
+        MessageManager.error(content=t__setting('请输入API名称'))
+        return dash.no_update
     for i in dao_notify.get_notify_api_by_name(api_name=None):
         if api_name_value2label(i.api_name) == api_name_label:
             MessageManager.error(content=api_name_label + t__setting('已存在'))
@@ -282,6 +374,9 @@ def add_wecom_group_robot_notify_api(nClick, api_name_label):
     prevent_initial_call=True,
 )
 def add_email_smtp_notify_api(nClick, api_name_label):
+    if not api_name_label:
+        MessageManager.error(content=t__setting('请输入API名称'))
+        return dash.no_update
     for i in dao_notify.get_notify_api_by_name(api_name=None):
         if api_name_value2label(i.api_name) == api_name_label:
             MessageManager.error(content=api_name_label + t__setting('已存在'))
@@ -373,6 +468,58 @@ def test_server_jiang_api(nClicks, SendKey, Noip, Channel, Openid):
         #     MessageManager.error(content=t__setting('消息加入Server酱队列成功，但可能未发送成功') + 'ERROR:' + str(rt_test))
     else:
         MessageManager.error(content=t__setting('Server酱测试发送失败') + 'ERROR:' + str(rt))
+    return dash.no_update
+
+
+# Gewechat测试通道
+@app.callback(
+    Output({'type': 'notify-api-Gewechat-test', 'name': MATCH}, 'id'),
+    Input({'type': 'notify-api-Gewechat-test', 'name': MATCH}, 'nClicks'),
+    [
+        State({'type': 'notify-api-Gewechat-token', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-Gewechat-app_id', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-Gewechat-base_url', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-Gewechat-wxid', 'name': MATCH}, 'value'),
+    ],
+    prevent_initial_call=True,
+)
+def test_Gewechat_api(nClicks, token, app_id, base_url, wxid):
+    is_ok, rt = gewechat.send_notify(
+        token=token,
+        app_id=app_id,
+        base_url=base_url,
+        title=t__setting('测试'),
+        wxid=wxid,
+        desp=t__setting('这是一条测试消息，用于验证推送功能。'),
+    )
+    if is_ok:
+        MessageManager.success(content=t__setting('Gewechat测试发送成功'))
+    else:
+        MessageManager.error(content=t__setting('Gewechat测试发送失败') + 'ERROR:' + str(rt))
+    return dash.no_update
+
+
+# Gewechat保存回调
+@app.callback(
+    Output({'type': 'notify-api-Gewechat-save', 'name': MATCH}, 'id'),
+    Input({'type': 'notify-api-Gewechat-save', 'name': MATCH}, 'nClicks'),
+    [
+        State({'type': 'notify-api-Gewechat-token', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-Gewechat-app_id', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-Gewechat-base_url', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-Gewechat-wxid', 'name': MATCH}, 'value'),
+        State({'type': 'notify-api-Gewechat-api-name', 'name': MATCH}, 'data'),
+    ],
+    prevent_initial_call=True,
+)
+def save_Gewechat_api(nClick, token, app_id, base_url, wxid, api_name):
+    values = dict(token=token, app_id=app_id, base_url=base_url, wxid=wxid)
+    api_name_label = api_name_value2label(api_name)
+    dao_notify.delete_notify_api_by_name(api_name=api_name)
+    if dao_notify.insert_notify_api(api_name=api_name, api_type='Gewechat', enable=True, params_json=json.dumps(values)):
+        MessageManager.success(content=api_name_label + t__setting('配置保存成功'))
+    else:
+        MessageManager.error(content=api_name_label + t__setting('配置保存失败'))
     return dash.no_update
 
 
