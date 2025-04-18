@@ -1,60 +1,60 @@
-from common.utilities.util_menu_access import MenuAccess
-import feffery_antd_components as fac
+from database.sql_db.conn import db
+from peewee import DoesNotExist, IntegrityError
 from common.utilities.util_logger import Log
-from dash_components import Card
-from dash_callback.application.setting_ import notify_api_c  # noqa
-from i18n import t__setting
-from feffery_dash_utils.style_utils import style
+from ..entity.table_notify_api import SysNotifyApi
+from datetime import datetime, timedelta
+from typing import Optional, Iterator, List, Union
 
-
-# 二级菜单的标题、图标和显示顺序
-title = '通知接口'
-icon = None
 logger = Log.get_logger(__name__)
-order = 1
-access_metas = ('通知接口-页面',)
+support_api_types = [
+    'Server酱',
+    'Gewechat',
+    '企业微信群机器人',
+    '邮件SMTP协议',
+]
 
 
-def render_content(menu_access: MenuAccess, **kwargs):
-    return fac.AntdSpace(
-        [
-            fac.AntdButton(
-                '💕' + t__setting('一天1毛钱的极简微信等消息接口，点击此处购买Server酱消息推送') + '💕',
-                variant='dashed',
-                color='primary',
-                href='https://sct.ftqq.com/r/16293',
-                target='_blank',
-            ),
-            fac.AntdSpace(
-                [
-                    fac.AntdInput(size='small', placeholder=t__setting('输入通知渠道名'), id='notify-api-add-name'),
-                    fac.AntdButton(t__setting('添加Server酱'), type='primary', size='small', id='notify-api-add-serverchan'),
-                    fac.AntdButton(t__setting('添加Gewechat'), type='primary', size='small', id='notify-api-add-Gewechat'),
-                    fac.AntdButton(t__setting('添加企业微信群机器人'), type='primary', size='small', id='notify-api-add-wecom-group-robot'),
-                    fac.AntdButton(t__setting('添加邮件SMTP协议'), type='primary', size='small', id='notify-api-add-email-smtp'),
-                ],
-                style=style(width=800),
-            ),
-            Card(
-                fac.AntdCheckboxGroup(
-                    options=(api_activate := notify_api_c.get_notify_api())[0],
-                    value=api_activate[1],
-                    id='notify-api-activate',
-                ),
-                title=t__setting('激活通道'),
-            ),
-            Card(
-                fac.AntdTabs(
-                    items=notify_api_c.get_tabs_items(),
-                    id='notify-api-edit-tabs',
-                    tabPosition='left',
-                    tabBarGutter=0,
-                    size='small',
-                    placeholder=fac.AntdEmpty(description='There are no available notify api at present'),
-                    style=style(width='100%'),
-                ),
-                title=t__setting('通道配置'),
-            ),
-        ],
-        direction='vertical',
-    )
+def insert_notify_api(api_name: str, api_type: str, enable: bool, params_json: str) -> bool:
+    database = db()
+    try:
+        with database.atomic():
+            SysNotifyApi.create(api_name=api_name, api_type=api_type, enable=enable, params_json=params_json)
+        return True
+    except IntegrityError as e:
+        logger.error(e, exc_info=True)
+        return False
+
+
+def get_notify_api_by_name(api_name: Optional[str] = None) -> Union[SysNotifyApi, List[SysNotifyApi]]:
+    database = db()
+    if api_name is None:
+        notify_apis = [i for i in SysNotifyApi.select()]
+        notify_apis.sort(key=lambda x: x.api_name)
+        return notify_apis
+    else:
+        try:
+            with database.atomic():
+                result = SysNotifyApi.select().where(SysNotifyApi.api_name == api_name).get()
+                return result
+        except DoesNotExist:
+            return None
+
+
+def delete_notify_api_by_name(api_name: str) -> bool:
+    database = db()
+    try:
+        with database.atomic():
+            SysNotifyApi.delete().where(SysNotifyApi.api_name == api_name).execute()
+        return True
+    except IntegrityError:
+        return False
+
+
+def modify_enable(api_name: str, enable: bool) -> bool:
+    database = db()
+    try:
+        with database.atomic():
+            SysNotifyApi.update(enable=enable).where(SysNotifyApi.api_name == api_name).execute()
+        return True
+    except IntegrityError:
+        return False
