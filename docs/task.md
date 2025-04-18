@@ -75,7 +75,7 @@
 
 
 
-### 5、支持Server酱、企业微信群机器人、邮箱多种通知渠道
+### 5、支持Server酱、企业微信群机器人、邮箱等多种通知渠道
 
 >
 > ![](../screenshots/setting_notify.png)

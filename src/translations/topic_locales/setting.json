@@ -14,17 +14,29 @@
         "消息测试": {
             "en-us": "Test"
         },
+        "请输入API名称": {
+            "en-us": "Input API Name"
+        },
+        "已存在": {
+            "en-us": "Already Exists"
+        },
         "创建成功": {
             "en-us": "Test"
         },
         "Server酱": {
             "en-us": "ServerChan"
         },
+        "Gewechat": {
+            "en-us": "Gewechat"
+        },
         "企业微信群机器人": {
             "en-us": "WeCom Group Robot"
         },
         "添加Server酱": {
             "en-us": "Add Server酱"
+        },
+        "添加Gewechat": {
+            "en-us": "Add Gewechat"
         },
         "添加企业微信群机器人": {
             "en-us": "Add WeCom Group Robot"
@@ -61,6 +73,12 @@
         },
         "企业微信群机器人测试发送失败": {
             "en-us": "WeCom Group Robot send test failed"
+        },
+        "Gewechat测试发送成功": {
+            "en-us": "Gewechat send test success"
+        },
+        "Gewechat测试发送失败": {
+            "en-us": "Gewechat send test failed"
         },
         "删除成功": {
             "en-us": "Delete success"

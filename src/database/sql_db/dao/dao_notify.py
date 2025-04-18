@@ -8,6 +8,7 @@ from typing import Optional, Iterator, List, Union
 logger = Log.get_logger(__name__)
 support_api_types = [
     'Server酱',
+    'Gewechat',
     '企业微信群机器人',
     '邮件SMTP协议',
 ]
