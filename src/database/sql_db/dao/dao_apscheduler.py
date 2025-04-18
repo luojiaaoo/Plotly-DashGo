@@ -27,7 +27,10 @@ def get_apscheduler_start_finish_datetime_with_status_by_job_id(job_id: str) -> 
     """查询指定job_id的开始时间"""
     try:
         result_running = (
-            SysApschedulerRunning.select(SysApschedulerRunning.start_datetime).where(SysApschedulerRunning.job_id == job_id).distinct().order_by(SysApschedulerRunning.start_datetime.desc())
+            SysApschedulerRunning.select(SysApschedulerRunning.start_datetime)
+            .where(SysApschedulerRunning.job_id == job_id)
+            .distinct()
+            .order_by(SysApschedulerRunning.start_datetime.desc())
         )
         result_done = (
             SysApschedulerResults.select(SysApschedulerResults.start_datetime, SysApschedulerResults.finish_datetime, SysApschedulerResults.status)

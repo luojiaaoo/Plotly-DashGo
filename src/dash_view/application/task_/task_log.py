@@ -28,8 +28,9 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             fac.AntdSelect(
                                 id='task-log-job-id-select',
                                 options=[{'label': job.job_id, 'value': job.job_id} for job in get_apscheduler_all_jobs()],
-                                style={'width': 700},
+                                style={'width': 800},
                                 listHeight=200,
+                                autoClearSearchValue=True,
                                 prefix=fac.AntdIcon(icon='bi-table'),
                             ),
                             fac.AntdButton(t__task('查询执行记录'), id='task-log-get-start-datetime-btn'),
@@ -41,7 +42,8 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                 id='task-log-start-datetime-select',
                                 prefix=fac.AntdIcon(icon='md-query-builder'),
                                 listHeight=500,
-                                style={'width': 700},
+                                autoClearSearchValue=True,
+                                style={'width': 800},
                             ),
                             fac.AntdButton(t__task('查询执行日志'), id='task-log-get-log-btn'),
                             fac.AntdSwitch(
@@ -80,5 +82,5 @@ def render_content(menu_access: MenuAccess, **kwargs):
             style={'width': '100%', 'height': '100%'},
             className={'& .ant-card-body': {'height': '100%'}},
         ),
-        id='task-log-viewport'
+        id='task-log-viewport',
     )

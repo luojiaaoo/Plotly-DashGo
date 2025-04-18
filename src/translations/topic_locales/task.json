@@ -151,6 +151,15 @@
         },
         "选中行删除成功": {
             "en-us": "Selected Row Delete Success"
+        },
+        "任务日志不存在，等待任务运行": {
+            "en-us": "Task Log Not Exist, Waiting for Task Run"
+        },
+        "请选择任务和开始时间": {
+            "en-us": "Please select task and start time"
+        },
+        "请选择任务": {
+            "en-us": "Please select task"
         }
     }
 }

@@ -6,6 +6,8 @@ import dash
 from uuid import uuid4
 from dash import set_props
 from common.utilities.util_apscheduler import get_apscheduler_all_jobs
+from dash_components import MessageManager
+from i18n import t__task
 
 
 def color_job_finish_status(status):
@@ -52,7 +54,13 @@ def get_start_datetime_options_by_job_id(job_id):
     prevent_initial_call=True,
 )
 def get_run_times(nClicks, job_id):
+    if not job_id:
+        MessageManager.warning(content=t__task('请选择任务'))
+        return dash.no_update
     all_time_of_job = get_start_datetime_options_by_job_id(job_id)
+    if not all_time_of_job:
+        MessageManager.warning(content=t__task('任务日志不存在，等待任务运行'))
+        return all_time_of_job, None, uuid4().hex
     return all_time_of_job, all_time_of_job[0]['value'], uuid4().hex
 
 
@@ -86,6 +94,9 @@ def start_sse(nClick, job_id, start_datetime):
     from urllib.parse import quote
     import uuid
 
+    if not (job_id and start_datetime):
+        MessageManager.warning(content=t__task('请选择任务和开始时间'))
+        return dash.no_update
     return (
         fuc.FefferyPostEventSource(
             key=uuid.uuid4().hex,
@@ -166,6 +177,11 @@ def jump_to_log_view(inViewport, job_id, nClicks):
         'task-log-start-datetime-select',
         {'key': uuid4().hex},
     )
-    set_props('task-log-start-datetime-select', {'value': all_time_of_job[0]['value']})
-    set_props('task-log-get-log-btn', {'nClicks': (nClicks or 0) + 1})
+    if not all_time_of_job:
+        MessageManager.warning(content=t__task('任务日志不存在，等待任务运行'))
+        set_props('task-log-start-datetime-select', {'value': None})
+    else:
+        datetime_select = all_time_of_job[0]['value']
+        set_props('task-log-start-datetime-select', {'value': datetime_select})
+        set_props('task-log-get-log-btn', {'nClicks': (nClicks or 0) + 1})
     return None
