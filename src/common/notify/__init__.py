@@ -1,4 +1,4 @@
-from . import server_jiang, enterprise_wechat, email_smtp
+from . import server_jiang, enterprise_wechat, email_smtp, gewechat
 from database.sql_db.dao.dao_notify import get_notify_api_by_name
 from common.utilities.util_logger import Log
 from typing import List
@@ -69,6 +69,24 @@ def send_text_notify(title: str, short: str, desp: str, notify_channels: List):
                 receivers=Receivers.split(','),
                 title=title,
                 content=desp,
+            )
+            if not is_ok:
+                logger.error(f'发送{api_name}通知失败，错误信息：{rt}')
+        elif api_type == 'Gewechat' and api_name in notify_channels:
+            if not notify_api.params_json:
+                logger.error(f'{api_name}的Key未配置')
+                continue
+            token = params_json['token']
+            app_id = params_json['app_id']
+            base_url = params_json['base_url']
+            wxid = params_json['wxid']
+            is_ok, rt = gewechat.send_notify(
+                token=token,
+                app_id=app_id,
+                base_url=base_url,
+                title=title,
+                wxid=wxid,
+                desp=desp,
             )
             if not is_ok:
                 logger.error(f'发送{api_name}通知失败，错误信息：{rt}')

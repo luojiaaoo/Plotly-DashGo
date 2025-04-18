@@ -3,15 +3,13 @@ from common.constant import HttpStatusConstant
 from config.dashgo_conf import ShowConf
 
 
-def send_notify(token, app_id, base_url, title, wxid, desp, short=None, Openid=None):
+def send_notify(token, app_id, base_url, title, wxid, desp):
     url = f'{base_url}/message/postText'
-    data = {'appId': app_id, 'toWxid': wxid, 'content': ShowConf.APP_NAME + '\n' + title + '\n' + desp}
-    print(data)
+    data = {'appId': app_id, 'toWxid': wxid, 'content': (title + f'【from {ShowConf.APP_NAME}】' + '\n' + desp)[:1200]}
     headers = {
         'X-GEWE-TOKEN': token,
         'Content-Type': 'application/json',
     }
-    print(headers)
     response = requests.post(url, json=data, headers=headers)
     result = response.json()
 
