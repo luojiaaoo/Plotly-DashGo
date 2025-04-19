@@ -33,6 +33,7 @@ def get_start_datetime_options_by_job_id(job_id):
                 fac.AntdText(job_id, keyboard=True),
                 f' Run Time:{start_datetime:%Y-%m-%dT%H:%M:%S} - {f"{finish_datetime:%Y-%m-%dT%H:%M:%S}" if isinstance(finish_datetime, datetime) else finish_datetime} (Duration:{f"{int((finish_datetime - start_datetime).total_seconds())}s" if isinstance(finish_datetime, datetime) else "unfinish"}) ',
                 fac.AntdTag(
+                    key=uuid4().hex,
                     content=f'Status:{status.upper()}',
                     color=color_job_finish_status(status),
                 ),

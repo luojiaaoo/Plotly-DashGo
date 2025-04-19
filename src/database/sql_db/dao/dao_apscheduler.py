@@ -39,7 +39,9 @@ def get_apscheduler_start_finish_datetime_with_status_by_job_id(job_id: str) -> 
         )
         start_datetimes_running = [(i.start_datetime, '...', 'running') for i in result_running]
         start_datetimes_done = [(i.start_datetime, i.finish_datetime, i.status) for i in result_done]
-        return [*start_datetimes_running, *start_datetimes_done]
+        rt = [*start_datetimes_running, *start_datetimes_done]
+        rt.sort(key=lambda x: x[0], reverse=True)
+        return rt
     except DoesNotExist as e:
         raise Exception('Job start datetime not found') from e
 
