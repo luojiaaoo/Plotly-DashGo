@@ -290,7 +290,7 @@ def refresh_add_modal(visible, task_type):
                 + '\n'
                 + t__task('1、符合格式要求的数值类型/字符类型，会写入数据库sys_apscheduler_extract_value表中；')
                 + '\n'
-                + t__task('2、符合格式要求的通知类型，会把name当作标题，val为内容，通过配置的“系统设置/通知接口”发送出去，ssh预置了ssh_status，用于判断是否成功建立ssh连接。'),
+                + t__task('2、符合格式要求的通知类型，会把name当作标题，val为内容，通过配置的“系统设置/通知接口”发送出去。ssh自带连接失败的消息推送。'),
                 ellipsis={'expandable': 'collapsible', 'rows': 1},
                 style=style(whiteSpace='pre-wrap'),
             ),

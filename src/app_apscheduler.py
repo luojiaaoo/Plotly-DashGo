@@ -307,12 +307,12 @@ def run_script(
                 start_datetime=start_datetime,
             )
         except TimeoutError:
-            err_log = f'<SOPS_VAR>ssh_status:[ERROR] Cannot connect to the host {host}</SOPS_VAR>'
+            err_log = f'<SOPS_VAR>[ERROR] SSH connect error from {job_id}: Cannot connect to the host {host}</SOPS_VAR>'
             insert_apscheduler_extract_value(
                 job_id=job_id,
                 log=err_log,
                 start_datetime=start_datetime,
-                extract_names={'type': 'notify', 'name': 'ssh_status'},
+                extract_names=[{'type': 'notify', 'name': f'[ERROR] SSH connect error from {job_id}'}],
                 notify_channels=notify_channels,
             )
             insert_apscheduler_result(
