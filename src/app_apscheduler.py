@@ -11,6 +11,7 @@ import subprocess
 from database.sql_db.dao.dao_apscheduler import (
     insert_apscheduler_result,
     insert_apscheduler_running,
+    insert_apscheduler_extract_value,
     delete_apscheduler_running,
     select_apscheduler_running_log,
     truncate_apscheduler_running,
@@ -25,6 +26,7 @@ from queue import Queue
 from itertools import count
 import threading
 import json
+import re
 import platform
 import os
 import tempfile
@@ -64,6 +66,7 @@ def run_script(
     start_datetime = datetime.now()
     extract_names = json.loads(extract_names)
     notify_channels = json.loads(notify_channels)
+    output_full = ''
 
     def pop_from_stdout(stdout, event: threading.Event, queue_stdout: Queue, encoding='utf8'):
         while not event.is_set():
@@ -134,6 +137,17 @@ def run_script(
                         order=order,
                         start_datetime=start_datetime,
                     )
+                    output_full += output
+                    if extract_names and (search_sops_var := re.search(r'<SOPS_VAR>.+</SOPS_VAR>', output_full)):
+                        # 发现了<SOPS_VAR>标签，进行提取
+                        insert_apscheduler_extract_value(
+                            job_id=job_id,
+                            log=output,
+                            start_datetime=start_datetime,
+                            extract_names=extract_names,
+                            notify_channels=notify_channels,
+                        )
+                        output_full = output_full[search_sops_var.end() :]  # 清除已经提取的内容
                     order += 1
             if process.poll() is not None and output == '':
                 break
@@ -154,6 +168,16 @@ def run_script(
                 order=order,
                 start_datetime=start_datetime,
             )
+            output_full += output
+            if extract_names and (search_sops_var := re.search(r'<SOPS_VAR>.+</SOPS_VAR>', output_full)):
+                # 发现了<SOPS_VAR>标签，进行提取
+                insert_apscheduler_extract_value(
+                    job_id=job_id,
+                    log=output,
+                    start_datetime=start_datetime,
+                    extract_names=extract_names,
+                    notify_channels=notify_channels,
+                )
         if is_timeout:
             log = select_apscheduler_running_log(job_id=job_id, start_datetime=start_datetime)
             insert_apscheduler_result(
@@ -161,8 +185,6 @@ def run_script(
                 status='timeout',
                 log=log,
                 start_datetime=start_datetime,
-                extract_names=extract_names,
-                notify_channels=notify_channels,
             )
         else:
             return_code = process.wait()
@@ -172,8 +194,6 @@ def run_script(
                 status='success' if return_code == 0 else 'error',
                 log=log,
                 start_datetime=start_datetime,
-                extract_names=extract_names,
-                notify_channels=notify_channels,
             )
         delete_apscheduler_running(job_id=job_id, start_datetime=start_datetime)
         # 删除旧的脚本文件
@@ -229,6 +249,17 @@ def run_script(
                                 order=order,
                                 start_datetime=start_datetime,
                             )
+                            output_full += output
+                            if extract_names and (search_sops_var := re.search(r'<SOPS_VAR>.+</SOPS_VAR>', output_full)):
+                                # 发现了<SOPS_VAR>标签，进行提取
+                                insert_apscheduler_extract_value(
+                                    job_id=job_id,
+                                    log=output,
+                                    start_datetime=start_datetime,
+                                    extract_names=extract_names,
+                                    notify_channels=notify_channels,
+                                )
+                                output_full = output_full[search_sops_var.end() :]  # 清除已经提取的内容
                             order += 1
                     if stdout.channel.exit_status_ready() and output == '':
                         break
@@ -245,7 +276,17 @@ def run_script(
                         order=order,
                         start_datetime=start_datetime,
                     )
-                stdout.readline() # 尝试读一下，如果是超时的异常，则会抛出socket.timeout
+                    output_full += output
+                    if extract_names and (search_sops_var := re.search(r'<SOPS_VAR>.+</SOPS_VAR>', output_full)):
+                        # 发现了<SOPS_VAR>标签，进行提取
+                        insert_apscheduler_extract_value(
+                            job_id=job_id,
+                            log=output,
+                            start_datetime=start_datetime,
+                            extract_names=extract_names,
+                            notify_channels=notify_channels,
+                        )
+                stdout.readline()  # 尝试读一下，如果是超时的异常，则会抛出socket.timeout
             except socket.timeout:
                 # 超时
                 log = select_apscheduler_running_log(job_id=job_id, start_datetime=start_datetime)
@@ -254,8 +295,6 @@ def run_script(
                     status='timeout',
                     log=log,
                     start_datetime=start_datetime,
-                    extract_names=extract_names,
-                    notify_channels=notify_channels,
                 )
                 return
             return_code = stdout.channel.recv_exit_status()
@@ -266,17 +305,21 @@ def run_script(
                 status='success' if return_code == 0 else 'error',
                 log=log,
                 start_datetime=start_datetime,
-                extract_names=extract_names,
-                notify_channels=notify_channels,
             )
         except TimeoutError:
+            err_log = f'<SOPS_VAR>ssh_status:[ERROR] Cannot connect to the host {host}</SOPS_VAR>'
+            insert_apscheduler_extract_value(
+                job_id=job_id,
+                log=err_log,
+                start_datetime=start_datetime,
+                extract_names={'type': 'notify', 'name': 'ssh_status'},
+                notify_channels=notify_channels,
+            )
             insert_apscheduler_result(
                 job_id,
                 status='error',
-                log=f'[ERROR] Cannot connect to the host {host}, <SOPS_VAR>ssh_status:unconnect</SOPS_VAR>',
+                log=err_log,
                 start_datetime=start_datetime,
-                extract_names=extract_names,
-                notify_channels=notify_channels,
             )
         except Exception as e:
             raise e

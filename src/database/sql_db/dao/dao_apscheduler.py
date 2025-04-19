@@ -130,50 +130,53 @@ def truncate_apscheduler_running():
         logger.error(f'清空实时日志时发生数据库完整性错误: {e}')
 
 
-def insert_apscheduler_result(job_id, status, log, start_datetime, extract_names, notify_channels):
+def insert_apscheduler_extract_value(job_id, log, start_datetime, extract_names, notify_channels):
+    database = db()
+    if not extract_names:
+        return
+    with database.atomic():
+        for extract_name in extract_names:
+            type_ = extract_name['type']
+            name = extract_name['name']
+            re_search = re.search(r'<SOPS_VAR>%s:(.+?)</SOPS_VAR>' % re.escape(name), log, flags=re.DOTALL)
+            if re_search:
+                value = re_search.group(1)
+                if type_ == 'string':
+                    try:
+                        value = str(value)
+                    except:
+                        logger.warning(f'提取数据类型为string，但无法转换为字符串: {value}')
+                        continue
+                elif type_ == 'number':
+                    try:
+                        value = float(value)
+                    except:
+                        logger.warning(f'提取数据类型为string，但无法转换为字符串: {value}')
+                        continue
+                elif type_ == 'notify':
+                    send_text_notify(
+                        title=name,
+                        short=value,
+                        desp=value + f'【The message from Job {job_id}】',
+                        notify_channels=notify_channels,
+                    )
+                else:
+                    raise ValueError('不支持的提取数据类型')
+                SysApschedulerExtractValue.create(
+                    job_id=job_id,
+                    extract_name=extract_name,
+                    value_type=type_,
+                    value=value,
+                    start_datetime=start_datetime,
+                    finish_datetime=datetime.now(),
+                )
+
+
+def insert_apscheduler_result(job_id, status, log, start_datetime):
     database = db()
     try:
-        now = datetime.now()
         with database.atomic():
-            SysApschedulerResults.create(job_id=job_id, status=status, log=log, start_datetime=start_datetime, finish_datetime=now)
-        if not extract_names:
-            return
-        with database.atomic():
-            for extract_name in extract_names:
-                type_ = extract_name['type']
-                name = extract_name['name']
-                re_search = re.search(r'<SOPS_VAR>%s:(.+?)</SOPS_VAR>' % re.escape(name), log, flags=re.DOTALL)
-                if re_search:
-                    value = re_search.group(1)
-                    if type_ == 'string':
-                        try:
-                            value = str(value)
-                        except:
-                            logger.warning(f'提取数据类型为string，但无法转换为字符串: {value}')
-                            continue
-                    elif type_ == 'number':
-                        try:
-                            value = float(value)
-                        except:
-                            logger.warning(f'提取数据类型为string，但无法转换为字符串: {value}')
-                            continue
-                    elif type_ == 'notify':
-                        send_text_notify(
-                            title=name,
-                            short=value,
-                            desp=value + f'【The message from Job {job_id}】',
-                            notify_channels=notify_channels,
-                        )
-                    else:
-                        raise ValueError('不支持的提取数据类型')
-                    SysApschedulerExtractValue.create(
-                        job_id=job_id,
-                        extract_name=extract_name,
-                        value_type=type_,
-                        value=value,
-                        start_datetime=start_datetime,
-                        finish_datetime=now,
-                    )
+            SysApschedulerResults.create(job_id=job_id, status=status, log=log, start_datetime=start_datetime, finish_datetime=datetime.now())
     except IntegrityError as e:
         logger.error(f'插入任务结果时发生数据库完整性错误: {e}')
         raise Exception('Failed to insert apscheduler result due to integrity error') from e
