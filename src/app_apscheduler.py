@@ -186,6 +186,15 @@ def run_script(
                 log=log,
                 start_datetime=start_datetime,
             )
+            err_name = f'[ERROR] {job_id} Local Script Execute Timeout'
+            err_log = f'<SOPS_VAR>{err_name}: {log}</SOPS_VAR>'
+            insert_apscheduler_extract_value(
+                job_id=job_id,
+                log=err_log,
+                start_datetime=start_datetime,
+                extract_names=[{'type': 'notify', 'name': err_name}],
+                notify_channels=notify_channels,
+            )
         else:
             return_code = process.wait()
             log = select_apscheduler_running_log(job_id=job_id, start_datetime=start_datetime)
@@ -195,6 +204,16 @@ def run_script(
                 log=log,
                 start_datetime=start_datetime,
             )
+            if return_code != 0:
+                err_name = f'[ERROR] {job_id} Local Script Execute Failed'
+                err_log = f'<SOPS_VAR>{err_name}: {log}</SOPS_VAR>'
+                insert_apscheduler_extract_value(
+                    job_id=job_id,
+                    log=err_log,
+                    start_datetime=start_datetime,
+                    extract_names=[{'type': 'notify', 'name': err_name}],
+                    notify_channels=notify_channels,
+                )
         delete_apscheduler_running(job_id=job_id, start_datetime=start_datetime)
         # 删除旧的脚本文件
         script_filepath_old = glob.glob(os.path.join(tempfile.gettempdir(), 'dashgo_*'))
@@ -296,6 +315,15 @@ def run_script(
                     log=log,
                     start_datetime=start_datetime,
                 )
+                err_name = f'[ERROR] {job_id} Ssh Script Execute Timeout'
+                err_log = f'<SOPS_VAR>{err_name}: {log}</SOPS_VAR>'
+                insert_apscheduler_extract_value(
+                    job_id=job_id,
+                    log=err_log,
+                    start_datetime=start_datetime,
+                    extract_names=[{'type': 'notify', 'name': err_name}],
+                    notify_channels=notify_channels,
+                )
                 return
             return_code = stdout.channel.recv_exit_status()
             # 执行成功 or 失败
@@ -306,20 +334,31 @@ def run_script(
                 log=log,
                 start_datetime=start_datetime,
             )
+            if return_code != 0:
+                err_name = f'[ERROR] {job_id} Ssh Script Execute Fail'
+                err_log = f'<SOPS_VAR>{err_name}: {log}</SOPS_VAR>'
+                insert_apscheduler_extract_value(
+                    job_id=job_id,
+                    log=err_log,
+                    start_datetime=start_datetime,
+                    extract_names=[{'type': 'notify', 'name': err_name}],
+                    notify_channels=notify_channels,
+                )
         except TimeoutError:
-            err_log = f'<SOPS_VAR>[ERROR] SSH connect error from {job_id}: Cannot connect to the host {host}</SOPS_VAR>'
-            insert_apscheduler_extract_value(
-                job_id=job_id,
-                log=err_log,
-                start_datetime=start_datetime,
-                extract_names=[{'type': 'notify', 'name': f'[ERROR] SSH connect error from {job_id}'}],
-                notify_channels=notify_channels,
-            )
+            err_log = f'<SOPS_VAR>{err_name}: Cannot connect to the host {host}</SOPS_VAR>'
             insert_apscheduler_result(
                 job_id,
                 status='error',
                 log=err_log,
                 start_datetime=start_datetime,
+            )
+            err_name = f'[ERROR] SSH connect error from {job_id}'
+            insert_apscheduler_extract_value(
+                job_id=job_id,
+                log=err_log,
+                start_datetime=start_datetime,
+                extract_names=[{'type': 'notify', 'name': err_name}],
+                notify_channels=notify_channels,
             )
         except Exception as e:
             raise e

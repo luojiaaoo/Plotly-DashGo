@@ -125,8 +125,11 @@
         "1、符合格式要求的数值类型/字符类型，会写入数据库sys_apscheduler_extract_value表中；": {
             "en-us": "1. The value type/character type that meets the format requirements will be written to the sys_apscheduler_extract_value table of the database;"
         },
-        "2、符合格式要求的通知类型，会把name当作标题，val为内容，通过配置的“系统设置/通知接口”发送出去。ssh自带连接失败的消息推送。": {
-            "en-us": "2. The notification type that meets the format requirements will be sent through the configured System Settings/Notify Api with name as the title and val as the content. SSH has a built-in connection failure notify."
+        "2、符合格式要求的通知类型，会把name当作标题，val为内容，通过配置的“系统设置/通知接口”发送出去。": {
+            "en-us": "2. The notification type that meets the format requirements will be sent through the configured System Settings/Notify Api with name as the title and val as the content. "
+        },
+        "！！ 当脚本失败/超时自动进行消息推送。": {
+            "en-us": "!! Automatically notify when the script fails/times out."
         },
         "抽取-数值类型": {
             "en-us": "Extract-Number"
