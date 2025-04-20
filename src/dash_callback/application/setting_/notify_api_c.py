@@ -228,7 +228,7 @@ def get_tabs_items():
                                         label='Host',
                                     ),
                                     fac.AntdFormItem(
-                                        fac.AntdInput(id={'type': 'notify-api-email-smtp-Port', 'name': api_name}, value=Port),
+                                        fac.AntdInput(id={'type': 'notify-api-email-smtp-Port', 'name': api_name}, value=Port if Port else '465'),
                                         label='Port',
                                     ),
                                     fac.AntdFormItem(

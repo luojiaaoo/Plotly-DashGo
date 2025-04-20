@@ -7,7 +7,7 @@ from common.utilities.util_logger import Log
 logger = Log.get_logger(__name__)
 
 
-def get_email_context_from_subject(
+def get_email_context_from_subject_during(
     imap_server: str,
     port: int,
     emal_account: str,

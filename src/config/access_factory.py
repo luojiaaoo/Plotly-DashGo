@@ -4,7 +4,7 @@ from dash_view.application.dashboard_ import workbench, monitor
 from dash_view.application.person_ import personal_info
 from dash_view.application.message_ import announcement
 from dash_view.application.task_ import task_mgmt, task_log
-from dash_view.application.setting_ import notify_api
+from dash_view.application.setting_ import notify_api, listen_api
 
 ################## 【开始】此处导入您的应用 ###################
 from dash_view.application.example_app import subapp1, subapp2
@@ -32,6 +32,7 @@ class AccessFactory:
         task_mgmt,
         task_log,
         notify_api,
+        listen_api,
         *apps,
     ]
 
@@ -63,6 +64,7 @@ class AccessFactory:
         '任务管理-页面',
         '任务日志-页面',
         '通知接口-页面',
+        '监听接口-页面',
     )
 
     # 内置可以分配的权限

@@ -45,6 +45,7 @@ def create_rds_table():
     from .entity.table_oauth2 import OAuth2Client, OAuth2AuthorizationCode, OAuth2Token
     from .entity.table_apscheduler import SysApschedulerResults, SysApschedulerExtractValue, SysApschedulerRunning
     from .entity.table_notify_api import SysNotifyApi
+    from .entity.table_listen_api import SysListenApi
 
     db_instance.create_tables(
         [
@@ -63,6 +64,7 @@ def create_rds_table():
             SysApschedulerExtractValue,
             SysApschedulerRunning,
             SysNotifyApi,
+            SysListenApi,
         ],
         safe=True,
     )

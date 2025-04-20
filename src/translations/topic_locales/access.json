@@ -293,6 +293,12 @@
         "任务日志-页面": {
             "en-us": "Task Log Show"
         },
+        "监听接口": {
+            "en-us": "Listen Api"
+        },
+        "监听接口-页面": {
+            "en-us": "Listen Api Show"
+        },
         "应用案例": {
             "en-us": "App Example"
         },
