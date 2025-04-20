@@ -27,7 +27,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                         [
                             fac.AntdSelect(
                                 id='task-log-job-id-select',
-                                options=[{'label': job.job_id, 'value': job.job_id} for job in get_apscheduler_all_jobs()],
+                                options=sorted([{'label': job.job_id, 'value': job.job_id} for job in get_apscheduler_all_jobs()], key=lambda job: job['label'], reverse=True),
                                 style={'width': 800},
                                 listHeight=200,
                                 autoClearSearchValue=True,

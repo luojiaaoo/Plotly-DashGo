@@ -439,7 +439,7 @@ class SchedulerService(rpyc.Service):
         return {
             'id': job.id,
             'status': job.next_run_time is not None,
-            'next_run_time': f'{job.next_run_time:%Y-%m-%dT%H:%M:%S}' if job.next_run_time else '',
+            'next_run_time': f'{job.next_run_time:%Y-%m-%dT%H:%M:%S}' if job.next_run_time else '-',
             'kwargs': job.kwargs,
             'trigger': trigger,
             'plan': plan,

@@ -23,9 +23,8 @@ def remove_activa_listen_job(job_id: str) -> bool:
     try:
         with database.atomic():
             ApschedulerJobsActiveListen.delete().where(ApschedulerJobsActiveListen.job_id == job_id).execute()
-        return True
-    except IntegrityError:
-        return False
+    except IntegrityError as e:
+        raise e
 
 
 def enable_job(job_id: str, enable: bool) -> bool:
@@ -33,11 +32,10 @@ def enable_job(job_id: str, enable: bool) -> bool:
     try:
         with database.atomic():
             ApschedulerJobsActiveListen.update(
-                enable=enable,
+                status=enable,
             ).where(ApschedulerJobsActiveListen.job_id == job_id).execute()
-        return True
-    except IntegrityError:
-        return False
+    except IntegrityError as e:
+        raise e
 
 
 def insert_activa_listen_job(
@@ -53,12 +51,12 @@ def insert_activa_listen_job(
     notify_channels,
     extract_names,
     timeout,
-    host,
-    port,
-    username,
-    password,
     listen_channels,
     listen_keyword,
+    host=None,
+    port=None,
+    username=None,
+    password=None,
 ) -> bool:
     database = db()
     try:
@@ -84,5 +82,5 @@ def insert_activa_listen_job(
                 listen_keyword=listen_keyword,
             )
         return True
-    except IntegrityError:
-        return False
+    except IntegrityError as e:
+        raise e

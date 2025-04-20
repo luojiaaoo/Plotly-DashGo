@@ -241,15 +241,15 @@ def get_apscheduler_all_jobs():
             JobInfo(
                 job_id=job.job_id,
                 status=job.status,
-                job_next_run_time=None,
+                job_next_run_time='-',
                 trigger='listen',
-                plan=None,
+                plan='-',
                 type=job.type,
                 script_text=job.script_text,
                 script_type=job.script_type,
                 timeout=job.timeout,
-                extract_names=json.loads(job.extract_names),
-                notify_channels=json.loads(job.notify_channels),
+                extract_names=job.extract_names,
+                notify_channels=job.notify_channels,
                 update_by=job.extract_names,
                 update_datetime=f'{job.update_datetime:%Y-%m-%dT%H:%M:%S}',
                 create_by=job.create_by,
@@ -257,7 +257,7 @@ def get_apscheduler_all_jobs():
             )
             for job in dao_listen_task.get_activa_listen_job()
         ]
-        return sorted(aps_job + active_listen_jobs, key=lambda x: x.job_id)
+        return aps_job + active_listen_jobs
     except Exception as e:
         raise e
     finally:
@@ -280,8 +280,8 @@ def start_stop_job(job_id, is_start: bool, type_task: str):
             conn.close()
 
 
-def remove_job(job_id,type_type):
-    if type_type == 'listen':
+def remove_job(job_id, task_tye):
+    if task_tye == 'listen':
         dao_listen_task.remove_activa_listen_job(job_id=job_id)
     else:
         try:
@@ -351,9 +351,9 @@ def get_platform():
 def get_job(job_id):
     try:
         conn = get_connect()
-        job = conn.root.get_job(job_id)
-        if job:
-            return json.loads()
+        job_json = conn.root.get_job(job_id)
+        if job_json:
+            return json.loads(job_json)
         else:
             return None
     except Exception as e:

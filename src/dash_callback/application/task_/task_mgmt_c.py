@@ -122,7 +122,7 @@ def init_table(timeoutCount):
 )
 def handle_enable_eow(recentlySwitchDataIndex, recentlySwitchStatus, recentlySwitchRow):
     """处理启用、关闭逻辑"""
-    type_task = recentlySwitchRow['type']
+    type_task = recentlySwitchRow['trigger']
     status = recentlySwitchRow['enable']['checked']
     job_id = recentlySwitchRow['enable']['custom']
     start_stop_job(job_id=job_id, is_start=status, type_task=type_task)
@@ -222,7 +222,7 @@ def refresh_add_modal(visible, task_type):
     ]
     return fac.AntdForm(
         [
-            dcc.Store(id='task-mgmt-table-add-modal-ok-trigger-store', data=''),
+            dcc.Store(id='task-mgmt-table-add-modal-ok-store', data=''),
             dcc.Store(id='task-mgmt-table-add-modal-editor-script-text-store'),
             fac.AntdFormItem(
                 fac.AntdSegmented(
@@ -245,7 +245,7 @@ def refresh_add_modal(visible, task_type):
             fac.AntdFormItem(
                 fac.AntdSpace(
                     [
-                        fac.AntdInput(id='task-mgmt-table-add-modal-listen-keyword'),
+                        fac.AntdInput(id='task-mgmt-table-add-modal-listen-keyword', value=''),
                         fac.AntdCheckboxGroup(
                             options=[{'label': api_name_value2label(listen_api.api_name), 'value': listen_api.api_name} for listen_api in get_listen_api_by_name(api_name=None)],
                             value=[],
@@ -602,7 +602,7 @@ app.clientside_callback(
         }
     """,
     [
-        Output('task-mgmt-table-add-modal-ok-trigger-store', 'data'),
+        Output('task-mgmt-table-add-modal-ok-store', 'data'),
         Output('task-mgmt-table-add-modal-editor-script-text-store', 'data'),
     ],
     Input('task-mgmt-table-add-modal', 'okCounts'),
@@ -612,7 +612,7 @@ app.clientside_callback(
 
 @app.callback(
     Output('task-mgmt-table', 'data', allow_duplicate=True),
-    Input('task-mgmt-table-add-modal-ok-trigger-store', 'data'),
+    Input('task-mgmt-table-add-modal-ok-store', 'data'),
     [
         State('task-mgmt-table-add-modal-task-type-store', 'data'),  # 任务类型 周期/定时
         State('task-mgmt-table-add-modal-run-type-select', 'value'),  # 执行类型 ssh/local
@@ -641,7 +641,7 @@ app.clientside_callback(
     prevent_initial_call=True,
 )
 def add_edit_job(
-    trigger,
+    modal_ok,
     task_type,
     type_run,
     script_text,
@@ -666,11 +666,11 @@ def add_edit_job(
     listen_channels,
     title,
 ):
-    if not trigger:  # fix: 无法避免初始化调用
+    if not modal_ok:  # fix: 无法避免初始化调用
         return dash.no_update
     # 如果任务类型是cron，需要提前检查cron表达式是否正确
     cron_verify = r'^((?<![\d\-\*])((\*\/)?([0-5]?[0-9])((\,|\-|\/)([0-5]?[0-9]))*|\*)[^\S\r\n]+((\*\/)?((2[0-3]|1[0-9]|[0-9]|00))((\,|\-|\/)(2[0-3]|1[0-9]|[0-9]|00))*|\*)[^\S\r\n]+((\*\/)?([1-9]|[12][0-9]|3[01])((\,|\-|\/)([1-9]|[12][0-9]|3[01]))*|\*)[^\S\r\n]+((\*\/)?([1-9]|1[0-2])((\,|\-|\/)([1-9]|1[0-2]))*|\*|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[^\S\r\n]+((\*\/)?[0-6]((\,|\-|\/)[0-6])*|\*|00|(sun|mon|tue|wed|thu|fri|sat))[^\S\r\n]*(?:\bexpr \x60date \+\\\%W\x60 \\\% \d{1,2} \> \/dev\/null \|\|)?(?=$| |\'|\"))|@(annually|yearly|monthly|weekly|daily|hourly|reboot)$'
-    if trigger == 'cron' and not re.match(cron_verify, f'{cron_minute} {cron_hour} {cron_day} {cron_month} {cron_day_of_week}'):
+    if task_type == 'cron' and not re.match(cron_verify, f'{cron_minute} {cron_hour} {cron_day} {cron_month} {cron_day_of_week}'):
         MessageManager.error(content='cron表达式不正确')
         return dash.no_update
     is_edit = False
@@ -686,7 +686,7 @@ def add_edit_job(
             job = dao_listen_task.get_activa_listen_job(job_id=job_id)[0]
             status = job.status
             create_by = job.create_by
-            create_datetime = job.create_datetime
+            create_datetime = f'{job.create_datetime:%Y-%m-%dT%H:%M:%S}'
         remove_job(job_id, task_type)  # 删除
         is_edit = True
     else:
@@ -697,7 +697,7 @@ def add_edit_job(
     op_user_name = get_menu_access(only_get_user_name=True)
     now = f'{datetime.now():%Y-%m-%dT%H:%M:%S}'
     create_by = create_by or op_user_name
-    create_datetime = create_datetime or f'{datetime.now():%Y-%m-%dT%H:%M:%S}'
+    create_datetime = create_datetime or now
     if type_run == 'local' and task_type == 'interval':
         add_local_interval_job(
             script_text=script_text,
@@ -800,9 +800,9 @@ def add_edit_job(
             script_text=script_text,
             script_type=script_type,
             update_by=op_user_name,
-            update_datetime=now,
+            update_datetime=datetime.strptime(now, '%Y-%m-%dT%H:%M:%S'),
             create_by=create_by,
-            create_datetime=create_datetime,
+            create_datetime=datetime.strptime(create_datetime, '%Y-%m-%dT%H:%M:%S'),
             notify_channels=json.dumps(notify_channels),
             extract_names=json.dumps(
                 [
@@ -823,9 +823,9 @@ def add_edit_job(
             script_text=script_text,
             script_type=script_type,
             update_by=op_user_name,
-            update_datetime=now,
+            update_datetime=datetime.strptime(now, '%Y-%m-%dT%H:%M:%S'),
             create_by=create_by,
-            create_datetime=create_datetime,
+            create_datetime=datetime.strptime(create_datetime, '%Y-%m-%dT%H:%M:%S'),
             notify_channels=json.dumps(notify_channels),
             extract_names=json.dumps(
                 [
@@ -867,7 +867,7 @@ def handle_delete(confirmCounts, selectedRows):
         return dash.no_update
 
     # 删除选中行
-    [remove_job(row['job_id'], row['type']) for row in selectedRows]
+    [remove_job(row['job_id'], row['trigger']) for row in selectedRows]
     MessageManager.success(content=t__task('选中行删除成功'))
 
     # 重置选中行

@@ -164,6 +164,7 @@ def jump_to_log_view(inViewport, job_id, nClicks):
     from dash_callback.application.task_.task_log_c import get_start_datetime_options_by_job_id
 
     all_job = [{'label': job.job_id, 'value': job.job_id} for job in get_apscheduler_all_jobs()]
+    all_job.sort(key=lambda job: job['label'], reverse=True)
     set_props(
         'task-log-job-id-select',
         {'options': all_job},
