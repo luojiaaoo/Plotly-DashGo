@@ -400,7 +400,10 @@ class SchedulerService(rpyc.Service):
 
     def exposed_get_job(self, job_id):
         job = scheduler.get_job(job_id)
-        return json.dumps(self.get_job_dict(job))
+        if job:
+            return json.dumps(self.get_job_dict(job))
+        else:
+            return None
 
     def exposed_get_platform(self):
         return platform.system()

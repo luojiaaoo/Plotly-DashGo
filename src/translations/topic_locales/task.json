@@ -143,6 +143,12 @@
         "连接错误，请检查主机/端口/用户名/密码": {
             "en-us": "Connection error, please check host/port/username/password"
         },
+        "监听接口触发任务的验证关键词/渠道": {
+            "en-us": "Listen Task Trigger Keyword/Channels"
+        },
+        "任务名已存在，请修改后重试": {
+            "en-us": "Task Name Already Exist, Please Modify and Retry"
+        },
         "连接成功": {
             "en-us": "Connection Success"
         },

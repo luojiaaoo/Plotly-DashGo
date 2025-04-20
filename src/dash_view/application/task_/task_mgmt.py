@@ -40,6 +40,12 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             type='primary',
                             icon=fac.AntdIcon(icon='md-schedule'),
                         ),
+                        fac.AntdButton(
+                            id='task-mgmt-button-add-listen',
+                            children=t__task('新增监听接口触发任务'),
+                            type='primary',
+                            icon=fac.AntdIcon(icon='pi-binoculars'),
+                        ),
                         fac.AntdPopconfirm(
                             fac.AntdButton(
                                 t__task('删除选中'),

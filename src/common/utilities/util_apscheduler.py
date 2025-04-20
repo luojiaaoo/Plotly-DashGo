@@ -264,27 +264,33 @@ def get_apscheduler_all_jobs():
         conn.close()
 
 
-def start_stop_job(job_id, is_start: bool):
-    try:
-        conn = get_connect()
-        if is_start:
-            conn.root.resume_job(job_id=job_id)
-        else:
-            conn.root.pause_job(job_id=job_id)
-    except Exception as e:
-        raise e
-    finally:
-        conn.close()
+def start_stop_job(job_id, is_start: bool, type_task: str):
+    if type_task == 'listen':
+        dao_listen_task.enable_job(job_id=job_id, enable=is_start)
+    else:
+        try:
+            conn = get_connect()
+            if is_start:
+                conn.root.resume_job(job_id=job_id)
+            else:
+                conn.root.pause_job(job_id=job_id)
+        except Exception as e:
+            raise e
+        finally:
+            conn.close()
 
 
-def remove_job(job_id):
-    try:
-        conn = get_connect()
-        conn.root.remove_job(job_id=job_id)
-    except Exception as e:
-        raise e
-    finally:
-        conn.close()
+def remove_job(job_id,type_type):
+    if type_type == 'listen':
+        dao_listen_task.remove_activa_listen_job(job_id=job_id)
+    else:
+        try:
+            conn = get_connect()
+            conn.root.remove_job(job_id=job_id)
+        except Exception as e:
+            raise e
+        finally:
+            conn.close()
 
 
 def modify_job(job_id, **kwargs):
@@ -345,7 +351,11 @@ def get_platform():
 def get_job(job_id):
     try:
         conn = get_connect()
-        return json.loads(conn.root.get_job(job_id))
+        job = conn.root.get_job(job_id)
+        if job:
+            return json.loads()
+        else:
+            return None
     except Exception as e:
         raise e
     finally:

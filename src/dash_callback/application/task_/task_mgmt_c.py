@@ -23,10 +23,12 @@ from common.utilities.util_apscheduler import (
     get_job,
 )
 from database.sql_db.dao.dao_notify import get_notify_api_by_name
+from database.sql_db.dao.dao_listen import get_listen_api_by_name
 from feffery_dash_utils.style_utils import style
 from uuid import uuid4
 from datetime import datetime
 from i18n import t__task
+from database.sql_db.dao import dao_listen_task
 from common.utilities.util_menu_access import get_menu_access
 import json
 
@@ -120,9 +122,10 @@ def init_table(timeoutCount):
 )
 def handle_enable_eow(recentlySwitchDataIndex, recentlySwitchStatus, recentlySwitchRow):
     """处理启用、关闭逻辑"""
+    type_task = recentlySwitchRow['type']
     status = recentlySwitchRow['enable']['checked']
     job_id = recentlySwitchRow['enable']['custom']
-    start_stop_job(job_id=job_id, is_start=status)
+    start_stop_job(job_id=job_id, is_start=status, type_task=type_task)
     if status:
         MessageManager.success(content=f'{job_id}' + t__task('任务启用成功'))
     else:
@@ -149,6 +152,7 @@ def flash_table(nClicks):
     [
         Input('task-mgmt-button-add-interval', 'nClicks'),
         Input('task-mgmt-button-add-cron', 'nClicks'),
+        Input('task-mgmt-button-add-listen', 'nClicks'),
         Input('task-mgmt-table', 'nClicksButton'),
     ],
     [
@@ -157,12 +161,14 @@ def flash_table(nClicks):
     ],
     prevent_initial_call=True,
 )
-def show_modal(nClicks, nClicks_, nClicksButton, clickedCustom, recentlyButtonClickedRow):
+def show_modal(nClicks, nClicks_, nClicks__, nClicksButton, clickedCustom, recentlyButtonClickedRow):
     """显示新增interval数据模态框"""
     if dash.ctx.triggered_id == 'task-mgmt-button-add-interval':
         return True, t__task('新增周期任务'), 'interval'
     elif dash.ctx.triggered_id == 'task-mgmt-button-add-cron':
         return True, t__task('新增定时任务'), 'cron'
+    elif dash.ctx.triggered_id == 'task-mgmt-button-add-listen':
+        return True, t__task('新增监听接口触发任务'), 'listen'
     elif dash.ctx.triggered_id == 'task-mgmt-table' and clickedCustom.startswith('edit'):
         job_id = clickedCustom.split(':', 1)[-1]
         trigger = recentlyButtonClickedRow['trigger']
@@ -235,6 +241,21 @@ def refresh_add_modal(visible, task_type):
                 fac.AntdInput(id='task-mgmt-table-add-modal-job-id'),
                 label=t__task('任务名'),
                 id='task-mgmt-table-add-modal-job-id-item',
+            ),
+            fac.AntdFormItem(
+                fac.AntdSpace(
+                    [
+                        fac.AntdInput(id='task-mgmt-table-add-modal-listen-keyword'),
+                        fac.AntdCheckboxGroup(
+                            options=[{'label': api_name_value2label(listen_api.api_name), 'value': listen_api.api_name} for listen_api in get_listen_api_by_name(api_name=None)],
+                            value=[],
+                            id='task-mgmt-table-add-modal-listen-channels',
+                        ),
+                    ]
+                ),
+                label=t__task('监听接口触发任务的验证关键词/渠道'),
+                id='task-mgmt-table-add-modal-listen-keyword-item',
+                style=style(display='block' if task_type == 'listen' else 'none'),
             ),
             fac.AntdSpace(
                 [
@@ -323,7 +344,8 @@ def refresh_add_modal(visible, task_type):
                 label=t__task('通知类型-通知渠道'),
             ),
         ],
-        labelCol={'span': 5},
+        labelWrap=True,
+        labelCol={'span': 4},
         wrapperCol={'span': 20},
         style={'width': 800},
     )
@@ -335,67 +357,117 @@ def refresh_add_modal(visible, task_type):
     [
         State('task-mgmt-table-add-modal-title', 'children'),
         State('task-mgmt-table-add-modal-extract-names-type-notify-for-notify-channels', 'options'),
+        State('task-mgmt-table-add-modal-listen-channels', 'options'),
+        State('task-mgmt-table-add-modal-task-type-store', 'data'),
     ],
 )
-def full_value_for_edit(id, title, notify_channels_options):
+def full_value_for_edit(id, title, notify_channels_options, listen_channels_options, task_type):
     # 如果是编辑，初始化数据
     if '⠆' not in title:  # 特殊盲文符号，作为编辑动作的标志位
         return dash.no_update
     notify_channels_options_value = [notify_channels_option['value'] for notify_channels_option in notify_channels_options]
     job_id = title.split('⠆')[-1]
-    job_dict = get_job(job_id)
-    set_props('task-mgmt-table-add-modal-update-editor-language', {'value': job_dict['kwargs']['script_type']})
-    set_props('task-mgmt-table-add-modal-editor-full-timeout', {'delay': 100})  # 间接代码填充
-    set_props('task-mgmt-table-add-modal-run-type-select', {'value': job_dict['kwargs']['type']})  # 任务名
     set_props('task-mgmt-table-add-modal-job-id', {'value': job_id})  # 任务名
     set_props('task-mgmt-table-add-modal-job-id-item', {'style': {'display': 'none'}})  # 任务名, 不给看
-    if job_dict['kwargs']['type'] == 'ssh':
-        set_props('task-mgmt-table-add-modal-ssh-host', {'value': job_dict['kwargs']['host']})  # ssh主机
-        set_props('task-mgmt-table-add-modal-ssh-port', {'value': job_dict['kwargs']['port']})  # ssh 端口
-        set_props('task-mgmt-table-add-modal-ssh-username', {'value': job_dict['kwargs']['username']})  # ssh用户名
-        set_props('task-mgmt-table-add-modal-ssh-password', {'value': job_dict['kwargs']['password']})  # ssh密码
-    set_props('task-mgmt-table-add-modal-timeout', {'value': job_dict['kwargs']['timeout']})  # 超时时间
-    if job_dict['kwargs']['extract_names']:
-        extract_names = json.loads(job_dict['kwargs']['extract_names'])
-        set_props(
-            'task-mgmt-table-add-modal-extract-names-type-number',
-            {'value': [extract_name['name'] for extract_name in extract_names if extract_name['type'] == 'number']},
-        )  # 抽取数据-数值类型
-        set_props(
-            'task-mgmt-table-add-modal-extract-names-type-string',
-            {'value': [extract_name['name'] for extract_name in extract_names if extract_name['type'] == 'string']},
-        )  # 抽取数据-字符串类型
-        set_props(
-            'task-mgmt-table-add-modal-extract-names-type-notify',
-            {'value': [extract_name['name'] for extract_name in extract_names if extract_name['type'] == 'notify']},
-        )  # 抽取数据-通知类型
-    if job_dict['kwargs']['notify_channels']:
-        notify_channels = json.loads(job_dict['kwargs']['notify_channels'])
-        set_props(
-            'task-mgmt-table-add-modal-extract-names-type-notify-for-notify-channels',
-            {'value': [notify_channel for notify_channel in notify_channels if notify_channel in notify_channels_options_value]},
-        )  # 通知类型-通知渠道
-    if job_dict['trigger'] == 'interval':
-        set_props('task-mgmt-table-add-modal-interval', {'value': job_dict['plan']['seconds']})  # interval周期
-    if job_dict['trigger'] == 'cron':
-        set_props('task-mgmt-table-add-modal-cron-minute', {'value': job_dict['plan']['minute']})  # cron 分
-        set_props('task-mgmt-table-add-modal-cron-hour', {'value': job_dict['plan']['hour']})  # cron 小时
-        set_props('task-mgmt-table-add-modal-cron-day', {'value': job_dict['plan']['day']})  # cron 天
-        set_props('task-mgmt-table-add-modal-cron-month', {'value': job_dict['plan']['month']})  # cron 月
-        set_props('task-mgmt-table-add-modal-cron-day-of-week', {'value': job_dict['plan']['day_of_week']})  # cron 周
+    if task_type != 'listen':
+        # aps自带任务
+        job_dict = get_job(job_id)
+        set_props('task-mgmt-table-add-modal-update-editor-language', {'value': job_dict['kwargs']['script_type']})
+        set_props('task-mgmt-table-add-modal-editor-full-timeout', {'delay': 100})  # 间接代码填充
+        set_props('task-mgmt-table-add-modal-run-type-select', {'value': job_dict['kwargs']['type']})  # 任务名
+        if job_dict['kwargs']['type'] == 'ssh':
+            set_props('task-mgmt-table-add-modal-ssh-host', {'value': job_dict['kwargs']['host']})  # ssh主机
+            set_props('task-mgmt-table-add-modal-ssh-port', {'value': job_dict['kwargs']['port']})  # ssh 端口
+            set_props('task-mgmt-table-add-modal-ssh-username', {'value': job_dict['kwargs']['username']})  # ssh用户名
+            set_props('task-mgmt-table-add-modal-ssh-password', {'value': job_dict['kwargs']['password']})  # ssh密码
+        set_props('task-mgmt-table-add-modal-timeout', {'value': job_dict['kwargs']['timeout']})  # 超时时间
+        if job_dict['kwargs']['extract_names']:
+            extract_names = json.loads(job_dict['kwargs']['extract_names'])
+            set_props(
+                'task-mgmt-table-add-modal-extract-names-type-number',
+                {'value': [extract_name['name'] for extract_name in extract_names if extract_name['type'] == 'number']},
+            )  # 抽取数据-数值类型
+            set_props(
+                'task-mgmt-table-add-modal-extract-names-type-string',
+                {'value': [extract_name['name'] for extract_name in extract_names if extract_name['type'] == 'string']},
+            )  # 抽取数据-字符串类型
+            set_props(
+                'task-mgmt-table-add-modal-extract-names-type-notify',
+                {'value': [extract_name['name'] for extract_name in extract_names if extract_name['type'] == 'notify']},
+            )  # 抽取数据-通知类型
+        if job_dict['kwargs']['notify_channels']:
+            notify_channels = json.loads(job_dict['kwargs']['notify_channels'])
+            set_props(
+                'task-mgmt-table-add-modal-extract-names-type-notify-for-notify-channels',
+                {'value': [notify_channel for notify_channel in notify_channels if notify_channel in notify_channels_options_value]},
+            )  # 通知类型-通知渠道
+        if job_dict['trigger'] == 'interval':
+            set_props('task-mgmt-table-add-modal-interval', {'value': job_dict['plan']['seconds']})  # interval周期
+        if job_dict['trigger'] == 'cron':
+            set_props('task-mgmt-table-add-modal-cron-minute', {'value': job_dict['plan']['minute']})  # cron 分
+            set_props('task-mgmt-table-add-modal-cron-hour', {'value': job_dict['plan']['hour']})  # cron 小时
+            set_props('task-mgmt-table-add-modal-cron-day', {'value': job_dict['plan']['day']})  # cron 天
+            set_props('task-mgmt-table-add-modal-cron-month', {'value': job_dict['plan']['month']})  # cron 月
+            set_props('task-mgmt-table-add-modal-cron-day-of-week', {'value': job_dict['plan']['day_of_week']})  # cron 周
+    else:
+        # listen监听接口触发任务
+        job = dao_listen_task.get_activa_listen_job(job_id=job_id)[0]
+        set_props('task-mgmt-table-add-modal-listen-keyword', {'value': job.listen_keyword})
+        set_props('task-mgmt-table-add-modal-update-editor-language', {'value': job.script_type})
+        set_props('task-mgmt-table-add-modal-editor-full-timeout', {'delay': 100})  # 间接代码填充
+        set_props('task-mgmt-table-add-modal-run-type-select', {'value': job.type})  # 任务名
+        if job.type == 'ssh':
+            set_props('task-mgmt-table-add-modal-ssh-host', {'value': job.host})  # ssh主机
+            set_props('task-mgmt-table-add-modal-ssh-port', {'value': job.port})  # ssh 端口
+            set_props('task-mgmt-table-add-modal-ssh-username', {'value': job.username})  # ssh用户名
+            set_props('task-mgmt-table-add-modal-ssh-password', {'value': job.password})  # ssh密码
+        set_props('task-mgmt-table-add-modal-timeout', {'value': job.timeout})  # 超时时间
+        if job.extract_names:
+            extract_names = json.loads(job.extract_names)
+            set_props(
+                'task-mgmt-table-add-modal-extract-names-type-number',
+                {'value': [extract_name['name'] for extract_name in extract_names if extract_name['type'] == 'number']},
+            )  # 抽取数据-数值类型
+            set_props(
+                'task-mgmt-table-add-modal-extract-names-type-string',
+                {'value': [extract_name['name'] for extract_name in extract_names if extract_name['type'] == 'string']},
+            )  # 抽取数据-字符串类型
+            set_props(
+                'task-mgmt-table-add-modal-extract-names-type-notify',
+                {'value': [extract_name['name'] for extract_name in extract_names if extract_name['type'] == 'notify']},
+            )  # 抽取数据-通知类型
+        if job.notify_channels:
+            notify_channels = json.loads(job.notify_channels)
+            set_props(
+                'task-mgmt-table-add-modal-extract-names-type-notify-for-notify-channels',
+                {'value': [notify_channel for notify_channel in notify_channels if notify_channel in notify_channels_options_value]},
+            )  # 通知类型-通知渠道
+        if job.listen_channels:
+            listen_channels_options_value = [listen_channels_option['value'] for listen_channels_option in listen_channels_options]
+            listen_channels = json.loads(job.listen_channels)
+            set_props(
+                'task-mgmt-table-add-modal-extract-names-type-notify-for-notify-channels',
+                {'value': [listen_channel for listen_channel in listen_channels if listen_channel in listen_channels_options_value]},
+            )  # 通知类型-通知渠道
     return dash.no_update
 
 
 @app.callback(
     Input('task-mgmt-table-add-modal-editor-full-timeout', 'timeoutCount'),
-    State('task-mgmt-table-add-modal-title', 'children'),
+    [
+        State('task-mgmt-table-add-modal-title', 'children'),
+        State('task-mgmt-table-add-modal-task-type-store', 'data'),
+    ],
     prevent_initial_call=True,
 )
-def full_script_for_edit(timeoutCount, title):
+def full_script_for_edit(timeoutCount, title, task_type):
     job_id = title.split('⠆')[-1]
-    job_dict = get_job(job_id)
-    # 设置editor的代码
-    script_text = job_dict['kwargs']['script_text']
+    if task_type != 'listen':
+        job_dict = get_job(job_id)
+        # 设置editor的代码
+        script_text = job_dict['kwargs']['script_text']
+    else:
+        script_text = dao_listen_task.get_activa_listen_job(job_id=job_id)[0].script_text
     json_str = json.dumps({'script_text': script_text})
     set_props('main-execute-js-output', {'jsString': f'const obj = {json_str};window.taskEditor.setValue(obj.script_text);'})
 
@@ -562,6 +634,8 @@ app.clientside_callback(
         State('task-mgmt-table-add-modal-cron-day', 'value'),  # cron 天
         State('task-mgmt-table-add-modal-cron-month', 'value'),  # cron 月
         State('task-mgmt-table-add-modal-cron-day-of-week', 'value'),  # cron 周
+        State('task-mgmt-table-add-modal-listen-keyword', 'value'),  # listen 关键词
+        State('task-mgmt-table-add-modal-listen-channels', 'value'),  # listen 渠道
         State('task-mgmt-table-add-modal-title', 'children'),
     ],
     prevent_initial_call=True,
@@ -588,25 +662,38 @@ def add_edit_job(
     cron_day,
     cron_month,
     cron_day_of_week,
+    listen_keyword,
+    listen_channels,
     title,
 ):
     if not trigger:  # fix: 无法避免初始化调用
         return dash.no_update
+    # 如果任务类型是cron，需要提前检查cron表达式是否正确
     cron_verify = r'^((?<![\d\-\*])((\*\/)?([0-5]?[0-9])((\,|\-|\/)([0-5]?[0-9]))*|\*)[^\S\r\n]+((\*\/)?((2[0-3]|1[0-9]|[0-9]|00))((\,|\-|\/)(2[0-3]|1[0-9]|[0-9]|00))*|\*)[^\S\r\n]+((\*\/)?([1-9]|[12][0-9]|3[01])((\,|\-|\/)([1-9]|[12][0-9]|3[01]))*|\*)[^\S\r\n]+((\*\/)?([1-9]|1[0-2])((\,|\-|\/)([1-9]|1[0-2]))*|\*|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec))[^\S\r\n]+((\*\/)?[0-6]((\,|\-|\/)[0-6])*|\*|00|(sun|mon|tue|wed|thu|fri|sat))[^\S\r\n]*(?:\bexpr \x60date \+\\\%W\x60 \\\% \d{1,2} \> \/dev\/null \|\|)?(?=$| |\'|\"))|@(annually|yearly|monthly|weekly|daily|hourly|reboot)$'
-    if not re.match(cron_verify, f'{cron_minute} {cron_hour} {cron_day} {cron_month} {cron_day_of_week}'):
+    if trigger == 'cron' and not re.match(cron_verify, f'{cron_minute} {cron_hour} {cron_day} {cron_month} {cron_day_of_week}'):
         MessageManager.error(content='cron表达式不正确')
         return dash.no_update
     is_edit = False
     status = True
     create_by, create_datetime = None, None
     if '⠆' in title:  # 特殊盲文符号，作为编辑动作的标志位，先删后增
-        job_dict = get_job(job_id)
-        status = job_dict['status']
-        create_by = job_dict['kwargs']['create_by']
-        create_datetime = job_dict['kwargs']['create_datetime']
-        remove_job(job_id)  # 删除
+        if task_type != 'listen':
+            job_dict = get_job(job_id)
+            status = job_dict['status']
+            create_by = job_dict['kwargs']['create_by']
+            create_datetime = job_dict['kwargs']['create_datetime']
+        else:
+            job = dao_listen_task.get_activa_listen_job(job_id=job_id)[0]
+            status = job.status
+            create_by = job.create_by
+            create_datetime = job.create_datetime
+        remove_job(job_id, task_type)  # 删除
         is_edit = True
-    # 新增
+    else:
+        # 新增
+        if dao_listen_task.get_activa_listen_job(job_id=job_id) or get_job(job_id):
+            MessageManager.error(content=t__task('任务名已存在，请修改后重试'))
+            return dash.no_update
     op_user_name = get_menu_access(only_get_user_name=True)
     now = f'{datetime.now():%Y-%m-%dT%H:%M:%S}'
     create_by = create_by or op_user_name
@@ -705,6 +792,56 @@ def add_edit_job(
             notify_channels=json.dumps(notify_channels),
             is_pause=not status,
         )
+    elif type_run == 'local' and task_type == 'listen':
+        dao_listen_task.insert_activa_listen_job(
+            type=type_run,
+            job_id=job_id,
+            status=status,
+            script_text=script_text,
+            script_type=script_type,
+            update_by=op_user_name,
+            update_datetime=now,
+            create_by=create_by,
+            create_datetime=create_datetime,
+            notify_channels=json.dumps(notify_channels),
+            extract_names=json.dumps(
+                [
+                    *[{'type': 'string', 'name': i} for i in extract_names_string],
+                    *[{'type': 'number', 'name': i} for i in extract_names_number],
+                    *[{'type': 'notify', 'name': i} for i in extract_names_notify],
+                ]
+            ),
+            timeout=int(timeout),
+            listen_channels=json.dumps(listen_channels),
+            listen_keyword=listen_keyword,
+        )
+    elif type_run == 'ssh' and task_type == 'listen':
+        dao_listen_task.insert_activa_listen_job(
+            type=type_run,
+            job_id=job_id,
+            status=status,
+            script_text=script_text,
+            script_type=script_type,
+            update_by=op_user_name,
+            update_datetime=now,
+            create_by=create_by,
+            create_datetime=create_datetime,
+            notify_channels=json.dumps(notify_channels),
+            extract_names=json.dumps(
+                [
+                    *[{'type': 'string', 'name': i} for i in extract_names_string],
+                    *[{'type': 'number', 'name': i} for i in extract_names_number],
+                    *[{'type': 'notify', 'name': i} for i in extract_names_notify],
+                ]
+            ),
+            timeout=int(timeout),
+            host=ssh_host,
+            port=ssh_port,
+            username=ssh_username,
+            password=ssh_password,
+            listen_channels=json.dumps(listen_channels),
+            listen_keyword=listen_keyword,
+        )
     else:
         MessageManager.error(content=t__task('不支持的运行类型') + type_run)
         return
@@ -730,7 +867,7 @@ def handle_delete(confirmCounts, selectedRows):
         return dash.no_update
 
     # 删除选中行
-    [remove_job(row['job_id']) for row in selectedRows]
+    [remove_job(row['job_id'], row['type']) for row in selectedRows]
     MessageManager.success(content=t__task('选中行删除成功'))
 
     # 重置选中行
