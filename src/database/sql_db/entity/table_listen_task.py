@@ -13,7 +13,9 @@ class ApschedulerJobsActiveListen(BaseModel):
     """主动监听触发器表"""
 
     # 执行配置
+    type = CharField(max_length=32, help_text='运行类型')
     job_id = CharField(max_length=64, help_text='job名称')
+    status = BooleanField(help_text='状态')
     script_text = TextField(help_text='脚本内容')
     script_type = CharField(max_length=32, help_text='脚本类型')
     update_by = CharField(max_length=32, help_text='被谁更新')

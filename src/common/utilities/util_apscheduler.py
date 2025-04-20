@@ -3,6 +3,7 @@ import json
 from dataclasses import dataclass
 from typing import Optional, Dict, List
 from config.dashgo_conf import ApSchedulerConf
+from database.sql_db.dao import dao_listen_task
 
 
 def get_connect():
@@ -10,7 +11,22 @@ def get_connect():
 
 
 def add_ssh_interval_job(
-    host, port, username, password, script_text, script_type, interval, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, notify_channels, is_pause
+    host,
+    port,
+    username,
+    password,
+    script_text,
+    script_type,
+    interval,
+    timeout,
+    job_id,
+    update_by,
+    update_datetime,
+    create_by,
+    create_datetime,
+    extract_names,
+    notify_channels,
+    is_pause,
 ):
     if not extract_names:
         extract_names = None
@@ -47,7 +63,22 @@ def add_ssh_interval_job(
 
 
 def add_ssh_cron_job(
-    host, port, username, password, script_text, script_type, cron_list, timeout, job_id, update_by, update_datetime, create_by, create_datetime, extract_names, notify_channels, is_pause
+    host,
+    port,
+    username,
+    password,
+    script_text,
+    script_type,
+    cron_list,
+    timeout,
+    job_id,
+    update_by,
+    update_datetime,
+    create_by,
+    create_datetime,
+    extract_names,
+    notify_channels,
+    is_pause,
 ):
     """https://apscheduler.readthedocs.io/en/master/api.html#apscheduler.triggers.cron.CronTrigger"""
     if not extract_names:
@@ -185,7 +216,7 @@ def get_apscheduler_all_jobs():
     try:
         conn = get_connect()
         job_jsons = json.loads(conn.root.get_jobs())
-        return [
+        aps_job = [
             JobInfo(
                 job_id=job_json['id'],
                 status=job_json['status'],
@@ -206,6 +237,27 @@ def get_apscheduler_all_jobs():
             )
             for job_json in job_jsons
         ]
+        active_listen_jobs = [
+            JobInfo(
+                job_id=job.job_id,
+                status=job.status,
+                job_next_run_time=None,
+                trigger='listen',
+                plan=None,
+                type=job.type,
+                script_text=job.script_text,
+                script_type=job.script_type,
+                timeout=job.timeout,
+                extract_names=json.loads(job.extract_names),
+                notify_channels=json.loads(job.notify_channels),
+                update_by=job.extract_names,
+                update_datetime=f'{job.update_datetime:%Y-%m-%dT%H:%M:%S}',
+                create_by=job.create_by,
+                create_datetime=f'{job.create_datetime:%Y-%m-%dT%H:%M:%S}',
+            )
+            for job in dao_listen_task.get_activa_listen_job()
+        ]
+        return sorted(aps_job + active_listen_jobs, key=lambda x: x.job_id)
     except Exception as e:
         raise e
     finally:

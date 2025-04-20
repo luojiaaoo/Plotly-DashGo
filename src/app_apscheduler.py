@@ -473,7 +473,7 @@ def add_clear_job(scheduler):
     print(f'清理作业添加成功，保留天数为{ApSchedulerConf.DATA_EXPIRE_DAY}')
 
 
-def listen_interval():
+def listen_interval(interval):
     pass
 
 
@@ -494,7 +494,7 @@ def add_listen_job(scheduler):
         seconds=interval,
         id=LISTEN_JOB_ID,
     )
-    print('主动监听作业添加成功，扫描周期为{interval}秒')
+    print(f'主动监听作业添加成功，扫描周期为{interval}秒')
 
 
 if __name__ == '__main__':
