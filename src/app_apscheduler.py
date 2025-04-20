@@ -483,10 +483,6 @@ def add_clear_job(scheduler):
     print(f'清理作业添加成功，保留天数为{ApSchedulerConf.DATA_EXPIRE_DAY}')
 
 
-manager = Manager()
-shared_datetime = manager.dict({'last_datetime': datetime.now() - timedelta(minutes=ListenTaskConf.PERIOD_MINTUES)})
-
-
 def listen_interval(shared_datetime):
     active_listen(shared_datetime=shared_datetime)
 
@@ -512,6 +508,8 @@ def add_listen_job(scheduler):
 
 
 if __name__ == '__main__':
+    manager = Manager()
+    shared_datetime = manager.dict({'last_datetime': datetime.now() - timedelta(minutes=ListenTaskConf.PERIOD_MINTUES)})
     if SqlDbConf.RDB_TYPE == 'sqlite':
         jobstores = {'default': SQLAlchemyJobStore(url=f'sqlite:///{SqlDbConf.SQLITE_DB_PATH}?timeout=20')}
     elif SqlDbConf.RDB_TYPE == 'mysql':
