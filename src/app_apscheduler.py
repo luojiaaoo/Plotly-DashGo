@@ -365,11 +365,8 @@ def run_script(
             ssh.close()
 
 
-def delete_expire_data_for_cron(day):
-    delete_expire_data(day)
-
-
 CLEAR_JOB_ID = 'sys_delete_expire_data_for_cron'
+LISTEN_JOB_ID = 'sys_listen_interval_job'
 
 
 class SchedulerService(rpyc.Service):
@@ -412,7 +409,7 @@ class SchedulerService(rpyc.Service):
         jobs = scheduler.get_jobs(jobstore)
         result = []
         for job in jobs:
-            if job.id == CLEAR_JOB_ID:
+            if job.id in (CLEAR_JOB_ID, LISTEN_JOB_ID):
                 continue
             result.append(self.get_job_dict(job))
         return json.dumps(result, ensure_ascii=False)
@@ -446,19 +443,11 @@ class SchedulerService(rpyc.Service):
         }
 
 
-if __name__ == '__main__':
-    if SqlDbConf.RDB_TYPE == 'sqlite':
-        jobstores = {'default': SQLAlchemyJobStore(url=f'sqlite:///{SqlDbConf.SQLITE_DB_PATH}?timeout=20')}
-    elif SqlDbConf.RDB_TYPE == 'mysql':
-        jobstores = {'default': SQLAlchemyJobStore(url=f'mysql+pymysql://{SqlDbConf.USER}:{SqlDbConf.PASSWORD}@{SqlDbConf.HOST}:{SqlDbConf.PORT}/{SqlDbConf.DATABASE}')}
-    truncate_apscheduler_running()
-    executors = {
-        'default': ThreadPoolExecutor(64),
-    }
-    job_defaults = {'coalesce': True, 'max_instances': 8}
-    scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
-    scheduler.start()
-    protocol_config = {'allow_public_attrs': True}
+def delete_expire_data_for_cron(day):
+    delete_expire_data(day)
+
+
+def add_clear_job(scheduler):
     # 添加清理作业
     try:
         scheduler.remove_job(CLEAR_JOB_ID)
@@ -482,7 +471,48 @@ if __name__ == '__main__':
         id=CLEAR_JOB_ID,
     )
     print(f'清理作业添加成功，保留天数为{ApSchedulerConf.DATA_EXPIRE_DAY}')
+
+
+def listen_interval():
+    pass
+
+
+def add_listen_job(scheduler):
+    # 添加监听作业
+    try:
+        scheduler.remove_job(LISTEN_JOB_ID)
+        print('主动监听作业删除成功')
+    except:
+        pass
+    interval = 120
+    scheduler.add_job(
+        'app_apscheduler:listen_interval',
+        'interval',
+        kwargs=[
+            ('interval', interval),
+        ],
+        seconds=interval,
+        id=LISTEN_JOB_ID,
+    )
+    print('主动监听作业添加成功，扫描周期为{interval}秒')
+
+
+if __name__ == '__main__':
+    if SqlDbConf.RDB_TYPE == 'sqlite':
+        jobstores = {'default': SQLAlchemyJobStore(url=f'sqlite:///{SqlDbConf.SQLITE_DB_PATH}?timeout=20')}
+    elif SqlDbConf.RDB_TYPE == 'mysql':
+        jobstores = {'default': SQLAlchemyJobStore(url=f'mysql+pymysql://{SqlDbConf.USER}:{SqlDbConf.PASSWORD}@{SqlDbConf.HOST}:{SqlDbConf.PORT}/{SqlDbConf.DATABASE}')}
+    truncate_apscheduler_running()
+    executors = {
+        'default': ThreadPoolExecutor(64),
+    }
+    job_defaults = {'coalesce': True, 'max_instances': 8}
+    scheduler = BackgroundScheduler(jobstores=jobstores, executors=executors, job_defaults=job_defaults)
+    scheduler.start()
+    protocol_config = {'allow_public_attrs': True}
     server = ThreadedServer(SchedulerService, hostname=ApSchedulerConf.HOST, port=ApSchedulerConf.PORT, protocol_config=protocol_config)
+    add_clear_job(scheduler)
+    add_listen_job(scheduler)
     try:
         server.start()
     except (KeyboardInterrupt, SystemExit):

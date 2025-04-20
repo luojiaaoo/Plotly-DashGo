@@ -46,6 +46,7 @@ def create_rds_table():
     from .entity.table_apscheduler import SysApschedulerResults, SysApschedulerExtractValue, SysApschedulerRunning
     from .entity.table_notify_api import SysNotifyApi
     from .entity.table_listen_api import SysListenApi
+    from .entity.table_listen_task import ApschedulerJobsActiveListen
 
     db_instance.create_tables(
         [
@@ -65,6 +66,7 @@ def create_rds_table():
             SysApschedulerRunning,
             SysNotifyApi,
             SysListenApi,
+            ApschedulerJobsActiveListen,
         ],
         safe=True,
     )
