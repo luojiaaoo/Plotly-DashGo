@@ -92,3 +92,7 @@ class SqlDbConf(metaclass=BaseMetaConf):
     PASSWORD: str
     DATABASE: str
     POOL_SIZE: int
+
+
+class ListenTaskConf(metaclass=BaseMetaConf):
+    PERIOD_MINTUES: int

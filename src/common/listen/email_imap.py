@@ -1,18 +1,33 @@
 import imaplib
 import email
+from typing import List
 from email.header import decode_header
 from datetime import datetime
+import re
 from common.utilities.util_logger import Log
+import base64
 
 logger = Log.get_logger(__name__)
 
+def encode_chinese_for_imap(text: str) -> str:
+    """
+    将中文文本编码为IMAP搜索可识别的格式
+    
+    参数:
+        text: 要编码的中文文本
+    
+    返回:
+        编码后的字符串
+    """
+    # 对于中文主题，通常需要转换为UTF-8编码的base64字符串
+    return f"{base64.b64encode(text.encode('utf-8')).decode()}"
 
 def get_email_context_from_subject_during(
     imap_server: str,
     port: int,
     emal_account: str,
     password: str,
-    subject: str,
+    subjects: List[str],
     since_time: datetime,
     before_time: datetime,
 ):
@@ -21,9 +36,10 @@ def get_email_context_from_subject_during(
     try:
         mail.login(emal_account, password)
         mail.select('inbox')  # 选择邮箱文件夹（通常是 INBOX）
-        since_time = f'{since_time:%d-%b-%Y}'
-        before_time = f'{before_time:%d-%b-%Y}'
-        status, messages = mail.search(None, f'SUBJECT "{subject}" SINCE {since_time} BEFORE {before_time}')
+        since_time_str = f'{since_time:%d-%b-%Y}'
+        before_time_str = f'{before_time:%d-%b-%Y}'
+        subjects_str = ' OR '.join([subject for subject in subjects])
+        status, messages = mail.search(None, f'SUBJECT "{subjects_str}" SINCE {since_time_str} BEFORE {before_time_str}')
         messages = messages[0].split()
         emails = []
         for mail_id in messages:

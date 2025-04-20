@@ -4,11 +4,7 @@ from common.utilities.util_logger import Log
 from typing import List
 
 
-__all__ = [
-    'send_notify',
-]
-
-logger = Log.get_logger('send_notify')
+logger = Log.get_logger('send_text_notify')
 
 
 def send_text_notify(title: str, short: str, desp: str, notify_channels: List):
@@ -22,7 +18,7 @@ def send_text_notify(title: str, short: str, desp: str, notify_channels: List):
         params_json = json.loads(notify_api.params_json)
         if api_type == 'Server酱' and api_name in notify_channels:
             if not notify_api.params_json:
-                logger.error(f'{api_name}的SendKey未配置')
+                logger.error(f'{api_name}的接口未配置')
                 continue
             server_jiang_json = params_json
             SendKey = server_jiang_json['SendKey']
@@ -54,7 +50,7 @@ def send_text_notify(title: str, short: str, desp: str, notify_channels: List):
                 logger.error(f'发送{api_name}通知失败，错误信息：{rt}')
         elif api_type == '邮件SMTP协议' and api_name in notify_channels:
             if not notify_api.params_json:
-                logger.error(f'{api_name}的Key未配置')
+                logger.error(f'{api_name}的接口未配置')
                 continue
             Host = params_json['Host']
             Port = params_json['Port']
@@ -74,7 +70,7 @@ def send_text_notify(title: str, short: str, desp: str, notify_channels: List):
                 logger.error(f'发送{api_name}通知失败，错误信息：{rt}')
         elif api_type == 'Gewechat' and api_name in notify_channels:
             if not notify_api.params_json:
-                logger.error(f'{api_name}的Key未配置')
+                logger.error(f'{api_name}的接口未配置')
                 continue
             token = params_json['token']
             app_id = params_json['app_id']

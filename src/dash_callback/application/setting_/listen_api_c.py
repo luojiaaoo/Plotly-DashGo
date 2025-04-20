@@ -8,7 +8,7 @@ from uuid import uuid4
 from dash import dcc
 import json
 from typing import List
-from common.notify import email_imap
+from common.listen import email_imap
 from datetime import datetime, timedelta
 from feffery_dash_utils.style_utils import style
 from i18n import t__setting

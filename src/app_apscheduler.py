@@ -18,10 +18,11 @@ from database.sql_db.dao.dao_apscheduler import (
     delete_expire_data,
 )
 from common.utilities import util_ssh
-from config.dashgo_conf import SqlDbConf
+from config.dashgo_conf import SqlDbConf, ListenTaskConf
 from datetime import datetime, timedelta
 import time
 from config.dashgo_conf import ApSchedulerConf
+from common.listen import active_listen
 from queue import Queue
 from itertools import count
 import threading
@@ -30,7 +31,9 @@ import re
 import platform
 import os
 import tempfile
+from multiprocessing import Manager
 # https://github.com/agronholm/apscheduler/blob/3.x/examples/rpc/server.py
+
 
 SUFFIX = {'Bat': '.bat', 'Shell': '.sh', 'Python': '.py'}
 RUN_CMD = {'Bat': ['cmd', '/c'], 'Shell': ['sh'], 'Python': ['python']}
@@ -476,8 +479,12 @@ def add_clear_job(scheduler):
     print(f'清理作业添加成功，保留天数为{ApSchedulerConf.DATA_EXPIRE_DAY}')
 
 
-def listen_interval(interval):
-    pass
+manager = Manager()
+shared_datetime = manager.dict({'last_datetime': datetime.now() - timedelta(minutes=ListenTaskConf.PERIOD_MINTUES)})
+
+
+def listen_interval(shared_datetime):
+    active_listen(shared_datetime=shared_datetime)
 
 
 def add_listen_job(scheduler):
@@ -487,12 +494,12 @@ def add_listen_job(scheduler):
         print('主动监听作业删除成功')
     except:
         pass
-    interval = 120
+    interval = ListenTaskConf.PERIOD_MINTUES * 60
     scheduler.add_job(
         'app_apscheduler:listen_interval',
         'interval',
         kwargs=[
-            ('interval', interval),
+            ('shared_datetime', shared_datetime),
         ],
         seconds=interval,
         id=LISTEN_JOB_ID,
