@@ -5,15 +5,50 @@ from common.utilities.util_logger import Log
 from typing import List, Dict
 import json
 from datetime import datetime, timedelta
+from common.utilities.util_apscheduler import add_ssh_date_job, add_local_date_job
 
 logger = Log.get_logger('active_listen_task')
+
+
+def email_to_run_date_job(email, jobs):
+    title = email['subject']
+    datetime_ = email['datetime'].strftime('%Y-%m-%dT%H:%M:%S')
+    from_ = email['from']
+    desp = email['context']
+    env_vars = ({'__title__': title, '__from__': from_, '__desp__': desp, '__datetime__': datetime_},)
+    for job in jobs:
+        if job['listen_keyword'] in title:
+            if job['type'] == 'ssh':
+                add_ssh_date_job(
+                    host=job['host'],
+                    port=job['port'],
+                    username=job['username'],
+                    password=job['password'],
+                    script_text=job['script_text'],
+                    script_type=job['script_type'],
+                    timeout=job['timeout'],
+                    job_id=job['job_id'],
+                    extract_names=job['extract_names'],
+                    notify_channels=job['notify_channels'],
+                    env_vars=env_vars,
+                )
+            elif job['type'] == 'local':
+                add_local_date_job(
+                    script_text=job['script_text'],
+                    script_type=job['script_type'],
+                    timeout=job['timeout'],
+                    job_id=job['job_id'],
+                    extract_names=job['extract_names'],
+                    notify_channels=job['notify_channels'],
+                    env_vars=env_vars,
+                )
 
 
 def active_listen(shared_datetime):
     last_datetime = shared_datetime.get('last_datetime')
     end_datetime = datetime.now()
     shared_datetime['last_datetime'] = end_datetime
-    mapping_listen_job: Dict[str, List] = {}
+    mapping_listen_job: Dict[str, List[Dict]] = {}
     for activa_listen_job in get_activa_listen_job(job_id=None):
         if not activa_listen_job.status:
             continue
@@ -64,5 +99,4 @@ def active_listen(shared_datetime):
                 before_time=end_datetime,
             )
             for email in emails:
-                ...
-                
+                email_to_run_date_job(email, mapping_listen_job.get[api_name])

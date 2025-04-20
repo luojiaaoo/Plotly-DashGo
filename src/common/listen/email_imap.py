@@ -9,18 +9,6 @@ import base64
 
 logger = Log.get_logger(__name__)
 
-def encode_chinese_for_imap(text: str) -> str:
-    """
-    将中文文本编码为IMAP搜索可识别的格式
-    
-    参数:
-        text: 要编码的中文文本
-    
-    返回:
-        编码后的字符串
-    """
-    # 对于中文主题，通常需要转换为UTF-8编码的base64字符串
-    return f"{base64.b64encode(text.encode('utf-8')).decode()}"
 
 def get_email_context_from_subject_during(
     imap_server: str,

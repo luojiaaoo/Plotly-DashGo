@@ -10,6 +10,48 @@ def get_connect():
     return rpyc.connect(ApSchedulerConf.HOST, ApSchedulerConf.PORT)
 
 
+def add_ssh_date_job(
+    host,
+    port,
+    username,
+    password,
+    script_text,
+    script_type,
+    timeout,
+    job_id,
+    extract_names,
+    notify_channels,
+    env_vars,
+):
+    if not extract_names:
+        extract_names = None
+    try:
+        conn = get_connect()
+        job = conn.root.add_job(
+            'app_apscheduler:run_script',
+            'date',
+            kwargs=[
+                ('type', 'ssh'),
+                ('script_text', script_text),
+                ('script_type', script_type),
+                ('timeout', timeout),
+                ('host', host),
+                ('port', port),
+                ('username', username),
+                ('password', password),
+                ('extract_names', extract_names),
+                ('notify_channels', notify_channels),
+                ('env_vars', env_vars),
+            ],
+            id=job_id,
+        )
+        return job.id
+    except Exception as e:
+        raise e
+    finally:
+        conn.close()
+
+
 def add_ssh_interval_job(
     host,
     port,
@@ -114,6 +156,40 @@ def add_ssh_cron_job(
             day=day,
             month=month,
             day_of_week=day_of_week,
+            id=job_id,
+        )
+        return job.id
+    except Exception as e:
+        raise e
+    finally:
+        conn.close()
+
+
+def add_local_date_job(
+    script_text,
+    script_type,
+    timeout,
+    job_id,
+    extract_names,
+    notify_channels,
+    env_vars,
+):
+    if not extract_names:
+        extract_names = None
+    try:
+        conn = get_connect()
+        job = conn.root.add_job(
+            'app_apscheduler:run_script',
+            'date',
+            kwargs=[
+                ('type', 'local'),
+                ('script_text', script_text),
+                ('script_type', script_type),
+                ('timeout', timeout),
+                ('extract_names', extract_names),
+                ('notify_channels', notify_channels),
+                ('env_vars', env_vars),
+            ],
             id=job_id,
         )
         return job.id

@@ -44,10 +44,6 @@ def run_script(
     script_text,
     script_type,
     job_id,
-    update_by,
-    update_datetime,
-    create_by,
-    create_datetime,
     notify_channels,
     extract_names=None,
     timeout=20,
@@ -55,6 +51,11 @@ def run_script(
     port=22,
     username=None,
     password=None,
+    update_by=None,
+    update_datetime=None,
+    create_by=None,
+    create_datetime=None,
+    env_vars=None,
 ):
     """
     根据类型执行脚本，支持本地和远程执行。
@@ -113,6 +114,7 @@ def run_script(
         process = subprocess.Popen(
             [*run_cmd, script_filepath],
             shell=True,
+            env={**os.environ.copy(), **env_vars} if env_vars else os.environ.copy(),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=False,
@@ -236,6 +238,7 @@ def run_script(
             suffix=suffix,
             encoding='utf-8',
         ) as f:
+            f.write('\n'.join(['export ' + key + '="' + value + '"' for key, value in env_vars.items()]) + '\n')  # 设置环境变量
             f.write(script_text)
             f.flush()
             script_filepath = f.name
@@ -380,7 +383,8 @@ class SchedulerService(rpyc.Service):
         is_pause = False
         if kwargs.get('is_pause', None):
             is_pause = True
-        kwargs.pop('is_pause')
+        if kwargs.get('is_pause', ...) != ...:
+            kwargs.pop('is_pause')
         job = scheduler.add_job(func, *args, **kwargs)
         if is_pause:
             job.pause()
