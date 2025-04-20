@@ -243,11 +243,17 @@ def refresh_add_modal(visible, task_type):
                             [fac.AntdInput(id='task-mgmt-table-add-modal-ssh-host'), fac.AntdInputNumber(id='task-mgmt-table-add-modal-ssh-port', value=22)],
                         ),
                         label=t__task('主机/端口'),
+                        id='task-mgmt-table-add-modal-ssh-host-port-item',
                     ),
                     fac.AntdFormItem(
                         fac.AntdSpace(
-                            [fac.AntdInput(id='task-mgmt-table-add-modal-ssh-username'), fac.AntdInput(mode='password', id='task-mgmt-table-add-modal-ssh-password')],
+                            [
+                                fac.AntdInput(id='task-mgmt-table-add-modal-ssh-username'),
+                                fac.AntdInput(mode='password', id='task-mgmt-table-add-modal-ssh-password'),
+                                fac.AntdButton(t__task('测试连接'), id='task-mgmt-table-add-modal-ssh-test-btn', color='primary', variant='outlined'),
+                            ],
                         ),
+                        id='task-mgmt-table-add-modal-ssh-username-password-item',
                         label=t__task('用户名/密码'),
                     ),
                 ],
@@ -406,6 +412,40 @@ app.clientside_callback(
     Output('task-mgmt-table-add-modal-ssh-container', 'style'),
     Input('task-mgmt-table-add-modal-run-type-select', 'value'),
 )
+
+
+# 测试ssh连接
+@app.callback(
+    [
+        Output('task-mgmt-table-add-modal-ssh-host-port-item', 'validateStatus'),
+        Output('task-mgmt-table-add-modal-ssh-username-password-item', 'validateStatus'),
+    ],
+    Input('task-mgmt-table-add-modal-ssh-test-btn', 'nClicks'),
+    [
+        State('task-mgmt-table-add-modal-ssh-host', 'value'),
+        State('task-mgmt-table-add-modal-ssh-port', 'value'),
+        State('task-mgmt-table-add-modal-ssh-username', 'value'),
+        State('task-mgmt-table-add-modal-ssh-password', 'value'),
+    ],
+    running=[
+        (Output('task-mgmt-table-add-modal-ssh-test-btn', 'loading'), True, False),
+    ],
+    prevent_initial_call=True,
+)
+def test_connection(nClicks, host, port, username, password):
+    """测试ssh连接"""
+    from common.utilities import util_ssh
+
+    if not (host and port and username):
+        MessageManager.error(content=t__task('主机/端口/用户名不能为空'))
+    try:
+        util_ssh.connect_ssh(hostname=host, port=port, username=username, password=password)
+    except:
+        MessageManager.error(content=t__task('连接错误，请检查主机/端口/用户名/密码'))
+        return 'error', 'error'
+    MessageManager.success(content=t__task('连接成功'))
+    return 'success', 'success'
+
 
 # 代码编辑器折叠
 app.clientside_callback(

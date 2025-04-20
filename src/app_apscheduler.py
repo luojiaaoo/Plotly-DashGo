@@ -17,8 +17,8 @@ from database.sql_db.dao.dao_apscheduler import (
     truncate_apscheduler_running,
     delete_expire_data,
 )
+from common.utilities import util_ssh
 from config.dashgo_conf import SqlDbConf
-import paramiko
 from datetime import datetime, timedelta
 import time
 from config.dashgo_conf import ApSchedulerConf
@@ -237,12 +237,8 @@ def run_script(
             f.flush()
             script_filepath = f.name
         try:
-            ssh = paramiko.SSHClient()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(hostname=host, username=username, password=password, port=port)
-            sftp = ssh.open_sftp()
-            sftp.put(script_filepath, f'/tmp/{os.path.basename(script_filepath)}')  # 传输到/tmp目录
-            sftp.close()
+            ssh = util_ssh.connect_ssh(hostname=host, port=port, username=username, password=password)
+            util_ssh.ftp_ssh(ssh, script_filepath, '/tmp')  # 上传脚本到远程/tmp目录
             os.remove(script_filepath)  # 清理本地临时文件
             try:
                 stdin, stdout, stderr = ssh.exec_command(f'{" ".join(run_cmd)} /tmp/{os.path.basename(script_filepath)}', get_pty=True, timeout=timeout)

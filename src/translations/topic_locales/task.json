@@ -134,6 +134,18 @@
         "抽取-数值类型": {
             "en-us": "Extract-Number"
         },
+        "测试连接": {
+            "en-us": "Test Connection"
+        },
+        "主机/端口/用户名不能为空": {
+            "en-us": "Host/Port/Username cannot be empty"
+        },
+        "连接错误，请检查主机/端口/用户名/密码": {
+            "en-us": "Connection error, please check host/port/username/password"
+        },
+        "连接成功": {
+            "en-us": "Connection Success"
+        },
         "抽取-字符类型": {
             "en-us": "Extract-String"
         },
