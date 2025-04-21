@@ -15,10 +15,10 @@ def email_to_run_date_job(email, jobs):
     datetime_ = email['datetime'].strftime('%Y-%m-%dT%H:%M:%S')
     from_ = email['from']
     desp = email['context']
-    env_vars = ({'__title__': title, '__from__': from_, '__desp__': desp, '__datetime__': datetime_},)
+    env_vars = {'__title__': title, '__from__': from_, '__desp__': desp, '__datetime__': datetime_}
     for job in jobs:
-        print('===========', job['listen_keyword'], title)
         if job['listen_keyword'] in title:
+            logger.info(f'正在发起任务: {job["job_id"]}')
             if job['type'] == 'ssh':
                 add_ssh_date_job(
                     host=job['host'],
@@ -31,7 +31,7 @@ def email_to_run_date_job(email, jobs):
                     job_id=job['job_id'],
                     extract_names=job['extract_names'],
                     notify_channels=job['notify_channels'],
-                    env_vars=env_vars,
+                    env_vars=json.dumps(env_vars),
                 )
             elif job['type'] == 'local':
                 add_local_date_job(
@@ -41,7 +41,7 @@ def email_to_run_date_job(email, jobs):
                     job_id=job['job_id'],
                     extract_names=job['extract_names'],
                     notify_channels=job['notify_channels'],
-                    env_vars=env_vars,
+                    env_vars=json.dumps(env_vars),
                 )
 
 

@@ -3,6 +3,7 @@ from datetime import datetime
 import poplib
 from email import parser
 from email.header import decode_header
+import re
 
 
 logger = Log.get_logger(__name__)
@@ -18,6 +19,22 @@ def decode_mime(header):
         else:
             decoded_parts.append(part)
     return ''.join(decoded_parts)
+
+
+# 保留：中文、英文、数字、常见标点符号
+pattern = re.compile(
+    r'[^\w\s'
+    r'\u4e00-\u9fff'  # 中文
+    r'\u3000-\u303f'  # 中文标点
+    r'\uFF00-\uFFEF'  # 全角符号
+    r'\u2000-\u206F'  # 通用标点
+    r'\u0020-\u007F'  # 基本ASCII
+    r']+'
+)
+
+
+def clean_text(text):
+    return re.sub(pattern, '', text)
 
 
 def get_email_context_from_subject_during(
@@ -65,13 +82,15 @@ def get_email_context_from_subject_during(
             else:
                 if datetime_.timestamp() < since_time.timestamp():
                     break
-                elif datetime_.timestamp() < before_time.timestamp() and any([subject in subject_ for subject in subjects]):
+                logger.info(f'检测到邮件: {subject_}， 正在判断是否符合条件')
+                if datetime_.timestamp() < before_time.timestamp() and any([subject in subject_ for subject in subjects]):
+                    logger.info(f'符合条件的邮件: {subject_}')
                     rt.append(
                         {
-                            'from': from_,
-                            'subject': subject_,
-                            'datetime': datetime_,
-                            'context': context,
+                            'from': clean_text(from_),
+                            'subject': clean_text(subject_),
+                            'datetime': clean_text(datetime_),
+                            'context': clean_text(context),
                         }
                     )
         return rt

@@ -70,6 +70,7 @@ def run_script(
     start_datetime = datetime.now()
     extract_names = json.loads(extract_names)
     notify_channels = json.loads(notify_channels)
+    env_vars = json.loads(env_vars) if env_vars else {}
     output_full = ''
 
     def pop_from_stdout(stdout, event: threading.Event, queue_stdout: Queue, encoding='utf8'):
