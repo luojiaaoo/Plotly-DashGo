@@ -27,6 +27,21 @@
   > 周：day_of_week: number or name of weekday (0-6 or mon,tue,wed,thu,fri,sat,sun)
 
   ![](../screenshots/task_cron.png)
+  
+- **监听接口触发任务**
+
+  通过监听外部消息，如果标题包含关键词则触发任务，目前支持邮件POP3轮询
+
+  脚本里内置`环境变量` :
+
+  ```python
+  1. __tite__  触发消息的标题
+  2. __from__  发送者是谁
+  3. __desp__  消息的内容
+  4. __datetime__  接收消息的时间
+  ```
+
+ ![](../screenshots/task_listen.png)
 
 ### 2、 任务脚本
 

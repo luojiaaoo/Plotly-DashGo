@@ -242,9 +242,9 @@ def run_script(
             if script_type == 'Shell':
                 f.write('\n'.join(['export ' + key + "='" + value + "'" for key, value in env_vars.items()]) + '\n')
             elif script_type == 'Python':
-                f.write('import os')
+                f.write('import os\n')
                 for k,v in env_vars.items():
-                    f.write(f"os.environ['{k}'] = '{v}'")
+                    f.write(f"os.environ['{k}'] = '''{v}'''\n")
             f.write(script_text)
             f.flush()
             script_filepath = f.name

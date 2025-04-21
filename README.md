@@ -5,7 +5,7 @@
 <p align="center">
     <a href="https://gitee.com/luojiaaoo/DashGo"><img src="https://gitee.com/luojiaaoo/DashGo/badge/star.svg?theme=dark"></a>
     <a href="https://github.com/luojiaaoo/Plotly-DashGo"><img src="https://img.shields.io/github/stars/luojiaaoo/Plotly-DashGo?style=social"></a>
-    <a href="https://gitee.com/luojiaaoo/DashGo"><img src="https://img.shields.io/badge/DashGo-v1.1.4-brightgreen.svg"></a>
+    <a href="https://gitee.com/luojiaaoo/DashGo"><img src="https://img.shields.io/badge/DashGo-v1.1.5-brightgreen.svg"></a>
     <img src="https://img.shields.io/badge/license-MIT-blue.svg">
     <img src="https://img.shields.io/badge/python-≥3.9-blue">
     <img src="https://img.shields.io/badge/MySQL-≥5.7-blue">
@@ -27,7 +27,7 @@ DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架
 4. i18n国际化组件
 5. 密码和OTP登录
 6. 支持OAuth2 provider
-7. 支持任务模块，支持周期任务和定时任务， <a href="docs/task.md">请查看使用文档</a>
+7. 支持任务模块，支持周期任务/定时任务和监听任务，监听任务暂时只支持邮件POP3协议触发， <a href="docs/task.md">请查看使用文档</a>
 8. 任务模块支持数据抽取与个性化信息推送，支持`Server酱`、`企业微信群机器人`、`SMTP邮件`、`Gewechat`，可以实现数据大屏、实时监控和通知推送
 
 ### 特点:
@@ -35,8 +35,10 @@ DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架
 1. 极易使用
 2. 只需要一个Python文件，就可以将应用嵌入系统，无需额外操作
 3. 符合主流数据平台风格
-4. 丰富的消息通知渠道：`Server酱`、`企业微信群机器人`、`SMTP邮件`、`Gewechat`
-5. 通过OAuth2接口+Iframe实现子系统接入（beta，自主开发的子系统见`https://github.com/luojiaaoo/dashgo-knowledge`）
+4. 支持周期和定时任务
+5. 支持轮询监听外部消息，实现任务触发
+6. 丰富的消息通知渠道：`Server酱`、`企业微信群机器人`、`SMTP邮件`、`Gewechat`
+7. 通过OAuth2接口+Iframe实现子系统接入（beta，自主开发的子系统见`https://github.com/luojiaaoo/dashgo-knowledge`）
 
 ------
 
