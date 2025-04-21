@@ -245,7 +245,7 @@ def refresh_add_modal(visible, task_type):
             fac.AntdFormItem(
                 fac.AntdSpace(
                     [
-                        fac.AntdInput(id='task-mgmt-table-add-modal-listen-keyword', value=uuid4().hex,style=style(width=300)),
+                        fac.AntdInput(id='task-mgmt-table-add-modal-listen-keyword', value=uuid4().hex, style=style(width=300)),
                         fac.AntdCheckboxGroup(
                             options=[{'label': api_name_value2label(listen_api.api_name), 'value': listen_api.api_name} for listen_api in get_listen_api_by_name(api_name=None)],
                             value=[],
@@ -552,19 +552,25 @@ def toggle_fullscreen(nClicks, isFullscreen):
 
 # 注入vscode代码编辑器
 app.clientside_callback(
-    """(language, id) => {
+    """(language, id, task_type) => {
 
     // 销毁先前已存在的编辑器实例
     if ( window.taskEditor ) {
         window.taskEditor.dispose();
     };
+    env_note=null;
+    if (task_type==='listen'){
+        env_note="Envs can be used:\\n__title__ (title)\\n__from__ (who send)\\n__desp__ (context)\\n__detetime__ (send time)\\n\\n"
+    }else{
+        env_note=""
+    }
     value=null;
     if (language.toLowerCase() === 'bat'){
-        value="@echo off\\n:: Python Example \\nconda activate env1\\npython E:\\\\script\\\\example.py\\n:: Echo Example\\necho \\"<SOPS_VAR>name:val</SOPS_VAR>\\"";
+        value="@echo off\\n"+env_note+":: Python Example \\nconda activate env1\\npython E:\\\\script\\\\example.py\\n:: Echo Example\\necho \\"<SOPS_VAR>name:val</SOPS_VAR>\\"";
     }else if(language.toLowerCase() === 'shell'){
-        value="# Python Example \\nconda activate env1\\npython /app/script/example.py\\n# Echo Example\\necho \\"<SOPS_VAR>name:val</SOPS_VAR>\\"";
+        value="# Python Example \\n"+env_note+"conda activate env1\\npython /app/script/example.py\\n# Echo Example\\necho \\"<SOPS_VAR>name:val</SOPS_VAR>\\"";
     }else if(language.toLowerCase() === 'python'){
-        value="# Echo Example\\nprint(\\"<SOPS_VAR>name:val</SOPS_VAR>\\")";
+        value="# Echo Example\\n"+env_note+"print(\\"<SOPS_VAR>name:val</SOPS_VAR>\\")";
     }
 
     monaco.languages.register({ id: 'python' });
@@ -593,7 +599,10 @@ app.clientside_callback(
 }""",
     Output('task-mgmt-table-add-modal-editor-mount-target', 'children', allow_duplicate=True),
     Input('task-mgmt-table-add-modal-update-editor-language', 'value'),
-    State('task-mgmt-table-add-modal-editor-mount-target', 'id'),
+    [
+        State('task-mgmt-table-add-modal-editor-mount-target', 'id'),
+        State('task-mgmt-table-add-modal-task-type-store', 'data'),
+    ],
     prevent_initial_call='initial_duplicate',
 )
 

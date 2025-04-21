@@ -239,7 +239,7 @@ def run_script(
             suffix=suffix,
             encoding='utf-8',
         ) as f:
-            f.write('\n'.join(['export ' + key + '="' + value + '"' for key, value in env_vars.items()]) + '\n')  # 设置环境变量
+            f.write('\n'.join(['export ' + key + "='" + value + "'" for key, value in env_vars.items()]) + '\n')  # 设置环境变量
             f.write(script_text)
             f.flush()
             script_filepath = f.name
