@@ -108,6 +108,6 @@ def active_listen(shared_datetime):
             if emails:
                 logger.info(f'接口{api_name}发现新增邮件，主题为: {",".join([email["subject"] for email in emails])}')
             else:
-                logger.info('接口{api_name}没有发现新增邮件')
+                logger.info(f'接口{api_name}没有发现新增邮件')
             for email in emails:
                 email_to_run_date_job(email, mapping_listen_job[api_name])

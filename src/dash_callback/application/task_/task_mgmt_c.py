@@ -247,8 +247,12 @@ def refresh_add_modal(visible, task_type):
                     [
                         fac.AntdInput(id='task-mgmt-table-add-modal-listen-keyword', value=uuid4().hex, style=style(width=300)),
                         fac.AntdCheckboxGroup(
-                            options=[{'label': api_name_value2label(listen_api.api_name), 'value': listen_api.api_name} for listen_api in get_listen_api_by_name(api_name=None)],
-                            value=[],
+                            options=(
+                                listen_apis := [
+                                    {'label': api_name_value2label(listen_api.api_name), 'value': listen_api.api_name} for listen_api in get_listen_api_by_name(api_name=None)
+                                ]
+                            ),
+                            value=[listen_api['value'] for listen_api in listen_apis],
                             id='task-mgmt-table-add-modal-listen-channels',
                             style=style(marginLeft=10),
                         ),
