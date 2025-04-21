@@ -239,7 +239,12 @@ def run_script(
             suffix=suffix,
             encoding='utf-8',
         ) as f:
-            f.write('\n'.join(['export ' + key + "='" + value + "'" for key, value in env_vars.items()]) + '\n')  # 设置环境变量
+            if script_type == 'Shell':
+                f.write('\n'.join(['export ' + key + "='" + value + "'" for key, value in env_vars.items()]) + '\n')
+            elif script_type == 'Python':
+                f.write('import os')
+                for k,v in env_vars.items():
+                    f.write(f"os.environ['{k}'] = '{v}'")
             f.write(script_text)
             f.flush()
             script_filepath = f.name
