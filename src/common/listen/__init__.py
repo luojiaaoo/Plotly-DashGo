@@ -52,10 +52,6 @@ def active_listen(shared_datetime):
     logger.info(f'上次时间: {last_datetime} 当前时间: {end_datetime}  准备发起监听任务')
     mapping_listen_job: Dict[str, List[Dict]] = {}
     for activa_listen_job in get_activa_listen_job(job_id=None):
-        print('=============', activa_listen_job)
-        print('=============', activa_listen_job.job_id)
-        print('=============', activa_listen_job.status)
-        print('=============', activa_listen_job.listen_channels)
         if not activa_listen_job.status:
             continue
         listen_channels = json.loads(activa_listen_job.listen_channels)
@@ -78,7 +74,6 @@ def active_listen(shared_datetime):
                 mapping_listen_job[listen_channel] = [dict_job]
             else:
                 mapping_listen_job[listen_channel].append(dict_job)
-    logger.info(f'监听任务映射配置: {mapping_listen_job}  开始对配置的监听通道进行扫描')
     for listen_api in get_listen_api_by_name(api_name=None):
         if not listen_api.enable:
             continue
@@ -88,7 +83,6 @@ def active_listen(shared_datetime):
         if api_type == '邮件POP3协议':
             if mapping_listen_job.get(api_name, None) is None:  # 都不需要检测这个通道
                 continue
-            logger.info(f'监听接口{api_name}匹配到任务{mapping_listen_job[api_name]}  开始对配置的监听通道进行扫描')
             if not listen_api.params_json:
                 logger.error(f'{api_name}的接口未配置')
                 continue
@@ -105,6 +99,5 @@ def active_listen(shared_datetime):
                 since_time=last_datetime,
                 before_time=end_datetime,
             )
-            logger.info(f'监听接口{api_name}抓取的数据{emails}')
             for email in emails:
                 email_to_run_date_job(email, mapping_listen_job[api_name])

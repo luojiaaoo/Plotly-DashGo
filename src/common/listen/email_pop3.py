@@ -43,7 +43,7 @@ def get_email_context_from_subject_during(
             return rt
         # 获取邮件列表
         _, msg_list, _ = pop_conn.list()
-        for msg_num in range(1, len(msg_list) + 1, -1):
+        for msg_num in range(1, len(msg_list) + 1)[::-1]:
             # 获取邮件
             response, msg_lines, _ = pop_conn.retr(msg_num)
             msg_content = b'\n'.join(msg_lines)
