@@ -17,6 +17,7 @@ def email_to_run_date_job(email, jobs):
     desp = email['context']
     env_vars = ({'__title__': title, '__from__': from_, '__desp__': desp, '__datetime__': datetime_},)
     for job in jobs:
+        print('===========', job['listen_keyword'], title)
         if job['listen_keyword'] in title:
             if job['type'] == 'ssh':
                 add_ssh_date_job(
@@ -48,32 +49,37 @@ def active_listen(shared_datetime):
     last_datetime = shared_datetime.get('last_datetime')
     end_datetime = datetime.now()
     shared_datetime['last_datetime'] = end_datetime
+    logger.info(f'上次时间: {last_datetime} 当前时间: {end_datetime}  准备发起监听任务')
     mapping_listen_job: Dict[str, List[Dict]] = {}
     for activa_listen_job in get_activa_listen_job(job_id=None):
+        print('=============', activa_listen_job)
+        print('=============', activa_listen_job.job_id)
+        print('=============', activa_listen_job.status)
+        print('=============', activa_listen_job.listen_channels)
         if not activa_listen_job.status:
             continue
         listen_channels = json.loads(activa_listen_job.listen_channels)
         for listen_channel in listen_channels:
+            dict_job = dict(
+                job_id=activa_listen_job.job_id,
+                listen_keyword=activa_listen_job.listen_keyword,
+                type=activa_listen_job.type,
+                script_text=activa_listen_job.script_text,
+                script_type=activa_listen_job.script_type,
+                notify_channels=activa_listen_job.notify_channels,
+                extract_names=activa_listen_job.extract_names,
+                timeout=activa_listen_job.timeout,
+                host=activa_listen_job.host,
+                port=activa_listen_job.port,
+                username=activa_listen_job.username,
+                password=activa_listen_job.password,
+            )
             if listen_channel not in mapping_listen_job:
-                mapping_listen_job[listen_channel] = []
+                mapping_listen_job[listen_channel] = [dict_job]
             else:
-                mapping_listen_job[listen_channel].append(
-                    dict(
-                        job_id=activa_listen_job.job_id,
-                        listen_keyword=activa_listen_job.listen_keyword,
-                        type=activa_listen_job.type,
-                        script_text=activa_listen_job.script_text,
-                        script_type=activa_listen_job.script_type,
-                        notify_channels=activa_listen_job.notify_channels,
-                        extract_names=activa_listen_job.extract_names,
-                        timeout=activa_listen_job.timeout,
-                        host=activa_listen_job.host,
-                        port=activa_listen_job.port,
-                        username=activa_listen_job.username,
-                        password=activa_listen_job.password,
-                    )
-                )
-    for listen_api in get_listen_api_by_name(job_id=None):
+                mapping_listen_job[listen_channel].append(dict_job)
+    logger.info(f'监听任务映射配置: {mapping_listen_job}  开始对配置的监听通道进行扫描')
+    for listen_api in get_listen_api_by_name(api_name=None):
         if not listen_api.enable:
             continue
         api_name = listen_api.api_name
@@ -82,6 +88,7 @@ def active_listen(shared_datetime):
         if api_type == '邮件IMAP协议':
             if mapping_listen_job.get(api_name, None) is None:  # 都不需要检测这个通道
                 continue
+            logger.info(f'监听接口{api_name}匹配到任务{mapping_listen_job[api_name]}  开始对配置的监听通道进行扫描')
             if not listen_api.params_json:
                 logger.error(f'{api_name}的接口未配置')
                 continue
@@ -98,5 +105,6 @@ def active_listen(shared_datetime):
                 since_time=last_datetime,
                 before_time=end_datetime,
             )
+            logger.info(f'监听接口{api_name}抓取的数据{emails}')
             for email in emails:
-                email_to_run_date_job(email, mapping_listen_job.get[api_name])
+                email_to_run_date_job(email, mapping_listen_job[api_name])

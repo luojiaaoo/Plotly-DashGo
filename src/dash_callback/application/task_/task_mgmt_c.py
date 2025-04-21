@@ -446,9 +446,9 @@ def full_value_for_edit(id, title, notify_channels_options, listen_channels_opti
             listen_channels_options_value = [listen_channels_option['value'] for listen_channels_option in listen_channels_options]
             listen_channels = json.loads(job.listen_channels)
             set_props(
-                'task-mgmt-table-add-modal-extract-names-type-notify-for-notify-channels',
+                'task-mgmt-table-add-modal-listen-channels',
                 {'value': [listen_channel for listen_channel in listen_channels if listen_channel in listen_channels_options_value]},
-            )  # 通知类型-通知渠道
+            )  # 监听渠道
     return dash.no_update
 
 

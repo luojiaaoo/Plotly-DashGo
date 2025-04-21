@@ -24,10 +24,10 @@ def get_email_context_from_subject_during(
     try:
         mail.login(emal_account, password)
         mail.select('inbox')  # 选择邮箱文件夹（通常是 INBOX）
-        since_time_str = f'{since_time:%d-%b-%Y}'
-        before_time_str = f'{before_time:%d-%b-%Y}'
-        subjects_str = ' OR '.join([subject for subject in subjects])
-        status, messages = mail.search(None, f'SUBJECT "{subjects_str}" SINCE {since_time_str} BEFORE {before_time_str}')
+        start_str = f"SINCE {since_time:%d-%b-%Y}" if since_time else ""
+        end_str = f"BEFORE {before_time:%d-%b-%Y}" if before_time else ""
+        subject = f"SUBJECT \"{' OR '.join([subject for subject in subjects])}\"" if subjects else ""
+        status, messages = mail.search(None, f'{subject}')  # 搜索邮件
         messages = messages[0].split()
         emails = []
         for mail_id in messages:
@@ -60,14 +60,14 @@ def get_email_context_from_subject_during(
                     else:
                         body = msg.get_payload(decode=True).decode(msg.get_content_charset() or 'utf-8')
                         context += body
-            emails.append(
-                {
-                    'subject': subject,
-                    'datetime': email_datetime,
-                    'from': from_info,
-                    'context': context,
-                }
-            )
+                    emails.append(
+                        {
+                            'subject': subject,
+                            'datetime': email_datetime,
+                            'from': from_info,
+                            'context': context,
+                        }
+                    )
         return emails
     except Exception as e:
         raise e
