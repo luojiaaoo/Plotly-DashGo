@@ -74,6 +74,7 @@ def get_email_context_from_subject_during(
                             'context': context,
                         }
                     )
+        return rt
     except Exception as e:
         raise e
     finally:

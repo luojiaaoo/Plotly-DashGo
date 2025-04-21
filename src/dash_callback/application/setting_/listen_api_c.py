@@ -153,7 +153,7 @@ def add_server_pop3_listen_api(nClick, api_name_label):
 def save_email_pop3_api(nClick, pop3_server, port, email_account, password, api_name):
     values = dict(
         pop3_server=pop3_server,
-        port=int(port),
+        port=port,
         email_account=email_account,
         password=password,
     )
@@ -182,7 +182,7 @@ def test_Gewechat_api(nClicks, pop3_server, port, email_account, password):
     try:
         email_pop3.get_email_context_from_subject_during(
             pop3_server=pop3_server,
-            port=int(port),
+            port=port,
             emal_account=email_account,
             password=password,
             subjects=['xxx'],
