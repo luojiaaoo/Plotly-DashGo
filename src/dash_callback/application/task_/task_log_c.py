@@ -125,14 +125,14 @@ app.clientside_callback(
                 window.dash_clientside.set_props(
                     'task-log-command-output-records',
                     {
-                        children: [data.replaceAll('<响应结束>', '').replaceAll('<换行符>', '\\n')]
+                        children: [JSON.parse(data.replaceAll('<响应结束>', '')).context]
                     }
                 )
             } else {
                 window.dash_clientside.set_props(
                     'task-log-command-output-records',
                     {
-                        children: [...children, data.replaceAll('<换行符>', '\\n')]
+                        children: [...children, JSON.parse(data).context]
                     }
                 )
             }

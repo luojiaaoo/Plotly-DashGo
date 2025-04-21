@@ -21,21 +21,6 @@ def decode_mime(header):
     return ''.join(decoded_parts)
 
 
-# 保留：中文、英文、数字、常见标点符号
-pattern = re.compile(
-    r'[^\w\s'
-    r'\u4e00-\u9fff'  # 中文
-    r'\u3000-\u303f'  # 中文标点
-    r'\uFF00-\uFFEF'  # 全角符号
-    r'\u2000-\u206F'  # 通用标点
-    r'\u0020-\u007F'  # 基本ASCII
-    r']+'
-)
-
-
-def clean_text(text):
-    return re.sub(pattern, '', text)
-
 
 def get_email_context_from_subject_during(
     pop3_server: str,
@@ -87,10 +72,10 @@ def get_email_context_from_subject_during(
                     logger.info(f'符合条件的邮件: {subject_}')
                     rt.append(
                         {
-                            'from': clean_text(from_),
-                            'subject': clean_text(subject_),
+                            'from': from_,
+                            'subject': subject_,
                             'datetime': datetime_,
-                            'context': clean_text(context),
+                            'context': context,
                         }
                     )
         return rt

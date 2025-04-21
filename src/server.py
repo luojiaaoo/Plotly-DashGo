@@ -61,6 +61,7 @@ def task_log_sse():
     from common.utilities.util_menu_access import get_menu_access
     from database.sql_db.dao.dao_apscheduler import get_running_log, get_done_log
     from urllib.parse import unquote
+    import json
 
     menu_access = get_menu_access()
     if not menu_access.has_access('任务日志-页面'):
@@ -83,11 +84,10 @@ def task_log_sse():
             else:
                 order_log = get_running_log(job_id=job_id, start_datetime=start_datetime, order=order)
                 if order_log is not None:
-                    data = order_log.replace('\r\n', '<换行符>').replace('\n', '<换行符>')
-                    yield 'data: {}\n\n'.format(data)
+                    yield 'data: {}\n\n'.format(json.dumps({'context': order_log}))
                     order += 1
 
-        yield 'data: <响应结束>{}\n\n'.format(total_log.replace('\r\n', '<换行符>').replace('\n', '<换行符>'))
+        yield 'data: <响应结束>{}\n\n'.format(json.dumps({'context': total_log}))
 
     return Response(_stream(), mimetype='text/event-stream')
 
