@@ -18,7 +18,7 @@ def email_to_run_date_job(email, jobs):
     env_vars = {'__title__': title, '__from__': from_, '__desp__': desp, '__datetime__': datetime_}
     for job in jobs:
         if job['listen_keyword'] in title:
-            logger.info(f'{email['subject']}符合{job["job_id"]}的关键词检测正在发起任务')
+            logger.info(f'{email["subject"]}符合{job["job_id"]}的关键词检测正在发起任务')
             if job['type'] == 'ssh':
                 add_ssh_date_job(
                     host=job['host'],
@@ -102,6 +102,6 @@ def active_listen(shared_datetime):
                 since_time=last_datetime,
                 before_time=end_datetime,
             )
-            logger.info(f'发现新增邮件，主题为: {','.join([email['subject'] for email in emails])}')
+            logger.info(f'发现新增邮件，主题为: {",".join([email["subject"] for email in emails])}')
             for email in emails:
                 email_to_run_date_job(email, mapping_listen_job[api_name])
