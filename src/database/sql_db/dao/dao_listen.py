@@ -7,7 +7,7 @@ from typing import Optional, Iterator, List, Union
 
 logger = Log.get_logger(__name__)
 support_api_types = [
-    '邮件IMAP协议',
+    '邮件POP3协议',
 ]
 
 

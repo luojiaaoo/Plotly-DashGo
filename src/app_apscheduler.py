@@ -31,7 +31,7 @@ import re
 import platform
 import os
 import tempfile
-from multiprocessing import Manager,freeze_support
+from multiprocessing import Manager
 # https://github.com/agronholm/apscheduler/blob/3.x/examples/rpc/server.py
 
 
@@ -508,8 +508,6 @@ def add_listen_job(scheduler):
 
 
 if __name__ == '__main__':
-    if platform.system() == 'Windows':
-        freeze_support()
     manager = Manager()
     shared_datetime = manager.dict({'last_datetime': datetime.now() - timedelta(minutes=ListenTaskConf.PERIOD_MINTUES)})
     if SqlDbConf.RDB_TYPE == 'sqlite':
@@ -533,4 +531,5 @@ if __name__ == '__main__':
         pass
     finally:
         server.close()
+        manager.shutdown()
         scheduler.shutdown()

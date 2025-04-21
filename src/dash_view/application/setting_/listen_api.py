@@ -22,7 +22,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                 [
                     fac.AntdInput(size='small', placeholder=t__setting('输入通知渠道名'), id='listen-api-add-name'),
                     fac.AntdTooltip(
-                        fac.AntdButton(t__setting('添加邮件IMAP协议'), type='primary', size='small', id='listen-api-add-email-imap'),
+                        fac.AntdButton(t__setting('添加邮件POP3协议'), type='primary', size='small', id='listen-api-add-email-pop3'),
                         title=t__setting('按2分钟的周期轮询邮箱，获取最新的邮件'),
                     ),
                 ],

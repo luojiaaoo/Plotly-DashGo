@@ -104,20 +104,20 @@
         "邮件SMTP协议测试发送失败": {
             "en-us": "SMTP Email test send failed"
         },
-        "添加邮件IMAP协议": {
-            "en-us": "Add IMAP"
+        "添加邮件POP3协议": {
+            "en-us": "Add POP3"
         },
         "按2分钟的周期轮询邮箱，获取最新的邮件": {
             "en-us": "Poll the mailbox every 2 minutes to get the latest emails"
         },
-        "邮件IMAP协议": {
-            "en-us": "IMAP Email"
+        "邮件POP3协议": {
+            "en-us": "POP3 Email"
         },
-        "IMAP测试接收成功": {
-            "en-us": "IMAP test receive success"
+        "POP3测试接收成功": {
+            "en-us": "POP3 test receive success"
         },
-        "IMAP测试接收失败": {
-            "en-us": "IMAP test receive failed"
+        "POP3测试接收失败": {
+            "en-us": "POP3 test receive failed"
         }
     }
 }

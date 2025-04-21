@@ -1,4 +1,4 @@
-from . import email_imap
+from . import email_pop3
 from database.sql_db.dao.dao_listen import get_listen_api_by_name
 from database.sql_db.dao.dao_listen_task import get_activa_listen_job
 from common.utilities.util_logger import Log
@@ -85,19 +85,19 @@ def active_listen(shared_datetime):
         api_name = listen_api.api_name
         api_type = listen_api.api_type
         params_json = json.loads(listen_api.params_json)
-        if api_type == '邮件IMAP协议':
+        if api_type == '邮件POP3协议':
             if mapping_listen_job.get(api_name, None) is None:  # 都不需要检测这个通道
                 continue
             logger.info(f'监听接口{api_name}匹配到任务{mapping_listen_job[api_name]}  开始对配置的监听通道进行扫描')
             if not listen_api.params_json:
                 logger.error(f'{api_name}的接口未配置')
                 continue
-            imap_server = params_json['imap_server']
+            pop3_server = params_json['pop3_server']
             port = params_json['port']
             email_account = params_json['email_account']
             password = params_json['password']
-            emails = email_imap.get_email_context_from_subject_during(
-                imap_server=imap_server,
+            emails = email_pop3.get_email_context_from_subject_during(
+                pop3_server=pop3_server,
                 port=int(port),
                 emal_account=email_account,
                 password=password,
