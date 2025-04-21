@@ -18,7 +18,7 @@ def email_to_run_date_job(email, jobs):
     env_vars = {'__title__': title, '__from__': from_, '__desp__': desp, '__datetime__': datetime_}
     for job in jobs:
         if job['listen_keyword'] in title:
-            logger.info(f'{email["subject"]}符合{job["job_id"]}的关键词检测正在发起任务')
+            logger.info(f'邮件主题"{email["subject"]}"符合"{job["job_id"]}"的关键词检测正在发起任务')
             if job['type'] == 'ssh':
                 add_ssh_date_job(
                     host=job['host'],
@@ -46,7 +46,7 @@ def email_to_run_date_job(email, jobs):
             else:
                 logger.error(f'不支持的类型运行类型: {job["type"]}')
                 continue
-            logger.info(f'{job["job_id"]}任务已发起')
+            logger.info(f'"{job["job_id"]}"任务已发起')
 
 
 def active_listen(shared_datetime):
@@ -82,16 +82,16 @@ def active_listen(shared_datetime):
         api_name = listen_api.api_name
         api_type = listen_api.api_type
         if not listen_api.enable:
-            logger.info(f'{api_name}接口监听未启用，跳过')
+            logger.info(f'"{api_name}"接口监听未启用，跳过')
             continue
-        logger.info(f'准备扫描{api_name}接口监听消息')
+        logger.info(f'准备扫描"{api_name}"接口监听消息')
         params_json = json.loads(listen_api.params_json)
         if api_type == '邮件POP3协议':
             if mapping_listen_job.get(api_name, None) is None:  # 都不需要检测这个通道
-                logger.info(f'没有任务配置{api_name}接口监听，跳过')
+                logger.info(f'没有任务配置"{api_name}"接口监听，跳过')
                 continue
             if not listen_api.params_json:
-                logger.error(f'{api_name}的接口未配置')
+                logger.error(f'"{api_name}"的接口未配置')
                 continue
             pop3_server = params_json['pop3_server']
             port = params_json['port']
@@ -106,8 +106,8 @@ def active_listen(shared_datetime):
                 before_time=end_datetime,
             )
             if emails:
-                logger.info(f'接口{api_name}发现新增邮件，主题为: {",".join([email["subject"] for email in emails])}')
+                logger.info(f'接口"{api_name}"发现新增邮件，主题为: {",".join([email["subject"] for email in emails])}')
             else:
-                logger.info(f'接口{api_name}没有发现新增邮件')
+                logger.info(f'接口"{api_name}"没有发现新增邮件')
             for email in emails:
                 email_to_run_date_job(email, mapping_listen_job[api_name])
