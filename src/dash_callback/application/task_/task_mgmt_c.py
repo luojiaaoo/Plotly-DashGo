@@ -245,16 +245,18 @@ def refresh_add_modal(visible, task_type):
             fac.AntdFormItem(
                 fac.AntdSpace(
                     [
-                        fac.AntdInput(id='task-mgmt-table-add-modal-listen-keyword', value=''),
+                        fac.AntdInput(id='task-mgmt-table-add-modal-listen-keyword', value=uuid4().hex,style=style(width=300)),
                         fac.AntdCheckboxGroup(
                             options=[{'label': api_name_value2label(listen_api.api_name), 'value': listen_api.api_name} for listen_api in get_listen_api_by_name(api_name=None)],
                             value=[],
                             id='task-mgmt-table-add-modal-listen-channels',
+                            style=style(marginLeft=10),
                         ),
-                    ]
+                    ],
                 ),
                 label=t__task('监听接口触发任务的验证关键词/渠道'),
                 id='task-mgmt-table-add-modal-listen-keyword-item',
+                tooltip=t__task('选择的监听渠道如果title字段包含该关键词，则会自动触发该任务'),
                 style=style(display='block' if task_type == 'listen' else 'none'),
             ),
             fac.AntdSpace(

@@ -12,7 +12,7 @@ logger = Log.get_logger('active_listen_task')
 
 def email_to_run_date_job(email, jobs):
     title = email['subject']
-    datetime_ = email['datetime'].strftime('%Y-%m-%dT%H:%M:%S')
+    datetime_ = email['datetime'].astimezone().strftime('%Y-%m-%dT%H:%M:%S')
     from_ = email['from']
     desp = email['context']
     env_vars = {'__title__': title, '__from__': from_, '__desp__': desp, '__datetime__': datetime_}

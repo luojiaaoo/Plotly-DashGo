@@ -149,6 +149,9 @@
         "任务名已存在，请修改后重试": {
             "en-us": "Task Name Already Exist, Please Modify and Retry"
         },
+        "选择的监听渠道如果title字段包含该关键词，则会自动触发该任务": {
+            "en-us": "If the title field of the selected listener contains keyword, the task will be automatically triggered"
+        },
         "连接成功": {
             "en-us": "Connection Success"
         },
