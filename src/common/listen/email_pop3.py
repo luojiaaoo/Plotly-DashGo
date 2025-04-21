@@ -63,9 +63,9 @@ def get_email_context_from_subject_during(
                 logger.error(f'解析邮件失败: {e}')
                 continue
             else:
-                if datetime_ < since_time:
+                if datetime_.timestamp() < since_time.timestamp():
                     break
-                elif since_time <= datetime_ < before_time and any([subject in subject_ for subject in subjects]):
+                elif datetime_.timestamp() < before_time.timestamp() and any([subject in subject_ for subject in subjects]):
                     rt.append(
                         {
                             'from': from_,

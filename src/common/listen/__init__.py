@@ -47,7 +47,7 @@ def email_to_run_date_job(email, jobs):
 
 def active_listen(shared_datetime):
     last_datetime = shared_datetime.get('last_datetime')
-    end_datetime = datetime.now()
+    end_datetime = datetime.now().astimezone()
     shared_datetime['last_datetime'] = end_datetime
     logger.info(f'上次时间: {last_datetime} 当前时间: {end_datetime}  准备发起监听任务')
     mapping_listen_job: Dict[str, List[Dict]] = {}
