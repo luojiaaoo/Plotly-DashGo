@@ -89,7 +89,7 @@ def get_email_context_from_subject_during(
                         {
                             'from': clean_text(from_),
                             'subject': clean_text(subject_),
-                            'datetime': clean_text(datetime_),
+                            'datetime': datetime_,
                             'context': clean_text(context),
                         }
                     )
