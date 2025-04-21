@@ -27,7 +27,6 @@ def get_email_context_from_subject_during(
     port: int,
     emal_account: str,
     password: str,
-    subjects: str,
     since_time: datetime,
     before_time: datetime,
 ):
@@ -67,9 +66,7 @@ def get_email_context_from_subject_during(
             else:
                 if datetime_.timestamp() < since_time.timestamp():
                     break
-                logger.info(f'检测到邮件: {subject_}， 正在判断是否符合条件')
-                if datetime_.timestamp() < before_time.timestamp() and any([subject in subject_ for subject in subjects]):
-                    logger.info(f'符合条件的邮件: {subject_}')
+                if datetime_.timestamp() < before_time.timestamp():
                     rt.append(
                         {
                             'from': from_,
