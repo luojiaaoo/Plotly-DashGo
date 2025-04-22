@@ -36,6 +36,7 @@ class ApschedulerJobsActiveListen(BaseModel):
     class Meta:
         table_name = 'apscheduler_jobs_active_listen'
         indexes = (
-            (('job_id'), True),
-            (('listen_keyword'), True),
+            (('job_id',), True),
+            (('listen_keyword',), True),
         )
+
