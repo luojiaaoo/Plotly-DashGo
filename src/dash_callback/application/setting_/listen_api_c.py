@@ -185,7 +185,6 @@ def test_Gewechat_api(nClicks, pop3_server, port, email_account, password):
             port=port,
             emal_account=email_account,
             password=password,
-            subjects=['xxx'],
             since_time=datetime.now() - timedelta(seconds=1),
             before_time=datetime.now(),
         )
