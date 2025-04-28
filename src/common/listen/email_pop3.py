@@ -40,7 +40,6 @@ def get_email_context_from_subject_during(
         # 2. 获取统计信息
         num_messages, _ = pop_conn.stat()
         if num_messages == 0:
-            pop_conn.quit()
             return rt
         # 获取邮件列表
         _, msg_list, _ = pop_conn.list()
