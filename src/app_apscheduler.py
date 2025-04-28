@@ -114,7 +114,7 @@ def run_script(
             script_filepath = f.name
         process = subprocess.Popen(
             [*run_cmd, script_filepath],
-            shell=True,
+            shell=False,
             env={**os.environ.copy(), **env_vars} if env_vars else os.environ.copy(),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
