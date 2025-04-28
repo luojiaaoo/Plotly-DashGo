@@ -119,6 +119,7 @@ def run_script(
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=False,
+            **(dict(start_new_session=True) if platform.system() != 'Windows' else {}),
         )
         queue_stdout = Queue()
         queue_stderr = Queue()
@@ -243,7 +244,7 @@ def run_script(
                 f.write('\n'.join(['export ' + key + "='" + value + "'" for key, value in env_vars.items()]) + '\n')
             elif script_type == 'Python':
                 f.write('import os\n')
-                for k,v in env_vars.items():
+                for k, v in env_vars.items():
                     f.write(f"os.environ['{k}'] = '''{v}'''\n")
             f.write(script_text)
             f.flush()
