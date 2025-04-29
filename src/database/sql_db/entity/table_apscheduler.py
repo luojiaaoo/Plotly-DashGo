@@ -1,5 +1,14 @@
-from peewee import Model, CharField, TextField, DateTimeField, ForeignKeyField, IntegerField
+from peewee import Model, CharField, TextField, ForeignKeyField, IntegerField
+from config.dashgo_conf import SqlDbConf
 from ..conn import db
+
+if SqlDbConf.RDB_TYPE == 'mysql':
+    from peewee import DateTimeField
+
+    class DateTimeField(DateTimeField):
+        field_type = 'DATETIME(6)'  # 直接指定字段类型
+else:
+    from peewee import DateTimeField
 
 
 class BaseModel(Model):

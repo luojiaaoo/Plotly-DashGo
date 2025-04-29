@@ -119,7 +119,6 @@ def run_script(
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=False,
-            **(dict(start_new_session=True) if platform.system() != 'Windows' else {}),
         )
         queue_stdout = Queue()
         queue_stderr = Queue()
