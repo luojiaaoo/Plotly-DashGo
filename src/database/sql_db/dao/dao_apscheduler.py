@@ -4,6 +4,7 @@ from common.utilities.util_logger import Log
 from ..entity.table_apscheduler import SysApschedulerResults, SysApschedulerExtractValue, SysApschedulerRunning
 from datetime import datetime, timedelta
 from common.notify import send_text_notify
+import json
 import re
 
 logger = Log.get_logger(__name__)
@@ -14,7 +15,7 @@ def select_last_log_from_job_id(job_id: str, accept_timedelta: timedelta) -> str
     try:
         result = (
             SysApschedulerResults.select(SysApschedulerResults.log)
-            .where(SysApschedulerResults.job_id == job_id and SysApschedulerResults.finish_datetime > datetime.now() - accept_timedelta)
+            .where((SysApschedulerResults.job_id == job_id) & (SysApschedulerResults.finish_datetime > datetime.now() - accept_timedelta))
             .order_by(SysApschedulerResults.finish_datetime.desc())
             .get()
         )
@@ -51,7 +52,7 @@ def get_running_log(job_id: str, start_datetime: datetime, order: int = None) ->
     try:
         return (
             SysApschedulerRunning.select(SysApschedulerRunning.log)
-            .where(SysApschedulerRunning.job_id == job_id and SysApschedulerRunning.start_datetime == start_datetime and SysApschedulerRunning.order == order)
+            .where((SysApschedulerRunning.job_id == job_id) & (SysApschedulerRunning.start_datetime == start_datetime) & (SysApschedulerRunning.order == order))
             .dicts()
             .get()['log']
         )
@@ -66,7 +67,7 @@ def get_done_log(job_id: str, start_datetime: datetime) -> str:
     try:
         return (
             SysApschedulerResults.select(SysApschedulerResults.log)
-            .where(SysApschedulerResults.job_id == job_id and SysApschedulerResults.start_datetime == start_datetime)
+            .where((SysApschedulerResults.job_id == job_id) & (SysApschedulerResults.start_datetime == start_datetime))
             .dicts()
             .get()['log']
         )
@@ -96,12 +97,12 @@ def select_apscheduler_running_log(job_id, start_datetime, order=None):
         if order is None:
             results = (
                 SysApschedulerRunning.select(SysApschedulerRunning.log)
-                .where(SysApschedulerRunning.job_id == job_id and SysApschedulerRunning.start_datetime == start_datetime)
+                .where((SysApschedulerRunning.job_id == job_id) & (SysApschedulerRunning.start_datetime == start_datetime))
                 .order_by(SysApschedulerRunning.order.asc())
             )
         else:
             results = SysApschedulerRunning.select(SysApschedulerRunning.log).where(
-                SysApschedulerRunning.job_id == job_id and SysApschedulerRunning.start_datetime == start_datetime and SysApschedulerRunning.order == order
+                (SysApschedulerRunning.job_id == job_id) & (SysApschedulerRunning.start_datetime == start_datetime) & (SysApschedulerRunning.order == order)
             )
         result = [result.log for result in results]
         return ''.join(result)
@@ -114,7 +115,7 @@ def delete_apscheduler_running(job_id, start_datetime):
     database = db()
     try:
         with database.atomic():
-            SysApschedulerRunning.delete().where(SysApschedulerRunning.job_id == job_id and SysApschedulerRunning.start_datetime == start_datetime).execute()
+            SysApschedulerRunning.delete().where((SysApschedulerRunning.job_id == job_id) & (SysApschedulerRunning.start_datetime == start_datetime)).execute()
     except IntegrityError as e:
         logger.error(f'删除实时日志时发生数据库完整性错误: {e}')
         raise Exception('Failed to delete apscheduler running log due to integrity error') from e
