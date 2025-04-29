@@ -166,7 +166,7 @@ def insert_apscheduler_extract_value(job_id, log, start_datetime, extract_names,
                     raise ValueError('不支持的提取数据类型')
                 SysApschedulerExtractValue.create(
                     job_id=job_id,
-                    extract_name=extract_name,
+                    extract_name=name,
                     value_type=type_,
                     value=value,
                     start_datetime=start_datetime,
