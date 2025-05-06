@@ -77,19 +77,21 @@ def task_log_sse():
         total_log = None
         order = 0
         while True:
-            time.sleep(0.1)
+            time.sleep(1)
             total_log = get_done_log(job_id=job_id, start_datetime=start_datetime)
             if total_log is not None:
                 break
             else:
                 order_log = get_running_log(job_id=job_id, start_datetime=start_datetime, order=order)
                 if order_log is not None:
-                    yield 'data: {}\n\n'.format(json.dumps({'context': order_log}))
+                    yield 'data: <执行中>{}\n\n'.format(json.dumps({'context': order_log}))
                     order += 1
-
+                else:
+                    yield 'data: <无更新>{}\n\n'.format(json.dumps({'context': ''}))
         yield 'data: <响应结束>{}\n\n'.format(json.dumps({'context': total_log}))
 
     return Response(_stream(), mimetype='text/event-stream')
+
 
 
 # nginx代理后，拦截直接访问

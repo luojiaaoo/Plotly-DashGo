@@ -128,11 +128,11 @@ app.clientside_callback(
                         children: [JSON.parse(data.replaceAll('<响应结束>', '')).context]
                     }
                 )
-            } else {
+            } else if (data.startsWith('<执行中>')) {
                 window.dash_clientside.set_props(
                     'task-log-command-output-records',
                     {
-                        children: [...children, JSON.parse(data).context]
+                        children: [...children, JSON.parse(data.replaceAll('<执行中>', '')).context]
                     }
                 )
             }
