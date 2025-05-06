@@ -154,7 +154,7 @@ def insert_apscheduler_extract_value(job_id, log, start_datetime, extract_names,
                     try:
                         value = float(value)
                     except:
-                        logger.warning(f'提取数据类型为string，但无法转换为字符串: {value}')
+                        logger.warning(f'提取数据类型为number，但无法转换为数值: {value}')
                         continue
                 elif type_ == 'notify':
                     send_text_notify(
