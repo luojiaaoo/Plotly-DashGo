@@ -53,7 +53,7 @@ def get_email_context_from_subject_during(
             try:
                 from_ = decode_mime(email_msg['From'])
                 subject_ = decode_mime(email_msg['Subject'])
-                datetime_ = datetime.strptime(decode_mime(email_msg['Date'])[:31], '%a, %d %b %Y %H:%M:%S %z')
+                datetime_ = datetime.strptime(' '.join(decode_mime(email_msg['Date']).split()[:6]), '%a, %d %b %Y %H:%M:%S %z')
                 context = ''
                 for part in email_msg.walk():
                     if part.get_content_type() == 'text/plain':
