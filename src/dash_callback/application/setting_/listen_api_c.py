@@ -20,7 +20,6 @@ def api_name_value2label(api_name: str):
 
 def get_tabs_items():
     items = []
-    # server酱配置
     listen_apis = dao_listen.get_listen_api_by_name(api_name=None)
     for listen_api in listen_apis:
         api_type = listen_api.api_type
@@ -29,6 +28,7 @@ def get_tabs_items():
         api_name = listen_api.api_name
         api_name_label = api_name_value2label(api_name)
         params_json = listen_api.params_json
+        # 邮件POP3协议配置
         if api_type == '邮件POP3协议':
             if params_json and (params_json := json.loads(params_json)):
                 pop3_server = params_json['pop3_server']
@@ -47,24 +47,24 @@ def get_tabs_items():
                     'contextMenu': [{'key': api_name, 'label': t__setting('删除')}],
                     'children': fac.AntdSpace(
                         [
-                            dcc.Store(id={'type': 'notify-api-pop3-api-name', 'name': api_name}, data=api_name),
+                            dcc.Store(id={'type': 'listen-api-pop3-api-name', 'name': api_name}, data=api_name),
                             fac.AntdDivider(api_name_label, innerTextOrientation='left'),
                             fac.AntdForm(
                                 [
                                     fac.AntdFormItem(
-                                        fac.AntdInput(id={'type': 'notify-api-pop3-pop3-server', 'name': api_name}, value=pop3_server),
+                                        fac.AntdInput(id={'type': 'listen-api-pop3-pop3-server', 'name': api_name}, value=pop3_server),
                                         label='pop3-server',
                                     ),
                                     fac.AntdFormItem(
-                                        fac.AntdInput(id={'type': 'notify-api-pop3-port', 'name': api_name}, value=port if port else '993'),
+                                        fac.AntdInput(id={'type': 'listen-api-pop3-port', 'name': api_name}, value=port if port else '993'),
                                         label='port',
                                     ),
                                     fac.AntdFormItem(
-                                        fac.AntdInput(id={'type': 'notify-api-pop3-email-account', 'name': api_name}, value=email_account),
+                                        fac.AntdInput(id={'type': 'listen-api-pop3-email-account', 'name': api_name}, value=email_account),
                                         label='email-account',
                                     ),
                                     fac.AntdFormItem(
-                                        fac.AntdInput(id={'type': 'notify-api-pop3-password', 'name': api_name}, value=password),
+                                        fac.AntdInput(id={'type': 'listen-api-pop3-password', 'name': api_name}, value=password),
                                         label='password',
                                     ),
                                 ],
@@ -75,12 +75,12 @@ def get_tabs_items():
                                 [
                                     fac.AntdButton(
                                         t__setting('保存'),
-                                        id={'type': 'notify-api-pop3-save', 'name': api_name},
+                                        id={'type': 'listen-api-pop3-save', 'name': api_name},
                                         type='primary',
                                     ),
                                     fac.AntdButton(
                                         t__setting('消息测试'),
-                                        id={'type': 'notify-api-pop3-test', 'name': api_name},
+                                        id={'type': 'listen-api-pop3-test', 'name': api_name},
                                         type='default',
                                     ),
                                 ],
@@ -136,17 +136,36 @@ def add_server_pop3_listen_api(nClick, api_name_label):
     MessageManager.success(content=api_name_label + t__setting('创建成功'))
     return [get_tabs_items(), *get_listen_api()]
 
+@app.callback(
+    [
+        Output('listen-api-edit-tabs', 'items', allow_duplicate=True),
+        Output('listen-api-activate', 'options', allow_duplicate=True),
+        Output('listen-api-activate', 'value', allow_duplicate=True),
+    ],
+    Input('listen-api-activate', 'value'),
+    State('listen-api-activate', 'options'),
+    prevent_initial_call=True,
+)
+def enable_listen_api(enables, options):
+    for option in options:
+        api_name = option['value']
+        if api_name in enables:
+            dao_listen.modify_enable(api_name=api_name, enable=True)
+        else:
+            dao_listen.modify_enable(api_name=api_name, enable=False)
+    return [get_tabs_items(), *get_listen_api()]
+
 
 # 邮件POP3协议保存
 @app.callback(
-    Output({'type': 'notify-api-pop3-save', 'name': MATCH}, 'id'),
-    Input({'type': 'notify-api-pop3-save', 'name': MATCH}, 'nClicks'),
+    Output({'type': 'listen-api-pop3-save', 'name': MATCH}, 'id'),
+    Input({'type': 'listen-api-pop3-save', 'name': MATCH}, 'nClicks'),
     [
-        State({'type': 'notify-api-pop3-pop3-server', 'name': MATCH}, 'value'),
-        State({'type': 'notify-api-pop3-port', 'name': MATCH}, 'value'),
-        State({'type': 'notify-api-pop3-email-account', 'name': MATCH}, 'value'),
-        State({'type': 'notify-api-pop3-password', 'name': MATCH}, 'value'),
-        State({'type': 'notify-api-pop3-api-name', 'name': MATCH}, 'data'),
+        State({'type': 'listen-api-pop3-pop3-server', 'name': MATCH}, 'value'),
+        State({'type': 'listen-api-pop3-port', 'name': MATCH}, 'value'),
+        State({'type': 'listen-api-pop3-email-account', 'name': MATCH}, 'value'),
+        State({'type': 'listen-api-pop3-password', 'name': MATCH}, 'value'),
+        State({'type': 'listen-api-pop3-api-name', 'name': MATCH}, 'data'),
     ],
     prevent_initial_call=True,
 )
@@ -158,8 +177,9 @@ def save_email_pop3_api(nClick, pop3_server, port, email_account, password, api_
         password=password,
     )
     api_name_label = api_name_value2label(api_name)
+    is_enabled = dao_listen.get_listen_api_by_name(api_name=api_name).enable
     dao_listen.delete_listen_api_by_name(api_name=api_name)
-    if dao_listen.insert_listen_api(api_name=api_name, api_type='邮件POP3协议', enable=True, params_json=json.dumps(values)):
+    if dao_listen.insert_listen_api(api_name=api_name, api_type='邮件POP3协议', enable=is_enabled, params_json=json.dumps(values)):
         MessageManager.success(content=api_name_label + t__setting('配置保存成功'))
     else:
         MessageManager.error(content=api_name_label + t__setting('配置保存失败'))
@@ -168,13 +188,13 @@ def save_email_pop3_api(nClick, pop3_server, port, email_account, password, api_
 
 # 测试邮件POP3协议
 @app.callback(
-    Output({'type': 'notify-api-pop3-test', 'name': MATCH}, 'id'),
-    Input({'type': 'notify-api-pop3-test', 'name': MATCH}, 'nClicks'),
+    Output({'type': 'listen-api-pop3-test', 'name': MATCH}, 'id'),
+    Input({'type': 'listen-api-pop3-test', 'name': MATCH}, 'nClicks'),
     [
-        State({'type': 'notify-api-pop3-pop3-server', 'name': MATCH}, 'value'),
-        State({'type': 'notify-api-pop3-port', 'name': MATCH}, 'value'),
-        State({'type': 'notify-api-pop3-email-account', 'name': MATCH}, 'value'),
-        State({'type': 'notify-api-pop3-password', 'name': MATCH}, 'value'),
+        State({'type': 'listen-api-pop3-pop3-server', 'name': MATCH}, 'value'),
+        State({'type': 'listen-api-pop3-port', 'name': MATCH}, 'value'),
+        State({'type': 'listen-api-pop3-email-account', 'name': MATCH}, 'value'),
+        State({'type': 'listen-api-pop3-password', 'name': MATCH}, 'value'),
     ],
     prevent_initial_call=True,
 )
@@ -197,3 +217,5 @@ def test_Gewechat_api(nClicks, pop3_server, port, email_account, password):
     else:
         MessageManager.success(content=t__setting('POP3测试接收成功'))
     return dash.no_update
+
+

@@ -427,8 +427,9 @@ def save_server_jiang_api(nClick, SendKey, Noip, Channel, Openid, api_name):
         Openid=Openid,
     )
     api_name_label = api_name_value2label(api_name)
+    is_enabled = dao_notify.get_notify_api_by_name(api_name=api_name).enable
     dao_notify.delete_notify_api_by_name(api_name=api_name)
-    if dao_notify.insert_notify_api(api_name=api_name, api_type='Server酱', enable=True, params_json=json.dumps(values)):
+    if dao_notify.insert_notify_api(api_name=api_name, api_type='Server酱', enable=is_enabled, params_json=json.dumps(values)):
         MessageManager.success(content=api_name_label + t__setting('配置保存成功'))
     else:
         MessageManager.error(content=api_name_label + t__setting('配置保存失败'))
@@ -515,8 +516,9 @@ def test_Gewechat_api(nClicks, token, app_id, base_url, wxid):
 def save_Gewechat_api(nClick, token, app_id, base_url, wxid, api_name):
     values = dict(token=token, app_id=app_id, base_url=base_url, wxid=wxid)
     api_name_label = api_name_value2label(api_name)
+    is_enabled = dao_notify.get_notify_api_by_name(api_name=api_name).enable
     dao_notify.delete_notify_api_by_name(api_name=api_name)
-    if dao_notify.insert_notify_api(api_name=api_name, api_type='Gewechat', enable=True, params_json=json.dumps(values)):
+    if dao_notify.insert_notify_api(api_name=api_name, api_type='Gewechat', enable=is_enabled, params_json=json.dumps(values)):
         MessageManager.success(content=api_name_label + t__setting('配置保存成功'))
     else:
         MessageManager.error(content=api_name_label + t__setting('配置保存失败'))
@@ -536,8 +538,9 @@ def save_Gewechat_api(nClick, token, app_id, base_url, wxid, api_name):
 def save_wecom_group_robot_api(nClick, Key, api_name):
     values = dict(Key=Key)
     api_name_label = api_name_value2label(api_name)
+    is_enabled = dao_notify.get_notify_api_by_name(api_name=api_name).enable
     dao_notify.delete_notify_api_by_name(api_name=api_name)
-    if dao_notify.insert_notify_api(api_name=api_name, api_type='企业微信群机器人', enable=True, params_json=json.dumps(values)):
+    if dao_notify.insert_notify_api(api_name=api_name, api_type='企业微信群机器人', enable=is_enabled, params_json=json.dumps(values)):
         MessageManager.success(content=api_name_label + t__setting('配置保存成功'))
     else:
         MessageManager.error(content=api_name_label + t__setting('配置保存失败'))
@@ -581,8 +584,9 @@ def test_wecom_group_robot_api(nClicks, Key):
 def save_email_smtp_api(nClick, Host, Port, User, Password, Receivers, api_name):
     values = dict(Host=Host, Port=Port, User=User, Password=Password, Receivers=Receivers)
     api_name_label = api_name_value2label(api_name)
+    is_enabled = dao_notify.get_notify_api_by_name(api_name=api_name).enable
     dao_notify.delete_notify_api_by_name(api_name=api_name)
-    if dao_notify.insert_notify_api(api_name=api_name, api_type='邮件SMTP协议', enable=True, params_json=json.dumps(values)):
+    if dao_notify.insert_notify_api(api_name=api_name, api_type='邮件SMTP协议', enable=is_enabled, params_json=json.dumps(values)):
         MessageManager.success(content=api_name_label + t__setting('配置保存成功'))
     else:
         MessageManager.error(content=api_name_label + t__setting('配置保存失败'))
