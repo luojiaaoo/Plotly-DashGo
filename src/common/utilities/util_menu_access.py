@@ -2,10 +2,14 @@ from typing import Set
 from common.exception import NotFoundUserException, AuthException
 from common.utilities.util_logger import Log
 from i18n import t__access
+from cacheout import Cache
+
+cache = Cache()
 
 logger = Log.get_logger(__name__)
 
 
+@cache.memoize(ttl=5)
 class MenuAccess:
     def get_user_all_access_metas(cls, user_info) -> Set[str]:
         from database.sql_db.dao import dao_user
@@ -32,7 +36,10 @@ class MenuAccess:
         json_menu_item_access_meta = {}
         for access_meta, menu_item in dict_access_meta2menu_item.items():
             # 此权限无需分配
-            if access_meta in (*AccessFactory.default_access_meta, *AccessFactory.admin_access_meta, *AccessFactory.group_access_meta) and access_meta not in AccessFactory.assignable_access_meta:
+            if (
+                access_meta in (*AccessFactory.default_access_meta, *AccessFactory.admin_access_meta, *AccessFactory.group_access_meta)
+                and access_meta not in AccessFactory.assignable_access_meta
+            ):
                 continue
             level1_name, level2_name = menu_item.split('.')
             if json_menu_item_access_meta.get(level1_name, None) is None:
@@ -148,10 +155,11 @@ class MenuAccess:
 
     def has_access(self, access_meta) -> bool:
         return access_meta in self.all_access_metas
-    
+
     @property
     def dict_access_meta2menu_item(self):
         from config.access_factory import AccessFactory
+
         return AccessFactory.get_dict_access_meta2menu_item()
 
     def __init__(self, user_name) -> None:
@@ -189,7 +197,7 @@ def get_menu_access(only_get_user_name=False) -> MenuAccess:
     from common.utilities.util_authorization import auth_validate
 
     rt_access = auth_validate(
-        verify_exp=LoginConf.JWT_EXPIRED_FORCE_LOGOUT, # 查看权限的时候是否检测过期
+        verify_exp=LoginConf.JWT_EXPIRED_FORCE_LOGOUT,  # 查看权限的时候是否检测过期
     )
     if rt_access == util_jwt.AccessFailType.EXPIRED:
         raise AuthException(message='您的授权令牌已过期，请重新登录')

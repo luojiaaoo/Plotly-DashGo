@@ -182,8 +182,18 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
 
     # 获取用户权限
     menu_access: MenuAccess = get_menu_access()
-    # 加载模块
-    module_page = importlib.import_module(f'dash_view.application.{url_menu_item}')
+
+    # 虽然main里检查了权限，但是可能有部分权限的用户，通过js进行恶意访问，这里还需要进行权限检查
+    from dash_view.pages import page_403, page_404
+
+    # 检查是否有这个页面，返回404
+    try:
+        module_page = importlib.import_module(f'dash_view.application.{url_menu_item}')
+    except Exception:
+        return page_404.render()
+    # 检查权限，没有权限，返回403
+    if url_menu_item not in menu_access.menu_items:
+        return page_403.render()
 
     ################# 返回页面 #################
     p_items = Patch()
