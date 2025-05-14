@@ -9,7 +9,7 @@ from dash.exceptions import PreventUpdate
 from dash import set_props
 from yarl import URL
 from common.utilities.util_menu_access import get_menu_access
-from dash_view.pages import page_404, page_401
+from common.utilities.util_menu_access import MenuAccess
 from i18n import t__access
 
 
@@ -91,6 +91,25 @@ app.clientside_callback(
 )
 
 
+def parse_url(href):
+    url = URL(href)
+    url_pathname = url.path
+    url_menu_item = '.'.join(url.parts[1:])  # 访问路径，第一个为/，去除
+    url_query: Dict = dict(url.query)  # 查询参数
+    url_fragment: str = url.fragment  # 获取锚链接
+    if 'flash_' in url_query:  # 排除强制刷新flash参数，此参数只作为首页跳转用
+        url_query.pop('flash_')
+    param = {
+        **url_query,
+        **({'url_fragment': url_fragment} if url_fragment else {}),
+    }  # 合并查询和锚连接，组成综合参数
+    return url_pathname, url_menu_item, url_query, url_fragment, param
+
+
+def is_independent(url_query):
+    return 'independent_' in url_query
+
+
 # 主路由函数：地址URL中继store -》 Tab新增+Tab切换+菜单展开+菜单选中+面包屑
 @app.callback(
     [
@@ -114,24 +133,14 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     if href is None:
         raise PreventUpdate
     has_open_tab_keys = has_open_tab_keys or []
-    url = URL(href)
-    url_pathname = url.path
-    url_menu_item = '.'.join(url.parts[1:])  # 访问路径，第一个为/，去除
-    url_query: Dict = dict(url.query)  # 查询参数
-    url_fragment: str = url.fragment  # 获取锚链接
-    if 'flash' in url_query:  # 排除强制刷新flash参数
-        url_query.pop('flash')
-    param = {
-        **url_query,
-        **({'url_fragment': url_fragment} if url_fragment else {}),
-    }  # 合并查询和锚连接，组成综合参数
+    url_pathname, url_menu_item, url_query, url_fragment, param = parse_url(href=href)
 
     # 当重载页面时，如果访问的不是首页，则先访问首页，再自动访问目标页
     relocation = False
     _last_pathname = ''
     _last_search = {}
     _last_hash = ''
-    if trigger == 'load' and url_menu_item != 'dashboard_.workbench':
+    if trigger == 'load' and url_menu_item != 'dashboard_.workbench':  # 当第一次访问，而且不是首页时，先访问首页，然后通过flash强制刷新地址
         relocation = True
         # 保存目标页的url
         _last_pathname = url_pathname
@@ -143,13 +152,6 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
         url_query = {}
         url_fragment = ''
         param = {}
-    try:
-        # 导入对应的页面模块
-        module_page = importlib.import_module(f'dash_view.application.{url_menu_item}')
-    except Exception:
-        # 没有该页面对应的模块，返回404
-        set_props('root-container', {'children': page_404.render()})
-        return dash.no_update
 
     def menu_item2url_path(menu_item: str, parent_count=0) -> str:
         if parent_count > 0:
@@ -162,8 +164,6 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     key_url_path_parent = menu_item2url_path(url_menu_item, 1)
 
     # 构建面包屑格式
-    from common.utilities.util_menu_access import MenuAccess
-
     breadcrumb_items = [{'title': t__access('首页'), 'href': '/dashboard_/workbench'}]
     _modules: List = url_menu_item.split('.')
     for i in range(len(_modules)):
@@ -182,10 +182,8 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
 
     # 获取用户权限
     menu_access: MenuAccess = get_menu_access()
-    # 没有权限，返回401
-    if url_menu_item not in menu_access.menu_items:
-        set_props('root-container', {'children': page_401.render()})
-        return dash.no_update
+    # 加载模块
+    module_page = importlib.import_module(f'dash_view.application.{url_menu_item}')
 
     ################# 返回页面 #################
     p_items = Patch()
@@ -206,6 +204,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
         set_props('main-url-search-last-when-load', {'data': _last_search})
         set_props('main-url-hash-last-when-load', {'data': _last_hash})
         set_props('main-url-timeout-last-when-load', {'delay': 100})
+
     return [
         p_items,  # tab标签页
         dash.no_update if relocation else key_url_path,  # tab选中key
@@ -255,7 +254,7 @@ app.clientside_callback(
 def jump_to_init_page(timeoutCount, pathname, search, hash):
     from yarl import URL
 
-    url = URL(pathname).with_query({**search, **{'flash': uuid4().hex[:8]}}).with_fragment(hash)
+    url = URL(pathname).with_query({**search, **{'flash_': uuid4().hex[:8]}}).with_fragment(hash)
     return url.path, URL.build(query=url.query).__str__(), URL.build(fragment=url.fragment).__str__()
 
 
@@ -314,11 +313,28 @@ app.clientside_callback(
 # 页面刷新
 app.clientside_callback(
     """
-    (nClicks) => {
-        return true;
+    (nClicks, id) => {
+        window.dash_clientside.set_props(
+                                    id,
+                                    { reload: true }
+                                )
     }
     """,
-    Output('main-reload', 'reload', allow_duplicate=True),
     Input('tabs-refresh', 'nClicks'),
+    State('global-reload', 'id'),
+    prevent_initial_call=True,
+)
+
+# 新开独立页面
+app.clientside_callback(
+    """
+    (nClicks, href) => {
+        const url = new URL(href);
+        url.searchParams.set('independent_', '');
+        window.open(url.toString(), '_blank');
+    }
+    """,
+    Input('tabs-open-independent', 'nClicks'),
+    State('main-url-location', 'href'),
     prevent_initial_call=True,
 )

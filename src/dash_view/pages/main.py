@@ -6,10 +6,25 @@ from common.utilities.util_menu_access import MenuAccess
 import feffery_utils_components as fuc
 from i18n import t__default
 from dash_view.framework import func_main
+from dash_callback.pages.main_c import parse_url, is_independent
+from dash_view.pages import page_403, page_404
+import importlib
 import dash_callback.pages.main_c  # noqa
 
 
-def render_content(menu_access: MenuAccess):
+def render_content(menu_access: MenuAccess, href: str):
+    _, url_menu_item, url_query, _, param = parse_url(href=href)
+    # 检查是否有这个页面，返回404
+    try:
+        module_page = importlib.import_module(f'dash_view.application.{url_menu_item}')
+    except Exception:
+        return page_404.render()
+    # 检查权限，没有权限，返回403
+    if url_menu_item not in menu_access.menu_items:
+        return page_403.render()
+    # 是否为独立页面，直接返回独立页面，无需渲染框架
+    if is_independent(url_query):
+        return module_page.render_content(menu_access, **param)
     return fac.AntdRow(
         [
             # 功能组件注入
@@ -51,6 +66,16 @@ def render_content(menu_access: MenuAccess):
                                 tabPaneAnimated=False,
                                 tabBarRightExtraContent=fac.AntdSpace(
                                     [
+                                        fac.AntdTooltip(
+                                            fac.AntdIcon(
+                                                id='tabs-open-independent',
+                                                icon='antd-export',
+                                                debounceWait=300,
+                                                style={'cursor': 'pointer', 'marginRight': '10px', 'fontSize': '1.2em'},
+                                            ),
+                                            title=t__default('新页面打开'),
+                                            placement='left',
+                                        ),
                                         fac.AntdTooltip(
                                             fac.AntdIcon(
                                                 id='tabs-refresh',

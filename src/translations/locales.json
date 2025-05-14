@@ -30,6 +30,9 @@
         },
         "全屏": {
             "en-us": "Full Screen"
+        },
+        "新页面打开": {
+            "en-us": "Open in New Page"
         }
     }
 }

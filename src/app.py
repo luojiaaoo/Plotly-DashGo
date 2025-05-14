@@ -31,6 +31,12 @@ app.layout = lambda: fuc.FefferyTopProgress(
         fac.Fragment(id='global-message-container'),
         # 注入全局通知信息容器
         fac.Fragment(id='global-notification-container'),
+        # 注入js执行
+        fuc.FefferyExecuteJs(id='global-execute-js-output'),
+        # 注入强制网页刷新组件
+        fuc.FefferyReload(id='global-reload'),
+        # 注入重定向组件容器，返回dcc.Location组件，重定向到新页面
+        fac.Fragment(id='global-redirect-container'),
         # URL初始化中继组件，触发root_router回调执行
         dcc.Store(id='global-url-init-load'),
         # 应用根容器
@@ -83,6 +89,7 @@ def root_router(href):
         return main.render_content(
             # 获取用户菜单权限，根据权限初始化主页内容
             menu_access=menu_access,
+            href=href,
         )
 
 

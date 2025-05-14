@@ -25,12 +25,6 @@ def render():
         fuc.FefferyTimeout(id='main-url-timeout-last-when-load'),
         #
         # >>>>> 功能组件
-        # 重定向组件容器，返回dcc.Location组件，重定向到新页面
-        fac.Fragment(id='main-redirect-container'),
-        # 强制网页刷新组件
-        fuc.FefferyReload(id='main-reload'),
-        # js执行
-        fuc.FefferyExecuteJs(id='main-execute-js-output'),
         # 监听窗口大小
         fuc.FefferyWindowSize(id='main-window-size'),
         # 退出登录提示弹窗

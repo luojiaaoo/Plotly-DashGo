@@ -30,10 +30,10 @@ from datetime import datetime
 from i18n import t__task
 from database.sql_db.dao import dao_listen_task
 from common.utilities.util_menu_access import get_menu_access
-import json
+from dash_callback.pages.main_c import is_independent
 
 
-def get_table_data():
+def get_table_data(href):
     return [
         {
             'job_id': job.job_id,
@@ -57,11 +57,17 @@ def get_table_data():
                     'type': 'primary',
                     'custom': f'edit:{job.job_id}',
                 },
-                {
-                    'content': 'View',
-                    'type': 'primary',
-                    'custom': f'view:{job.job_id}',
-                },
+                *(
+                    []
+                    if is_independent(href)
+                    else [
+                        {
+                            'content': 'View',
+                            'type': 'primary',
+                            'custom': f'view:{job.job_id}',
+                        }
+                    ]
+                ),
             ],
         }
         for job in sorted(get_apscheduler_all_jobs(), key=lambda job: job.create_datetime, reverse=True)
@@ -71,9 +77,10 @@ def get_table_data():
 @app.callback(
     Output('task-mgmt-table-container', 'children'),
     Input('task-mgmt-init-timeout', 'timeoutCount'),
+    State('global-url-location', 'href'),
     prevent_initial_call=True,
 )
-def init_table(timeoutCount):
+def init_table(timeoutCount, href):
     """页面加载时初始化渲染表格"""
     return [
         fac.AntdModal(
@@ -103,7 +110,7 @@ def init_table(timeoutCount):
                     {'title': t__task('操作'), 'dataIndex': 'action', 'renderOptions': {'renderType': 'button'}, 'width': 'calc(100% / 11)'},
                 ],
                 rowSelectionType='checkbox',
-                data=get_table_data(),
+                data=get_table_data(href),
                 pageSize=10,
             ),
             indicator=fuc.FefferyExtraSpinner(type='classic', color='#335efb'),
@@ -118,9 +125,10 @@ def init_table(timeoutCount):
         Input('task-mgmt-table', 'recentlySwitchStatus'),
         Input('task-mgmt-table', 'recentlySwitchRow'),
     ],
+    State('global-url-location', 'href'),
     prevent_initial_call=True,
 )
-def handle_enable_eow(recentlySwitchDataIndex, recentlySwitchStatus, recentlySwitchRow):
+def handle_enable_eow(recentlySwitchDataIndex, recentlySwitchStatus, recentlySwitchRow, href):
     """处理启用、关闭逻辑"""
     type_task = recentlySwitchRow['trigger']
     status = recentlySwitchRow['enable']['checked']
@@ -130,17 +138,18 @@ def handle_enable_eow(recentlySwitchDataIndex, recentlySwitchStatus, recentlySwi
         MessageManager.success(content=f'{job_id}' + t__task('任务启用成功'))
     else:
         MessageManager.success(content=f'{job_id}' + t__task('任务停用成功'))
-    return get_table_data()
+    return get_table_data(href)
 
 
 @app.callback(
     Output('task-mgmt-table', 'data', allow_duplicate=True),
     Input('task-mgmt-button-flash', 'nClicks'),
+    State('global-url-location', 'href'),
     prevent_initial_call=True,
 )
-def flash_table(nClicks):
+def flash_table(nClicks, href):
     time.sleep(0.5)
-    return get_table_data()
+    return get_table_data(href)
 
 
 @app.callback(
@@ -475,7 +484,7 @@ def full_script_for_edit(timeoutCount, title, task_type):
     else:
         script_text = dao_listen_task.get_activa_listen_job(job_id=job_id)[0].script_text
     json_str = json.dumps({'script_text': script_text})
-    set_props('main-execute-js-output', {'jsString': f'const obj = {json_str};window.taskEditor.setValue(obj.script_text);'})
+    set_props('global-execute-js-output', {'jsString': f'const obj = {json_str};window.taskEditor.setValue(obj.script_text);'})
 
 
 # ssh参数隐藏/显示
@@ -652,6 +661,7 @@ app.clientside_callback(
         State('task-mgmt-table-add-modal-listen-keyword', 'value'),  # listen 关键词
         State('task-mgmt-table-add-modal-listen-channels', 'value'),  # listen 渠道
         State('task-mgmt-table-add-modal-title', 'children'),
+        State('global-url-location', 'href'),
     ],
     prevent_initial_call=True,
 )
@@ -680,6 +690,7 @@ def add_edit_job(
     listen_keyword,
     listen_channels,
     title,
+    href,
 ):
     if not modal_ok:  # fix: 无法避免初始化调用
         return dash.no_update
@@ -864,16 +875,19 @@ def add_edit_job(
         MessageManager.success(content=t__task('添加任务成功'))
     else:
         MessageManager.success(content=t__task('修改任务成功'))
-    return get_table_data()
+    return get_table_data(href)
 
 
 @app.callback(
     Output('task-mgmt-table', 'data', allow_duplicate=True),
     Input('task-mgmt-button-delete', 'confirmCounts'),
-    State('task-mgmt-table', 'selectedRows'),
+    [
+        State('task-mgmt-table', 'selectedRows'),
+        State('global-url-location', 'href'),
+    ],
     prevent_initial_call=True,
 )
-def handle_delete(confirmCounts, selectedRows):
+def handle_delete(confirmCounts, selectedRows, href):
     """处理表格数据行删除逻辑"""
 
     # 若当前无已选中行
@@ -889,4 +903,4 @@ def handle_delete(confirmCounts, selectedRows):
     set_props('task-mgmt-table', {'selectedRows': []})
     set_props('task-mgmt-table', {'selectedRowKeys': []})
 
-    return get_table_data()
+    return get_table_data(href)

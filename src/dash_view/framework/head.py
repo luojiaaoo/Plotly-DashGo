@@ -5,6 +5,7 @@ from dash import html
 from server import app
 from dash.dependencies import Input, Output, State
 import dash
+from dash import set_props
 from dash.exceptions import PreventUpdate
 from database.sql_db.dao import dao_announcement
 from i18n import t__access, t__other, t__default
@@ -157,10 +158,7 @@ def render_head_content(menu_access: MenuAccess):
 
 # 个人信息，退出登录
 @app.callback(
-    [
-        Output('main-dcc-url', 'pathname', allow_duplicate=True),
-        Output('main-reload', 'reload', allow_duplicate=True),
-    ],
+    Output('main-dcc-url', 'pathname', allow_duplicate=True),
     Input('global-head-user-name-dropdown', 'nClicks'),
     State('global-head-user-name-dropdown', 'clickedKey'),
     prevent_initial_call=True,
@@ -170,9 +168,10 @@ def callback_func(nClicks, clickedKey):
         from common.utilities.util_jwt import clear_access_token_from_session
 
         clear_access_token_from_session()
-        return dash.no_update, True
+        set_props('global-reload', {'reload': True})
+        return dash.no_update
     elif clickedKey == '个人信息':
-        return '/person_/personal_info', dash.no_update
+        return '/person_/personal_info'
     return PreventUpdate
 
 
