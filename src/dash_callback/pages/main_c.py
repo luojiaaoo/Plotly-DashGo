@@ -190,10 +190,10 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     try:
         module_page = importlib.import_module(f'dash_view.application.{url_menu_item}')
     except Exception:
-        return page_404.render()
+        module_page = page_404
     # 检查权限，没有权限，返回403
     if url_menu_item not in menu_access.menu_items:
-        return page_403.render()
+        module_page = page_403
 
     ################# 返回页面 #################
     p_items = Patch()

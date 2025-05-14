@@ -59,7 +59,7 @@ def handle_root_router_error(e):
     set_props(
         'root-container',
         {
-            'children': page_500.render(e),
+            'children': page_500.render_content(e),
         },
     )
 

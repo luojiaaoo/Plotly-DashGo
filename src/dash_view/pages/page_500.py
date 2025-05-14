@@ -3,7 +3,7 @@ import feffery_antd_components as fac
 from feffery_dash_utils.style_utils import style
 
 
-def render(e: str = None):
+def render_content(e: str = None):
     """渲染500状态页面"""
 
     if e is None:

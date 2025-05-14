@@ -18,10 +18,10 @@ def render_content(menu_access: MenuAccess, href: str):
     try:
         module_page = importlib.import_module(f'dash_view.application.{url_menu_item}')
     except Exception:
-        return page_404.render()
+        return page_404.render_content()
     # 检查权限，没有权限，返回403
     if url_menu_item not in menu_access.menu_items:
-        return page_403.render()
+        return page_403.render_content()
     # 是否为独立页面，直接返回独立页面，无需渲染框架
     if is_independent(url_query):
         return module_page.render_content(menu_access, **param)
