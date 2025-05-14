@@ -3,7 +3,7 @@ from dash import html
 from common.constant import HttpStatusConstant
 
 
-def render_content():
+def render_content(*args, **kwargs):
     return html.Div(
         [
             html.Div(
