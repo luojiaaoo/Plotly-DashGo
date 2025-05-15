@@ -51,9 +51,9 @@ class MenuAccess:
                     json_menu_item_access_meta[level1_name][level2_name].append(access_meta)
 
         # 根据order属性排序目录
-        json_menu_item_access_meta = dict(sorted(json_menu_item_access_meta.items(), key=lambda x: MenuAccess.get_order(f'{x[0]}')))
+        json_menu_item_access_meta = dict(sorted(json_menu_item_access_meta.items(), key=lambda x: MenuAccess.get_order.__func__(f'{x[0]}')))
         for level1_name, dict_level2_access_metas in json_menu_item_access_meta.items():
-            json_menu_item_access_meta[level1_name] = dict(sorted(dict_level2_access_metas.items(), key=lambda x: MenuAccess.get_order(f'{level1_name}.{x[0]}')))
+            json_menu_item_access_meta[level1_name] = dict(sorted(dict_level2_access_metas.items(), key=lambda x: MenuAccess.get_order.__func__(f'{level1_name}.{x[0]}')))
 
         # 生成antd_tree的格式
         antd_tree_data = []
@@ -62,15 +62,15 @@ class MenuAccess:
             for level2_name, access_metas in dict_level2_access_metas.items():
                 format_level2.append(
                     {
-                        'title': t__access(MenuAccess.get_title(f'{level1_name}.{level2_name}')),
-                        'key': 'ignore:' + MenuAccess.get_title(f'{level1_name}.{level2_name}'),
+                        'title': t__access(MenuAccess.get_title.__func__(f'{level1_name}.{level2_name}')),
+                        'key': 'ignore:' + MenuAccess.get_title.__func__(f'{level1_name}.{level2_name}'),
                         'children': [{'title': t__access(access_meta), 'key': access_meta} for access_meta in access_metas],
                     },
                 )
             antd_tree_data.append(
                 {
-                    'title': t__access(MenuAccess.get_title(f'{level1_name}')),
-                    'key': 'ignore:' + MenuAccess.get_title(f'{level1_name}'),
+                    'title': t__access(MenuAccess.get_title.__func__(f'{level1_name}')),
+                    'key': 'ignore:' + MenuAccess.get_title.__func__(f'{level1_name}'),
                     'children': format_level2,
                 }
             )

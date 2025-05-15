@@ -167,7 +167,7 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     breadcrumb_items = [{'title': t__access('首页'), 'href': '/dashboard_/workbench'}]
     _modules: List = url_menu_item.split('.')
     for i in range(len(_modules)):
-        breadcrumb_items = breadcrumb_items + [{'title': t__access(MenuAccess.get_title('.'.join(_modules[: i + 1])))}]
+        breadcrumb_items = breadcrumb_items + [{'title': t__access(MenuAccess.get_title.__func__('.'.join(_modules[: i + 1])))}]
 
     # 情况1（实际上已经不存在这个情况，上一个回调已经拦截了这种情况，为了鲁棒性，还是保留）： 如已经打开，并且不带强制刷新参数,直接切换页面即可
     if key_url_path in has_open_tab_keys:
