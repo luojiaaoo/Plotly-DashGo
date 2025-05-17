@@ -33,6 +33,26 @@ class MenuAccess:
         from common.utilities.util_menu_access import MenuAccess
         from config.access_factory import AccessFactory
 
+        def add_to_nested_dict(nested_dict, keys, value):
+            """
+            递归地将值添加到嵌套字典中。
+            :param nested_dict: 当前的嵌套字典
+            :param keys: 菜单层级的列表
+            :param value: 要添加的权限元数据
+            """
+            key = keys[0]
+            if len(keys) == 1:
+                # 最后一层，直接添加权限元数据
+                if key not in nested_dict:
+                    nested_dict[key] = [value]
+                else:
+                    nested_dict[key].append(value)
+            else:
+                # 递归处理下一层
+                if key not in nested_dict:
+                    nested_dict[key] = {}
+                add_to_nested_dict(nested_dict[key], keys[1:], value)
+
         json_menu_item_access_meta = {}
         for access_meta, menu_item in dict_access_meta2menu_item.items():
             # 此权限无需分配
@@ -41,39 +61,61 @@ class MenuAccess:
                 and access_meta not in AccessFactory.assignable_access_meta
             ):
                 continue
-            level1_name, level2_name = menu_item.split('.')
-            if json_menu_item_access_meta.get(level1_name, None) is None:
-                json_menu_item_access_meta[level1_name] = {level2_name: [access_meta]}
-            else:
-                if json_menu_item_access_meta[level1_name].get(level2_name, None) is None:
-                    json_menu_item_access_meta[level1_name][level2_name] = [access_meta]
-                else:
-                    json_menu_item_access_meta[level1_name][level2_name].append(access_meta)
+            # 将菜单项按层级拆分
+            menu_hierarchy = menu_item.split('.')
+            add_to_nested_dict(json_menu_item_access_meta, menu_hierarchy, access_meta)
+        # json_menu_item_access_meta:
+        # {'task_': {'task_mgmt': ['任务管理-页面'], 'task_log': ['任务日志-页面']}, 'example_app': {'subapp2': ['应用2-基础权限', '应用2-权限1', '应用2-权限2'], 'subapp1': ['应用1-基础权限', '应用1-权限1', '应用1-权限2']}}
 
-        # 根据order属性排序目录
-        json_menu_item_access_meta = dict(sorted(json_menu_item_access_meta.items(), key=lambda x: MenuAccess.get_order.__func__(f'{x[0]}')))
-        for level1_name, dict_level2_access_metas in json_menu_item_access_meta.items():
-            json_menu_item_access_meta[level1_name] = dict(sorted(dict_level2_access_metas.items(), key=lambda x: MenuAccess.get_order.__func__(f'{level1_name}.{x[0]}')))
-
-        # 生成antd_tree的格式
-        antd_tree_data = []
-        for level1_name, dict_level2_access_metas in json_menu_item_access_meta.items():
-            format_level2 = []
-            for level2_name, access_metas in dict_level2_access_metas.items():
-                format_level2.append(
-                    {
-                        'title': t__access(MenuAccess.get_title.__func__(f'{level1_name}.{level2_name}')),
-                        'key': 'ignore:' + MenuAccess.get_title.__func__(f'{level1_name}.{level2_name}'),
-                        'children': [{'title': t__access(access_meta), 'key': access_meta} for access_meta in access_metas],
-                    },
+        # 根据 order 属性排序目录
+        def sort_nested_dict(nested_dict, parent_key=''):
+            """
+            递归地对嵌套字典进行排序。
+            :param nested_dict: 当前的嵌套字典
+            :param parent_key: 父级菜单的键，用于生成完整路径
+            """
+            if isinstance(nested_dict, dict):
+                return dict(
+                    sorted(
+                        {k: sort_nested_dict(v, f'{parent_key}.{k}' if parent_key else k) for k, v in nested_dict.items()}.items(),
+                        key=lambda x: MenuAccess.get_order.__func__(f'{parent_key}.{x[0]}' if parent_key else x[0]),
+                    )
                 )
-            antd_tree_data.append(
-                {
-                    'title': t__access(MenuAccess.get_title.__func__(f'{level1_name}')),
-                    'key': 'ignore:' + MenuAccess.get_title.__func__(f'{level1_name}'),
-                    'children': format_level2,
-                }
-            )
+            return nested_dict
+
+        json_menu_item_access_meta = sort_nested_dict(json_menu_item_access_meta)
+
+        # 生成 Ant Design Tree 的格式
+        def generate_antd_tree(nested_dict, parent_key=''):
+            """
+            递归地生成 Ant Design Tree 格式的数据。
+            :param nested_dict: 当前的嵌套字典
+            :param parent_key: 父级菜单的键，用于生成完整路径
+            """
+            tree = []
+            for key, value in nested_dict.items():
+                full_key = f'{parent_key}.{key}' if parent_key else key
+                if isinstance(value, dict):
+                    # 如果是字典，递归生成子节点
+                    tree.append(
+                        {
+                            'title': t__access(MenuAccess.get_title.__func__(full_key)),
+                            'key': f'ignore:{MenuAccess.get_title.__func__(full_key)}',
+                            'children': generate_antd_tree(value, full_key),
+                        }
+                    )
+                else:
+                    # 如果是列表，生成叶子节点
+                    tree.append(
+                        {
+                            'title': t__access(MenuAccess.get_title.__func__(full_key)),
+                            'key': f'ignore:{MenuAccess.get_title.__func__(full_key)}',
+                            'children': [{'title': t__access(meta), 'key': meta} for meta in value],
+                        }
+                    )
+            return tree
+
+        antd_tree_data = generate_antd_tree(json_menu_item_access_meta)
         return antd_tree_data
 
     @classmethod
@@ -115,43 +157,75 @@ class MenuAccess:
     @classmethod
     def gen_menu(cls, menu_items: Set[str]):
         # 根据菜单项构建菜单层级
-        dict_level1_level2 = dict()
-        for per_menu_item in menu_items:
-            level1_name, level2_name = per_menu_item.split('.')
-            if dict_level1_level2.get(level1_name) is None:
-                dict_level1_level2[level1_name] = [level2_name]
+        def add_to_nested_dict(nested_dict, keys):
+            """
+            递归地将菜单项添加到嵌套字典中。
+            :param nested_dict: 当前的嵌套字典
+            :param keys: 菜单层级的列表
+            """
+            key = keys[0]
+            if len(keys) == 1:
+                # 最后一层，标记为叶子节点
+                if key not in nested_dict:
+                    nested_dict[key] = {}
             else:
-                dict_level1_level2[level1_name].append(level2_name)
+                # 递归处理下一层
+                if key not in nested_dict:
+                    nested_dict[key] = {}
+                add_to_nested_dict(nested_dict[key], keys[1:])
 
-        # 根据order属性排序
-        dict_level1_level2 = dict(sorted(dict_level1_level2.items(), key=lambda x: cls.get_order(f'{x[0]}')))
-        for level1, level2 in dict_level1_level2.items():
-            level2.sort(key=lambda x: cls.get_order(f'{level1}.{x}'))
+        nested_menu = {}
+        for per_menu_item in menu_items:
+            menu_hierarchy = per_menu_item.split('.')
+            add_to_nested_dict(nested_menu, menu_hierarchy)
+        # nested_menu:
+        # {'dashboard_': {'workbench': {}, 'monitor': {}}, 'setting_': {'notify_api': {}, 'listen_api': {}}, 'example_app': {'subapp2': {}, 'subapp1': {}}, 'task_': {'task_mgmt': {}, 'task_log': {}}, 'access_': {'role_mgmt': {}, 'group_mgmt': {}, 'user_mgmt': {}}, 'person_': {'personal_info': {}}, 'message_': {'announcement': {}}}
 
-        menu = [
-            {
-                'component': 'SubMenu',
-                'props': {
-                    'key': f'/{level1_name}',
-                    'title': t__access(cls.get_title(f'{level1_name}')),
-                    'icon': cls.get_icon(f'{level1_name}'),
-                },
-                'children': [
-                    {
-                        'component': 'Item',
-                        'props': {
-                            'key': f'/{level1_name}/{level2_name}',
-                            'title': t__access(cls.get_title(f'{level1_name}.{level2_name}')),
-                            'icon': cls.get_icon(f'{level1_name}.{level2_name}'),
-                            'href': f'/{level1_name}/{level2_name}',
-                        },
-                    }
-                    for level2_name in level2_name_list
-                ],
-            }
-            for level1_name, level2_name_list in dict_level1_level2.items()
-        ]
-        return menu
+        # 根据 order 属性排序嵌套字典
+        def sort_nested_dict(nested_dict, parent_key=''):
+            """
+            递归地对嵌套字典进行排序。
+            :param nested_dict: 当前的嵌套字典
+            :param parent_key: 父级菜单的键，用于生成完整路径
+            """
+            return dict(
+                sorted(
+                    {k: sort_nested_dict(v, f'{parent_key}.{k}' if parent_key else k) for k, v in nested_dict.items()}.items(),
+                    key=lambda x: cls.get_order(f'{parent_key}.{x[0]}' if parent_key else x[0]),
+                )
+            )
+
+        sorted_menu = sort_nested_dict(nested_menu)
+        # sorted_menu:
+        # {'dashboard_': {'workbench': {}, 'monitor': {}}, 'example_app': {'subapp2': {}, 'subapp1': {}}, 'message_': {'announcement': {}}, 'access_': {'role_mgmt': {}, 'user_mgmt': {}, 'group_mgmt': {}}, 'task_': {'task_mgmt': {}, 'task_log': {}}, 'person_': {'personal_info': {}}, 'setting_': {'notify_api': {}, 'listen_api': {}}}
+
+        # 生成菜单结构
+        def generate_menu_structure(nested_dict, parent_path=''):
+            """
+            递归地生成菜单结构。
+            :param nested_dict: 当前的嵌套字典
+            :param parent_path: 父级路径，用于生成完整路径
+            """
+            menu = []
+            for key, value in nested_dict.items():
+                full_path = f'{parent_path}/{key}'
+                package_path = full_path.strip('/').replace('/', '.')
+                menu_item = {
+                    'component': 'SubMenu' if value else 'Item',
+                    'props': {
+                        'key': full_path,
+                        'title': t__access(cls.get_title(package_path)),
+                        'icon': cls.get_icon(package_path),
+                    },
+                }
+                if value:  # 如果有子菜单，递归生成子菜单
+                    menu_item['children'] = generate_menu_structure(value, full_path)
+                else:  # 如果是叶子节点，添加 href 属性
+                    menu_item['props']['href'] = full_path
+                menu.append(menu_item)
+            return menu
+
+        return generate_menu_structure(sorted_menu)
 
     def has_access(self, access_meta) -> bool:
         return access_meta in self.all_access_metas
