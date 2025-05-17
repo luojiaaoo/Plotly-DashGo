@@ -1,4 +1,4 @@
-from typing import Set
+from typing import Set, List
 from common.exception import NotFoundUserException, AuthException
 from common.utilities.util_logger import Log
 import importlib
@@ -21,13 +21,22 @@ class MenuAccess:
         all_access_metas: Set[str] = dao_user.get_user_access_meta(user_name=user_name, exclude_disabled=True)
         # 所有用户添加默认权限
         all_access_metas.update(AccessFactory.default_access_meta)
-        # admin角色添加默认权限
-        if 'admin' in user_info.user_roles:
-            all_access_metas.update(AccessFactory.admin_access_meta)
         # 团队管理员添加默认权限
         if dao_user.is_group_admin(user_name):
             all_access_metas.update(AccessFactory.group_access_meta)
+        # 添加额外权限
+        all_access_metas.update(cls.get_extra_access_meta(user_info.user_roles))
         return all_access_metas
+
+    @staticmethod
+    def get_extra_access_meta(user_roles) -> List[str]:
+        from config.access_factory import AccessFactory
+
+        extra_access_metas = []
+        # admin角色添加默认权限
+        if 'admin' in user_roles:
+            extra_access_metas.extend(AccessFactory.admin_access_meta)
+        return extra_access_metas
 
     @staticmethod
     def gen_antd_tree_data_menu_item_access_meta(dict_access_meta2menu_item):

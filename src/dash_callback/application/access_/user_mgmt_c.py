@@ -3,6 +3,7 @@ from dash.dependencies import Input, Output, State
 import dash
 from database.sql_db.dao import dao_user
 from dash_components import MessageManager
+from common.utilities.util_menu_access import MenuAccess
 from i18n import t__access, t__default
 
 
@@ -12,7 +13,7 @@ def get_data():
             'key': i.user_name,
             **{
                 **i.__dict__,
-                'user_roles': f'{", ".join(i.__dict__["user_roles"])}',
+                'user_roles': f'{", ".join(sorted(list(set(i.__dict__["user_roles"] + MenuAccess.get_extra_access_meta(i.user_roles)))))}',
                 'update_datetime': f'{i.__dict__["update_datetime"]:%Y-%m-%d %H:%M:%S}',
                 'create_datetime': f'{i.__dict__["create_datetime"]:%Y-%m-%d %H:%M:%S}',
             },
