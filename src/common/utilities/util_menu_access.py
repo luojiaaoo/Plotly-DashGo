@@ -1,6 +1,7 @@
 from typing import Set
 from common.exception import NotFoundUserException, AuthException
 from common.utilities.util_logger import Log
+import importlib
 from i18n import t__access
 from cacheout import Cache
 
@@ -131,26 +132,25 @@ class MenuAccess:
 
     @staticmethod
     def get_title(module_path):
-        from dash_view import application  # noqa
-
-        return eval(f'application.{module_path}.title')
+        module_page = importlib.import_module(f'dash_view.application.{module_path}')
+        return module_page.title
 
     @staticmethod
     def get_order(module_path):
-        from dash_view import application  # noqa
+        module_page = importlib.import_module(f'dash_view.application.{module_path}')
 
         try:
-            return eval(f'application.{module_path}.order')
+            return module_page.order
         except Exception:
             logger.warning(f'{module_path}没有定义order属性')
             return 999
 
     @staticmethod
     def get_icon(module_path):
-        from dash_view import application  # noqa
+        module_page = importlib.import_module(f'dash_view.application.{module_path}')
 
         try:
-            return eval(f'application.{module_path}.icon')
+            return module_page.icon
         except Exception:
             return None
 
