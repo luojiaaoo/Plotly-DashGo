@@ -53,6 +53,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             filterOptions={
                                 'user_roles': {'filterMode': 'keyword'},
                                 'user_name': {'filterSearch': True},
+                                'user_full_name': {'filterSearch': True},
                                 'user_email': {'filterSearch': True},
                                 'phone_number': {'filterSearch': True},
                                 'user_status': {},
