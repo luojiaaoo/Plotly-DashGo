@@ -37,6 +37,7 @@ def render_content(menu_access: MenuAccess, **kwargs):
                             columns=[
                                 {'title': t__access('角色名称'), 'dataIndex': 'role_name'},
                                 {'title': t__access('角色状态'), 'dataIndex': 'role_status', 'renderOptions': {'renderType': 'tags'}},
+                                {'title': t__access('权限元'), 'dataIndex': 'access_metas', 'renderOptions': {'renderType': 'ellipsis'}},
                                 {'title': t__access('角色描述'), 'dataIndex': 'role_remark'},
                                 {'title': t__access('更新时间'), 'dataIndex': 'update_datetime'},
                                 {'title': t__access('更新人'), 'dataIndex': 'update_by'},
@@ -44,37 +45,12 @@ def render_content(menu_access: MenuAccess, **kwargs):
                                 {'title': t__access('创建人'), 'dataIndex': 'create_by'},
                                 {'title': t__default('操作'), 'dataIndex': 'operation', 'renderOptions': {'renderType': 'button'}},
                             ],
-                            data=[
-                                {
-                                    'key': i.role_name,
-                                    **{
-                                        **i.__dict__,
-                                        'update_datetime': f'{i.__dict__["update_datetime"]:%Y-%m-%d %H:%M:%S}',
-                                        'create_datetime': f'{i.__dict__["create_datetime"]:%Y-%m-%d %H:%M:%S}',
-                                    },
-                                    'role_status': {'tag': t__default('启用' if i.role_status else '停用'), 'color': 'cyan' if i.role_status else 'volcano'},
-                                    'operation': [
-                                        {
-                                            'content': t__default('编辑'),
-                                            'type': 'primary',
-                                            'custom': 'update:' + i.role_name,
-                                        },
-                                        *(
-                                            [
-                                                {
-                                                    'content': t__default('删除'),
-                                                    'type': 'primary',
-                                                    'custom': 'delete:' + i.role_name,
-                                                    'danger': True,
-                                                }
-                                            ]
-                                            if i.role_name != 'admin'
-                                            else []
-                                        ),
-                                    ],
-                                }
-                                for i in dao_user.get_role_info(exclude_disabled=False)
-                            ],
+                            data=role_mgmt_c.get_data(),
+                            filterOptions={
+                                'access_metas': {'filterMode': 'keyword'},
+                                'role_name': {'filterSearch': True},
+                                'role_status': {},
+                            },
                             pageSize=10,
                         ),
                         style={'width': '100%'},

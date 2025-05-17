@@ -6,6 +6,41 @@ from dash_components import MessageManager
 from i18n import t__access, t__default
 
 
+def get_data():
+    return [
+        {
+            'key': i.user_name,
+            **{
+                **i.__dict__,
+                'user_roles': f'{", ".join(i.__dict__["user_roles"])}',
+                'update_datetime': f'{i.__dict__["update_datetime"]:%Y-%m-%d %H:%M:%S}',
+                'create_datetime': f'{i.__dict__["create_datetime"]:%Y-%m-%d %H:%M:%S}',
+            },
+            'user_status': {'tag': t__default('启用' if i.user_status else '停用'), 'color': 'cyan' if i.user_status else 'volcano'},
+            'operation': [
+                {
+                    'content': t__access('编辑'),
+                    'type': 'primary',
+                    'custom': 'update:' + i.user_name,
+                },
+                *(
+                    [
+                        {
+                            'content': t__access('删除'),
+                            'type': 'primary',
+                            'custom': 'delete:' + i.user_name,
+                            'danger': True,
+                        }
+                    ]
+                    if i.user_name != 'admin'
+                    else []
+                ),
+            ],
+        }
+        for i in dao_user.get_user_info(exclude_disabled=False)
+    ]
+
+
 @app.callback(
     [
         # 删除用户弹窗
@@ -80,37 +115,7 @@ def update_user(okCounts, user_name, user_full_name, user_email, phone_number, u
     rt = dao_user.update_user(user_name, user_full_name, password, user_status, user_sex, user_roles, user_email, phone_number, user_remark)
     if rt:
         MessageManager.success(content=t__access('用户更新成功'))
-        return [
-            {
-                'key': i.user_name,
-                **{
-                    **i.__dict__,
-                    'update_datetime': f'{i.__dict__["update_datetime"]:%Y-%m-%d %H:%M:%S}',
-                    'create_datetime': f'{i.__dict__["create_datetime"]:%Y-%m-%d %H:%M:%S}',
-                },
-                'user_status': {'tag': t__default('启用' if i.user_status else '停用'), 'color': 'cyan' if i.user_status else 'volcano'},
-                'operation': [
-                    {
-                        'content': t__default('编辑'),
-                        'type': 'primary',
-                        'custom': 'update:' + i.user_name,
-                    },
-                    *(
-                        [
-                            {
-                                'content': t__default('删除'),
-                                'type': 'primary',
-                                'custom': 'delete:' + i.user_name,
-                                'danger': True,
-                            }
-                        ]
-                        if i.user_name != 'admin'
-                        else []
-                    ),
-                ],
-            }
-            for i in dao_user.get_user_info(exclude_disabled=False)
-        ]
+        return get_data()
     else:
         MessageManager.warning(content=t__access('用户更新失败'))
         return dash.no_update
@@ -184,37 +189,7 @@ def add_user(okCounts, user_name, user_full_name, user_email, phone_number, user
     rt = dao_user.create_user(user_name, user_full_name, password, user_status, user_sex, user_roles, user_email, phone_number, user_remark)
     if rt:
         MessageManager.success(content=t__access('用户添加成功'))
-        return [
-            {
-                'key': i.user_name,
-                **{
-                    **i.__dict__,
-                    'update_datetime': f'{i.__dict__["update_datetime"]:%Y-%m-%d %H:%M:%S}',
-                    'create_datetime': f'{i.__dict__["create_datetime"]:%Y-%m-%d %H:%M:%S}',
-                },
-                'user_status': {'tag': t__default('启用' if i.user_status else '停用'), 'color': 'cyan' if i.user_status else 'volcano'},
-                'operation': [
-                    {
-                        'content': t__default('编辑'),
-                        'type': 'primary',
-                        'custom': 'update:' + i.user_name,
-                    },
-                    *(
-                        [
-                            {
-                                'content': t__default('删除'),
-                                'type': 'primary',
-                                'custom': 'delete:' + i.user_name,
-                                'danger': True,
-                            }
-                        ]
-                        if i.user_name != 'admin'
-                        else []
-                    ),
-                ],
-            }
-            for i in dao_user.get_user_info(exclude_disabled=False)
-        ]
+        return get_data()
     else:
         MessageManager.warning(content=t__access('用户添加失败'))
         return dash.no_update
@@ -232,37 +207,7 @@ def delete_role_modal(okCounts, user_name):
     rt = dao_user.delete_user(user_name)
     if rt:
         MessageManager.success(content=t__access('用户删除成功'))
-        return [
-            {
-                'key': i.user_name,
-                **{
-                    **i.__dict__,
-                    'update_datetime': f'{i.__dict__["update_datetime"]:%Y-%m-%d %H:%M:%S}',
-                    'create_datetime': f'{i.__dict__["create_datetime"]:%Y-%m-%d %H:%M:%S}',
-                },
-                'user_status': {'tag': t__default('启用' if i.user_status else '停用'), 'color': 'cyan' if i.user_status else 'volcano'},
-                'operation': [
-                    {
-                        'content': t__default('编辑'),
-                        'type': 'primary',
-                        'custom': 'update:' + i.user_name,
-                    },
-                    *(
-                        [
-                            {
-                                'content': t__default('删除'),
-                                'type': 'primary',
-                                'custom': 'delete:' + i.user_name,
-                                'danger': True,
-                            }
-                        ]
-                        if i.user_name != 'admin'
-                        else []
-                    ),
-                ],
-            }
-            for i in dao_user.get_user_info(exclude_disabled=False)
-        ]
+        return get_data()
     else:
         MessageManager.warning(content=t__access('用户删除失败'))
         return dash.no_update
