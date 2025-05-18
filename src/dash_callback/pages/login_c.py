@@ -4,11 +4,13 @@ from dash import dcc
 from dash.dependencies import Input, Output, State
 from server import app
 from dash.exceptions import PreventUpdate
+from dash import set_props
 import dash
+from yarl import URL
 from i18n import t__other
 
 
-# 定义一个客户端回调函数，用于处理登录验证代码的显示逻辑，总是显示login的路径，如果有next的query参数，则代表是OAuth2的请求
+# 定义一个客户端回调函数，用于处理登录验证代码的显示逻辑，如果有next的query参数，则代表是OAuth2的请求
 app.clientside_callback(
     """
     (fc_count,url) => {
@@ -23,22 +25,21 @@ app.clientside_callback(
         if (fc_count>="""
     + str(LoginConf.VERIFY_CODE_SHOW_LOGIN_FAIL_COUNT)
     + """) {
-            return [{'display':'flex'}, {'height': 'max(40%,600px)'}, 1, '/login', title];
+            return [{'display':'flex'}, {'height': 'max(40%,600px)'}, 1, title];
         }
-        return [{'display':'None'}, {'height': 'max(35%,500px)'}, 0, '/login', title];
+        return [{'display':'None'}, {'height': 'max(35%,500px)'}, 0, title];
     }
     """,
     [
         Output('login-verify-code-container', 'style'),
         Output('login-container', 'style'),
         Output('login-store-need-vc', 'data'),
-        Output('login-location-no-refresh', 'pathname'),
         Output('login-title', 'children'),
     ],
     [
         Input('login-store-fc', 'data'),
     ],
-    State('login-location-no-refresh', 'href'),
+    State('login-url-location', 'href'),
 )
 
 app.clientside_callback(
@@ -155,7 +156,6 @@ app.clientside_callback(
 # 密码登录
 @app.callback(
     [
-        Output('login-location-refresh-container', 'children', allow_duplicate=True),
         Output('login-store-fc', 'data'),
         Output('login-message-container', 'children', allow_duplicate=True),
         Output('login-verify-code-pic', 'refresh'),
@@ -174,6 +174,7 @@ app.clientside_callback(
         State('login-store-fc', 'data'),
         State('login-verify-code-container', 'style'),
         State('login-keep-login-status', 'checked'),
+        State('login-url-location', 'href'),
     ],
     prevent_initial_call=True,
 )
@@ -189,6 +190,7 @@ def login(
     fc,
     vc_style,
     is_keep_login_status,
+    href,
 ):
     # 登录回调函数
     # 该函数处理用户的登录请求，并根据登录结果更新页面内容和状态
@@ -211,13 +213,11 @@ def login(
     if not user_name or password_sha256 == 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' or not password_sha256:
         return (
             dash.no_update,
-            dash.no_update,
             fuc.FefferyFancyMessage(t__other('请输入账号和密码'), type='error'),
             True,
         )
     if need_vc and vc_input != pic_vc_value:
         return (
-            dash.no_update,
             dash.no_update,
             fuc.FefferyFancyMessage(t__other('验证码错误，请重新输入'), type='error'),
             True,
@@ -233,15 +233,15 @@ def login(
         return False
 
     if user_login(user_name, password_sha256, is_keep_login_status):
+        to_path_qs = URL(href).query.get('to', '/')
+        set_props('global-execute-js-output', {'jsString': f"window.location.assign('{to_path_qs}');"})
         return (
-            dcc.Location(pathname='/', refresh=True, id='index-redirect'),
             0,  # 重置登录失败次数
             dash.no_update,
             dash.no_update,
         )
     else:
         return (
-            dash.no_update,
             (fc or 0) + 1,
             fuc.FefferyFancyMessage(t__other('用户名或密码错误'), type='error'),
             True,
@@ -251,15 +251,17 @@ def login(
 # 动态码登录
 @app.callback(
     [
-        Output('login-location-refresh-container', 'children', allow_duplicate=True),
         Output('login-message-container', 'children', allow_duplicate=True),
         Output('login-otp', 'value'),
     ],
     Input('login-otp', 'value'),
-    State('login-username-otp', 'value'),
+    [
+        State('login-username-otp', 'value'),
+        State('login-url-location', 'href'),
+    ],
     prevent_initial_call=True,
 )
-def otp_login(otp_value, user_name):
+def otp_login(otp_value, user_name, href):
     from otpauth import TOTP
     from database.sql_db.dao import dao_user
     from common.utilities.util_jwt import jwt_encode_save_access_to_session
@@ -267,21 +269,20 @@ def otp_login(otp_value, user_name):
     otp_secret = dao_user.get_otp_secret(user_name)
     if not otp_secret:
         return (
-            dash.no_update,
             fuc.FefferyFancyMessage(t__other('用户未配置动态码'), type='error'),
             None,
         )
     totp = TOTP(otp_secret.encode())
     if totp.verify(int(otp_value)):
         jwt_encode_save_access_to_session({'user_name': user_name}, session_permanent=False)
+        to_path_qs = URL(href).query.get('to', '/')
+        set_props('global-execute-js-output', {'jsString': f"window.location.assign('{to_path_qs}');"})
         return (
-            dcc.Location(pathname='/', refresh=True, id='index-redirect'),
             dash.no_update,
             dash.no_update,
         )
     else:
         return (
-            dash.no_update,
             fuc.FefferyFancyMessage(t__other('动态码验证错误'), type='error'),
             None,
         )

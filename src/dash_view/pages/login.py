@@ -170,10 +170,8 @@ def render_content():
                         tabBarGutter=0,
                         tabBarRightExtraContent=render_lang_content(),
                     ),
-                    # >>>>> 重定向组件
-                    fac.Fragment(id='login-location-refresh-container'),
-                    # >>>>> 地址栏控制组件
-                    dcc.Location(id='login-location-no-refresh', refresh=False),
+                    # >>>>> 地址栏监听组件
+                    fuc.FefferyLocation(id='login-url-location'),
                     # >>>>> 消息组件
                     fac.Fragment(id='login-message-container'),
                 ],
