@@ -5,7 +5,7 @@
 <p align="center">
     <a href="https://gitee.com/luojiaaoo/DashGo"><img src="https://gitee.com/luojiaaoo/DashGo/badge/star.svg?theme=dark"></a>
     <a href="https://github.com/luojiaaoo/Plotly-DashGo"><img src="https://img.shields.io/github/stars/luojiaaoo/Plotly-DashGo?style=social"></a>
-    <a href="https://gitee.com/luojiaaoo/DashGo"><img src="https://img.shields.io/badge/DashGo-v1.1.5-brightgreen.svg"></a>
+    <a href="https://gitee.com/luojiaaoo/DashGo"><img src="https://img.shields.io/badge/DashGo-v1.1.9-brightgreen.svg"></a>
     <img src="https://img.shields.io/badge/license-MIT-blue.svg">
     <img src="https://img.shields.io/badge/python-≥3.9-blue">
     <img src="https://img.shields.io/badge/MySQL-≥5.7-blue">
@@ -21,7 +21,7 @@ DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架
 
 
 ### 功能:
-1. 多页面管理
+1. 多页面管理，支持多级菜单嵌套
 2. 组件和函数级别的细粒度权限管理
 3. 自带用户、角色和团队的权限的管理
 4. i18n国际化组件
@@ -34,11 +34,12 @@ DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架
 
 1. 极易使用
 2. 只需要一个Python文件，就可以将应用嵌入系统，无需额外操作
-3. 符合主流数据平台风格
-4. 支持周期和定时任务
-5. 支持轮询监听外部消息，实现任务触发
-6. 丰富的消息通知渠道：`Server酱`、`企业微信群机器人`、`SMTP邮件`、`Gewechat`
-7. 通过OAuth2接口+Iframe实现子系统接入（beta，自主开发的子系统见`https://github.com/luojiaaoo/dashgo-knowledge`）
+3. 自动根据代码视图结构生成菜单项，无需单独维护菜单
+4. 符合主流数据平台风格
+5. 支持周期和定时任务
+6. 支持轮询监听外部消息，实现任务触发
+7. 丰富的消息通知渠道：`Server酱`、`企业微信群机器人`、`SMTP邮件`、`Gewechat`
+8. 通过OAuth2接口+Iframe实现子系统接入（待开发）
 
 ------
 
@@ -85,6 +86,8 @@ DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架
 > 以example_app为例，存在2个应用页面 —— subapp1   subapp2
 >
 > 在config/access_factory.py中注册以上2个页面，系统会自动识别页面中的配置信息
+>
+> 案例仅演示2级菜单，可按格式自定义嵌套多级菜单
 
 以应用subapp1为例：
 
