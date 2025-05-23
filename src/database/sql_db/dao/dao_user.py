@@ -659,7 +659,22 @@ def get_group_info(group_names: Optional[List[str]] = None, exclude_disabled=Tru
         )
     else:
         raise NotImplementedError('Unsupported database type')
-
+    query_users = (
+        SysGroup.select(
+            SysGroup.group_name,
+            users_agg,
+        )
+        .join(SysGroupUser, JOIN.LEFT_OUTER, on=(SysGroup.group_name == SysGroupUser.group_name))
+        .group_by(SysGroup.group_name)
+    )
+    query_role = (
+        SysGroup.select(
+            SysGroup.group_name,
+            roles_agg,
+        )
+        .join(SysGroupRole, JOIN.LEFT_OUTER, on=(SysGroup.group_name == SysGroupRole.group_name))
+        .group_by(SysGroup.group_name)
+    )
     query = (
         SysGroup.select(
             SysGroup.group_name,
@@ -669,11 +684,11 @@ def get_group_info(group_names: Optional[List[str]] = None, exclude_disabled=Tru
             SysGroup.create_datetime,
             SysGroup.create_by,
             SysGroup.group_remark,
-            roles_agg,
-            users_agg,
+            query_role.c.group_roles,
+            query_users.c.user_name_plus,
         )
-        .join(SysGroupRole, JOIN.LEFT_OUTER, on=(SysGroup.group_name == SysGroupRole.group_name))
-        .join(SysGroupUser, JOIN.LEFT_OUTER, on=(SysGroup.group_name == SysGroupUser.group_name))
+        .join(query_role, on=(SysGroup.group_name == query_role.c.group_name))
+        .join(query_users, on=(SysGroup.group_name == query_users.c.group_name))
         .group_by(SysGroup.group_name, SysGroup.group_status, SysGroup.update_datetime, SysGroup.update_by, SysGroup.create_datetime, SysGroup.create_by, SysGroup.group_remark)
     )
 
@@ -752,6 +767,7 @@ def get_user_and_role_for_group_name(group_name: str):
     )
     users = []
     roles = []
+    group_remark = ''
     for row in query.dicts():
         if isinstance(database, MySQLDatabase):
             users = json.loads(row['users_agg']) if row['users_agg'] else []
