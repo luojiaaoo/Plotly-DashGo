@@ -1,18 +1,12 @@
-from flask import request, redirect, send_from_directory, abort, jsonify, Response
-from common.exception import OAuth2Error
-from common.utilities.util_oauth2 import current_token, require_oauth
+from flask import request, redirect, send_from_directory, abort
 from config.dashgo_conf import ShowConf, FlaskConf, CommonConf, PathProj
-from common.utilities.util_logger import Log
+from loguru import logger
 from common.exception import global_exception_handler
 from common.utilities.util_dash import CustomDash
 from common.constant import HttpStatusConstant
-from datetime import datetime, timedelta, timezone
-import time
-from dash import get_asset_url
+from typing import Optional, List
 from i18n import t__other
 
-
-logger = Log.get_logger(__name__)
 
 # dash实例
 app = CustomDash(
@@ -22,22 +16,10 @@ app = CustomDash(
     update_title=None,
     serve_locally=CommonConf.DASH_SERVE_LOCALLY,
     extra_hot_reload_paths=[],
-    hooks={
-        'request_pre': """
-(payload) => {
-    // 尝试获取键名为access_token的cookie，用于生成请求头令牌
-    let access_token = document.cookie.match(/Authorization=([^;]+)/)
-    // 为来自dash的请求添加请求头
-    if (access_token){
-        store.getState().config.fetch.headers['Authorization'] = access_token[1].replace(/"/g, '')
-    }
-}
-"""
-    },
     on_error=global_exception_handler,
 )
-app.server.config['COMPRESS_ALGORITHM'] = FlaskConf.COMPRESS_ALGORITHM
-app.server.config['COMPRESS_BR_LEVEL'] = FlaskConf.COMPRESS_BR_LEVEL
+app.server.config["COMPRESS_ALGORITHM"] = FlaskConf.COMPRESS_ALGORITHM
+app.server.config["COMPRESS_BR_LEVEL"] = FlaskConf.COMPRESS_BR_LEVEL
 app.server.secret_key = FlaskConf.COOKIE_SESSION_SECRET_KEY
 app.title = ShowConf.WEB_TITLE
 
@@ -46,52 +28,16 @@ server = app.server
 
 
 # 头像获取接口
-@server.route('/avatar/<user_name>')
+@server.route("/avatar/<user_name>")
 def download_file(user_name):
-    file_name = f'{user_name}.jpg'
-    if '..' in user_name:
-        logger.warning(f'有人尝试通过头像文件接口攻击，URL:{request.url}，IP:{request.remote_addr}')
+    file_name = f"{user_name}.jpg"
+    if ".." in user_name:
+        logger.warning(
+            f"有人尝试通过头像文件接口攻击，URL:{request.url}，IP:{request.remote_addr}"
+        )
         abort(HttpStatusConstant.FORBIDDEN)
     else:
         return send_from_directory(PathProj.AVATAR_DIR_PATH, file_name)
-
-
-@server.route('/task_log_sse', methods=['POST'])
-def task_log_sse():
-    from common.utilities.util_menu_access import get_menu_access
-    from database.sql_db.dao.dao_apscheduler import get_running_log, get_done_log
-    from urllib.parse import unquote
-    import json
-
-    menu_access = get_menu_access()
-    if not menu_access.has_access('任务日志-页面'):
-        response = jsonify({'error': 'Task Log SSE Permission Rejected.'})
-        response.status_code = HttpStatusConstant.FORBIDDEN
-        return response
-
-    job_id = unquote(request.headers.get('job-id'))
-    start_datetime = request.headers.get('start-datetime')
-    start_datetime = datetime.strptime(start_datetime, '%Y-%m-%dT%H:%M:%S.%f')
-
-    def _stream():
-        total_log = None
-        order = 0
-        while True:
-            time.sleep(1)
-            total_log = get_done_log(job_id=job_id, start_datetime=start_datetime)
-            if total_log is not None:
-                break
-            else:
-                order_log = get_running_log(job_id=job_id, start_datetime=start_datetime, order=order)
-                if order_log is not None:
-                    yield 'data: <执行中>{}\n\n'.format(json.dumps({'context': order_log}))
-                    order += 1
-                else:
-                    yield 'data: <无更新>{}\n\n'.format(json.dumps({'context': ''}))
-        yield 'data: <响应结束>{}\n\n'.format(json.dumps({'context': total_log}))
-
-    return Response(_stream(), mimetype='text/event-stream')
-
 
 
 # nginx代理后，拦截直接访问
@@ -99,18 +45,20 @@ def task_log_sse():
 def ban_bypass_proxy():
     from config.dashgo_conf import ProxyConf
 
-    if ProxyConf.NGINX_PROXY and request.headers.get('X-Forwarded-For') is None:
+    if ProxyConf.NGINX_PROXY and request.headers.get("X-Forwarded-For") is None:
         abort(HttpStatusConstant.FORBIDDEN)
 
 
 # 恶意访问管理页面拦截器
 @server.before_request
 def ban_admin():
-    if request.path.startswith('/admin'):
+    if request.path.startswith("/admin"):
         from common.utilities.util_browser import get_browser_info
 
         browser_info = get_browser_info()
-        logger.warning(f'有人尝试访问不存在的管理页面，URL:{browser_info.url}，IP:{browser_info.request_addr}')
+        logger.warning(
+            f"有人尝试访问不存在的管理页面，URL:{browser_info.url}，IP:{browser_info.request_addr}"
+        )
         abort(HttpStatusConstant.NOT_FOUND)
 
 
@@ -120,12 +68,18 @@ def get_user_agent_info():
     from common.utilities.util_browser import get_browser_info
 
     browser_info = get_browser_info()
-    if browser_info.type == 'ie':
-        return "<h1 style='color: red'>IP:{}, {}</h1>".format(browser_info.request_addr, t__other('请不要使用IE内核浏览器'))
-    elif browser_info.type == 'chrome' and browser_info.version is not None and browser_info.version < 88:
+    if browser_info.type == "ie":
+        return "<h1 style='color: red'>IP:{}, {}</h1>".format(
+            browser_info.request_addr, t__other("请不要使用IE内核浏览器")
+        )
+    elif (
+        browser_info.type == "chrome"
+        and browser_info.version is not None
+        and browser_info.version < 88
+    ):
         return "<h1 style='color: red'>IP:{}, {}</h1>".format(
             browser_info.request_addr,
-            t__other('Chrome内核版本号太低，请升级浏览器'),
+            t__other("Chrome内核版本号太低，请升级浏览器"),
         )
 
 
@@ -146,180 +100,62 @@ def _db_close(exc):
         _db.close()
 
 
-@server.route('/oauth/authorize', methods=['GET', 'POST'])
-def authorize():
-    """第一步grant用户确认阶段
-    OAuth2授权端点
-    参数：
-    - client_id: 客户端ID（必须）
-    - redirect_uri: 重定向URI（必须）
-    - response_type: 必须为'code'
-    - scope: 请求的权限范围（可选，本项目为必选）
-    - state: 客户端状态值（可选，本项目为必选）
-    """
-    from flask import request, render_template_string
-    from common.utilities.util_jwt import AccessFailType
-    from common.utilities.util_authorization import auth_validate
-    from common.utilities.util_oauth2 import authorize_html
-    from config.dashgo_conf import OAuth2Conf
-    from database.sql_db.dao.dao_oauth2 import exist_client, insert_authorization_code
-    from yarl import URL
-    import secrets
-
-    # 1. 如果没登陆，登录了再来认证
-    if isinstance((rt_access := auth_validate()), AccessFailType):
-        return redirect(URL.build(path='/login').with_query({'next': request.url}).__str__())
-    ### 参数检查
-    user_name = rt_access['user_name']
-    # 检查client_id
-    if request.args.get('client_id') is None:
-        raise OAuth2Error('Invalid_client_id')
-    client = exist_client(client_id=request.args.get('client_id'))
-    # 检查scope
-    if request.args.get('scope') is None or client.check_scope(request.args.get('scope').split()):
-        raise OAuth2Error('Invalid_scope')
-    # 检查redirect_uri
-    if request.args.get('redirect_uri') is None or client.check_redirect_uri(request.args.get('redirect_uri')):
-        raise OAuth2Error('Invalid_redirect_uri')
-    # 检查response_type
-    if request.args.get('response_type') != 'code':
-        raise OAuth2Error('Invalid_response_type')
-    # 检查state
-    if request.args.get('state') is None:
-        raise OAuth2Error('Invalid_state')
-    # 2. 登录啦，是否同意授权？
-    if request.method == 'GET' and request.args.get('confirm') != 'yes':
-        return render_template_string(authorize_html, scope=request.args.get('scope'), client_id=request.args.get('client_id'), user_name=user_name)
-
-    # 3. 同意授权
-    grant_user = rt_access['user_name'] if request.form['confirm'] or request.args.get('confirm') == 'yes' else None
-    if grant_user is None:
-        raise OAuth2Error('NOT_IMPLEMENTED', HttpStatusConstant.NOT_IMPLEMENTED)
-    # 生成code授权码
-    if insert_authorization_code(
-        code=(auth_code := secrets.token_urlsafe(OAuth2Conf.OAuth2AuthorizationCodeLength)),
-        client_id=request.args.get('client_id'),
-        user_name=user_name,
-        expires_at=datetime.now() + timedelta(minutes=OAuth2Conf.OAuth2AuthorizationCodeExpiresInMinutes),
-        redirect_uri=request.args.get('redirect_uri'),
-        scope=request.args.get('scope'),
-    ):
-        return redirect(URL(request.args.get('redirect_uri')).with_query({'code': auth_code, 'state': request.args.get('state')}).__str__())
-    else:
-        raise OAuth2Error('Internal error: Authorization code generation failed')
-
-
-@server.route('/oauth/token', methods=['POST'])
-def issue_token():
-    """第三步token发放
-    OAuth2令牌端点
-    支持授权码模式（authorization_code）
-    参数：
-    - grant_type: 必须为'authorization_code'
-    - code: 授权码（必须）
-    - redirect_uri: 必须与授权请求时一致
-    - client_id: 客户端ID（必须）
-    - client_secret: 客户端密钥（必须）
-    """
-    from database.sql_db.dao.dao_oauth2 import exist_code, validate_client, insert_token
-    from config.dashgo_conf import OAuth2Conf
-    from common.utilities.util_jwt import jwt_encode
-
-    # 验证客户端凭证
-    client_id = request.form.get('client_id')
-    client_secret = request.form.get('client_secret')
-    client = validate_client(client_id, client_secret)
-    if not client:
-        raise OAuth2Error('Invalid client credentials', HttpStatusConstant.UNAUTHORIZED)
-    # 验证授权类型
-    if request.form.get('grant_type') != 'authorization_code':
-        raise OAuth2Error('Unsupported grant_type')
-    # 获取授权码
-    code = request.form.get('code')
-    if not code:
-        raise OAuth2Error('Missing authorization code')
-    auth_code = exist_code(code=code, client_id=client_id)
-    if not auth_code:
-        raise OAuth2Error('Invalid authorization code', HttpStatusConstant.UNAUTHORIZED)
-    # 验证授权码
-    if not auth_code.is_valid():
-        raise OAuth2Error('Authorization code expired')
-    if not auth_code.check_client_id(client_id):
-        raise OAuth2Error('Client mismatch')
-    if not auth_code.check_redirect_uri(request.form.get('redirect_uri')):
-        raise OAuth2Error('Redirect URI mismatch')
-    if insert_token(
-        token=(
-            token_ := jwt_encode(
-                data={'user_name': auth_code.user_name},
-                expires_delta=timedelta(minutes=OAuth2Conf.OAuth2TokenExpiresInMinutes),
-            )
-        ),
-        client_id=client_id,
-        user_name=auth_code.user_name,
-        expires_at=datetime.now() + timedelta(minutes=OAuth2Conf.OAuth2TokenExpiresInMinutes),
-        scope=auth_code.scope,
-    ):
-        auth_code.delete()
-        return jsonify(
-            {
-                'token_type': 'bearer',
-                'access_token': token_,
-                'expires_in': OAuth2Conf.OAuth2TokenExpiresInMinutes * 60,
-                'scope': auth_code.scope,
-            }
-        )
-    else:
-        raise OAuth2Error('Internal error: Token generation failed')
-
-
-@server.route('/api/userinfo')
-@require_oauth('userinfo')
-def userinfo():
-    """受保护端点"""
-    from database.sql_db.dao.dao_user import get_user_info
-    from common.utilities.util_menu_access import MenuAccess
-    from common.utilities.util_jwt import jwt_decode
-
-    token = current_token()
-    user_name = jwt_decode(token.token)['user_name']
-    if user_name != token.user_name:  # 不改数据库不可能发生
-        abort(HttpStatusConstant.ERROR)
-    user = get_user_info(user_names=[token.user_name])[0]
-    access_metas = MenuAccess(token.user_name).all_access_metas
-    return jsonify(
-        {
-            'user_name': user.user_name,
-            'user_full_name': user.user_full_name,
-            'user_sex': user.user_sex,
-            'access_metas': access_metas,
-            'user_email': user.user_email,
-            'phone_number': user.phone_number,
-            'user_remark': user.user_remark,
-        }
-    )
-
-
-# oauth2_grant登录后重定向
-@server.before_request
-def oauth2_grant_redirect():
-    if request.method == 'GET':
-        from common.utilities.util_authorization import auth_validate, AccessFailType
-        from yarl import URL
-
-        if not isinstance(auth_validate(), AccessFailType) and request.path == '/' and request.args.get('next') is not None:
-            return redirect(URL(request.args.get('next')).extend_query(confirm='yes').__str__())
-
-
-# OAuth2错误处理器
-@server.errorhandler(OAuth2Error)
-def handle_oauth2_error(e):
-    return jsonify({'error': 'invalid_request', 'error_description': e.description}), e.status_code
-
-
 # 首页重定向
 @server.before_request
 def main_page_redirct():
-    if request.method == 'GET':
-        if request.path == '/':
-            return redirect('/dashboard_/workbench')
+    if request.method == "GET":
+        if request.path == "/":
+            return redirect("/sys_dashboard/workbench")
+
+
+def serve(
+    *,
+    host: str = "localhost",
+    port: int = 7777,
+    reload: bool = False,
+    reload_includes: Optional[List[str]] = None,
+    reload_excludes: Optional[List[str]] = None,
+    workers: Optional[int] = 4,
+    access_log: bool = False,
+    **kwargs,
+):
+    import uvicorn
+    from uvicorn.middleware.wsgi import WSGIMiddleware
+
+    # Create a terminal panel to announce OS initialization and provide useful info
+    from rich.align import Align
+    from rich.console import Console, Group
+    from rich.panel import Panel
+    from rich import box
+    import platform
+
+    panel_group = [
+        Align.center(
+            f"\n\n[bold dark_orange]running on:[/bold dark_orange] [bold cyan]http://{host}:{port}[/bold cyan]"
+        ),
+    ]
+
+    console = Console()
+    console.print(
+        Panel(
+            Group(*panel_group),
+            title=ShowConf.APP_NAME,
+            expand=False,
+            border_style="dark_orange",
+            box=box.DOUBLE_EDGE,
+            padding=(2, 2),
+        )
+    )
+
+    uvicorn.run(
+        app=WSGIMiddleware(server),
+        host=host,
+        port=port,
+        reload=reload,
+        reload_includes=reload_includes,
+        reload_excludes=reload_excludes,
+        workers=None if platform.system() == "Windows" else workers,
+        access_log=access_log,
+        lifespan="on",
+        **kwargs,
+    )

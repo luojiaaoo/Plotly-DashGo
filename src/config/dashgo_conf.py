@@ -31,11 +31,7 @@ class BaseMetaConf(type):
 
 class LogConf(metaclass=BaseMetaConf):
     LOG_LEVEL: str = 'WARNING'
-    HANDLER_CONSOLE: bool = True
-    HANDLER_LOG_FILE: bool = False
     LOG_FILE_PATH: str
-    MAX_MB_PER_LOG_FILE: int = 50
-    MAX_COUNT_LOG_FILE: int = 3
 
 
 class CommonConf(metaclass=BaseMetaConf):

@@ -140,15 +140,15 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     _last_pathname = ''
     _last_search = {}
     _last_hash = ''
-    if trigger == 'load' and url_menu_item != 'dashboard_.workbench':  # 当第一次访问，而且不是首页时，先访问首页，然后通过flash强制刷新地址
+    if trigger == 'load' and url_menu_item != 'sys_dashboard.workbench':  # 当第一次访问，而且不是首页时，先访问首页，然后通过flash强制刷新地址
         relocation = True
         # 保存目标页的url
         _last_pathname = url_pathname
         _last_search = url_query
         _last_hash = url_fragment
         # 强制访问首页，不带参数
-        url_menu_item = 'dashboard_.workbench'
-        url_pathname = '/dashboard_/workbench'
+        url_menu_item = 'sys_dashboard.workbench'
+        url_pathname = '/sys_dashboard/workbench'
         url_query = {}
         url_fragment = ''
         param = {}
@@ -164,10 +164,10 @@ def main_router(href, has_open_tab_keys: List, is_collapsed_menu: bool, trigger)
     key_url_path_parent = menu_item2url_path(url_menu_item, 1)
 
     # 构建面包屑格式
-    breadcrumb_items = [{'title': t__access('首页'), 'href': '/dashboard_/workbench'}]
+    breadcrumb_items = [{'title': t__access('首页'), 'href': '/sys_dashboard/workbench'}]
     _modules: List = url_menu_item.split('.')
     for i in range(len(_modules)):
-        breadcrumb_items = breadcrumb_items + [{'title': t__access(MenuAccess.get_title.__func__('.'.join(_modules[: i + 1])))}]
+        breadcrumb_items = breadcrumb_items + [{'title': t__access(MenuAccess.get_title('.'.join(_modules[: i + 1])))}]
 
     # 情况1（实际上已经不存在这个情况，上一个回调已经拦截了这种情况，为了鲁棒性，还是保留）： 如已经打开，并且不带强制刷新参数,直接切换页面即可
     if key_url_path in has_open_tab_keys:
@@ -230,7 +230,7 @@ app.clientside_callback(
     """
         (activeKey,items) => {
             for (let i = 0; i < items.length; i++) {
-                if (items[i].key === '/dashboard_/workbench'){ //除了主页以外
+                if (items[i].key === '/sys_dashboard/workbench'){ //除了主页以外
                     items[i].closable = false;
                 } else {
                     items[i].closable = items[i].key === activeKey;

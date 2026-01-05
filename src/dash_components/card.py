@@ -19,9 +19,4 @@ class Card(fac.AntdCard):
                     fac.AntdText(kwargs['title'], style={'marginLeft': '10px'}),
                 ]
             )
-        else:
-            kwargs['headStyle'] = {
-                **(kwargs['headStyle'] if kwargs.get('headStyle', None) is not None else {}),
-                **{'display': 'none'},
-            }
         super().__init__(*args, **kwargs)

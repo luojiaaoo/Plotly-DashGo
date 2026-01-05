@@ -1,7 +1,7 @@
 from common.utilities.util_menu_access import MenuAccess
 import feffery_antd_components as fac
 import feffery_utils_components as fuc
-from common.utilities.util_logger import Log
+from loguru import logger
 from dash_components import Card
 
 
@@ -9,7 +9,6 @@ from dash_components import Card
 title = '应用2'
 icon = None
 order = 2
-logger = Log.get_logger(__name__)
 
 access_metas = (
     '应用2-基础权限',

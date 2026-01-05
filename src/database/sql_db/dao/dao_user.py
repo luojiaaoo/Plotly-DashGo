@@ -7,11 +7,10 @@ from common.utilities import util_menu_access
 import json
 import hashlib
 from peewee import DoesNotExist, fn, MySQLDatabase, SqliteDatabase, IntegrityError, JOIN, Case
-from common.utilities.util_logger import Log
+from loguru import logger
 from common.utilities.util_menu_access import get_menu_access
 from ..entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole, SysGroupUser, SysRole, SysGroupRole, SysGroup
 
-logger = Log.get_logger(__name__)
 
 
 class Status:

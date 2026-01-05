@@ -1,13 +1,12 @@
 from typing import Set, List
 from common.exception import NotFoundUserException, AuthException
-from common.utilities.util_logger import Log
+from loguru import logger
 import importlib
 from i18n import t__access
 from cacheout import Cache
 
 cache = Cache()
 
-logger = Log.get_logger(__name__)
 
 
 @cache.memoize(ttl=5)
@@ -88,7 +87,7 @@ class MenuAccess:
                 return dict(
                     sorted(
                         {k: sort_nested_dict(v, f'{parent_key}.{k}' if parent_key else k) for k, v in nested_dict.items()}.items(),
-                        key=lambda x: MenuAccess.get_order.__func__(f'{parent_key}.{x[0]}' if parent_key else x[0]),
+                        key=lambda x: MenuAccess.get_order(f'{parent_key}.{x[0]}' if parent_key else x[0]),
                     )
                 )
             return nested_dict
@@ -109,8 +108,8 @@ class MenuAccess:
                     # 如果是字典，递归生成子节点
                     tree.append(
                         {
-                            'title': t__access(MenuAccess.get_title.__func__(full_key)),
-                            'key': f'ignore:{MenuAccess.get_title.__func__(full_key)}',
+                            'title': t__access(MenuAccess.get_title(full_key)),
+                            'key': f'ignore:{MenuAccess.get_title(full_key)}',
                             'children': generate_antd_tree(value, full_key),
                         }
                     )
@@ -118,8 +117,8 @@ class MenuAccess:
                     # 如果是列表，生成叶子节点
                     tree.append(
                         {
-                            'title': t__access(MenuAccess.get_title.__func__(full_key)),
-                            'key': f'ignore:{MenuAccess.get_title.__func__(full_key)}',
+                            'title': t__access(MenuAccess.get_title(full_key)),
+                            'key': f'ignore:{MenuAccess.get_title(full_key)}',
                             'children': [{'title': t__access(meta), 'key': meta} for meta in value],
                         }
                     )
@@ -188,7 +187,7 @@ class MenuAccess:
             menu_hierarchy = per_menu_item.split('.')
             add_to_nested_dict(nested_menu, menu_hierarchy)
         # nested_menu:
-        # {'dashboard_': {'workbench': {}, 'monitor': {}}, 'setting_': {'notify_api': {}, 'listen_api': {}}, 'example_app': {'subapp2': {}, 'subapp1': {}}, 'task_': {'task_mgmt': {}, 'task_log': {}}, 'access_': {'role_mgmt': {}, 'group_mgmt': {}, 'user_mgmt': {}}, 'person_': {'personal_info': {}}, 'message_': {'announcement': {}}}
+        # {'sys_dashboard': {'workbench': {}, 'monitor': {}}, 'setting_': {'notify_api': {}, 'listen_api': {}}, 'example_app': {'subapp2': {}, 'subapp1': {}}, 'task_': {'task_mgmt': {}, 'task_log': {}}, 'access_': {'role_mgmt': {}, 'group_mgmt': {}, 'user_mgmt': {}}, 'person_': {'personal_info': {}}, 'message_': {'announcement': {}}}
 
         # 根据 order 属性排序嵌套字典
         def sort_nested_dict(nested_dict, parent_key=''):
@@ -206,7 +205,7 @@ class MenuAccess:
 
         sorted_menu = sort_nested_dict(nested_menu)
         # sorted_menu:
-        # {'dashboard_': {'workbench': {}, 'monitor': {}}, 'example_app': {'subapp2': {}, 'subapp1': {}}, 'message_': {'announcement': {}}, 'access_': {'role_mgmt': {}, 'user_mgmt': {}, 'group_mgmt': {}}, 'task_': {'task_mgmt': {}, 'task_log': {}}, 'person_': {'personal_info': {}}, 'setting_': {'notify_api': {}, 'listen_api': {}}}
+        # {'sys_dashboard': {'workbench': {}, 'monitor': {}}, 'example_app': {'subapp2': {}, 'subapp1': {}}, 'message_': {'announcement': {}}, 'access_': {'role_mgmt': {}, 'user_mgmt': {}, 'group_mgmt': {}}, 'task_': {'task_mgmt': {}, 'task_log': {}}, 'person_': {'personal_info': {}}, 'setting_': {'notify_api': {}, 'listen_api': {}}}
 
         # 生成菜单结构
         def generate_menu_structure(nested_dict, parent_path=''):
