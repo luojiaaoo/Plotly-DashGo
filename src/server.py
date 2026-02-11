@@ -156,6 +156,5 @@ def serve(
         reload_excludes=reload_excludes,
         workers=None if platform.system() == "Windows" else workers,
         access_log=access_log,
-        lifespan="on",
         **kwargs,
     )

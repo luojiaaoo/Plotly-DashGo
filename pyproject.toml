@@ -1,0 +1,29 @@
+[project]
+name = "yell-resume"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "apscheduler>=3.11.2",
+    "cacheout>=0.16.0",
+    "feffery-antd-charts>=0.2.3",
+    "feffery-antd-components>=0.4.4",
+    "feffery-dash-utils>=0.2.6",
+    "feffery-utils-components>=0.3.5",
+    "flask-compress>=1.23",
+    "loguru>=0.7.3",
+    "orjson>=3.11.7",
+    "peewee>=3.19.0",
+    "pillow>=12.1.1",
+    "pyjwt>=2.11.0",
+    "rich>=14.3.2",
+    "user-agents>=2.2.0",
+    "uvicorn>=0.40.0",
+    "waitress>=3.0.2",
+    "yarl>=1.22.0",
+]
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true

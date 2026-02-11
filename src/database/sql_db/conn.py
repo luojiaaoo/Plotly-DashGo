@@ -40,7 +40,7 @@ def db():
 # 判断是否存在SysUser表，如不存在则初始化库
 def create_rds_table():
     db_instance = db()
-    from .entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole, SysGroupUser, SysRole, SysGroupRole, SysGroup
+    from .entity.table_user import SysUser, SysRoleAccessMeta, SysUserRole, SysRole
     from .entity.table_announcement import SysAnnouncement
 
     db_instance.create_tables(
@@ -48,10 +48,7 @@ def create_rds_table():
             SysUser,
             SysRoleAccessMeta,
             SysUserRole,
-            SysGroupUser,
             SysRole,
-            SysGroupRole,
-            SysGroup,
             SysAnnouncement,
         ],
         safe=True,
@@ -87,6 +84,5 @@ def init_rds_data():
             update_by='admin',
             update_datetime=datetime.now(),
             user_remark='',
-            otp_secret='',
         )
         SysUserRole.create(user_name='admin', role_name='admin')

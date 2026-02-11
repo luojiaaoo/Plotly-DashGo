@@ -131,36 +131,6 @@ def render_content():
                                     )
                                 ],
                             },
-                            {
-                                'key': '动态码登录',
-                                'label': fac.AntdText(
-                                    t__other('动态码登录'),
-                                    className={
-                                        'color': 'rgb(22,119,255)',
-                                    },
-                                ),
-                                'children': [
-                                    fac.AntdSpace(
-                                        [
-                                            fac.AntdInput(
-                                                id='login-username-otp',
-                                                prefix=fac.AntdIcon(icon='antd-user'),
-                                                placeholder=t__other('请输入用户名'),
-                                                className={
-                                                    'marginTop': '20px',
-                                                    'marginBottom': '20px',
-                                                },
-                                            ),
-                                            fac.AntdText(t__other('动态码：'), keyboard=True, strong=True),
-                                            fac.AntdOTP(id='login-otp'),
-                                        ],
-                                        direction='vertical',
-                                        className={
-                                            'width': '100%',
-                                        },
-                                    )
-                                ],
-                            },
                         ],
                         className={
                             'height': '85%',

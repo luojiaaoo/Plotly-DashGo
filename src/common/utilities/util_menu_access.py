@@ -20,9 +20,6 @@ class MenuAccess:
         all_access_metas: Set[str] = dao_user.get_user_access_meta(user_name=user_name, exclude_disabled=True)
         # 所有用户添加默认权限
         all_access_metas.update(AccessFactory.default_access_meta)
-        # 团队管理员添加默认权限
-        if dao_user.is_group_admin(user_name):
-            all_access_metas.update(AccessFactory.group_access_meta)
         # 添加额外权限
         all_access_metas.update(cls.get_extra_access_meta(user_info.user_roles))
         return all_access_metas
@@ -33,8 +30,10 @@ class MenuAccess:
 
         extra_access_metas = []
         # admin角色添加默认权限
+        # if 'admin' in user_roles:
+        #     extra_access_metas.extend(AccessFactory.admin_access_meta)
         if 'admin' in user_roles:
-            extra_access_metas.extend(AccessFactory.admin_access_meta)
+            extra_access_metas.extend(AccessFactory.get_dict_access_meta2menu_item().keys())
         return extra_access_metas
 
     @staticmethod

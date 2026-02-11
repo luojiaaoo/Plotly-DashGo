@@ -35,7 +35,6 @@ class LogConf(metaclass=BaseMetaConf):
 
 
 class CommonConf(metaclass=BaseMetaConf):
-    ENCRYPT_KEY: str
     DASH_SERVE_LOCALLY: bool
     SYSTEM_IS_UNIX: str = platform.system() != 'Windows'
 
@@ -67,18 +66,6 @@ class ProxyConf(metaclass=BaseMetaConf):
     NGINX_PROXY: bool = False
 
 
-class OAuth2Conf(metaclass=BaseMetaConf):
-    OAuth2AuthorizationCodeExpiresInMinutes: int
-    OAuth2AuthorizationCodeLength: int
-    OAuth2TokenExpiresInMinutes: int
-
-
-class ApSchedulerConf(metaclass=BaseMetaConf):
-    DATA_EXPIRE_DAY: int
-    HOST: str
-    PORT: int
-
-
 class SqlDbConf(metaclass=BaseMetaConf):
     RDB_TYPE: str
     SQLITE_DB_PATH: str
@@ -89,6 +76,3 @@ class SqlDbConf(metaclass=BaseMetaConf):
     DATABASE: str
     POOL_SIZE: int
 
-
-class ListenTaskConf(metaclass=BaseMetaConf):
-    PERIOD_MINTUES: int

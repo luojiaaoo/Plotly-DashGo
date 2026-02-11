@@ -164,4 +164,3 @@ cython_debug/
 # Custom
 .__*.lock
 app.db
-apscheduler.db
