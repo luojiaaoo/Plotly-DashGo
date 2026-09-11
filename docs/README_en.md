@@ -17,6 +17,7 @@ Includes:
 4. Group Management
 5. i18n Internationalization
 6. Password and OTP Authentication
+7. [OrcaRouter](https://www.orcarouter.ai) model-gateway integration: connect with an API key or with OAuth 2.0 + PKCE, with a capability-filtered model selector backed by the live catalog — see <a href="orcarouter.md">the OrcaRouter guide</a>
 
 Features:
 1. Easy to use

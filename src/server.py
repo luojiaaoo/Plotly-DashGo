@@ -311,6 +311,24 @@ def oauth2_grant_redirect():
             return redirect(URL(request.args.get('next')).extend_query(confirm='yes').__str__())
 
 
+@server.route('/orcarouter/cancel', methods=['POST'])
+def orcarouter_cancel_connect():
+    """Release a pending OrcaRouter authorization.
+
+    Called by the browser with ``keepalive`` from a ``pagehide`` handler, so the
+    server-side login lock is released even though the page is being unloaded. The
+    response is deliberately tiny and carries no credential material.
+    """
+    from common.orcarouter import runtime
+
+    generation = request.form.get('generation') or (request.get_json(silent=True) or {}).get('generation')
+    try:
+        generation = int(generation)
+    except (TypeError, ValueError):
+        return jsonify({'cancelled': False}), HttpStatusConstant.BAD_REQUEST
+    return jsonify({'cancelled': runtime.cancel_connect(generation)})
+
+
 # OAuth2错误处理器
 @server.errorhandler(OAuth2Error)
 def handle_oauth2_error(e):
