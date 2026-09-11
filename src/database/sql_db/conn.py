@@ -47,6 +47,7 @@ def create_rds_table():
     from .entity.table_notify_api import SysNotifyApi
     from .entity.table_listen_api import SysListenApi
     from .entity.table_listen_task import ApschedulerJobsActiveListen
+    from .entity.table_orcarouter import SysOrcaRouterCredential
 
     db_instance.create_tables(
         [
@@ -67,6 +68,7 @@ def create_rds_table():
             SysNotifyApi,
             SysListenApi,
             ApschedulerJobsActiveListen,
+            SysOrcaRouterCredential,
         ],
         safe=True,
     )

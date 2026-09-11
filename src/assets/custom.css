@@ -14,3 +14,19 @@
 ._dash-loading::after {
     content: '';
 }
+
+/* OrcaRouter model selector dropdown.
+   The dropdown is rendered in a portal outside the page subtree, so it is targeted by
+   its own popup class. It needs an opaque background and a real border so the model
+   list stays readable over whatever is behind it. */
+.orcarouter-model-dropdown {
+    background-color: #ffffff;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 6px 16px 0 rgba(0, 0, 0, 0.08);
+    padding: 4px;
+}
+
+.orcarouter-model-dropdown .ant-select-item {
+    border-radius: 4px;
+}

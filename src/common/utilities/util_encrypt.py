@@ -1,5 +1,5 @@
 from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad
+from Crypto.Util.Padding import pad, unpad
 import base64
 from Crypto.Random import get_random_bytes
 from config.dashgo_conf import CommonConf
@@ -64,6 +64,6 @@ def decrypt_data(encrypted_data: str, key: Optional[str] = None) -> str:
     decrypted_padded_data = cipher.decrypt(encrypted_data)
 
     # 去除填充
-    decrypted_data = decrypted_padded_data, AES.block_size.decode('utf-8')
+    decrypted_data = unpad(decrypted_padded_data, AES.block_size).decode('utf-8')
 
     return decrypted_data

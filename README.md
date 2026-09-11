@@ -29,6 +29,7 @@ DashGo谐音<u>**大西瓜**</u>，这是一个开箱即用的低代码WEB框架
 6. 支持OAuth2 provider
 7. 支持任务模块，支持周期任务/定时任务和监听任务，监听任务暂时只支持邮件POP3协议触发， <a href="docs/task.md">请查看使用文档</a>
 8. 任务模块支持数据抽取与个性化信息推送，支持`Server酱`、`企业微信群机器人`、`SMTP邮件`、`Gewechat`，可以实现数据大屏、实时监控和通知推送
+9. 支持 [OrcaRouter](https://www.orcarouter.ai) 大模型网关：既可用 API Key 接入，也可用 OAuth 2.0 + PKCE 账号授权接入；模型下拉来自实时模型目录并按能力过滤，<a href="docs/orcarouter.md">请查看接入文档</a>
 
 ### 特点:
 

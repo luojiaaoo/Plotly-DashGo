@@ -118,6 +118,186 @@
         },
         "POP3测试接收失败": {
             "en-us": "POP3 test receive failed"
+        },
+        "API Key": {
+            "en-us": "API Key"
+        },
+        "OrcaRouter - API": {
+            "en-us": "OrcaRouter - API"
+        },
+        "OrcaRouter - Auth": {
+            "en-us": "OrcaRouter - Auth"
+        },
+        "OrcaRouter API Key 已保存": {
+            "en-us": "OrcaRouter API key saved"
+        },
+        "OrcaRouter 凭据只保存在本机": {
+            "en-us": "OrcaRouter credentials never leave this installation"
+        },
+        "OrcaRouter 接入方式": {
+            "en-us": "OrcaRouter credentials"
+        },
+        "OrcaRouter 账号已连接": {
+            "en-us": "OrcaRouter account connected"
+        },
+        "使用当前凭据向下游推理接口发送一次真实请求，用于验证接线。": {
+            "en-us": "Sends one real request to the inference endpoint with the stored credential, to verify the wiring."
+        },
+        "刷新模型目录": {
+            "en-us": "Refresh catalog"
+        },
+        "发送测试请求": {
+            "en-us": "Send test request"
+        },
+        "取消": {
+            "en-us": "Cancel"
+        },
+        "只显示明确声明支持这些输入模态的模型；未声明的一律不显示": {
+            "en-us": "Only models that explicitly declare these input modalities are listed; anything undeclared is excluded."
+        },
+        "完成连接": {
+            "en-us": "Complete connection"
+        },
+        "实时模型目录不可用，当前显示已验证的备用目录（降级）": {
+            "en-us": "Live catalog unavailable — showing the verified fallback catalog (degraded)"
+        },
+        "已取消授权": {
+            "en-us": "Authorization cancelled"
+        },
+        "已清除 OrcaRouter API Key": {
+            "en-us": "OrcaRouter API key cleared"
+        },
+        "已选模型不再兼容当前能力/附件，请重新选择": {
+            "en-us": "The selected model is no longer compatible with this capability/attachment and was cleared. Pick another."
+        },
+        "已配置": {
+            "en-us": "Configured"
+        },
+        "当前密钥": {
+            "en-us": "Current key"
+        },
+        "当前能力下没有可用模型": {
+            "en-us": "No model is available for this capability"
+        },
+        "打开授权页面": {
+            "en-us": "Open authorization page"
+        },
+        "授权地址": {
+            "en-us": "Authorization URL"
+        },
+        "授权方式": {
+            "en-us": "Authorization method"
+        },
+        "推理接口返回了空响应": {
+            "en-us": "The inference endpoint returned an empty response"
+        },
+        "推理测试": {
+            "en-us": "Inference test"
+        },
+        "未检测到 OrcaRouter 凭据": {
+            "en-us": "No OrcaRouter credential detected"
+        },
+        "未检测到 OrcaRouter 凭据，请先在上方配置 API Key 或连接账号": {
+            "en-us": "No OrcaRouter credential detected. Configure an API key or connect an account above."
+        },
+        "未配置": {
+            "en-us": "Not configured"
+        },
+        "模型": {
+            "en-us": "Model"
+        },
+        "模型目录": {
+            "en-us": "Model catalog"
+        },
+        "模型目录就绪": {
+            "en-us": "Catalog ready"
+        },
+        "模型能力": {
+            "en-us": "Model capabilities"
+        },
+        "浏览器自动回调": {
+            "en-us": "Automatic browser callback"
+        },
+        "清除": {
+            "en-us": "Clear"
+        },
+        "目录状态": {
+            "en-us": "Catalog status"
+        },
+        "等待授权…": {
+            "en-us": "Waiting for authorization…"
+        },
+        "管理/撤销密钥": {
+            "en-us": "Manage / revoke keys"
+        },
+        "粘贴授权码": {
+            "en-us": "Paste authorization code"
+        },
+        "粘贴授权页面显示的授权码": {
+            "en-us": "Paste the code shown on the authorization page"
+        },
+        "能力": {
+            "en-us": "Capability"
+        },
+        "自建部署地址不固定时使用粘贴授权码；浏览器与 DashGo 同机时可用自动回调": {
+            "en-us": "Self-hosted installs whose address is not fixed should paste the code; use the automatic callback when the browser runs on the same machine as DashGo."
+        },
+        "请先点击 Connect with OrcaRouter 发起授权": {
+            "en-us": "Click \"Connect with OrcaRouter\" first to start an authorization"
+        },
+        "请先选择模型": {
+            "en-us": "Select a model first"
+        },
+        "请输入 API Key": {
+            "en-us": "Enter an API key"
+        },
+        "请输入授权码": {
+            "en-us": "Enter the authorization code"
+        },
+        "请选择模型": {
+            "en-us": "Select a model"
+        },
+        "连接状态": {
+            "en-us": "Connection status"
+        },
+        "附件模态": {
+            "en-us": "Attachment modalities"
+        },
+        "需要重新授权": {
+            "en-us": "Needs re-authorization"
+        },
+        "API Key 与账号授权两种方式都会得到一个由你的 OrcaRouter 账号计费、随时可撤销的 API Key，两者使用同一套推理接口与模型目录。": {
+            "en-us": "Both options yield an API key billed to your own OrcaRouter account and revocable at any time. Both drive the same inference endpoint and the same model catalog."
+        },
+        "文本对话": {
+            "en-us": "Text chat"
+        },
+        "多模态理解": {
+            "en-us": "Multimodal understanding"
+        },
+        "向量嵌入": {
+            "en-us": "Embeddings"
+        },
+        "图片生成": {
+            "en-us": "Image generation"
+        },
+        "视频生成": {
+            "en-us": "Video generation"
+        },
+        "重排序": {
+            "en-us": "Rerank"
+        },
+        "图片": {
+            "en-us": "Image"
+        },
+        "音频": {
+            "en-us": "Audio"
+        },
+        "视频": {
+            "en-us": "Video"
+        },
+        "文件": {
+            "en-us": "File"
         }
     }
 }
